@@ -3,4 +3,5 @@ module.exports = {
   experimental: {
     newArchitecture: false,
   },
+  assets: ['src/assets/fonts'],
 };
