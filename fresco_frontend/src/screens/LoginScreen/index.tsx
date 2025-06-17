@@ -4,6 +4,8 @@ import {login, getProfile} from '@react-native-seoul/kakao-login';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../../App';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 // import axios from 'axios';
 import CustomText from '../../components/common/CustomText';
 import styles from './styles';
@@ -36,6 +38,7 @@ const LoginScreen = (): React.JSX.Element => {
 
       // 로그인 성공 -> 다음 화면 이동
       console.log('로그인 성공', `환영합니다, ${profile.nickname}님!`);
+      await AsyncStorage.setItem('userId', String(profile.id));
 
       navigation.replace('FridgeSelect');
     } catch (error: any) {
