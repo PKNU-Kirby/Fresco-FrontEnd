@@ -1,58 +1,33 @@
-import React from 'react';
-import {View, TouchableOpacity, Image, Alert} from 'react-native';
-import {login, getProfile} from '@react-native-seoul/kakao-login';
-import {useNavigation} from '@react-navigation/native';
-import {RootStackParamList} from '../../../App';
-import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import React, {useState} from 'react';
+import {View} from 'react-native';
+import {Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useNavigation} from '@react-navigation/native';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
-// import axios from 'axios';
 import CustomText from '../../components/common/CustomText';
+import KakaoLoginButton from '../../components/SocialLogin/KakaoLoginButton';
+import NaverLoginButton from '../../components/SocialLogin/NaverLoginButton';
 import styles from './styles';
+import {RootStackParamList} from '../../../App';
 
 const LoginScreen = (): React.JSX.Element => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  // const API_BASE_URL = 'https://your-api-server.com';
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleKakaoLogin = async () => {
+  const saveUserIdAndNavigate = async (userId: string) => {
     try {
-      const token = await login();
-      console.log('로그인 성공:', token.accessToken);
-
-      const profile = await getProfile();
-      console.log('사용자 정보:', profile);
-
-      /* 백엔드 호출
-      const response = await axios.post(`${API_BASE_URL}/auth/kakao`, {
-        provider: 'KAKAO',
-        providerId: profile.id,
-        name: profile.nickname,
-        fcmToken: '',
-      });
-
-      console.log('로그인 성공, 백엔드 응답:', response.data);
-      
-      */
-      // ->  성공했다 치고??
-
-      // 로그인 성공 -> 다음 화면 이동
-      console.log('로그인 성공', `환영합니다, ${profile.nickname}님!`);
-      await AsyncStorage.setItem('userId', String(profile.id));
-
+      await AsyncStorage.setItem('userId', userId);
       navigation.replace('FridgeSelect');
-    } catch (error: any) {
-      console.warn('카카오 로그인 실패:', error);
-      console.log('로그인 실패', '카카오 로그인 중 문제가 발생했습니다.');
+    } catch (error) {
+      console.error('사용자 ID 저장 실패:', error);
+      Alert.alert('오류', '로그인 정보 저장에 실패했습니다.');
     }
   };
 
-  const handleNaverLogin = async () => {
-    try {
-      // 추후 구현 예정
-    } catch (error) {
-      console.warn('네이버 로그인 실패: ', error);
-    }
+  const showErrorAlert = (message: string) => {
+    Alert.alert('로그인 실패', message, [{text: '확인', style: 'default'}]);
   };
 
   return (
@@ -64,25 +39,18 @@ const LoginScreen = (): React.JSX.Element => {
           </CustomText>
         </View>
         <View style={styles.buttonWrapper}>
-          {/* 카카오 */}
-          <TouchableOpacity
-            onPress={handleKakaoLogin}
-            style={styles.loginButton}>
-            <Image
-              source={require('../../assets/img/btn_login_kakao.png')}
-              style={styles.image}
-            />
-          </TouchableOpacity>
-
-          {/* 네이버 */}
-          <TouchableOpacity
-            onPress={handleNaverLogin}
-            style={styles.loginButton}>
-            <Image
-              source={require('../../assets/img/btn_login_naver.png')}
-              style={styles.image}
-            />
-          </TouchableOpacity>
+          <KakaoLoginButton
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+            saveUserIdAndNavigate={saveUserIdAndNavigate}
+            showErrorAlert={showErrorAlert}
+          />
+          <NaverLoginButton
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+            saveUserIdAndNavigate={saveUserIdAndNavigate}
+            showErrorAlert={showErrorAlert}
+          />
         </View>
       </View>
     </View>
