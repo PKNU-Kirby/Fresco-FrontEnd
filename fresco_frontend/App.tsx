@@ -1,7 +1,4 @@
 import React from 'react';
-import {SafeAreaView} from 'react-native';
-import styles from './App.styles';
-
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import SplashScreen from './src/screens/SplashScreen';
