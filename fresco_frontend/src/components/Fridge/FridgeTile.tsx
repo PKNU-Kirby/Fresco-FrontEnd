@@ -1,47 +1,36 @@
 import React from 'react';
 import {TouchableOpacity} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import CustomText from '../common/CustomText';
-import styles from '../../screens/FridgeSelectScreen/styles';
+import styles from './FridgeTileStyles';
+import {RootStackParamList} from '../../../App';
 
-interface FridgeSection {
-  id: string;
+export type Fridge = {
+  id: number;
   name: string;
-}
+  isHidden: boolean;
+};
 
-interface Fridge {
-  id: string;
-  name: string;
-  sections: FridgeSection[];
-}
-
-interface Props {
+type Props = {
   fridge: Fridge;
   isEditMode: boolean;
-  onSelect: (id: string) => void;
-  onEdit: (fridge: Fridge) => void;
-  onAdd: () => void;
-}
+};
 
-const FridgeTile = ({fridge, isEditMode, onSelect, onEdit, onAdd}: Props) => {
-  const isAdd = fridge.id === 'add';
+const FridgeTile = ({fridge}: Props) => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   return (
     <TouchableOpacity
-      style={[styles.fridgeTile, isAdd && styles.addTile]}
-      onPress={() => (isAdd ? onAdd() : onSelect(fridge.id))}>
-      {isEditMode && !isAdd && (
-        <TouchableOpacity
-          style={styles.editIcon}
-          onPress={e => {
-            e.stopPropagation?.();
-            onEdit(fridge);
-          }}>
-          <CustomText style={styles.editIconText}>✏️</CustomText>
-        </TouchableOpacity>
-      )}
-      <CustomText style={[styles.tileText, isAdd && styles.addTileText]}>
-        {fridge.name}
-      </CustomText>
+      style={styles.tile}
+      onPress={() =>
+        navigation.navigate('FridgeHome', {
+          fridgeId: fridge.id,
+          fridgeName: fridge.name,
+        })
+      }>
+      <CustomText style={styles.tileText}>{fridge.name}</CustomText>
     </TouchableOpacity>
   );
 };
