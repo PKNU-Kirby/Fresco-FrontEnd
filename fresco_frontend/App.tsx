@@ -1,31 +1,102 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import SplashScreen from './src/screens/SplashScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import FridgeSelectScreen from './src/screens/FridgeSelectScreen';
 import FridgeHomeScreen from './src/screens/FridgeHomeScreen';
+import RecipeScreen from './src/screens/RecipeScreen';
+import ShoppingListScreen from './src/screens/ShoppingListScreen';
 
+// Stack Navigator Type
 export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   FridgeSelect: undefined;
+  MainTabs: {fridgeId: number; fridgeName: string};
+};
+
+// Tab Navigator Type
+export type MainTabParamList = {
   FridgeHome: {fridgeId: number; fridgeName: string};
+  Recipe: {fridgeId: number; fridgeName: string};
+  ShoppingList: {fridgeId: number; fridgeName: string};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-function App(): React.JSX.Element {
+const Tab = createBottomTabNavigator<MainTabParamList>();
+
+// Main Tab Navigator
+function MainTabNavigator({
+  route,
+}: {
+  route: {params: {fridgeId: number; fridgeName: string}};
+}) {
+  const {fridgeId, fridgeName} = route.params;
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Splash"
-        screenOptions={{headerShown: false}}>
-        <Stack.Screen name="Splash" component={SplashScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="FridgeSelect" component={FridgeSelectScreen} />
-        <Stack.Screen name="FridgeHome" component={FridgeHomeScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: '#ff6b6b',
+        tabBarInactiveTintColor: '#666',
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          borderTopWidth: 1,
+          borderTopColor: '#e0e0e0',
+          paddingVertical: 12,
+          height: 60,
+        },
+        tabBarLabelStyle: {
+          fontSize: 14,
+          fontWeight: '500',
+        },
+      }}>
+      <Tab.Screen
+        name="FridgeHome"
+        component={FridgeHomeScreen}
+        initialParams={{fridgeId, fridgeName}}
+        options={{
+          tabBarLabel: '홈',
+        }}
+      />
+      <Tab.Screen
+        name="Recipe"
+        component={RecipeScreen}
+        initialParams={{fridgeId, fridgeName}}
+        options={{
+          tabBarLabel: '레시피',
+        }}
+      />
+      <Tab.Screen
+        name="ShoppingList"
+        component={ShoppingListScreen}
+        initialParams={{fridgeId, fridgeName}}
+        options={{
+          tabBarLabel: '쇼핑목록',
+        }}
+      />
+    </Tab.Navigator>
   );
 }
+
+function App(): React.JSX.Element {
+  return (
+    <GestureHandlerRootView style={{flex: 1}}>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="Splash"
+          screenOptions={{headerShown: false}}>
+          <Stack.Screen name="Splash" component={SplashScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="FridgeSelect" component={FridgeSelectScreen} />
+          <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
+  );
+}
+
 export default App;

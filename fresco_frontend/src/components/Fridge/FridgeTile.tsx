@@ -30,7 +30,7 @@ const FridgeTile = ({fridge, isEditMode, onEdit, isHidden, isSmall}: Props) => {
       onEdit(fridge);
     } else if (!isEditMode) {
       // Navigate to Fridge Home
-      navigation.navigate('FridgeHome', {
+      navigation.navigate('MainTabs', {
         fridgeId: fridge.id,
         fridgeName: fridge.name,
       });
