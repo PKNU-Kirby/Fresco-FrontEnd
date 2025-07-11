@@ -14,10 +14,10 @@ import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 // import axios from 'axios';
 
 import CustomText from '../../components/common/CustomText';
-import FridgeTile from '../../components/Fridge/FridgeTile';
-import FridgeModalForm from '../../components/Fridge/FridgeModalForm';
+import FridgeTile from '../../components/FridgeSelect/FridgeTile';
+import FridgeModalForm from '../../components/modals/FridgeModalForm';
 import {RootStackParamList} from '../../../App';
-import fridgeTileStyles from '../../components/Fridge/FridgeTileStyles';
+import fridgeTileStyles from '../../components/FridgeSelect/FridgeTile/styles';
 import styles from './styles';
 
 type Fridge = {

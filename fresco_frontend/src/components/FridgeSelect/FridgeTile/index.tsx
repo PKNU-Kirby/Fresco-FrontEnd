@@ -2,9 +2,9 @@ import React from 'react';
 import {TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import CustomText from '../common/CustomText';
+import CustomText from '../../common/CustomText';
 import {RootStackParamList} from '../../../App';
-import styles from './FridgeTileStyles';
+import styles from './styles';
 
 type Fridge = {
   id: number;

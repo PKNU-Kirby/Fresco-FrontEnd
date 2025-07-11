@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import CustomText from '../common/CustomText';
+import CustomText from '../../common/CustomText';
 
 type Fridge = {
   id: number;
