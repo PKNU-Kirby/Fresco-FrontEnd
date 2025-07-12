@@ -9,6 +9,8 @@ import FridgeSelectScreen from './src/screens/FridgeSelectScreen';
 import FridgeHomeScreen from './src/screens/FridgeHomeScreen';
 import RecipeScreen from './src/screens/RecipeScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
+import AddItemScreen from './src/screens/AddItemScreen';
+import CameraScreen from './src/screens/CameraScreen';
 
 // Stack Navigator Type
 export type RootStackParamList = {
@@ -16,6 +18,18 @@ export type RootStackParamList = {
   Login: undefined;
   FridgeSelect: undefined;
   MainTabs: {fridgeId: number; fridgeName: string};
+  AddItem: {
+    fridgeId: number;
+    recognizedData?: {
+      name?: string;
+      quantity?: string;
+      unit?: string;
+      expiryDate?: string;
+      storageType?: string;
+      itemCategory?: string;
+    };
+  };
+  Camera: {fridgeId: number};
 };
 
 // Tab Navigator Type
@@ -93,6 +107,22 @@ function App(): React.JSX.Element {
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="FridgeSelect" component={FridgeSelectScreen} />
           <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+          <Stack.Screen
+            name="AddItem"
+            component={AddItemScreen}
+            options={{
+              presentation: 'modal',
+              animation: 'slide_from_bottom', // 하단에서 올라오는 애니메이션
+            }}
+          />
+          <Stack.Screen
+            name="Camera"
+            component={CameraScreen}
+            options={{
+              presentation: 'fullScreenModal', // 전체화면 모달
+              animation: 'slide_from_bottom',
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {View, TouchableOpacity, TextInput, Modal} from 'react-native';
 import CustomText from '../../common/CustomText';
-import DatePicker from '../DatePicker';
+import DatePicker from '../../modals/DatePicker';
 import {styles} from './styles';
 
 type FridgeItem = {

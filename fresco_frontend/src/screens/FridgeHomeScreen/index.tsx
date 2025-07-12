@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {SafeAreaView, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -11,6 +11,7 @@ import FilterBar from '../../components/FridgeHome/FilterBar';
 import FridgeItemList from '../../components/FridgeHome/FridgeItemList';
 import StorageTypeModal from '../../components/modals/StorageTypeModal';
 import ItemCategoryModal from '../../components/modals/ItemCategoryModal';
+import AddItemModal from '../../components/modals/AddItemModal';
 
 // Hooks
 import {useFridgeData, FridgeItem} from '../../hooks/useFridgeData';
@@ -63,6 +64,8 @@ const FridgeHomeScreen = ({route}: Props) => {
     closeItemCategoryModal,
   } = useModalState();
 
+  const [isAddItemModalVisible, setIsAddItemModalVisible] = useState(false);
+
   // Event handlers
   const handleBackPress = () => {
     navigation.goBack();
@@ -74,8 +77,22 @@ const FridgeHomeScreen = ({route}: Props) => {
   };
 
   const handleAddItem = () => {
-    // 식재료 추가 화면
-    console.log('식재료 추가 화면으로 이동');
+    // + 버튼 클릭 시 모달 열기
+    setIsAddItemModalVisible(true);
+  };
+
+  const handleDirectAdd = () => {
+    setIsAddItemModalVisible(false);
+    navigation.navigate('AddItem', {
+      fridgeId,
+    });
+  };
+
+  const handleCameraAdd = () => {
+    setIsAddItemModalVisible(false);
+    navigation.navigate('Camera', {
+      fridgeId,
+    });
   };
 
   const handleQuantityChange = (itemId: number, newQuantity: string) => {
@@ -152,6 +169,14 @@ const FridgeHomeScreen = ({route}: Props) => {
         onClose={closeItemCategoryModal}
         onSelect={handleItemCategorySelect}
         onUpdateCategories={setItemCategories}
+      />
+
+      {/* 식재료 추가 방법 선택 모달 */}
+      <AddItemModal
+        visible={isAddItemModalVisible}
+        onClose={() => setIsAddItemModalVisible(false)}
+        onDirectAdd={handleDirectAdd}
+        onCameraAdd={handleCameraAdd}
       />
     </SafeAreaView>
   );
