@@ -19,6 +19,10 @@ type FridgeItemListProps = {
   isEditMode: boolean;
   onAddItem: () => void;
   onItemPress?: (item: FridgeItem) => void;
+  onQuantityChange?: (itemId: number, newQuantity: string) => void;
+  onUnitChange?: (itemId: number, newUnit: string) => void;
+  onExpiryDateChange?: (itemId: number, newDate: string) => void;
+  onDeleteItem?: (itemId: number) => void;
 };
 
 const FridgeItemList: React.FC<FridgeItemListProps> = ({
@@ -26,12 +30,20 @@ const FridgeItemList: React.FC<FridgeItemListProps> = ({
   isEditMode,
   onAddItem,
   onItemPress,
+  onQuantityChange,
+  onUnitChange,
+  onExpiryDateChange,
+  onDeleteItem,
 }) => {
   const renderItem = ({item}: {item: FridgeItem}) => (
     <FridgeItemCard
       item={item}
       isEditMode={isEditMode}
       onPress={() => onItemPress?.(item)}
+      onQuantityChange={onQuantityChange}
+      onUnitChange={onUnitChange}
+      onExpiryDateChange={onExpiryDateChange}
+      onDeleteItem={onDeleteItem}
     />
   );
 
@@ -45,13 +57,15 @@ const FridgeItemList: React.FC<FridgeItemListProps> = ({
         showsVerticalScrollIndicator={false}
       />
 
-      {/* 플러스 버튼 */}
-      <TouchableOpacity style={styles.addButton} onPress={onAddItem}>
-        <View style={styles.addButtonIcon}>
-          <View style={styles.addButtonHorizontal} />
-          <View style={styles.addButtonVertical} />
-        </View>
-      </TouchableOpacity>
+      {/* 플러스 버튼 - 편집 모드일 때는 숨김 */}
+      {!isEditMode && (
+        <TouchableOpacity style={styles.addButton} onPress={onAddItem}>
+          <View style={styles.addButtonIcon}>
+            <View style={styles.addButtonHorizontal} />
+            <View style={styles.addButtonVertical} />
+          </View>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

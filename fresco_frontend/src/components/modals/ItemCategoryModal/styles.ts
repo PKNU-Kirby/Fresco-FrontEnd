@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     width: '85%',
-    maxHeight: '70%',
+    maxHeight: '80%',
   },
   modalTitle: {
     fontSize: 20,
@@ -69,5 +69,98 @@ export const styles = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+
+  // 편집 모드 관련 스타일 추가
+  editModeItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  dragHandle: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  dragHandleText: {
+    fontSize: 18,
+    color: '#999',
+    fontWeight: 'bold',
+  },
+  editItemContent: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  deleteItemText: {
+    fontSize: 16,
+  },
+  confirmButton: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+  },
+  confirmButtonText: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  addCategoryButton: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: '#34C759',
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  addCategoryButtonText: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+
+  // 추가 모달 스타일
+  addModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    width: '80%',
+  },
+  addModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#333',
+  },
+  addModalInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  addModalButtons: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  addModalCancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: '#8E8E93',
+    borderRadius: 12,
+  },
+  addModalConfirmButton: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
   },
 });

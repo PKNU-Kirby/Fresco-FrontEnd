@@ -53,7 +53,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               styles.actionButtonText,
               isListEditMode && styles.actionButtonTextActive,
             ]}>
-            편집하기
+            {isListEditMode ? '완료' : '편집하기'}
           </CustomText>
         </TouchableOpacity>
       </View>

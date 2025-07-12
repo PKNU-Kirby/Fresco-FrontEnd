@@ -32,8 +32,17 @@ const FridgeHomeScreen = ({route}: Props) => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Custom hooks
-  const {fridgeItems, storageTypes, setStorageTypes, itemCategories} =
-    useFridgeData(fridgeId);
+  const {
+    fridgeItems,
+    storageTypes,
+    setStorageTypes,
+    itemCategories,
+    setItemCategories,
+    deleteItem,
+    updateItemQuantity,
+    updateItemUnit,
+    updateItemExpiryDate,
+  } = useFridgeData(fridgeId);
 
   const {
     activeStorageType,
@@ -69,9 +78,20 @@ const FridgeHomeScreen = ({route}: Props) => {
     console.log('식재료 추가 화면으로 이동');
   };
 
-  const handleItemPress = (item: FridgeItem) => {
-    // 아이템 상세보기 또는 편집
-    console.log('아이템 선택:', item);
+  const handleQuantityChange = (itemId: number, newQuantity: string) => {
+    updateItemQuantity(itemId, newQuantity);
+  };
+
+  const handleUnitChange = (itemId: number, newUnit: string) => {
+    updateItemUnit(itemId, newUnit);
+  };
+
+  const handleExpiryDateChange = (itemId: number, newDate: string) => {
+    updateItemExpiryDate(itemId, newDate);
+  };
+
+  const handleDeleteItem = (itemId: number) => {
+    deleteItem(itemId);
   };
 
   const handleStorageTypeSelect = (storageType: string) => {
@@ -80,11 +100,6 @@ const FridgeHomeScreen = ({route}: Props) => {
 
   const handleItemCategorySelect = (category: string) => {
     setActiveItemCategory(category);
-  };
-
-  const handleEditItemCategory = () => {
-    // 식재료 유형 편집 기능 (추후 구현)
-    console.log('식재료 유형 편집');
   };
 
   return (
@@ -112,7 +127,10 @@ const FridgeHomeScreen = ({route}: Props) => {
           items={filteredItems}
           isEditMode={isListEditMode}
           onAddItem={handleAddItem}
-          onItemPress={handleItemPress}
+          onQuantityChange={handleQuantityChange}
+          onUnitChange={handleUnitChange}
+          onExpiryDateChange={handleExpiryDateChange}
+          onDeleteItem={handleDeleteItem}
         />
       </View>
 
@@ -133,7 +151,7 @@ const FridgeHomeScreen = ({route}: Props) => {
         activeItemCategory={activeItemCategory}
         onClose={closeItemCategoryModal}
         onSelect={handleItemCategorySelect}
-        onEditPress={handleEditItemCategory}
+        onUpdateCategories={setItemCategories}
       />
     </SafeAreaView>
   );

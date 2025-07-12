@@ -77,6 +77,8 @@ const StorageTypeModal: React.FC<StorageTypeModalProps> = ({
               <FlatList
                 data={storageTypes}
                 keyExtractor={(item, index) => index.toString()}
+                style={{maxHeight: 300}} // 최대 높이 제한
+                showsVerticalScrollIndicator={true}
                 renderItem={({item}) => (
                   <TouchableOpacity
                     style={[
@@ -105,6 +107,8 @@ const StorageTypeModal: React.FC<StorageTypeModalProps> = ({
                 data={storageTypes}
                 onDragEnd={({data}) => onUpdateStorageTypes(data)}
                 keyExtractor={(item, index) => index.toString()}
+                style={{maxHeight: 300}} // 최대 높이 제한
+                showsVerticalScrollIndicator={true}
                 renderItem={({item, drag, isActive}) => (
                   <View style={styles.editModeItem}>
                     <TouchableOpacity

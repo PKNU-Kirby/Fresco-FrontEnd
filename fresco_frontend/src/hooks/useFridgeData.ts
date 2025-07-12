@@ -1,4 +1,4 @@
-import {useState, useMemo} from 'react';
+import {useState, useEffect} from 'react';
 
 export type FridgeItem = {
   id: number;
@@ -9,6 +9,7 @@ export type FridgeItem = {
   storageType: string;
   itemCategory: string;
   fridgeId: number;
+  unit?: string;
 };
 
 export const useFridgeData = (fridgeId: number) => {
@@ -24,7 +25,7 @@ export const useFridgeData = (fridgeId: number) => {
   ]);
 
   // 식재료 카테고리 목록
-  const itemCategories = [
+  const [itemCategories, setItemCategories] = useState([
     '전체',
     '베이커리',
     '채소 / 과일',
@@ -36,7 +37,10 @@ export const useFridgeData = (fridgeId: number) => {
     '건강식품',
     '장 / 양념 / 소스',
     '기타',
-  ];
+  ]);
+
+  // 냉장고 아이템들을 상태로 관리
+  const [fridgeItems, setFridgeItems] = useState<FridgeItem[]>([]);
 
   // Mock data
   const getMockDataByFridgeId = (fridgeId: number): FridgeItem[] => {
@@ -220,15 +224,50 @@ export const useFridgeData = (fridgeId: number) => {
     return dataMap[fridgeId] || [];
   };
 
-  const fridgeItems = useMemo(
-    () => getMockDataByFridgeId(fridgeId),
-    [fridgeId],
-  );
+  // fridgeId가 변경될 때 해당 냉장고 데이터 로드
+  useEffect(() => {
+    const mockData = getMockDataByFridgeId(fridgeId);
+    setFridgeItems(mockData);
+  }, [fridgeId]);
+
+  const deleteItem = (itemId: number) => {
+    setFridgeItems(prev => prev.filter(item => item.id !== itemId));
+  };
+
+  // 아이템 개수 변경 함수
+  const updateItemQuantity = (itemId: number, newQuantity: string) => {
+    setFridgeItems(prev =>
+      prev.map(item =>
+        item.id === itemId ? {...item, quantity: newQuantity} : item,
+      ),
+    );
+  };
+
+  // 아이템 단위 변경 함수
+  const updateItemUnit = (itemId: number, newUnit: string) => {
+    setFridgeItems(prev =>
+      prev.map(item => (item.id === itemId ? {...item, unit: newUnit} : item)),
+    );
+  };
+
+  // 아이템 소비기한 변경 함수
+  const updateItemExpiryDate = (itemId: number, newDate: string) => {
+    setFridgeItems(prev =>
+      prev.map(item =>
+        item.id === itemId ? {...item, expiryDate: newDate} : item,
+      ),
+    );
+  };
 
   return {
     fridgeItems,
     storageTypes,
     setStorageTypes,
     itemCategories,
+    setItemCategories,
+    deleteItem,
+    updateItemQuantity,
+    updateItemUnit,
+    updateItemExpiryDate,
   };
 };
