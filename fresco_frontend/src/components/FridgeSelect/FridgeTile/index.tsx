@@ -3,8 +3,11 @@ import {TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import CustomText from '../../common/CustomText';
-import {RootStackParamList} from '../../../App';
 import styles from './styles';
+
+type RootStackParamList = {
+  MainTabs: {fridgeId: number; fridgeName: string};
+};
 
 type Fridge = {
   id: number;

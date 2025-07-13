@@ -2,40 +2,36 @@ import {StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
   /** Fridge Select Screen Style */
-  container: {flex: 1, padding: 16},
-  list: {gap: 5, marginHorizontal: 10},
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   headerStyle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    paddingHorizontal: 16,
+    paddingBottom: 5,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingBottom: 10,
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#f8f8f8',
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  /** LogOut Button Style */
-  logoutButton: {
-    marginHorizontal: 16,
-    fontSize: 16,
-    fontWeight: 'bold',
-    padding: 8,
-    backgroundColor: 'lightgray',
-    borderRadius: 8,
-  },
+
   /** Edit Button Style */
   editButton: {
     fontSize: 16,
-    marginHorizontal: 16,
     fontWeight: 'bold',
     padding: 8,
     backgroundColor: 'lightgray',
     borderRadius: 8,
   },
+
+  list: {gap: 5, marginHorizontal: 10},
 
   /** Bottom Sheet Style : Hidden Fridge Section */
   bottomSheet: {

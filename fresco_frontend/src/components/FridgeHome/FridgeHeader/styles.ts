@@ -11,22 +11,11 @@ export const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
     backgroundColor: '#f8f8f8',
   },
-  backButton: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    padding: 8,
-    backgroundColor: 'lightgray',
-    borderRadius: 8,
-  },
   accountButton: {
-    paddingRight: 8,
-    minWidth: 60,
+    padding: 8,
+    minWidth: 40,
     alignItems: 'flex-end',
-  },
-  headerBackButtonText: {
-    fontSize: 16,
-    color: 'black',
-    fontWeight: '600',
+    borderWidth: 1,
   },
   headerSettingsButtonText: {
     fontSize: 36,
@@ -36,7 +25,7 @@ export const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#666',
     flex: 1,
     textAlign: 'center',
   },

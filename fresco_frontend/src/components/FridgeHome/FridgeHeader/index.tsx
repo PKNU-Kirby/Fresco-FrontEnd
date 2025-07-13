@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, TouchableOpacity} from 'react-native';
 import CustomText from '../../common/CustomText';
+import BackButton from '../../common/BackButton';
 import {styles} from './styles';
 
 type FridgeHeaderProps = {
@@ -16,9 +17,7 @@ const FridgeHeader: React.FC<FridgeHeaderProps> = ({
 }) => {
   return (
     <View style={styles.header}>
-      <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
-        <CustomText style={styles.headerBackButtonText}>뒤로가기</CustomText>
-      </TouchableOpacity>
+      <BackButton onPress={onBackPress} />
 
       <CustomText style={styles.headerTitle}>{fridgeName}</CustomText>
 

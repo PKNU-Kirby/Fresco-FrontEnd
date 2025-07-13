@@ -14,6 +14,7 @@ import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 // import axios from 'axios';
 
 import CustomText from '../../components/common/CustomText';
+import BackButton from '../../components/common/BackButton';
 import FridgeTile from '../../components/FridgeSelect/FridgeTile';
 import FridgeModalForm from '../../components/modals/FridgeModalForm';
 import {RootStackParamList} from '../../../App';
@@ -170,9 +171,7 @@ const FridgeSelectScreen = () => {
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.headerStyle}>
-          <TouchableOpacity onPress={handleLogout}>
-            <CustomText style={styles.logoutButton}>뒤로가기</CustomText>
-          </TouchableOpacity>
+          <BackButton onPress={handleLogout} />
           <TouchableOpacity onPress={handleEditToggle}>
             <CustomText style={styles.editButton}>
               {isEditMode ? '완료' : '편집'}
