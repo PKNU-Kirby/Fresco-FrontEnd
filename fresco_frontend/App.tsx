@@ -3,6 +3,9 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import CustomText from './src/components/common/CustomText';
+
+// Screens
 import SplashScreen from './src/screens/SplashScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import FridgeSelectScreen from './src/screens/FridgeSelectScreen';
@@ -34,7 +37,7 @@ export type RootStackParamList = {
   FridgeSettings: {
     fridgeId: number;
     fridgeName: string;
-    userRole: 'owner' | 'member'; // 권한에 따른 UI 분기
+    userRole: 'owner' | 'member'; // 권한에 따른 UI 분리
   };
 };
 
@@ -60,18 +63,22 @@ function MainTabNavigator({
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#ff6b6b',
+        tabBarActiveTintColor: 'limegreen',
         tabBarInactiveTintColor: '#666',
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#e0e0e0',
           paddingVertical: 12,
-          height: 60,
+          height: 75,
         },
         tabBarLabelStyle: {
           fontSize: 14,
           fontWeight: '500',
+        },
+        // 아이콘 스타일
+        tabBarIconStyle: {
+          marginBottom: 4,
         },
       }}>
       <Tab.Screen
@@ -80,6 +87,9 @@ function MainTabNavigator({
         initialParams={{fridgeId, fridgeName}}
         options={{
           tabBarLabel: '홈',
+          tabBarIcon: ({color, size}) => (
+            <CustomText style={{fontSize: size * 1.1, color}}>⌂</CustomText>
+          ),
         }}
       />
       <Tab.Screen
@@ -88,6 +98,9 @@ function MainTabNavigator({
         initialParams={{fridgeId, fridgeName}}
         options={{
           tabBarLabel: '레시피',
+          tabBarIcon: ({color, size}) => (
+            <CustomText style={{fontSize: size * 1.1, color}}>✴︎</CustomText>
+          ),
         }}
       />
       <Tab.Screen
@@ -96,6 +109,9 @@ function MainTabNavigator({
         initialParams={{fridgeId, fridgeName}}
         options={{
           tabBarLabel: '쇼핑목록',
+          tabBarIcon: ({color, size}) => (
+            <CustomText style={{fontSize: size * 1.1, color}}>✓</CustomText>
+          ),
         }}
       />
     </Tab.Navigator>
@@ -133,7 +149,7 @@ function App(): React.JSX.Element {
             name="FridgeSettings"
             component={FridgeSettingsScreen}
             options={{
-              presentation: 'modal', // 모달 스타일
+              presentation: 'modal',
               animation: 'slide_from_right', // 오른쪽에서 슬라이드
             }}
           />
