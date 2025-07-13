@@ -17,13 +17,13 @@ const FridgeHeader: React.FC<FridgeHeaderProps> = ({
   return (
     <View style={styles.header}>
       <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
-        <CustomText style={styles.headerButtonText}>뒤로가기</CustomText>
+        <CustomText style={styles.headerBackButtonText}>뒤로가기</CustomText>
       </TouchableOpacity>
 
       <CustomText style={styles.headerTitle}>{fridgeName}</CustomText>
 
       <TouchableOpacity onPress={onAccountPress} style={styles.accountButton}>
-        <CustomText style={styles.headerButtonText}>⚙️</CustomText>
+        <CustomText style={styles.headerSettingsButtonText}>≡</CustomText>
       </TouchableOpacity>
     </View>
   );

@@ -19,12 +19,17 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
   },
   accountButton: {
-    padding: 8,
+    paddingRight: 8,
     minWidth: 60,
     alignItems: 'flex-end',
   },
-  headerButtonText: {
+  headerBackButtonText: {
     fontSize: 16,
+    color: 'black',
+    fontWeight: '600',
+  },
+  headerSettingsButtonText: {
+    fontSize: 36,
     color: 'black',
     fontWeight: '600',
   },

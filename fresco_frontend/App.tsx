@@ -11,6 +11,7 @@ import RecipeScreen from './src/screens/RecipeScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import AddItemScreen from './src/screens/AddItemScreen';
 import CameraScreen from './src/screens/CameraScreen';
+import FridgeSettingsScreen from './src/screens/FridgeSettingsScreen';
 
 // Stack Navigator Type
 export type RootStackParamList = {
@@ -30,6 +31,11 @@ export type RootStackParamList = {
     };
   };
   Camera: {fridgeId: number};
+  FridgeSettings: {
+    fridgeId: number;
+    fridgeName: string;
+    userRole: 'owner' | 'member'; // 권한에 따른 UI 분기
+  };
 };
 
 // Tab Navigator Type
@@ -121,6 +127,14 @@ function App(): React.JSX.Element {
             options={{
               presentation: 'fullScreenModal', // 전체화면 모달
               animation: 'slide_from_bottom',
+            }}
+          />
+          <Stack.Screen
+            name="FridgeSettings"
+            component={FridgeSettingsScreen}
+            options={{
+              presentation: 'modal', // 모달 스타일
+              animation: 'slide_from_right', // 오른쪽에서 슬라이드
             }}
           />
         </Stack.Navigator>

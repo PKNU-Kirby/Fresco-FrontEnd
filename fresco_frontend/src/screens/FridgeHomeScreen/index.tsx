@@ -72,8 +72,11 @@ const FridgeHomeScreen = ({route}: Props) => {
   };
 
   const handleAccountPress = () => {
-    // 구성원 관리 화면
-    console.log('구성원 관리 화면으로 이동');
+    navigation.navigate('FridgeSettings', {
+      fridgeId,
+      fridgeName,
+      userRole: 'owner', // or 'member'
+    });
   };
 
   const handleAddItem = () => {
