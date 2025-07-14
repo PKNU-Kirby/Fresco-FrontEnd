@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import CustomText from './src/components/common/CustomText';
+import {initKakao} from './src/utils/kakaoConfig';
 
 // Screens
 import SplashScreen from './src/screens/SplashScreen';
@@ -121,6 +122,17 @@ function MainTabNavigator({
 }
 
 function App(): React.JSX.Element {
+  // 카카오 SDK 초기화
+  useEffect(() => {
+    const initializeKakaoSDK = async () => {
+      try {
+        await initKakao();
+      } catch (error) {}
+    };
+
+    initializeKakaoSDK();
+  }, []);
+
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <NavigationContainer>

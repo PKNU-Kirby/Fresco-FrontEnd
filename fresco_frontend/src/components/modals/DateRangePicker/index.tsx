@@ -77,7 +77,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     onClose();
   };
 
-  if (!visible) return null;
+  if (!visible) {
+    return null;
+  }
 
   return (
     <Modal

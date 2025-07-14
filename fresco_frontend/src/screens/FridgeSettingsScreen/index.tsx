@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   SafeAreaView,
   View,
@@ -10,6 +10,7 @@ import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import CustomText from '../../components/common/CustomText';
 import BackButton from '../../components/common/BackButton';
+import InviteMemberModal from '../../components/modals/InviteMemberModal'; // 모달 import
 import {RootStackParamList} from '../../../App';
 import {styles} from './styles';
 
@@ -34,8 +35,10 @@ type Props = {
 const FridgeSettingsScreen = ({route}: Props) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  // const {fridgeId, fridgeName, userRole = 'owner'} = route.params;
   const {fridgeId, fridgeName, userRole = 'member'} = route.params;
+
+  // 초대 모달 상태 추가
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   // Mock 구성원 데이터
   const mockMembers: Member[] = [
@@ -66,16 +69,15 @@ const FridgeSettingsScreen = ({route}: Props) => {
     navigation.goBack();
   };
 
+  // Func 1. 식재료 사용 기록 확인하기
   const handleUsageHistory = () => {
     navigation.navigate('UsageHistoryScreen', {fridgeId});
   };
 
+  // Func 2. 구성원 초대하기 - 모달 열기로 변경
   const handleMemberInvite = () => {
-    console.log('구성원 초대');
-    Alert.alert('구성원 초대', '초대 링크를 생성하시겠습니까?', [
-      {text: '취소', style: 'cancel'},
-      {text: '링크 생성', onPress: () => console.log('초대 링크 생성')},
-    ]);
+    console.log('구성원 초대 모달 열기');
+    setShowInviteModal(true);
   };
 
   const handleLogout = () => {
@@ -191,6 +193,14 @@ const FridgeSettingsScreen = ({route}: Props) => {
           </TouchableOpacity>
         )}
       </View>
+
+      {/* 구성원 초대 모달 */}
+      <InviteMemberModal
+        visible={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        fridgeId={fridgeId}
+        fridgeName={fridgeName}
+      />
     </SafeAreaView>
   );
 };
