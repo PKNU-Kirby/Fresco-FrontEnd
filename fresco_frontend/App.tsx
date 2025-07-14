@@ -15,6 +15,7 @@ import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import AddItemScreen from './src/screens/AddItemScreen';
 import CameraScreen from './src/screens/CameraScreen';
 import FridgeSettingsScreen from './src/screens/FridgeSettingsScreen';
+import UsageHistoryScreen from './src/screens/UsageHistoryScreen';
 
 // Stack Navigator Type
 export type RootStackParamList = {
@@ -39,6 +40,7 @@ export type RootStackParamList = {
     fridgeName: string;
     userRole: 'owner' | 'member'; // 권한에 따른 UI 분리
   };
+  UsageHistoryScreen: {fridgeId: number};
 };
 
 // Tab Navigator Type
@@ -151,6 +153,14 @@ function App(): React.JSX.Element {
             options={{
               presentation: 'modal',
               animation: 'slide_from_right', // 오른쪽에서 슬라이드
+            }}
+          />
+          <Stack.Screen
+            name="UsageHistoryScreen"
+            component={UsageHistoryScreen}
+            options={{
+              presentation: 'modal',
+              animation: 'slide_from_right',
             }}
           />
         </Stack.Navigator>

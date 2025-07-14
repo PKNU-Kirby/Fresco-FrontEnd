@@ -15,7 +15,6 @@ export const styles = StyleSheet.create({
     padding: 8,
     minWidth: 40,
     alignItems: 'flex-end',
-    borderWidth: 1,
   },
   headerSettingsButtonText: {
     fontSize: 36,

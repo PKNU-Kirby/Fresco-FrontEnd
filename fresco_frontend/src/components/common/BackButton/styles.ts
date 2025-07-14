@@ -6,7 +6,6 @@ export const styles = StyleSheet.create({
     minWidth: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
   },
   backButtonText: {
     fontSize: 27,

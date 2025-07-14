@@ -174,7 +174,7 @@ const FridgeSelectScreen = () => {
           <BackButton onPress={handleLogout} />
           <TouchableOpacity onPress={handleEditToggle}>
             <CustomText style={styles.editButton}>
-              {isEditMode ? '완료' : '편집'}
+              {isEditMode ? '완료' : '편집하기'}
             </CustomText>
           </TouchableOpacity>
         </View>

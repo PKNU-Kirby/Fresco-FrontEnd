@@ -3,7 +3,7 @@ import {StyleSheet} from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f7',
+    backgroundColor: '#fff',
   },
 
   // 헤더
@@ -13,93 +13,118 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 0.5,
+    borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
-  headerButton: {
-    fontSize: 17,
-    color: '#007AFF',
-    fontWeight: '400',
-  },
   headerTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '600',
     color: '#000',
   },
   headerRight: {
-    width: 50,
+    width: 40, // BackButton과 동일한 너비로 중앙 정렬
   },
 
   // 콘텐츠
   content: {
     flex: 1,
+    paddingHorizontal: 20,
   },
 
-  // 섹션
-  section: {
-    marginTop: 35,
+  // 구성원 섹션
+  membersSection: {
+    paddingTop: 20,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '400',
-    color: '#6d6d72',
-    textTransform: 'uppercase',
-    marginBottom: 8,
-    marginLeft: 20,
-    marginRight: 20,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 16,
   },
 
-  // 냉장고 정보
-  fridgeInfo: {
+  // 구성원 카드 (식재료 카드 스타일)
+  memberCard: {
     backgroundColor: '#fff',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    alignItems: 'center',
-    borderTopWidth: 0.5,
-    borderBottomWidth: 0.5,
-    borderColor: '#c6c6c8',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
   },
-  fridgeName: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#000',
+  memberCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  memberAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#f8f9fa',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+    borderWidth: 2,
+    borderColor: '#e9ecef',
+  },
+  memberAvatarText: {
+    fontSize: 24,
+  },
+  memberMainInfo: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  memberName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  memberCardFooter: {
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingTop: 8,
+  },
+  memberJoinDateText: {
+    fontSize: 12,
+    color: '#999',
+    fontStyle: 'italic',
+  },
+
+  // 기존 memberItem 스타일 제거하고 위 카드 스타일로 대체
+
+  // 하단 버튼들
+  bottomButtons: {
+    flexDirection: 'row',
+    paddingHorizontal: 15,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    backgroundColor: '#fff',
+  },
+  bottomButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  bottomButtonIcon: {
+    fontSize: 24,
     marginBottom: 4,
   },
-  userRole: {
-    fontSize: 14,
-    color: '#8e8e93',
+  bottomButtonText: {
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '500',
+    textAlign: 'center',
   },
-
-  // 메뉴 아이템
-  menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#c6c6c8',
-    borderTopWidth: 0.5,
-    borderTopColor: '#c6c6c8',
-    marginTop: -0.5, // 보더 겹침 방지
-  },
-  menuItemLast: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#c6c6c8',
-  },
-  menuItemText: {
-    fontSize: 17,
-    color: '#000',
-    fontWeight: '400',
-  },
-  menuItemDanger: {
-    color: '#ff3b30',
-  },
-  menuItemArrow: {
-    fontSize: 14,
-    color: '#c7c7cc',
-    fontWeight: '400',
+  dangerText: {
+    color: '#FF3B30',
   },
 });
