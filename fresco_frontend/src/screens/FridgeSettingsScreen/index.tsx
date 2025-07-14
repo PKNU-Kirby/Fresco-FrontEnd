@@ -6,11 +6,12 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, CommonActions} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomText from '../../components/common/CustomText';
 import BackButton from '../../components/common/BackButton';
-import InviteMemberModal from '../../components/modals/InviteMemberModal'; // 모달 import
+import InviteMemberModal from '../../components/modals/InviteMemberModal';
 import {RootStackParamList} from '../../../App';
 import {styles} from './styles';
 
@@ -83,7 +84,25 @@ const FridgeSettingsScreen = ({route}: Props) => {
   const handleLogout = () => {
     Alert.alert('로그아웃', '로그아웃 하시겠습니까?', [
       {text: '취소', style: 'cancel'},
-      {text: '로그아웃', onPress: () => console.log('로그아웃')},
+      {
+        text: '로그아웃',
+        onPress: async () => {
+          try {
+            // AsyncStorage에서 사용자 정보 삭제
+            await AsyncStorage.removeItem('userId');
+
+            // 로그인 화면으로 리셋 (뒤로가기 방지)
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{name: 'Login'}],
+              }),
+            );
+          } catch (error) {
+            Alert.alert('오류', '로그아웃 중 문제가 발생했습니다.');
+          }
+        },
+      },
     ]);
   };
 
