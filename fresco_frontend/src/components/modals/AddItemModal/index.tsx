@@ -21,7 +21,8 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+      style={styles.content}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
@@ -34,9 +35,6 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                 <CustomText style={styles.optionIconText}>✎</CustomText>
               </View>
               <CustomText style={styles.optionText}>직접 추가</CustomText>
-              <CustomText style={styles.optionDescription}>
-                식재료 정보를 직접 입력합니다
-              </CustomText>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.optionButton} onPress={onCameraAdd}>
@@ -44,9 +42,6 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                 <CustomText style={styles.optionIconText}>📷</CustomText>
               </View>
               <CustomText style={styles.optionText}>카메라</CustomText>
-              <CustomText style={styles.optionDescription}>
-                카메라로 식재료를 촬영합니다
-              </CustomText>
             </TouchableOpacity>
           </View>
 

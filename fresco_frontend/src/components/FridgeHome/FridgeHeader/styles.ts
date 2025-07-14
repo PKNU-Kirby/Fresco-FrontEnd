@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
     backgroundColor: '#f8f8f8',
   },
-  accountButton: {
+  settingsButton: {
     padding: 8,
     minWidth: 40,
     alignItems: 'flex-end',

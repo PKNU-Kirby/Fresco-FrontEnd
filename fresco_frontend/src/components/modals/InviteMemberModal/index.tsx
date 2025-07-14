@@ -7,8 +7,10 @@ import {
   Clipboard,
   Share,
   Linking,
+  Image,
 } from 'react-native';
 import shareCustom from '@react-native-kakao/share';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import {checkKakaoAvailability} from '../../../utils/kakaoConfig';
 import CustomText from '../../common/CustomText';
 import {styles} from './styles';
@@ -163,7 +165,10 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
                 onPress={shareToKakao}
                 disabled={!isKakaoAvailable}>
                 <View style={styles.shareButtonIcon}>
-                  <CustomText style={styles.shareButtonEmoji}>💬</CustomText>
+                  <Image
+                    source={require('../../../assets/img/btn_share_kakao.png')}
+                    style={styles.shareButtonEmoji}
+                  />
                 </View>
                 <CustomText
                   style={[
@@ -177,7 +182,7 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
               {/* 문자 */}
               <TouchableOpacity style={styles.shareButton} onPress={shareToSMS}>
                 <View style={styles.shareButtonIcon}>
-                  <CustomText style={styles.shareButtonEmoji}>💌</CustomText>
+                  <FontAwesome6 name="message" size={24} color="#333" />
                 </View>
                 <CustomText style={styles.shareButtonText}>문자</CustomText>
               </TouchableOpacity>
@@ -187,7 +192,7 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
                 style={styles.shareButton}
                 onPress={copyToClipboard}>
                 <View style={styles.shareButtonIcon}>
-                  <CustomText style={styles.shareButtonEmoji}>📋</CustomText>
+                  <FontAwesome6 name="clipboard" size={24} color="#333" />
                 </View>
                 <CustomText style={styles.shareButtonText}>복사하기</CustomText>
               </TouchableOpacity>

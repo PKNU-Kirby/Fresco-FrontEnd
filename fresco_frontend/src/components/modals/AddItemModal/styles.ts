@@ -1,24 +1,35 @@
-import {StyleSheet, Dimensions} from 'react-native';
-
-// const {width, height} = Dimensions.get('window');
+import {StyleSheet} from 'react-native';
 
 export const styles = StyleSheet.create({
-  modalOverlay: {
+  content: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    position: 'relative',
+  },
+  modalOverlay: {
+    position: 'absolute',
+    bottom: 108,
+    right: 30,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    width: '80%',
+    backgroundColor: '#ccc',
+    borderRadius: 14,
+    width: 300,
     overflow: 'hidden',
   },
   modalHeader: {
     padding: 20,
     borderBottomWidth: 0.5,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#999',
     alignItems: 'center',
   },
   modalTitle: {
@@ -36,7 +47,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
     marginBottom: 12,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#eee',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e9ecef',
@@ -45,7 +56,7 @@ export const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#fff',
+    backgroundColor: '#eee',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -68,17 +79,11 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
     flex: 1,
   },
-  optionDescription: {
-    fontSize: 14,
-    color: '#666',
-    flex: 1,
-    marginTop: 4,
-  },
 
   // 하단 버튼
   modalButtons: {
     borderTopWidth: 0.5,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: '#999',
   },
   cancelButton: {
     paddingVertical: 16,

@@ -1,6 +1,4 @@
-import {StyleSheet, Dimensions} from 'react-native';
-
-// const {width} = Dimensions.get('window');
+import {StyleSheet} from 'react-native';
 
 export const styles = StyleSheet.create({
   // 모달 기본
@@ -90,7 +88,7 @@ export const styles = StyleSheet.create({
   linkContainer: {
     flexDirection: 'row',
     backgroundColor: '#f8f9fa',
-    borderRadius: 14,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#dee2e6',
     overflow: 'hidden',
@@ -151,7 +149,9 @@ export const styles = StyleSheet.create({
     borderColor: '#dee2e6',
   },
   shareButtonEmoji: {
-    fontSize: 24,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
   shareButtonText: {
     fontSize: 12,

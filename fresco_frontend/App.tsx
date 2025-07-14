@@ -3,9 +3,12 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import CustomText from './src/components/common/CustomText';
 import {initKakao} from './src/utils/kakaoConfig';
-
+// Fonts
+// import CustomText from './src/components/common/CustomText';
+// Icons
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 // Screens
 import SplashScreen from './src/screens/SplashScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -73,15 +76,15 @@ function MainTabNavigator({
           borderTopWidth: 1,
           borderTopColor: '#e0e0e0',
           paddingVertical: 12,
-          height: 75,
+          height: 80,
         },
         tabBarLabelStyle: {
           fontSize: 14,
           fontWeight: '500',
+          marginTop: 8,
         },
-        // 아이콘 스타일
         tabBarIconStyle: {
-          marginBottom: 4,
+          marginTop: 6,
         },
       }}>
       <Tab.Screen
@@ -91,7 +94,7 @@ function MainTabNavigator({
         options={{
           tabBarLabel: '홈',
           tabBarIcon: ({color, size}) => (
-            <CustomText style={{fontSize: size * 1.1, color}}>⌂</CustomText>
+            <FontAwesome6 name="house" size={size} color={color} />
           ),
         }}
       />
@@ -102,7 +105,7 @@ function MainTabNavigator({
         options={{
           tabBarLabel: '레시피',
           tabBarIcon: ({color, size}) => (
-            <CustomText style={{fontSize: size * 1.1, color}}>✴︎</CustomText>
+            <FontAwesome5 name="mortar-pestle" size={size} color={color} />
           ),
         }}
       />
@@ -113,7 +116,7 @@ function MainTabNavigator({
         options={{
           tabBarLabel: '쇼핑목록',
           tabBarIcon: ({color, size}) => (
-            <CustomText style={{fontSize: size * 1.1, color}}>✓</CustomText>
+            <FontAwesome5 name="shopping-basket" size={size} color={color} />
           ),
         }}
       />
@@ -164,7 +167,7 @@ function App(): React.JSX.Element {
             component={FridgeSettingsScreen}
             options={{
               presentation: 'modal',
-              animation: 'slide_from_right', // 오른쪽에서 슬라이드
+              animation: 'slide_from_right',
             }}
           />
           <Stack.Screen

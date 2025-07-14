@@ -65,18 +65,9 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   memberAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#f8f9fa',
+    marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
-    borderWidth: 2,
-    borderColor: '#e9ecef',
-  },
-  memberAvatarText: {
-    fontSize: 24,
   },
   memberMainInfo: {
     flex: 1,
@@ -112,19 +103,34 @@ export const styles = StyleSheet.create({
   bottomButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 8,
-  },
-  bottomButtonIcon: {
-    fontSize: 24,
-    marginBottom: 4,
   },
   bottomButtonText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#333',
     fontWeight: '500',
     textAlign: 'center',
+    marginTop: 6,
   },
   dangerText: {
-    color: '#FF3B30',
+    color: 'tomato',
+  },
+
+  memberNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  ownerBadge: {
+    backgroundColor: 'limegreen',
+    borderRadius: 15,
+    marginLeft: 12,
+    flexDirection: 'row',
+    padding: 7,
+  },
+  ownerBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#212529',
+    marginLeft: 4,
   },
 });

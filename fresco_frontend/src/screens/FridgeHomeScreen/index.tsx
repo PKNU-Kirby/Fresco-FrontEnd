@@ -14,7 +14,7 @@ import ItemCategoryModal from '../../components/modals/ItemCategoryModal';
 import AddItemModal from '../../components/modals/AddItemModal';
 
 // Hooks
-import {useFridgeData, FridgeItem} from '../../hooks/useFridgeData';
+import {useFridgeData} from '../../hooks/useFridgeData';
 import {useFilterState} from '../../hooks/useFilterState';
 import {useModalState} from '../../hooks/useModalState';
 
@@ -71,11 +71,12 @@ const FridgeHomeScreen = ({route}: Props) => {
     navigation.goBack();
   };
 
-  const handleAccountPress = () => {
+  const handleSettingsPress = () => {
     navigation.navigate('FridgeSettings', {
       fridgeId,
       fridgeName,
-      userRole: 'owner', // or 'member'
+      // userRole: 'owner',
+      userRole: 'member',
     });
   };
 
@@ -128,7 +129,7 @@ const FridgeHomeScreen = ({route}: Props) => {
       <FridgeHeader
         fridgeName={fridgeName}
         onBackPress={handleBackPress}
-        onAccountPress={handleAccountPress}
+        onSettingsPress={handleSettingsPress}
       />
 
       {/* 필터 바 */}
