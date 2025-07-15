@@ -101,8 +101,8 @@ export const styles = StyleSheet.create({
   confirmButton: {
     flex: 1,
     paddingVertical: 12,
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
+    backgroundColor: '#333',
+    borderRadius: 8,
   },
   confirmButtonText: {
     fontSize: 14,
@@ -113,13 +113,13 @@ export const styles = StyleSheet.create({
   addCategoryButton: {
     flex: 1,
     paddingVertical: 12,
-    backgroundColor: '#34C759',
-    borderRadius: 12,
+    backgroundColor: 'lightgray',
+    borderRadius: 8,
     marginRight: 8,
   },
   addCategoryButtonText: {
     fontSize: 14,
-    color: '#fff',
+    color: '#333',
     fontWeight: 'bold',
     textAlign: 'center',
   },

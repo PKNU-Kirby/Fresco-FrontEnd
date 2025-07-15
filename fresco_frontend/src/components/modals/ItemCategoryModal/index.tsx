@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
 import {View, Modal, TouchableOpacity, FlatList, TextInput} from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import CustomText from '../../common/CustomText';
 import {styles} from './styles';
 
@@ -115,7 +117,11 @@ const ItemCategoryModal: React.FC<ItemCategoryModalProps> = ({
                       style={styles.dragHandle}
                       onLongPress={drag}
                       disabled={isActive}>
-                      <CustomText style={styles.dragHandleText}>≡</CustomText>
+                      <MaterialIcons
+                        name="drag-handle"
+                        size={16}
+                        color="#333"
+                      />
                     </TouchableOpacity>
 
                     <TouchableOpacity style={styles.editItemContent}>
@@ -127,9 +133,7 @@ const ItemCategoryModal: React.FC<ItemCategoryModalProps> = ({
                     {item !== '전체' && ( // '전체'는 삭제 불가
                       <TouchableOpacity
                         onPress={() => handleDeleteCategory(item)}>
-                        <CustomText style={styles.deleteItemText}>
-                          🗑️
-                        </CustomText>
+                        <FontAwesome5 name="trash" size={16} color="#333" />
                       </TouchableOpacity>
                     )}
                   </View>
