@@ -1,10 +1,7 @@
 import {StyleSheet} from 'react-native';
 
-export const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-    position: 'relative',
-  },
+// 메인 모달 스타일
+export const modalStyles = StyleSheet.create({
   modalOverlay: {
     position: 'absolute',
     bottom: 108,
@@ -37,10 +34,26 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
   },
-
   optionContainer: {
     padding: 20,
   },
+  modalButtons: {
+    borderTopWidth: 0.5,
+    borderTopColor: '#999',
+  },
+  cancelButton: {
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '400',
+  },
+});
+
+// 옵션 버튼 스타일
+export const optionStyles = StyleSheet.create({
   optionButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -56,7 +69,7 @@ export const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#eee',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -69,29 +82,10 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  optionIconText: {
-    fontSize: 24,
-  },
   optionText: {
     fontSize: 17,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 4,
     flex: 1,
-  },
-
-  // 하단 버튼
-  modalButtons: {
-    borderTopWidth: 0.5,
-    borderTopColor: '#999',
-  },
-  cancelButton: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '400',
   },
 });
