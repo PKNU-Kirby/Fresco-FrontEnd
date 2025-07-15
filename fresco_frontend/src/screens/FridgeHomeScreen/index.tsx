@@ -1,5 +1,22 @@
-import React from 'react';
-import {Text, SafeAreaView} from 'react-native';
+import React, {useState} from 'react';
+import {SafeAreaView, View} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../../App';
+import {styles} from './styles';
+
+// Components
+import FridgeHeader from '../../components/FridgeHome/FridgeHeader';
+import FilterBar from '../../components/FridgeHome/FilterBar';
+import FridgeItemList from '../../components/FridgeHome/FridgeItemList';
+import StorageTypeModal from '../../components/modals/StorageTypeModal';
+import ItemCategoryModal from '../../components/modals/ItemCategoryModal';
+import AddItemModal from '../../components/modals/AddItemModal';
+
+// Hooks
+import {useFridgeData} from '../../hooks/useFridgeData';
+import {useFilterState} from '../../hooks/useFilterState';
+import {useModalState} from '../../hooks/useModalState';
 
 type Props = {
   route: {
@@ -12,15 +29,159 @@ type Props = {
 
 const FridgeHomeScreen = ({route}: Props) => {
   const {fridgeId, fridgeName} = route.params;
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  // Custom hooks
+  const {
+    fridgeItems,
+    storageTypes,
+    setStorageTypes,
+    itemCategories,
+    setItemCategories,
+    deleteItem,
+    updateItemQuantity,
+    updateItemUnit,
+    updateItemExpiryDate,
+  } = useFridgeData(fridgeId);
+
+  const {
+    activeStorageType,
+    setActiveStorageType,
+    activeItemCategory,
+    setActiveItemCategory,
+    isListEditMode,
+    toggleEditMode,
+    filteredItems,
+  } = useFilterState(fridgeItems);
+
+  const {
+    isStorageModalVisible,
+    isItemCategoryModalVisible,
+    openStorageModal,
+    closeStorageModal,
+    openItemCategoryModal,
+    closeItemCategoryModal,
+  } = useModalState();
+
+  const [isAddItemModalVisible, setIsAddItemModalVisible] = useState(false);
+
+  // Event handlers
+  const handleBackPress = () => {
+    navigation.goBack();
+  };
+
+  const handleSettingsPress = () => {
+    navigation.navigate('FridgeSettings', {
+      fridgeId,
+      fridgeName,
+      // userRole: 'owner',
+      userRole: 'member',
+    });
+  };
+
+  const handleAddItem = () => {
+    // + 버튼 클릭 시 모달 열기
+    setIsAddItemModalVisible(true);
+  };
+
+  const handleDirectAdd = () => {
+    setIsAddItemModalVisible(false);
+    navigation.navigate('AddItem', {
+      fridgeId,
+    });
+  };
+
+  const handleCameraAdd = () => {
+    setIsAddItemModalVisible(false);
+    navigation.navigate('Camera', {
+      fridgeId,
+    });
+  };
+
+  const handleQuantityChange = (itemId: number, newQuantity: string) => {
+    updateItemQuantity(itemId, newQuantity);
+  };
+
+  const handleUnitChange = (itemId: number, newUnit: string) => {
+    updateItemUnit(itemId, newUnit);
+  };
+
+  const handleExpiryDateChange = (itemId: number, newDate: string) => {
+    updateItemExpiryDate(itemId, newDate);
+  };
+
+  const handleDeleteItem = (itemId: number) => {
+    deleteItem(itemId);
+  };
+
+  const handleStorageTypeSelect = (storageType: string) => {
+    setActiveStorageType(storageType);
+  };
+
+  const handleItemCategorySelect = (category: string) => {
+    setActiveItemCategory(category);
+  };
 
   return (
-    <SafeAreaView>
-      {/* 뒤로가기 버튼 (냉장고 선택화면으로 나가기) 만들어야 함 : 좌측 상단*/}
-      {/* 계정 관리 화면으로 넘어가는 버튼 우측 상단에 만들어야 함 */}
-      {/* 네비게이션 바 만들어야함 : 하단*/}
-      {/* */}
-      <Text>냉장고 이름: {fridgeName}</Text>
-      <Text>냉장고 ID: {fridgeId}</Text>
+    <SafeAreaView style={styles.container}>
+      {/* 헤더 */}
+      <FridgeHeader
+        fridgeName={fridgeName}
+        onBackPress={handleBackPress}
+        onSettingsPress={handleSettingsPress}
+      />
+
+      {/* 필터 바 */}
+      <FilterBar
+        activeStorageType={activeStorageType}
+        activeItemCategory={activeItemCategory}
+        isListEditMode={isListEditMode}
+        onStorageTypePress={openStorageModal}
+        onItemCategoryPress={openItemCategoryModal}
+        onEditModeToggle={toggleEditMode}
+      />
+
+      {/* 메인 콘텐츠 영역 */}
+      <View style={styles.mainContent}>
+        <FridgeItemList
+          items={filteredItems}
+          isEditMode={isListEditMode}
+          onAddItem={handleAddItem}
+          onQuantityChange={handleQuantityChange}
+          onUnitChange={handleUnitChange}
+          onExpiryDateChange={handleExpiryDateChange}
+          onDeleteItem={handleDeleteItem}
+        />
+      </View>
+
+      {/* 보관 분류 선택 모달 */}
+      <StorageTypeModal
+        visible={isStorageModalVisible}
+        storageTypes={storageTypes}
+        activeStorageType={activeStorageType}
+        onClose={closeStorageModal}
+        onSelect={handleStorageTypeSelect}
+        onUpdateStorageTypes={setStorageTypes}
+      />
+
+      {/* 식재료 유형 선택 모달 */}
+      <ItemCategoryModal
+        visible={isItemCategoryModalVisible}
+        itemCategories={itemCategories}
+        activeItemCategory={activeItemCategory}
+        onClose={closeItemCategoryModal}
+        onSelect={handleItemCategorySelect}
+        onUpdateCategories={setItemCategories}
+      />
+
+      {/* 식재료 추가 방법 선택 모달 */}
+      <AddItemModal
+        visible={isAddItemModalVisible}
+        onClose={() => setIsAddItemModalVisible(false)}
+        onDirectAdd={handleDirectAdd}
+        onCameraAdd={handleCameraAdd}
+      />
     </SafeAreaView>
   );
 };

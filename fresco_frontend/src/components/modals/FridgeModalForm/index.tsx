@@ -1,12 +1,7 @@
 import React, {useState} from 'react';
-import {
-  Modal,
-  View,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
-import CustomText from '../common/CustomText';
+import {Modal, View, TextInput, TouchableOpacity} from 'react-native';
+import CustomText from '../../common/CustomText';
+import {styles} from './styles';
 
 type Fridge = {
   id: number;
@@ -78,7 +73,9 @@ const FridgeModalForm = ({
 
           {editMode && (
             <View style={styles.switchContainer}>
-              <CustomText>상태</CustomText>
+              <CustomText style={styles.switchContainerText}>
+                냉장고 상태
+              </CustomText>
               <TouchableOpacity
                 style={[styles.switch, isHidden && styles.switchActive]}
                 onPress={() => setIsHidden(!isHidden)}>
@@ -90,11 +87,15 @@ const FridgeModalForm = ({
           )}
 
           <View style={styles.buttonRow}>
-            <TouchableOpacity onPress={handleAdd} style={styles.button}>
-              <CustomText>{editMode ? '수정' : '추가'}</CustomText>
+            <TouchableOpacity
+              style={styles.buttonRowRight}
+              onPress={handleClose}>
+              <CustomText style={styles.buttonRowRightText}>취소</CustomText>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleClose} style={styles.button}>
-              <CustomText>취소</CustomText>
+            <TouchableOpacity style={styles.buttonRowLeft} onPress={handleAdd}>
+              <CustomText style={styles.buttonRowLeftText}>
+                {editMode ? '수정' : '추가'}
+              </CustomText>
             </TouchableOpacity>
           </View>
         </View>
@@ -104,53 +105,3 @@ const FridgeModalForm = ({
 };
 
 export default FridgeModalForm;
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: '#00000088',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalBox: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 6,
-    padding: 10,
-    marginBottom: 16,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  button: {
-    padding: 10,
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  switch: {
-    backgroundColor: '#ddd',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-    minWidth: 50,
-    alignItems: 'center',
-  },
-  switchActive: {
-    backgroundColor: '#007AFF',
-  },
-  switchText: {
-    color: 'white',
-    fontSize: 12,
-  },
-});
