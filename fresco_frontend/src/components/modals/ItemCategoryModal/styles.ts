@@ -50,7 +50,8 @@ export const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     backgroundColor: '#333',
-    borderRadius: 12,
+    borderRadius: 8,
+    marginRight: 8,
   },
   editCategoryButtonText: {
     fontSize: 14,
@@ -62,7 +63,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     backgroundColor: 'lightgray',
-    borderRadius: 12,
+    borderRadius: 8,
   },
   closeButtonText: {
     fontSize: 14,
@@ -94,26 +95,26 @@ export const styles = StyleSheet.create({
   deleteItemText: {
     fontSize: 16,
   },
-  confirmButton: {
+  addCategoryButton: {
     flex: 1,
     paddingVertical: 12,
     backgroundColor: '#333',
     borderRadius: 8,
+    marginRight: 8,
   },
-  confirmButtonText: {
+  addCategoryButtonText: {
     fontSize: 14,
-    color: '#fff',
+    color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  addCategoryButton: {
+  confirmButton: {
     flex: 1,
     paddingVertical: 12,
     backgroundColor: 'lightgray',
     borderRadius: 8,
-    marginRight: 8,
   },
-  addCategoryButtonText: {
+  confirmButtonText: {
     fontSize: 14,
     color: '#333',
     fontWeight: 'bold',
@@ -145,24 +146,33 @@ export const styles = StyleSheet.create({
   },
   addModalButtons: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
     gap: 10,
   },
   addModalCancelButton: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
+    paddingVertical: 13.5,
     backgroundColor: 'lightgray',
-    borderRadius: 10,
-    alignItems: 'center',
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  addModalButtonTextCancel: {
+    fontSize: 14,
+    color: 'black',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   addModalConfirmButton: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
+    paddingVertical: 13.5,
     backgroundColor: '#333',
-    borderRadius: 10,
-    alignItems: 'center',
+    borderRadius: 8,
   },
-  addModalButtonTextCancel: {fontSize: 14},
-  addModalButtonTextAdd: {fontSize: 14, color: 'white'},
+  addModalButtonTextAdd: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
 });

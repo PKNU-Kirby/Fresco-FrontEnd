@@ -10,10 +10,10 @@ export const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#fff',
-    borderRadius: 20,
+    borderRadius: 14,
     padding: 20,
     width: '85%',
-    maxHeight: '70%',
+    maxHeight: '80%',
   },
   modalTitle: {
     fontSize: 20,
@@ -35,26 +35,20 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-  checkMark: {
-    fontSize: 18,
-    color: '#333',
-    fontWeight: 'bold',
-  },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
     gap: 10,
   },
-
-  // 버튼 스타일들
-  editCategoryButton: {
+  editStorageTypeButton: {
     flex: 1,
     paddingVertical: 12,
     backgroundColor: '#333',
-    borderRadius: 12,
+    borderRadius: 8,
+    marginRight: 8,
   },
-  editCategoryButtonText: {
+  editStorageTypeButtonText: {
     fontSize: 14,
     color: '#fff',
     fontWeight: 'bold',
@@ -64,36 +58,11 @@ export const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     backgroundColor: 'lightgray',
-    borderRadius: 12,
+    borderRadius: 8,
   },
   closeButtonText: {
     fontSize: 14,
     color: 'black',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  confirmButton: {
-    flex: 1,
-    paddingVertical: 12,
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-  },
-  confirmButtonText: {
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  addCategoryButton: {
-    flex: 1,
-    paddingVertical: 12,
-    backgroundColor: '#34C759',
-    borderRadius: 12,
-    marginRight: 8,
-  },
-  addCategoryButtonText: {
-    fontSize: 14,
-    color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -105,10 +74,6 @@ export const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
-  },
-  dragHandle: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
   },
   dragHandleText: {
     fontSize: 18,
@@ -123,13 +88,38 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   deleteItemText: {
-    fontSize: 18,
+    fontSize: 16,
+  },
+  addStorageTypeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: '#333',
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  addStorageTypeButtonText: {
+    fontSize: 14,
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  confirmButton: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: 'lightgray',
+    borderRadius: 8,
+  },
+  confirmButtonText: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 
   // 보관 분류 추가 모달
+  addStorageTypeSection: {},
   addModalContent: {
     backgroundColor: '#fff',
-    borderRadius: 20,
     padding: 20,
     width: '80%',
   },
@@ -137,7 +127,7 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
     color: '#333',
   },
   addModalInput: {
@@ -156,13 +146,19 @@ export const styles = StyleSheet.create({
   addModalCancelButton: {
     flex: 1,
     paddingVertical: 12,
-    backgroundColor: '#8E8E93',
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    backgroundColor: 'lightgray',
+    borderRadius: 10,
+    alignItems: 'center',
   },
   addModalConfirmButton: {
     flex: 1,
     paddingVertical: 12,
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    backgroundColor: '#333',
+    borderRadius: 10,
+    alignItems: 'center',
   },
+  addModalButtonTextCancel: {fontSize: 14},
+  addModalButtonTextAdd: {fontSize: 14, color: 'white'},
 });

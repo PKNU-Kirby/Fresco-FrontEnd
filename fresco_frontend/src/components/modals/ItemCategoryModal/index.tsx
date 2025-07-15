@@ -78,13 +78,15 @@ const ItemCategoryModal: React.FC<ItemCategoryModalProps> = ({
     onClose();
   };
 
-  if (!visible) return null;
+  if (!visible) {
+    return null;
+  }
 
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="fade"
       onRequestClose={handleClose}>
       <View style={styles.modalOverlay}>
         <View
@@ -121,7 +123,7 @@ const ItemCategoryModal: React.FC<ItemCategoryModalProps> = ({
                     {item}
                   </CustomText>
                   {activeItemCategory === item && (
-                    <CustomText style={styles.checkMark}>✓</CustomText>
+                    <MaterialIcons name="check" size={16} color="#333" />
                   )}
                 </TouchableOpacity>
               )}

@@ -1,6 +1,15 @@
 import React, {useState} from 'react';
-import {View, Modal, TouchableOpacity, FlatList, TextInput} from 'react-native';
+import {
+  View,
+  Modal,
+  TouchableOpacity,
+  FlatList,
+  TextInput,
+  Alert,
+} from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import CustomText from '../../common/CustomText';
 import {styles} from './styles';
 
@@ -13,6 +22,8 @@ type StorageTypeModalProps = {
   onUpdateStorageTypes: (types: string[]) => void;
 };
 
+type ModalMode = 'select' | 'edit' | 'add';
+
 const StorageTypeModal: React.FC<StorageTypeModalProps> = ({
   visible,
   storageTypes,
@@ -21,8 +32,7 @@ const StorageTypeModal: React.FC<StorageTypeModalProps> = ({
   onSelect,
   onUpdateStorageTypes,
 }) => {
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [modalMode, setModalMode] = useState<ModalMode>('select');
   const [newStorageName, setNewStorageName] = useState('');
 
   const handleStorageTypeSelect = (storageType: string) => {
@@ -30,188 +40,200 @@ const StorageTypeModal: React.FC<StorageTypeModalProps> = ({
     onClose();
   };
 
-  const handleEditToggle = () => {
-    setIsEditMode(!isEditMode);
-  };
-
   const handleDeleteStorageType = (storageType: string) => {
-    const updatedTypes = storageTypes.filter(item => item !== storageType);
-    onUpdateStorageTypes(updatedTypes);
+    Alert.alert('', `[${storageType}] 보관 분류를 삭제합니다.`, [
+      {
+        text: '취소',
+        style: 'cancel',
+      },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: () => {
+          const updatedTypes = storageTypes.filter(
+            item => item !== storageType,
+          );
+          onUpdateStorageTypes(updatedTypes);
 
-    // 현재 선택된 분류가 삭제되면 첫 번째로 변경
-    if (activeStorageType === storageType && updatedTypes.length > 0) {
-      onSelect(updatedTypes[0]);
-    }
+          // 현재 선택된 분류가 삭제되면 첫 번째로 변경
+          if (activeStorageType === storageType && updatedTypes.length > 0) {
+            onSelect(updatedTypes[0]);
+          }
+        },
+      },
+    ]);
   };
 
   const handleAddStorageType = () => {
     if (newStorageName.trim()) {
       onUpdateStorageTypes([...storageTypes, newStorageName.trim()]);
       setNewStorageName('');
-      setIsAddModalVisible(false);
+      setModalMode('edit');
     }
   };
 
-  const handleOpenAddModal = () => {
-    setIsAddModalVisible(true);
-  };
-
   const handleClose = () => {
-    setIsEditMode(false);
+    setModalMode('select');
+    setNewStorageName('');
     onClose();
   };
 
+  if (!visible) {
+    return null;
+  }
+
   return (
-    <>
-      <Modal
-        visible={visible}
-        transparent
-        animationType="fade"
-        onRequestClose={handleClose}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <CustomText style={styles.modalTitle}>보관 분류</CustomText>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={handleClose}>
+      <View style={styles.modalOverlay}>
+        <View
+          style={[
+            styles.modalContent,
+            modalMode === 'add' && {height: 'auto', minHeight: 200},
+          ]}>
+          {/* HEADER */}
+          <CustomText style={styles.modalTitle}>
+            {modalMode === 'add' ? '보관 분류 추가' : '보관 분류'}
+          </CustomText>
 
-            {!isEditMode ? (
-              // 일반 모드: 선택만 가능
-              <FlatList
-                data={storageTypes}
-                keyExtractor={(item, index) => index.toString()}
-                style={{maxHeight: 300}} // 최대 높이 제한
-                showsVerticalScrollIndicator={true}
-                renderItem={({item}) => (
-                  <TouchableOpacity
+          {/* SELECT MODE */}
+          {modalMode === 'select' && (
+            <FlatList
+              data={storageTypes}
+              keyExtractor={(item, index) => index.toString()}
+              style={{maxHeight: 300}}
+              showsVerticalScrollIndicator={true}
+              renderItem={({item}) => (
+                <TouchableOpacity
+                  style={[
+                    styles.modalItem,
+                    activeStorageType === item && {
+                      backgroundColor: 'lightgray',
+                    },
+                  ]}
+                  onPress={() => handleStorageTypeSelect(item)}>
+                  <CustomText
                     style={[
-                      styles.modalItem,
-                      activeStorageType === item && {
-                        backgroundColor: 'lightgray',
-                      },
-                    ]}
-                    onPress={() => handleStorageTypeSelect(item)}>
-                    <CustomText
-                      style={[
-                        styles.modalItemText,
-                        activeStorageType === item && {fontWeight: 'bold'},
-                      ]}>
-                      {item}
-                    </CustomText>
-                    {activeStorageType === item && (
-                      <CustomText style={styles.checkMark}>✓</CustomText>
-                    )}
+                      styles.modalItemText,
+                      activeStorageType === item && {fontWeight: 'bold'},
+                    ]}>
+                    {item}
+                  </CustomText>
+                  {activeStorageType === item && (
+                    <MaterialIcons name="check" size={16} color="#333" />
+                  )}
+                </TouchableOpacity>
+              )}
+            />
+          )}
+
+          {modalMode === 'edit' && (
+            <DraggableFlatList
+              data={storageTypes}
+              onDragEnd={({data}) => onUpdateStorageTypes(data)}
+              keyExtractor={(item, index) => index.toString()}
+              showsVerticalScrollIndicator={true}
+              renderItem={({item, drag, isActive}) => (
+                <View style={styles.editModeItem}>
+                  <TouchableOpacity onLongPress={drag} disabled={isActive}>
+                    <MaterialIcons name="drag-handle" size={16} color="#333" />
                   </TouchableOpacity>
-                )}
-              />
-            ) : (
-              // 편집 모드: 순서 변경, 삭제 가능
-              <DraggableFlatList
-                data={storageTypes}
-                onDragEnd={({data}) => onUpdateStorageTypes(data)}
-                keyExtractor={(item, index) => index.toString()}
-                style={{maxHeight: 300}} // 최대 높이 제한
-                showsVerticalScrollIndicator={true}
-                renderItem={({item, drag, isActive}) => (
-                  <View style={styles.editModeItem}>
-                    <TouchableOpacity
-                      style={styles.dragHandle}
-                      onLongPress={drag}
-                      disabled={isActive}>
-                      <CustomText style={styles.dragHandleText}>≡</CustomText>
-                    </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.editItemContent}>
-                      <CustomText style={styles.modalItemText}>
-                        {item}
-                      </CustomText>
-                    </TouchableOpacity>
+                  <TouchableOpacity style={styles.editItemContent}>
+                    <CustomText style={styles.modalItemText}>{item}</CustomText>
+                  </TouchableOpacity>
 
+                  {item !== '전체' && (
                     <TouchableOpacity
                       onPress={() => handleDeleteStorageType(item)}>
-                      <CustomText style={styles.deleteItemText}>🗑️</CustomText>
+                      <FontAwesome5 name="trash" size={16} color="#333" />
                     </TouchableOpacity>
-                  </View>
-                )}
+                  )}
+                </View>
+              )}
+            />
+          )}
+
+          {/* ADD MODE */}
+          {modalMode === 'add' && (
+            <View style={styles.addStorageTypeSection}>
+              <TextInput
+                style={styles.addModalInput}
+                placeholder="식재료 유형"
+                value={newStorageName}
+                onChangeText={setNewStorageName}
+                autoFocus
               />
+            </View>
+          )}
+
+          {/* 하단 버튼들 */}
+          <View style={styles.modalButtons}>
+            {modalMode === 'select' && (
+              <>
+                <TouchableOpacity
+                  style={styles.editStorageTypeButton}
+                  onPress={() => setModalMode('edit')}>
+                  <CustomText style={styles.editStorageTypeButtonText}>
+                    식재료 유형 편집
+                  </CustomText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={handleClose}>
+                  <CustomText style={styles.closeButtonText}>닫기</CustomText>
+                </TouchableOpacity>
+              </>
             )}
 
-            <View style={styles.modalButtons}>
-              {!isEditMode ? (
-                <>
-                  <TouchableOpacity
-                    style={styles.editCategoryButton}
-                    onPress={handleEditToggle}>
-                    <CustomText style={styles.editCategoryButtonText}>
-                      보관 분류 편집
-                    </CustomText>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={handleClose}>
-                    <CustomText style={styles.closeButtonText}>닫기</CustomText>
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <>
-                  <TouchableOpacity
-                    style={styles.addCategoryButton}
-                    onPress={handleOpenAddModal}>
-                    <CustomText style={styles.addCategoryButtonText}>
-                      + 보관 분류 추가
-                    </CustomText>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.confirmButton}
-                    onPress={() => {
-                      setIsEditMode(false);
-                      handleClose();
-                    }}>
-                    <CustomText style={styles.confirmButtonText}>
-                      확인
-                    </CustomText>
-                  </TouchableOpacity>
-                </>
-              )}
-            </View>
+            {modalMode === 'edit' && (
+              <>
+                <TouchableOpacity
+                  style={styles.addStorageTypeButton}
+                  onPress={() => setModalMode('add')}>
+                  <CustomText style={styles.addStorageTypeButtonText}>
+                    + 보관 분류 추가
+                  </CustomText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  onPress={() => {
+                    setModalMode('select');
+                    handleClose();
+                  }}>
+                  <CustomText style={styles.confirmButtonText}>확인</CustomText>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {modalMode === 'add' && (
+              <>
+                <TouchableOpacity
+                  style={styles.addModalCancelButton}
+                  onPress={() => {
+                    setModalMode('edit');
+                    setNewStorageName('');
+                  }}>
+                  <CustomText style={styles.addModalButtonTextCancel}>
+                    취소
+                  </CustomText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.addModalConfirmButton}
+                  onPress={handleAddStorageType}>
+                  <CustomText style={styles.addModalButtonTextAdd}>
+                    추가
+                  </CustomText>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
-      </Modal>
-
-      {/* 보관 분류 추가 모달 */}
-      <Modal
-        visible={isAddModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setIsAddModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.addModalContent}>
-            <CustomText style={styles.addModalTitle}>보관 분류 추가</CustomText>
-
-            <TextInput
-              style={styles.addModalInput}
-              placeholder="보관 분류"
-              value={newStorageName}
-              onChangeText={setNewStorageName}
-              autoFocus
-            />
-
-            <View style={styles.addModalButtons}>
-              <TouchableOpacity
-                style={styles.addModalCancelButton}
-                onPress={() => {
-                  setIsAddModalVisible(false);
-                  setNewStorageName('');
-                }}>
-                <CustomText>취소</CustomText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.addModalConfirmButton}
-                onPress={handleAddStorageType}>
-                <CustomText>추가</CustomText>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </>
+      </View>
+    </Modal>
   );
 };
 
