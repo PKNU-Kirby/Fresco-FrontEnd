@@ -4,10 +4,11 @@ import {
   isKakaoTalkSharingAvailable,
 } from '@react-native-kakao/share';
 
-const KAKAO_APP_KEY = '카카오네이티브앱키로 변경해야함';
+const KAKAO_APP_KEY = '카카오네이티브앱키';
 
 // 카카오 SDK 초기화
 export const initKakao = async (): Promise<boolean> => {
+  /*
   try {
     await initializeKakaoSDK(KAKAO_APP_KEY);
     console.log('카카오 SDK 초기화 완료');
@@ -16,10 +17,12 @@ export const initKakao = async (): Promise<boolean> => {
     console.error('카카오 SDK 초기화 실패:', error);
     return false;
   }
+  */
 };
 
 // 카카오톡 공유 가능 여부 확인
 export const checkKakaoAvailability = async (): Promise<boolean> => {
+  /*
   try {
     const isAvailable = await isKakaoTalkSharingAvailable();
     console.log('카카오톡 공유 가능 여부:', isAvailable);
@@ -28,6 +31,7 @@ export const checkKakaoAvailability = async (): Promise<boolean> => {
     console.error('카카오톡 가용성 확인 실패:', error);
     return false;
   }
+  */
 };
 
 // 카카오톡 공유 템플릿 생성

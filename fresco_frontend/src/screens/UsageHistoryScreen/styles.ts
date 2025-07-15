@@ -31,20 +31,17 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
     gap: 10,
   },
   filterButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'lightgray',
     borderRadius: 16,
     minWidth: 80,
   },
   filterButtonActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: 'limegreen',
   },
   filterButtonText: {
     fontSize: 14,
@@ -53,7 +50,7 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
   filterButtonTextActive: {
-    color: '#fff',
+    color: '#333',
     fontWeight: '600',
   },
 
@@ -112,15 +109,15 @@ export const styles = StyleSheet.create({
   },
   userName: {
     fontWeight: '600',
-    color: '#007AFF',
+    color: 'limegreen',
   },
   itemName: {
-    fontWeight: '600',
-    color: '#000',
+    fontWeight: '900',
+    color: '#333',
   },
   quantity: {
     fontWeight: '600',
-    color: '#FF6B35',
+    color: 'tomato',
   },
   usageTime: {
     fontSize: 13,

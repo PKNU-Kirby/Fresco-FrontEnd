@@ -104,7 +104,6 @@ const StorageTypeModal: React.FC<StorageTypeModalProps> = ({
             <FlatList
               data={storageTypes}
               keyExtractor={(item, index) => index.toString()}
-              style={{maxHeight: 300}}
               showsVerticalScrollIndicator={true}
               renderItem={({item}) => (
                 <TouchableOpacity

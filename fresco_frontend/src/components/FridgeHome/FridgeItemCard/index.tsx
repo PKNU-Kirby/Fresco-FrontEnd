@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {View, TouchableOpacity, TextInput, Modal} from 'react-native';
+import {View, TouchableOpacity, TextInput, Modal, Alert} from 'react-native';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import CustomText from '../../common/CustomText';
 import DatePicker from '../../modals/DatePicker';
 import {styles} from './styles';
@@ -41,6 +42,8 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [previousQuantity, setPreviousQuantity] = useState(item.quantity); // 이전 수량 저장
+
   const CardComponent = onPress && !isEditMode ? TouchableOpacity : View;
 
   const unitOptions = ['개', 'ml', 'g', 'kg', 'L'];
@@ -61,9 +64,17 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
   };
 
   const handleQuantityChange = (newQuantity: string) => {
+    // 빈 문자열이면 일단 설정하고 넘어감 (사용자가 입력 중일 수 있음)
+    if (newQuantity === '') {
+      setLocalQuantity(newQuantity);
+      return;
+    }
+
     // 0이 되면 삭제 확인 모달 표시
-    if (newQuantity === '0' || newQuantity === '') {
-      setShowDeleteConfirm(true);
+    if (newQuantity === '0') {
+      setPreviousQuantity(localQuantity); // 현재 수량을 저장
+      setLocalQuantity(newQuantity);
+      handleDeleteConfirm(item.name); // 함수 호출 수정
       return;
     }
 
@@ -71,15 +82,26 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     onQuantityChange?.(item.id, newQuantity);
   };
 
-  const handleDeleteConfirm = () => {
-    setShowDeleteConfirm(false);
-    onDeleteItem?.(item.id);
-  };
-
-  const handleDeleteCancel = () => {
-    setShowDeleteConfirm(false);
-    // 원래 수량으로 복구
-    setLocalQuantity(localQuantity === '0' ? '1' : localQuantity);
+  const handleDeleteConfirm = (name: string) => {
+    Alert.alert('', `식재료 [${name}] 을(를) 삭제합니다.`, [
+      {
+        text: '취소',
+        style: 'cancel',
+        onPress: () => {
+          setShowDeleteConfirm(false);
+          // 이전 수량으로 복구
+          setLocalQuantity(previousQuantity);
+        },
+      },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: () => {
+          setShowDeleteConfirm(false);
+          onDeleteItem?.(item.id);
+        },
+      },
+    ]);
   };
 
   const handleIncrement = () => {
@@ -100,6 +122,15 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     handleQuantityChange(numericText);
   };
 
+  // TextInput에서 포커스를 잃었을 때 처리
+  const handleTextInputBlur = () => {
+    // 빈 문자열이면 1로 설정
+    if (localQuantity === '') {
+      setLocalQuantity('1');
+      onQuantityChange?.(item.id, '1');
+    }
+  };
+
   return (
     <>
       <CardComponent style={styles.itemCard} onPress={onPress}>
@@ -107,8 +138,8 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
           <TouchableOpacity
             style={styles.deleteItemButton}
             activeOpacity={1}
-            onPress={() => onDeleteItem?.(item.id)}>
-            <CustomText style={styles.deleteItemButtonText}>✕</CustomText>
+            onPress={() => handleDeleteConfirm(item.name)}>
+            <FontAwesome6 name="circle-xmark" size={24} color="#666" solid />
           </TouchableOpacity>
         )}
 
@@ -127,13 +158,14 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
                   style={styles.quantityButton}
                   activeOpacity={1}
                   onPress={handleDecrement}>
-                  <CustomText style={styles.quantityButtonText}>−</CustomText>
+                  <FontAwesome6 name="circle-minus" size={25} color="#666" />
                 </TouchableOpacity>
 
                 <TextInput
                   style={styles.quantityInput}
                   value={localQuantity}
                   onChangeText={handleTextChange}
+                  onBlur={handleTextInputBlur} // 포커스 잃었을 때 처리 추가
                   keyboardType="numeric"
                   selectTextOnFocus
                 />
@@ -151,7 +183,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
                   style={styles.quantityButton}
                   activeOpacity={1}
                   onPress={handleIncrement}>
-                  <CustomText style={styles.quantityButtonText}>+</CustomText>
+                  <FontAwesome6 name="circle-plus" size={24} color="#666" />
                 </TouchableOpacity>
               </View>
             ) : (
@@ -228,40 +260,6 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
         onDateSelect={handleDateSelect}
         onClose={() => setShowDatePicker(false)}
       />
-
-      {/* 삭제 확인 모달 */}
-      <Modal
-        visible={showDeleteConfirm}
-        transparent
-        animationType="fade"
-        onRequestClose={handleDeleteCancel}>
-        <View style={styles.deleteModalOverlay}>
-          <View style={styles.deleteModalContent}>
-            <CustomText style={styles.deleteModalTitle}>식재료 삭제</CustomText>
-            <CustomText style={styles.deleteModalMessage}>
-              "{item.name}"을 삭제할까요?
-            </CustomText>
-
-            <View style={styles.deleteModalButtons}>
-              <TouchableOpacity
-                style={styles.deleteModalCancelButton}
-                onPress={handleDeleteCancel}>
-                <CustomText style={styles.deleteModalCancelText}>
-                  취소
-                </CustomText>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.deleteModalConfirmButton}
-                onPress={handleDeleteConfirm}>
-                <CustomText style={styles.deleteModalConfirmText}>
-                  삭제
-                </CustomText>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </>
   );
 };

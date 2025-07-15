@@ -71,19 +71,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   quantityButton: {
-    width: 26,
-    height: 26,
-    backgroundColor: '#333',
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
     margin: 3,
     opacity: 0.5,
-  },
-  quantityButtonText: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
   },
   quantityInput: {
     minWidth: 40,
@@ -104,19 +93,8 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
-    width: 26,
-    height: 26,
-    backgroundColor: '#333',
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
     zIndex: 1,
     opacity: 0.5,
-  },
-  deleteItemButtonText: {
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: 'bold',
   },
 
   // 삭제 확인 모달 스타일 /////////////////////////////////////

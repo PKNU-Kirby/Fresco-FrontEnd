@@ -104,7 +104,6 @@ const ItemCategoryModal: React.FC<ItemCategoryModalProps> = ({
             <FlatList
               data={itemCategories}
               keyExtractor={(item, index) => index.toString()}
-              style={{maxHeight: 300}}
               showsVerticalScrollIndicator={true}
               renderItem={({item}) => (
                 <TouchableOpacity

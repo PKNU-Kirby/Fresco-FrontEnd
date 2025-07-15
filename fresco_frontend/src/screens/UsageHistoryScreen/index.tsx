@@ -46,7 +46,7 @@ const UsageHistoryScreen = ({route}: Props) => {
       {
         id: 1,
         userId: 1,
-        userName: '김철수',
+        userName: '김후정',
         userAvatar: '♟',
         itemName: '양배추',
         quantity: '1',
@@ -57,7 +57,7 @@ const UsageHistoryScreen = ({route}: Props) => {
       {
         id: 2,
         userId: 2,
-        userName: '이영희',
+        userName: '황정민',
         userAvatar: '♟',
         itemName: '우유',
         quantity: '250',
@@ -68,29 +68,29 @@ const UsageHistoryScreen = ({route}: Props) => {
       {
         id: 3,
         userId: 3,
-        userName: '박민수',
+        userName: '황유진',
         userAvatar: '♟',
         itemName: '계란',
         quantity: '2',
         unit: '개',
-        usedAt: '2025-07-03T19:45:00Z', // 수정: 07-03
+        usedAt: '2025-07-03T19:45:00Z',
         time: '오후 7:45',
       },
       {
         id: 4,
         userId: 1,
-        userName: '김철수',
+        userName: '황유진',
         userAvatar: '♟',
         itemName: '닭가슴살',
         quantity: '300',
         unit: 'g',
-        usedAt: '2025-07-13T12:20:00Z', // 수정: 2024년으로 변경
+        usedAt: '2025-07-13T12:20:00Z',
         time: '오후 12:20',
       },
       {
         id: 5,
         userId: 2,
-        userName: '이영희',
+        userName: '김후정',
         userAvatar: '♟',
         itemName: '토마토',
         quantity: '3',
@@ -244,7 +244,7 @@ const UsageHistoryScreen = ({route}: Props) => {
                 styles.filterButtonText,
                 activeFilter === filter && styles.filterButtonTextActive,
               ]}>
-              {filter === '원하는 기간' && customDateRange // 수정: 조건 변경
+              {filter === '원하는 기간' && customDateRange
                 ? `${customDateRange.start} ~ ${customDateRange.end}`
                 : filter}
             </CustomText>

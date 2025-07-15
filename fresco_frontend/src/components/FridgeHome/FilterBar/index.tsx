@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, TouchableOpacity} from 'react-native';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import CustomText from '../../common/CustomText';
 import {styles} from './styles';
 
@@ -28,7 +29,10 @@ const FilterBar: React.FC<FilterBarProps> = ({
           style={styles.filterButton}
           onPress={onStorageTypePress}>
           <CustomText style={styles.filterButtonText}>
-            {activeStorageType} ▼
+            <FontAwesome5 name="caret-down" size={15} color="white" />
+            <CustomText> </CustomText>
+            <CustomText> </CustomText>
+            {activeStorageType}
           </CustomText>
         </TouchableOpacity>
 
@@ -36,7 +40,10 @@ const FilterBar: React.FC<FilterBarProps> = ({
           style={styles.filterButton}
           onPress={onItemCategoryPress}>
           <CustomText style={styles.filterButtonText}>
-            {activeItemCategory} ▼
+            <FontAwesome5 name="caret-down" size={15} color="white" />
+            <CustomText> </CustomText>
+            <CustomText> </CustomText>
+            {activeItemCategory}
           </CustomText>
         </TouchableOpacity>
       </View>

@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
   filterButton: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: '#333',
     borderRadius: 16,

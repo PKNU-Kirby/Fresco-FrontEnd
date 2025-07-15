@@ -4,6 +4,7 @@ export const styles = StyleSheet.create({
   content: {
     flex: 1,
     position: 'relative',
+    marginTop: 10,
   },
   listContainer: {
     paddingHorizontal: 16,
