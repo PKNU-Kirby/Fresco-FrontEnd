@@ -1,5 +1,12 @@
 import React, {useState} from 'react';
-import {View, Modal, TouchableOpacity, FlatList, TextInput} from 'react-native';
+import {
+  View,
+  Modal,
+  TouchableOpacity,
+  FlatList,
+  TextInput,
+  Alert,
+} from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -37,13 +44,27 @@ const ItemCategoryModal: React.FC<ItemCategoryModalProps> = ({
   };
 
   const handleDeleteCategory = (category: string) => {
-    const updatedCategories = itemCategories.filter(item => item !== category);
-    onUpdateCategories(updatedCategories);
+    Alert.alert('', `[${category}] 카테고리를 삭제합니다.`, [
+      {
+        text: '취소',
+        style: 'cancel',
+      },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: () => {
+          const updatedCategories = itemCategories.filter(
+            item => item !== category,
+          );
+          onUpdateCategories(updatedCategories);
 
-    // 현재 선택된 카테고리가 삭제되면 첫 번째로 변경
-    if (activeItemCategory === category && updatedCategories.length > 0) {
-      onSelect(updatedCategories[0]);
-    }
+          // 현재 선택된 카테고리가 삭제되면 첫 번째로 변경
+          if (activeItemCategory === category && updatedCategories.length > 0) {
+            onSelect(updatedCategories[0]);
+          }
+        },
+      },
+    ]);
   };
 
   const handleAddCategory = () => {
