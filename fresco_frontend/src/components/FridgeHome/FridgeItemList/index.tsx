@@ -1,7 +1,8 @@
 import React from 'react';
-import {View, FlatList, TouchableOpacity} from 'react-native';
+import {View, FlatList} from 'react-native';
 import FridgeItemCard from '../FridgeItemCard';
-import {styles} from './styles';
+import AddButton from './ItemAddButton';
+import {listStyles as styles} from './styles';
 
 type FridgeItem = {
   id: number;
@@ -12,6 +13,7 @@ type FridgeItem = {
   storageType: string;
   itemCategory: string;
   fridgeId: number;
+  unit?: string;
 };
 
 type FridgeItemListProps = {
@@ -57,15 +59,7 @@ const FridgeItemList: React.FC<FridgeItemListProps> = ({
         showsVerticalScrollIndicator={false}
       />
 
-      {/* 플러스 버튼 - 편집 모드일 때는 숨김 */}
-      {!isEditMode && (
-        <TouchableOpacity style={styles.addButton} onPress={onAddItem}>
-          <View style={styles.addButtonIcon}>
-            <View style={styles.addButtonHorizontal} />
-            <View style={styles.addButtonVertical} />
-          </View>
-        </TouchableOpacity>
-      )}
+      <AddButton onPress={onAddItem} visible={!isEditMode} />
     </View>
   );
 };
