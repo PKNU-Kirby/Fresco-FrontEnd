@@ -1,3 +1,23 @@
+/**
+ *
+ * 기본 사용법
+<CustomText>안녕하세요</CustomText>
+
+ * 확장된 사용법
+  <CustomText
+    weight="bold"
+    color="limegreen"
+    size={16}
+  >제목 텍스트</CustomText>
+
+* 스타일 적용
+<CustomText
+  weight="medium"
+  color="limegreen"
+  style={{ marginTop: 10 }}
+>설명 텍스트</CustomText>
+*/
+
 import React from 'react';
 import {Text, TextProps, StyleProp, TextStyle} from 'react-native';
 
@@ -7,26 +27,34 @@ interface CustomTextProps extends TextProps {
   weight?: FontWeight;
   style?: StyleProp<TextStyle>;
   children: React.ReactNode;
+  color?: string;
+  size?: number;
 }
 
-const fontMap: Record<FontWeight, string> = {
+const FONT_FAMILY_MAP: Record<FontWeight, string> = {
   regular: 'Pretendard-Regular',
   medium: 'Pretendard-Medium',
   bold: 'Pretendard-Bold',
   extrabold: 'Pretendard-ExtraBold',
 };
 
-// props 분해
+const DEFAULT_TEXT_COLOR = '#333';
+const DEFAULT_FONT_WEIGHT: FontWeight = 'regular';
+
 const CustomText: React.FC<CustomTextProps> = ({
-  weight = 'regular', // default : Pretendard-Regular
-  style, // user custom style
-  children, // Text
+  weight = DEFAULT_FONT_WEIGHT,
+  style,
+  children,
+  color = DEFAULT_TEXT_COLOR,
+  size,
   ...rest
 }) => {
   const computedStyle: TextStyle = {
-    fontFamily: fontMap[weight],
-    color: '#000000',
+    fontFamily: FONT_FAMILY_MAP[weight],
+    color,
+    ...(size && {fontSize: size}),
   };
+
   return (
     <Text style={[computedStyle, style]} {...rest}>
       {children}

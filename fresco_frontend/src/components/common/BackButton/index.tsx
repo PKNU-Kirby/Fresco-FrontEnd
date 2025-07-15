@@ -1,9 +1,9 @@
 /**
  * 기본 사용법 (기존과 동일)
  <BackButton onPress={goBack} />
- * 
+ *
  * 커스터마이징 사용법
-<BackButton 
+<BackButton
   onPress={goBack}
   icon="arrow-back"
   iconSize={20}
