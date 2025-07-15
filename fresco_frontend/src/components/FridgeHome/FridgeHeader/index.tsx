@@ -18,13 +18,30 @@ const FridgeHeader: React.FC<FridgeHeaderProps> = ({
 }) => {
   return (
     <View style={styles.header}>
-      <BackButton onPress={onBackPress} />
+      {/* LEFT : Back button */}
+      <View style={styles.leftSection}>
+        <BackButton onPress={onBackPress} />
+      </View>
 
-      <CustomText style={styles.headerTitle}>{fridgeName}</CustomText>
+      {/* MID : Fridge name */}
+      <View style={styles.centerSection}>
+        <CustomText
+          style={styles.headerTitle}
+          numberOfLines={1}
+          ellipsizeMode="tail">
+          {fridgeName}
+        </CustomText>
+      </View>
 
-      <TouchableOpacity onPress={onSettingsPress} style={styles.settingsButton}>
-        <MaterialIcons name="menu" size={28} color="#333" />
-      </TouchableOpacity>
+      {/* Right : Setting button */}
+      <View style={styles.rightSection}>
+        <TouchableOpacity
+          onPress={onSettingsPress}
+          style={styles.settingsButton}
+          activeOpacity={0.7}>
+          <MaterialIcons name="menu" size={28} color="#333" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

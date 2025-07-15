@@ -5,7 +5,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     backgroundColor: 'lightgray',
-    borderRadius: 16,
+    borderRadius: 12,
     minHeight: 36,
     alignItems: 'center',
     justifyContent: 'center',
@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
   },
   actionButtonDisabled: {
     backgroundColor: '#e0e0e0',
-    opacity: 0.5,
+    opacity: 0.6,
   },
   actionButtonTextDisabled: {
     color: '#999',
