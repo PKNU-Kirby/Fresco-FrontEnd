@@ -16,7 +16,6 @@
 import React from 'react';
 import {TouchableOpacity, ViewStyle, TextStyle} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import CustomText from '../CustomText';
 import {styles} from './styles';
 
 interface BackButtonProps {
@@ -33,7 +32,6 @@ interface BackButtonProps {
 const BackButton: React.FC<BackButtonProps> = ({
   onPress,
   style,
-  textStyle,
   icon = 'arrow-back-ios-new',
   iconSize = 24,
   iconColor = '#666',
@@ -46,13 +44,11 @@ const BackButton: React.FC<BackButtonProps> = ({
       style={[styles.backButton, style]}
       activeOpacity={activeOpacity}
       disabled={disabled}>
-      <CustomText style={[styles.backButtonText, textStyle]}>
-        <MaterialIcons
-          name={icon}
-          size={iconSize}
-          color={disabled ? '#ccc' : iconColor}
-        />
-      </CustomText>
+      <MaterialIcons
+        name={icon}
+        size={iconSize}
+        color={disabled ? '#ccc' : iconColor}
+      />
     </TouchableOpacity>
   );
 };
