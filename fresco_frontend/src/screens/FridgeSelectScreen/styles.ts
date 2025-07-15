@@ -1,115 +1,85 @@
-import {StyleSheet, Dimensions} from 'react-native';
-
-const {width} = Dimensions.get('window');
-const tileSize = (width - 60) / 2; // 좌우 패딩 20씩, 가운데 간격 20
+import {StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  header: {
+  /** Fridge Select Screen Style */
+  container: {flex: 1, padding: 16},
+  list: {gap: 5, marginHorizontal: 10},
+  headerStyle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    marginBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#cccccc',
+    borderBottomColor: '#ccc',
+    paddingBottom: 10,
   },
-  headerTitle: {
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  /** LogOut Button Style */
+  logoutButton: {
+    marginHorizontal: 16,
+    fontSize: 16,
+    fontWeight: 'bold',
+    padding: 8,
+    backgroundColor: 'lightgray',
+    borderRadius: 8,
+  },
+  /** Edit Button Style */
+  editButton: {
+    fontSize: 16,
+    marginHorizontal: 16,
+    fontWeight: 'bold',
+    padding: 8,
+    backgroundColor: 'lightgray',
+    borderRadius: 8,
+  },
+
+  /** Bottom Sheet Style : Hidden Fridge Section */
+  bottomSheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'lightgray',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    // Shadow effect
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: -5},
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  bottomSheetHeader: {
+    height: 80,
+    paddingBottom: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: 'lightgray',
+  },
+  dragHandle: {
+    width: 140,
+    height: 4,
+    backgroundColor: 'darkgray',
+    borderRadius: 2,
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  bottomSheetTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#666',
   },
-  editModeButton: {
-    color: '#007bff',
-    fontSize: 14,
-  },
-  logoutText: {
-    color: '#ff0000',
-  },
-  tilesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 20,
-    justifyContent: 'space-between',
-  },
-  fridgeTile: {
-    width: tileSize,
-    height: tileSize,
-    backgroundColor: '#cccccc',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-    position: 'relative',
-  },
-  addTile: {
-    backgroundColor: '#cccccc',
-    borderStyle: 'dashed',
-    borderWidth: 2,
-    borderColor: '#999999',
-  },
-  tileText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000000',
-  },
-  addTileText: {
-    fontSize: 32,
-    color: '#666666',
-  },
-  editIcon: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#ffffff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
-  editIconText: {
-    fontSize: 12,
-  },
-  modalOverlay: {
+  bottomSheetContent: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#ffffff',
-    padding: 20,
-    margin: 20,
-    borderWidth: 1,
-    borderColor: '#cccccc',
-    width: '80%',
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#cccccc',
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 14,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  modalButton: {
-    padding: 12,
-    backgroundColor: '#f0f0f0',
-    borderWidth: 1,
-    borderColor: '#cccccc',
-    minWidth: 80,
-    alignItems: 'center',
+    paddingHorizontal: 16,
   },
 });
 
