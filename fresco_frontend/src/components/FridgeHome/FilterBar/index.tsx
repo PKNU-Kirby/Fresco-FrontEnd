@@ -1,17 +1,19 @@
 import React from 'react';
-import {View, TouchableOpacity} from 'react-native';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import CustomText from '../../common/CustomText';
+import {View} from 'react-native';
+import FilterDropdownButton from '../../common/FilterDropdownButton';
+import ActionToggleButton from '../../common/ActionToggleButton';
 import {styles} from './styles';
 
-type FilterBarProps = {
+// Filter Bar Component
+interface FilterBarProps {
   activeStorageType: string;
   activeItemCategory: string;
   isListEditMode: boolean;
   onStorageTypePress: () => void;
   onItemCategoryPress: () => void;
   onEditModeToggle: () => void;
-};
+  disabled?: boolean;
+}
 
 const FilterBar: React.FC<FilterBarProps> = ({
   activeStorageType,
@@ -20,49 +22,33 @@ const FilterBar: React.FC<FilterBarProps> = ({
   onStorageTypePress,
   onItemCategoryPress,
   onEditModeToggle,
+  disabled = false,
 }) => {
   return (
     <View style={styles.tabContainer}>
-      {/* 보관 분류 + 식재료 유형 버튼 */}
+      {/* Filter Button Group */}
       <View style={styles.leftTabGroup}>
-        <TouchableOpacity
-          style={styles.filterButton}
-          onPress={onStorageTypePress}>
-          <CustomText style={styles.filterButtonText}>
-            <FontAwesome5 name="caret-down" size={15} color="white" />
-            <CustomText> </CustomText>
-            <CustomText> </CustomText>
-            {activeStorageType}
-          </CustomText>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.filterButton}
-          onPress={onItemCategoryPress}>
-          <CustomText style={styles.filterButtonText}>
-            <FontAwesome5 name="caret-down" size={15} color="white" />
-            <CustomText> </CustomText>
-            <CustomText> </CustomText>
-            {activeItemCategory}
-          </CustomText>
-        </TouchableOpacity>
+        <FilterDropdownButton
+          label={activeStorageType}
+          onPress={onStorageTypePress}
+          disabled={disabled}
+        />
+        <FilterDropdownButton
+          label={activeItemCategory}
+          onPress={onItemCategoryPress}
+          disabled={disabled}
+        />
       </View>
 
+      {/* Action Button Group : Edit Button */}
       <View style={styles.rightTabGroup}>
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            isListEditMode && styles.actionButtonActive,
-          ]}
-          onPress={onEditModeToggle}>
-          <CustomText
-            style={[
-              styles.actionButtonText,
-              isListEditMode && styles.actionButtonTextActive,
-            ]}>
-            {isListEditMode ? '완료' : '편집하기'}
-          </CustomText>
-        </TouchableOpacity>
+        <ActionToggleButton
+          isActive={isListEditMode}
+          onPress={onEditModeToggle}
+          activeText="완료"
+          inactiveText="편집하기"
+          disabled={disabled}
+        />
       </View>
     </View>
   );

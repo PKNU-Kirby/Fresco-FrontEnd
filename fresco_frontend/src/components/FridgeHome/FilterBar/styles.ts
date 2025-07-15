@@ -8,44 +8,15 @@ export const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
     paddingHorizontal: 20,
     paddingVertical: 10,
+    minHeight: 56,
   },
   leftTabGroup: {
     flexDirection: 'row',
     gap: 10,
+    flex: 1,
   },
   rightTabGroup: {
     flexDirection: 'row',
     gap: 8,
-  },
-  filterButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#333',
-    borderRadius: 16,
-    minWidth: 80,
-  },
-  filterButtonText: {
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  actionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: 'lightgray',
-    borderRadius: 15,
-  },
-  actionButtonText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  actionButtonActive: {
-    backgroundColor: '#333',
-  },
-  actionButtonTextActive: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
 });
