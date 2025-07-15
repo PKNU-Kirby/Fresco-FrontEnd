@@ -1,6 +1,7 @@
 import {StyleSheet} from 'react-native';
 
-export const styles = StyleSheet.create({
+// Item Card Styles : './index.tsx'
+export const cardStyles = StyleSheet.create({
   itemCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
@@ -51,7 +52,6 @@ export const styles = StyleSheet.create({
     color: '#666',
   },
   editableExpiry: {
-    //    color: '#007AFF',
     textDecorationLine: 'underline',
     fontWeight: '500',
   },
@@ -60,8 +60,10 @@ export const styles = StyleSheet.create({
     color: '#999',
     fontStyle: 'italic',
   },
+});
 
-  // 편집 모드 - 개수 조절 ////////////////////////////////////
+// Quantity Edit Style : './QuantityEditor.tsx'
+export const quantityStyles = StyleSheet.create({
   quantityEditContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -87,75 +89,6 @@ export const styles = StyleSheet.create({
     color: '#666',
     marginRight: 4,
   },
-
-  // 편집 모드 - 삭제 버튼 (우상단) /////////////////////////////
-  deleteItemButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 1,
-    opacity: 0.5,
-  },
-
-  // 삭제 확인 모달 스타일 /////////////////////////////////////
-  deleteModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  deleteModalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    width: '80%',
-    maxWidth: 300,
-    alignItems: 'center',
-  },
-  deleteModalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  deleteModalMessage: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 22,
-  },
-  deleteModalButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    width: '100%',
-  },
-  deleteModalCancelButton: {
-    flex: 1,
-    paddingVertical: 12,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  deleteModalCancelText: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '600',
-  },
-  deleteModalConfirmButton: {
-    flex: 1,
-    paddingVertical: 12,
-    backgroundColor: '#FF3B30',
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  deleteModalConfirmText: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: '600',
-  },
-
-  // 단위 선택 관련 스타일 추가 //////////////////////////////////
   unitSelector: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -172,8 +105,21 @@ export const styles = StyleSheet.create({
     color: '#666',
     marginLeft: 2,
   },
+});
 
-  // 단위 선택 모달
+// Item Delete Button Style : './DeleteButton.tsx'
+export const deleteStyles = StyleSheet.create({
+  deleteItemButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 1,
+    opacity: 0.5,
+  },
+});
+
+// Unit Select Modal Style : './UnitSelector.tsx'
+export const modalStyles = StyleSheet.create({
   unitModalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
