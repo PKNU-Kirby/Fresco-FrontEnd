@@ -5,25 +5,30 @@ import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import CustomText from '../../common/CustomText';
 import styles from './styles';
 
+// types
 type RootStackParamList = {
   MainTabs: {fridgeId: number; fridgeName: string};
 };
-
 type Fridge = {
   id: number;
   name: string;
   isHidden: boolean;
 };
-
-type Props = {
+interface FridgeTileProps {
   fridge: Fridge;
   isEditMode: boolean;
   onEdit?: (fridge: Fridge) => void;
   isHidden?: boolean;
   isSmall?: boolean;
-};
+}
 
-const FridgeTile = ({fridge, isEditMode, onEdit, isHidden, isSmall}: Props) => {
+const FridgeTile: React.FC<FridgeTileProps> = ({
+  fridge,
+  isEditMode,
+  onEdit,
+  isHidden,
+  isSmall,
+}) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -40,23 +45,32 @@ const FridgeTile = ({fridge, isEditMode, onEdit, isHidden, isSmall}: Props) => {
     }
   };
 
-  const getTileStyle = () => {
-    if (isSmall) {
-      return isHidden
-        ? [styles.smallTile, styles.hiddenTile]
-        : styles.smallTile;
-    } else {
-      return isHidden ? [styles.tile, styles.hiddenTile] : styles.tile;
-    }
-  };
+  // style logic
+  const tileStyle = [
+    isSmall ? styles.smallTile : styles.tile,
+    isHidden && styles.hiddenTile,
+  ].filter(Boolean);
 
-  const getTextStyle = () => {
-    return isSmall ? styles.smallTileText : styles.tileText;
+  const textStyle = isSmall ? styles.smallTileText : styles.tileText;
+
+  const accessibilityLabel = `${fridge.name} 냉장고${
+    isHidden ? ' (숨김)' : ''
+  }`;
+  const accessibilityState = {
+    disabled: isHidden,
+    selected: isEditMode,
   };
 
   return (
-    <TouchableOpacity style={getTileStyle()} onPress={handlePress}>
-      <CustomText style={getTextStyle()}>{fridge.name}</CustomText>
+    <TouchableOpacity
+      style={tileStyle}
+      onPress={handlePress}
+      accessible={true}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      accessibilityState={accessibilityState}
+      activeOpacity={0.7}>
+      <CustomText style={textStyle}>{fridge.name}</CustomText>
     </TouchableOpacity>
   );
 };
