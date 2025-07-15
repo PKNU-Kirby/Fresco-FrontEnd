@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#fff',
-    borderRadius: 20,
+    borderRadius: 14,
     padding: 20,
     width: '85%',
     maxHeight: '80%',
@@ -79,10 +79,6 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  dragHandle: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
   dragHandleText: {
     fontSize: 18,
     color: '#999',
@@ -125,9 +121,9 @@ export const styles = StyleSheet.create({
   },
 
   // 추가 모달 스타일
+  addCategorySection: {},
   addModalContent: {
     backgroundColor: '#fff',
-    borderRadius: 20,
     padding: 20,
     width: '80%',
   },
@@ -135,7 +131,7 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
     color: '#333',
   },
   addModalInput: {
@@ -145,7 +141,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
-    marginBottom: 20,
+    marginVertical: 16,
   },
   addModalButtons: {
     flexDirection: 'row',
@@ -154,13 +150,19 @@ export const styles = StyleSheet.create({
   addModalCancelButton: {
     flex: 1,
     paddingVertical: 12,
-    backgroundColor: '#8E8E93',
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    backgroundColor: 'lightgray',
+    borderRadius: 10,
+    alignItems: 'center',
   },
   addModalConfirmButton: {
     flex: 1,
     paddingVertical: 12,
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    backgroundColor: '#333',
+    borderRadius: 10,
+    alignItems: 'center',
   },
+  addModalButtonTextCancel: {fontSize: 14},
+  addModalButtonTextAdd: {fontSize: 14, color: 'white'},
 });
