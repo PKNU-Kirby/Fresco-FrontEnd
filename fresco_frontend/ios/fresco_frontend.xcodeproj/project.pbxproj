@@ -7,14 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06BD61E488884F42B8958F60 /* Pretendard-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D141131BDFF346C39A887004 /* Pretendard-Regular.ttf */; };
 		0C80B921A6F3F58F76C31292 /* libPods-fresco_frontend.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-fresco_frontend.a */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		279B5B24B945B9CC6CB67FCD /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
+		390BA494E33B4B9BAF909993 /* Pretendard-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7E311BF6A99C45689321E44B /* Pretendard-ExtraLight.ttf */; };
+		5A129CC535E54630982A50C0 /* Pretendard-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0D674D5CFE98421280405A95 /* Pretendard-Medium.ttf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		9AE88CFF81EB440AB0F15BB2 /* Pretendard-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C7CED91A4B6440398485C3B3 /* Pretendard-Bold.ttf */; };
+		9F7F1CA1BDCD4F9B8569289D /* Pretendard-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0B78311FE500460A84FB035F /* Pretendard-Thin.ttf */; };
+		A89B80F6D46240B7A3C5E302 /* Pretendard-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DB249CA8B75445618FAFF3CD /* Pretendard-ExtraBold.ttf */; };
+		B160CDC0E03A48B09A005DDD /* Pretendard-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BC481768B3D54F7FA5D024DE /* Pretendard-SemiBold.ttf */; };
+		CCCABFA59AAD4CAC8C479FA1 /* Pretendard-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A5A2ECF6EB414FD785581A77 /* Pretendard-Light.ttf */; };
+		F844B0B9511947EB89124F79 /* Pretendard-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 962BBA5D6EE04F55ADF340FF /* Pretendard-Black.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0B78311FE500460A84FB035F /* Pretendard-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-Thin.ttf"; path = "../src/assets/fonts/Pretendard-Thin.ttf"; sourceTree = "<group>"; };
+		0D674D5CFE98421280405A95 /* Pretendard-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-Medium.ttf"; path = "../src/assets/fonts/Pretendard-Medium.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* fresco_frontend.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = fresco_frontend.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = fresco_frontend/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = fresco_frontend/Info.plist; sourceTree = "<group>"; };
@@ -23,7 +34,14 @@
 		5709B34CF0A7D63546082F79 /* Pods-fresco_frontend.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fresco_frontend.release.xcconfig"; path = "Target Support Files/Pods-fresco_frontend/Pods-fresco_frontend.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-fresco_frontend.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fresco_frontend.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = fresco_frontend/AppDelegate.swift; sourceTree = "<group>"; };
+		7E311BF6A99C45689321E44B /* Pretendard-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-ExtraLight.ttf"; path = "../src/assets/fonts/Pretendard-ExtraLight.ttf"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = fresco_frontend/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		962BBA5D6EE04F55ADF340FF /* Pretendard-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-Black.ttf"; path = "../src/assets/fonts/Pretendard-Black.ttf"; sourceTree = "<group>"; };
+		A5A2ECF6EB414FD785581A77 /* Pretendard-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-Light.ttf"; path = "../src/assets/fonts/Pretendard-Light.ttf"; sourceTree = "<group>"; };
+		BC481768B3D54F7FA5D024DE /* Pretendard-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-SemiBold.ttf"; path = "../src/assets/fonts/Pretendard-SemiBold.ttf"; sourceTree = "<group>"; };
+		C7CED91A4B6440398485C3B3 /* Pretendard-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-Bold.ttf"; path = "../src/assets/fonts/Pretendard-Bold.ttf"; sourceTree = "<group>"; };
+		D141131BDFF346C39A887004 /* Pretendard-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-Regular.ttf"; path = "../src/assets/fonts/Pretendard-Regular.ttf"; sourceTree = "<group>"; };
+		DB249CA8B75445618FAFF3CD /* Pretendard-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Pretendard-ExtraBold.ttf"; path = "../src/assets/fonts/Pretendard-ExtraBold.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -75,6 +93,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				99386A4CA6554958BF5B0C10 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -87,6 +106,23 @@
 				13B07F961A680F5B00A75B9A /* fresco_frontend.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		99386A4CA6554958BF5B0C10 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				962BBA5D6EE04F55ADF340FF /* Pretendard-Black.ttf */,
+				C7CED91A4B6440398485C3B3 /* Pretendard-Bold.ttf */,
+				DB249CA8B75445618FAFF3CD /* Pretendard-ExtraBold.ttf */,
+				7E311BF6A99C45689321E44B /* Pretendard-ExtraLight.ttf */,
+				A5A2ECF6EB414FD785581A77 /* Pretendard-Light.ttf */,
+				0D674D5CFE98421280405A95 /* Pretendard-Medium.ttf */,
+				D141131BDFF346C39A887004 /* Pretendard-Regular.ttf */,
+				BC481768B3D54F7FA5D024DE /* Pretendard-SemiBold.ttf */,
+				0B78311FE500460A84FB035F /* Pretendard-Thin.ttf */,
+			);
+			name = Resources;
+			path = "";
 			sourceTree = "<group>";
 		};
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
@@ -161,6 +197,15 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				279B5B24B945B9CC6CB67FCD /* PrivacyInfo.xcprivacy in Resources */,
+				F844B0B9511947EB89124F79 /* Pretendard-Black.ttf in Resources */,
+				9AE88CFF81EB440AB0F15BB2 /* Pretendard-Bold.ttf in Resources */,
+				A89B80F6D46240B7A3C5E302 /* Pretendard-ExtraBold.ttf in Resources */,
+				390BA494E33B4B9BAF909993 /* Pretendard-ExtraLight.ttf in Resources */,
+				CCCABFA59AAD4CAC8C479FA1 /* Pretendard-Light.ttf in Resources */,
+				5A129CC535E54630982A50C0 /* Pretendard-Medium.ttf in Resources */,
+				06BD61E488884F42B8958F60 /* Pretendard-Regular.ttf in Resources */,
+				B160CDC0E03A48B09A005DDD /* Pretendard-SemiBold.ttf in Resources */,
+				9F7F1CA1BDCD4F9B8569289D /* Pretendard-Thin.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
