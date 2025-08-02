@@ -87,14 +87,14 @@ const FridgeHomeScreen = ({ route }: Props) => {
 
   const handleDirectAdd = () => {
     setIsAddItemModalVisible(false);
-    navigation.navigate('AddItem', {
+    navigation.navigate('AddItemScreen', {
       fridgeId,
     });
   };
 
   const handleCameraAdd = () => {
     setIsAddItemModalVisible(false);
-    navigation.navigate('Camera', {
+    navigation.navigate('CameraScreen', {
       fridgeId,
     });
   };

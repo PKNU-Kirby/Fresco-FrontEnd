@@ -19,12 +19,8 @@ import RecipeScreen from './src/screens/RecipeScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import FridgeSettingsScreen from './src/screens/FridgeSettingsScreen';
 import UsageHistoryScreen from './src/screens/UsageHistoryScreen';
-/*
-
 import AddItemScreen from './src/screens/AddItemScreen';
 import CameraScreen from './src/screens/CameraScreen';
-
-*/
 
 // Stack Navigator Type
 export type RootStackParamList = {
@@ -32,7 +28,7 @@ export type RootStackParamList = {
   Login: undefined;
   FridgeSelect: undefined;
   MainTabs: { fridgeId: number; fridgeName: string };
-  AddItem: {
+  AddItemScreen: {
     fridgeId: number;
     recognizedData?: {
       name?: string;
@@ -41,9 +37,16 @@ export type RootStackParamList = {
       expiryDate?: string;
       storageType?: string;
       itemCategory?: string;
+      photo?: string;
     };
   };
-  Camera: { fridgeId: number };
+  CameraScreen: {
+    fridgeId: number;
+    photo?: any;
+    onRetake?: () => void;
+    onUse?: () => void;
+    onCancel?: () => void;
+  };
   FridgeSettings: {
     fridgeId: number;
     fridgeName: string;
@@ -143,7 +146,6 @@ function App(): React.JSX.Element {
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="FridgeSelect" component={FridgeSelectScreen} />
           <Stack.Screen name="MainTabs" component={MainTabNavigator} />
-
           <Stack.Screen
             name="FridgeSettings"
             component={FridgeSettingsScreen}
@@ -160,25 +162,22 @@ function App(): React.JSX.Element {
               animation: 'slide_from_right',
             }}
           />
-          {/*
-          <Stack.Screen name="MainTabs" component={MainTabNavigator} />
           <Stack.Screen
-            name="AddItem"
+            name="AddItemScreen"
             component={AddItemScreen}
             options={{
               presentation: 'modal',
-              animation: 'slide_from_bottom', // 하단에서 올라오는 애니메이션
-            }}
-          />
-          <Stack.Screen
-            name="Camera"
-            component={CameraScreen}
-            options={{
-              presentation: 'fullScreenModal', // 전체화면 모달
               animation: 'slide_from_bottom',
             }}
           />
-          */}
+          <Stack.Screen
+            name="CameraScreen"
+            component={CameraScreen}
+            options={{
+              presentation: 'fullScreenModal',
+              animation: 'slide_from_bottom',
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
