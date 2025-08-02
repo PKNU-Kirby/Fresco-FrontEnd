@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Image } from 'react-native';
 import {
-  login as kakaoLogin,
+  loginWithKakaoAccount,
   getProfile as getKakaoProfile,
 } from '@react-native-seoul/kakao-login';
 import styles from './styles';
@@ -37,8 +37,8 @@ const KakaoLoginButton = ({
     }
     setIsLoading(true);
     try {
-      // token, ID 가져오기
-      const token = await kakaoLogin();
+      // 웹 브라우저로 카카오 로그인
+      const token = await loginWithKakaoAccount(); // 변경된 부분
       const profile: KakaoProfile = await getKakaoProfile();
 
       if (!token?.accessToken) {
@@ -47,16 +47,6 @@ const KakaoLoginButton = ({
       if (!profile?.id) {
         throw new Error('카카오 프로필 정보를 가져올 수 없습니다');
       }
-
-      // 백엔드에 토큰 전달
-      /*
-      await axios.post('https://your-backend-api.com/auth/kakao', {
-        accessToken: token.accessToken,
-      });
-      */
-      // 백엔드 API 호출을 생략 : 프로필 ID 바로 사용함
-      // 실제로는 백엔드 API를 호출하여 사용자 정보를 저장하고,
-      // 사용자 ID를 받아와야 함
 
       await saveUserIdAndNavigate(String(profile.id));
     } catch (error) {

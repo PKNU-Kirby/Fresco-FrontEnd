@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, TextInput, Modal } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import CustomText from '../../components/common/CustomText';
 import { CartItem } from './index';
 import { Cardstyles as styles } from './styles';

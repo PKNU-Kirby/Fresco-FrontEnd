@@ -56,9 +56,9 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Tab Navigator Type
 export type MainTabParamList = {
-  FridgeHome: { fridgeId: number; fridgeName: string };
-  Recipe: { fridgeId: number; fridgeName: string };
-  ShoppingList: { fridgeId: number; fridgeName: string };
+  FridgeHomeScreen: { fridgeId: number; fridgeName: string };
+  RecipeScreen: { fridgeId: number; fridgeName: string };
+  ShoppingListScreen: { fridgeId: number; fridgeName: string };
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -95,7 +95,7 @@ function MainTabNavigator({
       }}
     >
       <Tab.Screen
-        name="FridgeHome"
+        name="FridgeHomeScreen"
         component={FridgeHomeScreen}
         initialParams={{ fridgeId, fridgeName }}
         options={{
@@ -106,7 +106,7 @@ function MainTabNavigator({
         }}
       />
       <Tab.Screen
-        name="Recipe"
+        name="RecipeScreen"
         component={RecipeScreen}
         initialParams={{ fridgeId, fridgeName }}
         options={{
@@ -117,7 +117,7 @@ function MainTabNavigator({
         }}
       />
       <Tab.Screen
-        name="ShoppingList"
+        name="ShoppingListScreen"
         component={ShoppingListScreen}
         initialParams={{ fridgeId, fridgeName }}
         options={{

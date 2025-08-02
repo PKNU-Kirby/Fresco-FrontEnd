@@ -20,7 +20,38 @@ export interface CartItem {
 const STORAGE_KEY = '@shopping_cart_items';
 
 const ShoppingListScreen: React.FC = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([
+    {
+      id: '1',
+      name: '양배추',
+      quantity: 1,
+      unit: '개',
+      category: '야채',
+      isChecked: false,
+      order: 0,
+      createdAt: new Date(),
+    },
+    {
+      id: '2',
+      name: '당가슴살',
+      quantity: 500,
+      unit: 'g',
+      category: '육류',
+      isChecked: false,
+      order: 1,
+      createdAt: new Date(),
+    },
+    {
+      id: '3',
+      name: '우유',
+      quantity: 1000,
+      unit: 'ml',
+      category: '유제품',
+      isChecked: true,
+      order: 2,
+      createdAt: new Date(),
+    },
+  ]);
 
   // AsyncStorage에서 데이터 로드
   useEffect(() => {
