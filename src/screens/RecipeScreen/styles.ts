@@ -6,7 +6,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#F8F9FA',
   },
 
-  // 헤더
+  // HEADER
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -36,7 +36,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
 
-  // AI 섹션
+  /* AI Section *************************************************************/
   aiSection: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -56,6 +56,12 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
+  aiHeaderText: {
+    fontSize: 18,
+    fontWeight: 500,
+    color: '#333',
+    marginLeft: 8,
+  },
   aiTitle: {
     fontSize: 18,
     fontWeight: '700',
@@ -68,22 +74,20 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 16,
   },
-  aiButton: {
+  // Buttons
+  aiButtonPrimary: {
+    backgroundColor: 'limegreen',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FF6B35',
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    shadowColor: '#FF6B35',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowColor: 'limegreen',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
   aiButtonDisabled: {
     backgroundColor: '#CCC',
@@ -96,19 +100,35 @@ export const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginLeft: 8,
   },
+  aiDetailButton: {
+    backgroundColor: '#f0f7ff',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#4A90E2',
+    shadowColor: '#4A90E2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
 
-  // 섹션
+  // Folder & Recent Recipes
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '600',
     color: '#333',
     marginBottom: 16,
   },
 
-  // 모달
+  // MODALS
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -123,7 +143,7 @@ export const styles = StyleSheet.create({
     maxWidth: 400,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#333',
     textAlign: 'center',
@@ -154,27 +174,27 @@ export const styles = StyleSheet.create({
   modalConfirmButton: {
     flex: 1,
     paddingVertical: 12,
-    backgroundColor: '#007AFF',
+    backgroundColor: 'limegreen',
     borderRadius: 8,
     alignItems: 'center',
     marginLeft: 8,
   },
   modalCancelText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
     fontWeight: '500',
   },
   modalConfirmText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#FFFFFF',
     fontWeight: '600',
   },
-
-  // 하단 여백
   bottomPadding: {
     height: 50,
   },
 });
+
+/* Recipe Card Style ********************************************************/
 export const recipeCardStyles = {
   container: {
     flexDirection: 'row' as const,
@@ -211,7 +231,7 @@ export const recipeCardStyles = {
     right: -4,
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    backgroundColor: '#FF6B35',
+    backgroundColor: 'limegreen',
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -252,6 +272,7 @@ export const recipeCardStyles = {
   },
 };
 
+/* Folder Card Style ********************************************************/
 export const folderCardStyles = {
   container: {
     flexDirection: 'row' as const,
@@ -268,27 +289,15 @@ export const folderCardStyles = {
   },
   iconContainer: {
     position: 'relative' as const,
-    marginRight: 12,
-  },
-  sharedBadge: {
-    position: 'absolute' as const,
-    top: -4,
-    right: -4,
-    backgroundColor: '#FF6B35',
-    borderRadius: 8,
-    width: 16,
-    height: 16,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
+    marginRight: 14,
   },
   info: {
     flex: 1,
   },
   name: {
     fontSize: 16,
-    fontWeight: '600',
     color: '#333',
-    marginBottom: 2,
+    marginBottom: 3,
   },
   count: {
     fontSize: 12,

@@ -66,7 +66,9 @@ const RecipeDetailScreen: React.FC = () => {
 🍳 ${recipe.title}
 
 📝 재료:
-${recipe.ingredients.map((ing, index) => `${index + 1}. ${ing}`).join('\n')}
+${recipe.ingredients
+  .map((ing, index) => `${index + 1}. ${ing.name} (${ing.amount})`)
+  .join('\n')}
 
 👨‍🍳 조리 방법:
 ${recipe.instructions.map((inst, index) => `${index + 1}. ${inst}`).join('\n')}
@@ -77,7 +79,7 @@ ${recipe.instructions.map((inst, index) => `${index + 1}. ${inst}`).join('\n')}
 ${recipe.link ? `🔗 참고 링크: ${recipe.link}` : ''}
 
 - Fresco 앱에서 공유됨 -
-      `.trim();
+    `.trim();
 
       await Share.share({
         message: shareContent,
@@ -243,9 +245,14 @@ ${recipe.link ? `🔗 참고 링크: ${recipe.link}` : ''}
                     {index + 1}
                   </CustomText>
                 </View>
-                <CustomText size={15} color="#333" style={{ flex: 1 }}>
-                  {ingredient}
-                </CustomText>
+                <View style={{ flex: 1 }}>
+                  <CustomText size={15} color="#333" weight="medium">
+                    {ingredient.name}
+                  </CustomText>
+                  <CustomText size={13} color="#666">
+                    {ingredient.amount}
+                  </CustomText>
+                </View>
               </View>
             ))}
           </View>

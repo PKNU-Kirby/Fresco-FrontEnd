@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, Text } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import CustomText from '../../components/common/CustomText';
 import { RecipeFolder } from './index';
 import { folderCardStyles } from './styles';
 
@@ -17,30 +16,18 @@ export const FolderCard: React.FC<FolderCardProps> = ({ folder, onPress }) => {
         <MaterialIcons
           name={folder.isShared ? 'folder-shared' : 'folder'}
           size={24}
-          color={folder.isShared ? '#FF6B35' : '#007AFF'}
+          color={folder.isShared ? 'limegreen' : '#666'}
         />
-        {folder.isShared && (
-          <View style={folderCardStyles.sharedBadge}>
-            <MaterialIcons name="people" size={12} color="#FFF" />
-          </View>
-        )}
       </View>
 
       <View style={folderCardStyles.info}>
-        <CustomText
-          weight="bold"
-          size={16}
-          color="#333"
-          style={{ marginBottom: 2 }}
-        >
-          {folder.name}
-        </CustomText>
-        <CustomText size={12} color="#666">
+        <Text style={folderCardStyles.name}>{folder.name}</Text>
+        <Text style={folderCardStyles.count}>
           {folder.recipes.length}개의 레시피
-        </CustomText>
+        </Text>
       </View>
 
-      <MaterialIcons name="chevron-right" size={20} color="#CCC" />
+      <MaterialIcons name="chevron-right" size={24} color="#666" />
     </TouchableOpacity>
   );
 };

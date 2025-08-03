@@ -93,7 +93,11 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onPress }) => {
         </View>
 
         <CustomText size={12} color="#999" numberOfLines={2}>
-          재료: {recipe.ingredients.slice(0, 3).join(', ')}
+          재료:{' '}
+          {recipe.ingredients
+            .slice(0, 3)
+            .map(ing => ing.name)
+            .join(', ')}
           {recipe.ingredients.length > 3 && '...'}
         </CustomText>
       </View>
