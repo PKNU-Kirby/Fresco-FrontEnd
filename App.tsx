@@ -19,12 +19,15 @@ import RecipeScreen from './src/screens/RecipeScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import FridgeSettingsScreen from './src/screens/FridgeSettingsScreen';
 import UsageHistoryScreen from './src/screens/UsageHistoryScreen';
-/*
 
+import RecipeFolderScreen from './src/screens/RecipeFolderScreen';
+import RecipeDetailScreen from './src/screens/RecipeDetailScreen';
+import RecipeEditScreen from './src/screens/RecipeEditScreen';
+/*
 import AddItemScreen from './src/screens/AddItemScreen';
 import CameraScreen from './src/screens/CameraScreen';
-
 */
+import { Recipe, RecipeFolder } from './src/screens/RecipeScreen';
 
 // Stack Navigator Type
 export type RootStackParamList = {
@@ -43,13 +46,35 @@ export type RootStackParamList = {
       itemCategory?: string;
     };
   };
-  Camera: { fridgeId: number };
+  Camera: {
+    fridgeId: number;
+    photo?: any;
+    onRetake?: () => void;
+    onUse?: (photo?: string) => void;
+    onCancel?: () => void;
+  };
   FridgeSettings: {
     fridgeId: number;
     fridgeName: string;
     userRole: 'owner' | 'member'; // 권한에 따른 UI 분리
   };
   UsageHistoryScreen: { fridgeId: number };
+  RecipeFolderScreen: {
+    folder: RecipeFolder;
+    fridgeId: number;
+    fridgeName: string;
+  };
+  RecipeDetailScreen: {
+    recipe: Recipe;
+    fridgeId: number;
+    fridgeName: string;
+  };
+  RecipeEditScreen: {
+    recipe?: Recipe;
+    folderId: string;
+    fridgeId: number;
+    fridgeName: string;
+  };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -179,6 +204,41 @@ function App(): React.JSX.Element {
             }}
           />
           */}
+
+          {/* 새로 추가할 레시피 스크린들 */}
+          <Stack.Screen
+            name="RecipeFolderScreen"
+            component={RecipeFolderScreen}
+            options={{
+              headerShown: true,
+              headerTitle: '레시피 폴더',
+              headerStyle: { backgroundColor: '#FFFFFF' },
+              headerTintColor: '#333',
+              headerTitleStyle: { fontWeight: '600' },
+            }}
+          />
+          <Stack.Screen
+            name="RecipeDetailScreen"
+            component={RecipeDetailScreen}
+            options={{
+              headerShown: true,
+              headerTitle: '레시피',
+              headerStyle: { backgroundColor: '#FFFFFF' },
+              headerTintColor: '#333',
+              headerTitleStyle: { fontWeight: '600' },
+            }}
+          />
+          <Stack.Screen
+            name="RecipeEditScreen"
+            component={RecipeEditScreen}
+            options={{
+              headerShown: true,
+              headerTitle: '레시피 편집',
+              headerStyle: { backgroundColor: '#FFFFFF' },
+              headerTintColor: '#333',
+              headerTitleStyle: { fontWeight: '600' },
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
