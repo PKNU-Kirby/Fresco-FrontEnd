@@ -44,7 +44,7 @@ export type RootStackParamList = {
     fridgeId: number;
     photo?: any;
     onRetake?: () => void;
-    onUse?: () => void;
+    onUse?: (photo: string) => void;
     onCancel?: () => void;
   };
   FridgeSettings: {

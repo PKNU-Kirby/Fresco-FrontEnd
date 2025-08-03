@@ -45,6 +45,7 @@ const CameraScreen: React.FC = () => {
   const navigation = useNavigation<CameraScreenNavigationProp>();
   const route = useRoute<CameraScreenRouteProp>();
   const { fridgeId } = route.params;
+  console.log('fridgeId:', fridgeId); // fridgeId 미사용 방지
 
   const [capturedPhoto, setCapturedPhoto] = useState<CapturedPhoto | null>(
     null,

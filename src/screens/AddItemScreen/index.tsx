@@ -3,22 +3,24 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  TextInput,
   Alert,
   SafeAreaView,
-  Image,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'; // 추가
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import CustomText from '../../components/common/CustomText';
+import BackButton from '../../components/common/BackButton';
+import AddItemCard from './AddItemCard';
 import { RootStackParamList } from '../../../App';
 import { styles } from './styles';
 
 type AddItemScreenRouteProp = RouteProp<RootStackParamList, 'AddItemScreen'>;
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>; // 추가
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-interface ItemFormData {
+export interface ItemFormData {
+  id: string;
   name: string;
   quantity: string;
   unit: string;
@@ -29,244 +31,204 @@ interface ItemFormData {
 }
 
 const AddItemScreen: React.FC = () => {
-  const navigation = useNavigation<NavigationProp>(); // 타입 지정
+  const navigation = useNavigation<NavigationProp>();
   const route = useRoute<AddItemScreenRouteProp>();
 
-  // 네비게이션 파라미터에서 데이터 가져오기
   const { fridgeId, recognizedData } = route.params;
 
-  // 폼 상태
-  const [formData, setFormData] = useState<ItemFormData>({
-    name: recognizedData?.name || '',
-    quantity: recognizedData?.quantity || '1',
-    unit: recognizedData?.unit || '개',
-    expiryDate: recognizedData?.expiryDate || '',
-    storageType: recognizedData?.storageType || '냉장',
-    itemCategory: recognizedData?.itemCategory || '야채',
-    photo: undefined,
-  });
-
+  // 편집 모드 상태
+  const [isEditMode, setIsEditMode] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 단위 옵션
-  const units = ['개', 'kg', 'g', 'L', 'ml', '봉지', '포', '상자', '병'];
-  const storageTypes = ['냉장', '냉동', '실온'];
-  const categories = [
-    '야채',
-    '과일',
-    '육류',
-    '해산물',
-    '유제품',
-    '조미료',
-    '기타',
-  ];
+  // 아이템 목록 상태
+  const [items, setItems] = useState<ItemFormData[]>([
+    {
+      id: '1',
+      name: recognizedData?.name || '',
+      quantity: recognizedData?.quantity || '1',
+      unit: recognizedData?.unit || '개',
+      expiryDate: recognizedData?.expiryDate || '',
+      storageType: recognizedData?.storageType || '냉장',
+      itemCategory: recognizedData?.itemCategory || '야채',
+      photo: recognizedData?.photo,
+    },
+  ]);
 
-  // 폼 업데이트
-  const updateFormData = (field: keyof ItemFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  // 새 아이템 추가
+  const addNewItem = () => {
+    const newItem: ItemFormData = {
+      id: Date.now().toString(),
+      name: '',
+      quantity: '1',
+      unit: '개',
+      expiryDate: '',
+      storageType: '냉장',
+      itemCategory: '야채',
+    };
+    setItems(prev => [...prev, newItem]);
   };
 
-  // 카메라로 재촬영
-  const retakePhoto = () => {
-    navigation.navigate('CameraScreen', { fridgeId });
+  // 아이템 삭제
+  const removeItem = (itemId: string) => {
+    if (items.length === 1) {
+      Alert.alert('알림', '최소 하나의 식재료는 있어야 합니다.');
+      return;
+    }
+    setItems(prev => prev.filter(item => item.id !== itemId));
   };
 
-  // 식재료 등록
-  const handleSaveItem = async () => {
-    // 필수 필드 검증
-    if (!formData.name.trim()) {
-      Alert.alert('오류', '식재료 이름을 입력해주세요.');
-      return;
-    }
-    if (!formData.quantity.trim()) {
-      Alert.alert('오류', '수량을 입력해주세요.');
-      return;
-    }
+  // 아이템 정보 업데이트
+  const updateItem = (
+    itemId: string,
+    field: keyof ItemFormData,
+    value: string,
+  ) => {
+    setItems(prev =>
+      prev.map(item =>
+        item.id === itemId ? { ...item, [field]: value } : item,
+      ),
+    );
+  };
 
+  // 유효성 검사
+  const validateItems = (): boolean => {
+    for (const item of items) {
+      if (!item.name.trim()) {
+        Alert.alert('오류', '모든 식재료의 이름을 입력해주세요.');
+        return false;
+      }
+      if (!item.quantity.trim() || parseInt(item.quantity) < 1) {
+        Alert.alert('오류', '모든 식재료의 수량을 올바르게 입력해주세요.');
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // 편집 완료 버튼
+  const handleEditComplete = () => {
+    if (!validateItems()) return;
+    setIsEditMode(false);
+  };
+
+  // 최종 확인 및 저장
+  const handleFinalConfirm = () => {
+    Alert.alert('확인', '식재료를 냉장고에 추가합니다.', [
+      {
+        text: '다시 확인하기',
+        style: 'cancel',
+      },
+      {
+        text: '확인',
+        onPress: handleSaveItems,
+      },
+    ]);
+  };
+
+  // 백엔드로 데이터 전송
+  const handleSaveItems = async () => {
     setIsLoading(true);
 
     try {
       // TODO: 백엔드 API 호출
-      // const response = await api.addFridgeItem({
-      //   fridgeId,
-      //   ...formData,
-      //   quantity: parseFloat(formData.quantity),
-      // });
+      console.log('저장할 아이템들:', items);
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // 임시 성공 처리
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 로딩 시뮬레이션
+      // AsyncStorage에서 냉장고 이름 가져오기
+      const fridgeName =
+        (await AsyncStorage.getItem('currentFridgeName')) || '내 냉장고';
 
-      Alert.alert('성공', '식재료가 등록되었습니다!', [
-        {
-          text: '확인',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+      // FridgeHome으로 직접 이동 (MainTabs의 첫 번째 탭)
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'MainTabs',
+            params: {
+              fridgeId,
+              fridgeName,
+            },
+          },
+        ],
+      });
     } catch (error) {
-      console.error('식재료 등록 실패:', error);
-      Alert.alert('오류', '식재료 등록에 실패했습니다.');
+      console.error('식재료 저장 실패:', error);
+      Alert.alert('오류', '식재료 저장에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // 편집 모드로 돌아가기
+  const handleBackToEdit = () => {
+    setIsEditMode(true);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* 헤더 */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => navigation.goBack()}
-        >
-          <MaterialIcons name="close" size={24} color="#333" />
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} />
 
-        <CustomText style={styles.headerTitle}>식재료 등록</CustomText>
+        <CustomText style={styles.headerTitle}>식재료 추가</CustomText>
 
         <TouchableOpacity
-          style={[styles.saveButton, isLoading && styles.saveButtonDisabled]}
-          onPress={handleSaveItem}
+          style={[
+            styles.headerButton,
+            isLoading && styles.headerButtonDisabled,
+          ]}
+          onPress={isEditMode ? handleEditComplete : handleFinalConfirm}
           disabled={isLoading}
         >
-          <CustomText style={styles.saveButtonText}>
-            {isLoading ? '등록 중...' : '등록'}
+          <CustomText style={styles.headerButtonText}>
+            {isLoading
+              ? '저장 중...'
+              : isEditMode
+              ? '식재료 추가하기'
+              : '확인 완료'}
           </CustomText>
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* 사진 미리보기 */}
-        {recognizedData?.photo && (
-          <View style={styles.photoSection}>
-            <Image
-              source={{ uri: recognizedData.photo }}
-              style={styles.photoPreview}
-            />
-            <TouchableOpacity style={styles.retakeButton} onPress={retakePhoto}>
-              <MaterialIcons name="camera-alt" size={16} color="#666" />
-              <CustomText style={styles.retakeButtonText}>다시 촬영</CustomText>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* 아이템 카드 목록 */}
+        {items.map((item, index) => (
+          <AddItemCard
+            key={item.id}
+            item={item}
+            isEditMode={isEditMode}
+            showDeleteButton={items.length > 1}
+            onUpdateItem={updateItem}
+            onRemoveItem={removeItem}
+          />
+        ))}
+
+        {/* 아이템 추가 버튼 (편집 모드일 때만) */}
+        {isEditMode && (
+          <View style={styles.addButtonContainer}>
+            <TouchableOpacity style={styles.addButton} onPress={addNewItem}>
+              <MaterialIcons name="add" size={24} color="#007AFF" />
             </TouchableOpacity>
           </View>
         )}
 
-        {/* 식재료 이름 */}
-        <View style={styles.section}>
-          <CustomText style={styles.sectionTitle}>식재료 이름 *</CustomText>
-          <TextInput
-            style={styles.textInput}
-            value={formData.name}
-            onChangeText={text => updateFormData('name', text)}
-            placeholder="예: 양배추, 당근, 우유"
-            placeholderTextColor="#999"
-          />
-        </View>
-
-        {/* 수량 및 단위 */}
-        <View style={styles.section}>
-          <CustomText style={styles.sectionTitle}>수량 및 단위 *</CustomText>
-          <View style={styles.quantityContainer}>
-            <TextInput
-              style={styles.quantityInput}
-              value={formData.quantity}
-              onChangeText={text => updateFormData('quantity', text)}
-              placeholder="수량"
-              placeholderTextColor="#999"
-              keyboardType="numeric"
-            />
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.unitScrollView}
+        {/* 확인 모드일 때 편집 버튼 */}
+        {!isEditMode && (
+          <View style={styles.editModeContainer}>
+            <TouchableOpacity
+              style={styles.backToEditButton}
+              onPress={handleBackToEdit}
             >
-              {units.map(unit => (
-                <TouchableOpacity
-                  key={unit}
-                  style={[
-                    styles.unitOption,
-                    formData.unit === unit && styles.unitOptionSelected,
-                  ]}
-                  onPress={() => updateFormData('unit', unit)}
-                >
-                  <CustomText
-                    style={[
-                      styles.unitOptionText,
-                      formData.unit === unit && styles.unitOptionTextSelected,
-                    ]}
-                  >
-                    {unit}
-                  </CustomText>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+              <CustomText style={styles.backToEditButtonText}>
+                수정하기
+              </CustomText>
+            </TouchableOpacity>
           </View>
-        </View>
-
-        {/* 유통기한 */}
-        <View style={styles.section}>
-          <CustomText style={styles.sectionTitle}>유통기한</CustomText>
-          <TextInput
-            style={styles.textInput}
-            value={formData.expiryDate}
-            onChangeText={text => updateFormData('expiryDate', text)}
-            placeholder="예: 2025-12-31 또는 12월 31일"
-            placeholderTextColor="#999"
-          />
-        </View>
-
-        {/* 보관 방법 */}
-        <View style={styles.section}>
-          <CustomText style={styles.sectionTitle}>보관 방법</CustomText>
-          <View style={styles.optionRow}>
-            {storageTypes.map(type => (
-              <TouchableOpacity
-                key={type}
-                style={[
-                  styles.optionButton,
-                  formData.storageType === type && styles.optionButtonSelected,
-                ]}
-                onPress={() => updateFormData('storageType', type)}
-              >
-                <CustomText
-                  style={[
-                    styles.optionButtonText,
-                    formData.storageType === type &&
-                      styles.optionButtonTextSelected,
-                  ]}
-                >
-                  {type}
-                </CustomText>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* 카테고리 */}
-        <View style={styles.section}>
-          <CustomText style={styles.sectionTitle}>카테고리</CustomText>
-          <View style={styles.categoryGrid}>
-            {categories.map(category => (
-              <TouchableOpacity
-                key={category}
-                style={[
-                  styles.categoryOption,
-                  formData.itemCategory === category &&
-                    styles.categoryOptionSelected,
-                ]}
-                onPress={() => updateFormData('itemCategory', category)}
-              >
-                <CustomText
-                  style={[
-                    styles.categoryOptionText,
-                    formData.itemCategory === category &&
-                      styles.categoryOptionTextSelected,
-                  ]}
-                >
-                  {category}
-                </CustomText>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+        )}
 
         {/* 하단 여백 */}
         <View style={styles.bottomPadding} />
