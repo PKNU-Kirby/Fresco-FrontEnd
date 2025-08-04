@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, TextInput, Modal, Text } from 'react-native';
+import { View, TouchableOpacity, TextInput, Modal } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import CustomText from '../../components/common/CustomText';
 import { CartItem } from './index';
