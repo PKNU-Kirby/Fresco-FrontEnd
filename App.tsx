@@ -12,15 +12,16 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import SplashScreen from './src/screens/SplashScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import FridgeSelectScreen from './src/screens/FridgeSelectScreen';
-
 import FridgeHomeScreen from './src/screens/FridgeHomeScreen';
-
 import RecipeScreen from './src/screens/RecipeScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import FridgeSettingsScreen from './src/screens/FridgeSettingsScreen';
 import UsageHistoryScreen from './src/screens/UsageHistoryScreen';
 import AddItemScreen from './src/screens/AddItemScreen';
 import CameraScreen from './src/screens/CameraScreen';
+import PhotoPreview from './src/screens/CameraScreen/PhotoPreview';
+import CropView from './src/screens/CameraScreen/CropView';
+import CameraView from './src/screens/CameraScreen/CameraView';
 
 // Stack Navigator Type
 export type RootStackParamList = {
@@ -46,6 +47,17 @@ export type RootStackParamList = {
     onRetake?: () => void;
     onUse?: (photo: string) => void;
     onCancel?: () => void;
+  };
+  PhotoPreview: {
+    croppedPhotoUri?: string;
+    additionalPhotoUri?: string;
+  };
+  CropView: {
+    photoUri: string;
+    onCropComplete: (croppedUri: string) => void;
+  };
+  CameraView: {
+    onPhotoCapture: (photoUri: string) => void;
   };
   FridgeSettings: {
     fridgeId: number;
@@ -176,6 +188,24 @@ function App(): React.JSX.Element {
             options={{
               presentation: 'fullScreenModal',
               animation: 'slide_from_bottom',
+            }}
+          />
+          <Stack.Screen
+            name="PhotoPreview"
+            component={PhotoPreview}
+            options={{ title: 'Photo Preview', headerShown: true }}
+          />
+          <Stack.Screen
+            name="CropView"
+            component={CropView}
+            options={{ title: 'CropImage' }}
+          />
+          <Stack.Screen
+            name="CameraView"
+            component={CameraView}
+            options={{
+              title: 'Additional Photo',
+              headerShown: false,
             }}
           />
         </Stack.Navigator>

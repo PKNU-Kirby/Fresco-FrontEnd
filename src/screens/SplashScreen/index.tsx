@@ -35,8 +35,8 @@ const SplashScreen = (): React.JSX.Element => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>My App</Text>
-      <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
+      <Text style={styles.title}>Fresco</Text>
+      <ActivityIndicator size="large" color="limegreen" style={styles.loader} />
     </View>
   );
 };

@@ -20,7 +20,6 @@ import CustomText from '../../components/common/CustomText';
 import PhotoPreview from './PhotoPreview';
 import { styles } from './styles';
 
-// Navigation 타입 정의
 type CameraScreenRouteProp = RouteProp<RootStackParamList, 'CameraScreen'>;
 type CameraScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -52,30 +51,31 @@ const CameraScreen: React.FC = () => {
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  // 카메라 실행
+  // Run Camera
   const openCamera = () => {
     const options = {
       mediaType: 'photo' as MediaType,
       includeBase64: false,
-      maxHeight: 2000,
+      maxHeight: 3000,
       maxWidth: 2000,
       quality: 0.8 as PhotoQuality,
       saveToPhotos: false,
+      cameraType: 'back',
+      presentationStyle: 'fullScreen',
     };
-
     setIsLoading(true);
 
     launchCamera(options, (response: ImagePickerResponse) => {
       setIsLoading(false);
 
       if (response.didCancel) {
-        console.log('사용자가 카메라를 취소했습니다');
+        console.log('User canceled Camera5');
         return;
       }
 
       if (response.errorMessage) {
-        console.error('카메라 오류:', response.errorMessage);
-        Alert.alert('오류', '카메라를 실행할 수 없습니다.');
+        console.error('Camera Error', response.errorMessage);
+        Alert.alert('Error', "Can't open Camera");
         return;
       }
 
@@ -107,7 +107,7 @@ const CameraScreen: React.FC = () => {
         style: 'destructive',
         onPress: () => {
           setCapturedPhoto(null);
-          navigation.goBack(); // 네비게이션으로 뒤로가기
+          navigation.goBack();
         },
       },
     ]);
@@ -134,17 +134,23 @@ const CameraScreen: React.FC = () => {
       <StatusBar barStyle="light-content" backgroundColor="#000" />
 
       {capturedPhoto ? (
-        // 사진 미리보기 화면
+        // Photo Preview Screen
         <PhotoPreview
           photo={capturedPhoto}
           onRetake={retakePhoto}
           onUse={usePhoto}
           onCancel={cancelPhoto}
+          onPhotoUpdate={updatedPhoto => {
+            setCapturedPhoto(updatedPhoto);
+          }}
+          onAdditionalPhoto={newPhoto => {
+            console.log('New additional photo:', newPhoto);
+          }}
         />
       ) : (
-        // 카메라 실행 화면
+        // Camera Screen
         <View style={styles.cameraLaunchContainer}>
-          {/* 상단 헤더 */}
+          {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity style={styles.closeButton} onPress={cancelPhoto}>
               <MaterialIcons name="close" size={24} color="#fff" />
@@ -153,7 +159,7 @@ const CameraScreen: React.FC = () => {
             <View style={styles.placeholder} />
           </View>
 
-          {/* 중앙 카메라 버튼 */}
+          {/* Center : Camera Button */}
           <View style={styles.centerContent}>
             <TouchableOpacity
               style={[
@@ -174,7 +180,7 @@ const CameraScreen: React.FC = () => {
             </CustomText>
           </View>
 
-          {/* 하단 안내 */}
+          {/* Bottom : Guide */}
           <View style={styles.bottomGuide}>
             <CustomText style={styles.guideText}>
               식재료를 카메라로 촬영해주세요
