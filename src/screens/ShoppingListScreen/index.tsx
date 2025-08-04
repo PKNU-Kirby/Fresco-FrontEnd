@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, SafeAreaView, Alert } from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import CartItemCard from './CartItemCard';
+import { RootStackParamList } from '../../../App';
+import CustomText from '../../components/common/CustomText';
+import BackButton from '../../components/common/BackButton';
+import ActionToggleButton from '../../components/common/ActionToggleButton';
 import { styles } from './styles';
 
 export interface CartItem {
@@ -17,9 +24,67 @@ export interface CartItem {
   createdAt: Date;
 }
 
+type ShoppingListHeaderProps = {
+  listName: string;
+  isEditMode: boolean;
+  onEditToggle: () => void;
+};
+
+const ShoppingListHeader: React.FC<ShoppingListHeaderProps> = ({
+  listName,
+  isEditMode,
+  onEditToggle,
+}) => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const handleBack = () => {
+    navigation.goBack();
+  };
+
+  return (
+    <View style={styles.header}>
+      {/* LEFT : Back button */}
+      <View style={styles.leftSection}>
+        <BackButton onPress={handleBack} />
+      </View>
+
+      {/* MID : List name */}
+      <View style={styles.centerSection}>
+        <CustomText
+          style={styles.headerTitle}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {listName}
+        </CustomText>
+      </View>
+
+      {/* Right Section : Edit Toggle Button */}
+      <View style={styles.rightSection}>
+        <ActionToggleButton
+          isActive={isEditMode}
+          onPress={onEditToggle}
+          activeText="완료"
+          inactiveText="편집"
+          style={styles.editButton}
+          textStyle={styles.editButtonText}
+        />
+      </View>
+    </View>
+  );
+};
+
 const STORAGE_KEY = '@shopping_cart_items';
 
-const ShoppingListScreen: React.FC = () => {
+interface ShoppingListScreenProps {
+  onSettingsPress?: () => void;
+  listName?: string;
+}
+
+const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
+  listName = '장바구니',
+}) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
       id: '1',
@@ -53,43 +118,49 @@ const ShoppingListScreen: React.FC = () => {
     },
   ]);
 
-  // AsyncStorage에서 데이터 로드
+  // edit mode state
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  // load data from AsyncStorage
   useEffect(() => {
     loadCartItems();
   }, []);
 
-  // AsyncStorage에서 장바구니 아이템 로드
+  // load cart item from AsyncStorage
   const loadCartItems = async () => {
     try {
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
         const items: CartItem[] = JSON.parse(stored);
-        // 체크된 항목은 하단으로, 체크 안된 항목은 order 순으로 정렬
         const sortedItems = items.sort((a, b) => {
           if (a.isChecked !== b.isChecked) {
-            return a.isChecked ? 1 : -1; // 체크된 항목을 뒤로
+            return a.isChecked ? 1 : -1;
           }
           return a.order - b.order;
         });
         setCartItems(sortedItems);
       }
     } catch (error) {
-      console.error('장바구니 로드 실패:', error);
+      console.error('FAILED - load cart :', error);
     }
   };
 
-  // AsyncStorage에 데이터 저장
+  // save data to AsyncStorage
   const saveCartItems = async (items: CartItem[]) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch (error) {
-      console.error('장바구니 저장 실패:', error);
+      console.error('FAILED - save cart :', error);
     }
   };
 
-  // 드래그 완료 시 순서 업데이트
+  // toggle : EDIT mode
+  const handleEditToggle = () => {
+    setIsEditMode(!isEditMode);
+  };
+
+  // order item list : after drag item
   const handleDragEnd = ({ data }: { data: CartItem[] }) => {
-    // 체크 상태별로 order 재정렬
     const updatedItems = data.map((item, index) => ({
       ...item,
       order: index,
@@ -99,7 +170,7 @@ const ShoppingListScreen: React.FC = () => {
     saveCartItems(updatedItems);
   };
 
-  // 체크박스 토글
+  // toggle : check box
   const handleToggleCheck = (itemId: string) => {
     const updatedItems = cartItems.map(item => {
       if (item.id === itemId) {
@@ -108,7 +179,7 @@ const ShoppingListScreen: React.FC = () => {
       return item;
     });
 
-    // 체크 상태 변경 후 정렬 (체크된 항목을 하단으로)
+    // order item list : after check item
     const sortedItems = updatedItems.sort((a, b) => {
       if (a.isChecked !== b.isChecked) {
         return a.isChecked ? 1 : -1;
@@ -120,9 +191,20 @@ const ShoppingListScreen: React.FC = () => {
     saveCartItems(sortedItems);
   };
 
-  // 수량 변경
+  const handleNameChange = (itemId: string, newName: string) => {
+    if (!isEditMode || !newName.trim()) return;
+
+    const updatedItems = cartItems.map(item =>
+      item.id === itemId ? { ...item, name: newName.trim() } : item,
+    );
+
+    setCartItems(updatedItems);
+    saveCartItems(updatedItems);
+  };
+
+  // change quantity (EDIT MODE)
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
-    if (newQuantity <= 0) return;
+    if (!isEditMode || newQuantity <= 0) return;
 
     const updatedItems = cartItems.map(item =>
       item.id === itemId ? { ...item, quantity: newQuantity } : item,
@@ -132,8 +214,10 @@ const ShoppingListScreen: React.FC = () => {
     saveCartItems(updatedItems);
   };
 
-  // 단위 변경
+  // change unit (EDIT MODE)
   const handleUnitChange = (itemId: string, newUnit: string) => {
+    if (!isEditMode) return;
+
     const updatedItems = cartItems.map(item =>
       item.id === itemId ? { ...item, unit: newUnit } : item,
     );
@@ -142,13 +226,13 @@ const ShoppingListScreen: React.FC = () => {
     saveCartItems(updatedItems);
   };
 
-  // 아이템 삭제
+  // delete item
   const handleDeleteItem = (itemId: string) => {
     const itemToDelete = cartItems.find(item => item.id === itemId);
     if (!itemToDelete) return;
 
     Alert.alert(
-      '삭제 확인',
+      '',
       `"${itemToDelete.name}"을(를) 장바구니에서 삭제하시겠습니까?`,
       [
         { text: '취소', style: 'cancel' },
@@ -165,7 +249,7 @@ const ShoppingListScreen: React.FC = () => {
     );
   };
 
-  // 테스트용 더미 데이터 추가 (개발 중에만 사용)
+  // data : for test
   const addTestItem = () => {
     const testItem: CartItem = {
       id: Date.now().toString(),
@@ -185,22 +269,26 @@ const ShoppingListScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* 임시 테스트 버튼 - 나중에 제거 */}
-        {/* <TouchableOpacity style={styles.testButton} onPress={addTestItem}>
-          <CustomText style={styles.testButtonText}>테스트 아이템 추가</CustomText>
-        </TouchableOpacity> */}
+      <ShoppingListHeader
+        listName={listName}
+        isEditMode={isEditMode}
+        onEditToggle={handleEditToggle}
+      />
 
+      <View style={styles.content}>
         <DraggableFlatList
           data={cartItems}
           onDragEnd={handleDragEnd}
           keyExtractor={item => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContainer}
+          activationDistance={0}
           renderItem={({ item, drag, isActive }) => (
             <CartItemCard
               item={item}
+              isEditMode={isEditMode}
               onToggleCheck={handleToggleCheck}
+              onNameChange={handleNameChange}
               onQuantityChange={handleQuantityChange}
               onUnitChange={handleUnitChange}
               onDelete={handleDeleteItem}

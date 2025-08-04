@@ -13,24 +13,48 @@ export const styles = StyleSheet.create({
   listContainer: {
     paddingBottom: 20,
   },
-  // 임시 테스트 버튼 스타일
-  testButton: {
-    backgroundColor: '#333',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+  // header
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#f8f8f8',
+    minHeight: 56,
   },
-  testButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+  leftSection: {
+    width: 56,
+    alignItems: 'flex-start',
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  rightSection: {
+    width: 80, // 편집 버튼을 위해 너비 증가
+    alignItems: 'flex-end',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#444',
+    textAlign: 'center',
+    maxWidth: '100%',
+  },
+  editButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    minHeight: 32,
+  },
+  editButtonText: {
+    fontSize: 13,
   },
 });
 
 export const Cardstyles = StyleSheet.create({
-  // 기본 카드 스타일 (기존 cardStyles.itemCard 기반)
   itemCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
@@ -58,23 +82,23 @@ export const Cardstyles = StyleSheet.create({
     transform: [{ scale: 1.02 }],
   },
 
-  // 체크박스 (이미지 영역)
+  // checkbox section
   checkboxContainer: {
-    marginRight: 16,
+    marginRight: 18,
   },
   itemImagePlaceholder: {
-    width: 60,
-    height: 60,
+    width: 30,
+    height: 30,
     backgroundColor: '#e0e0e0',
-    borderRadius: 8,
+    borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkedImagePlaceholder: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: 'limegreen',
   },
 
-  // 아이템 정보
+  // item data
   itemInfo: {
     flex: 1,
     justifyContent: 'space-between',
@@ -85,29 +109,80 @@ export const Cardstyles = StyleSheet.create({
     color: '#333',
     marginBottom: 8,
   },
+  editableItemName: {
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dashed',
+    textDecorationColor: '#999',
+  },
+  nameInput: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+    backgroundColor: '#fff',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    width: 150,
+    minHeight: 32,
+  },
   checkedText: {
     color: '#999',
     textDecorationLine: 'line-through',
   },
+  simpleQuantityText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginRight: 8,
+  },
+  simpleUnitText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
 
-  // 수량 및 단위
+  // delete button
+  deleteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    padding: 4,
+    opacity: 0.6,
+  },
+
+  // quantity & unit
   itemDetails: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 4,
   },
+
+  // edit mode : quantity container
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#f8f8f8',
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
     marginRight: 12,
+    width: 130,
   },
   quantityButton: {
     padding: 4,
     opacity: 0.7,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quantityTextContainer: {
+    flex: 1,
+    alignItems: 'center',
   },
   quantityText: {
     fontSize: 16,
@@ -127,9 +202,11 @@ export const Cardstyles = StyleSheet.create({
     borderRadius: 4,
     paddingVertical: 2,
     paddingHorizontal: 8,
+    flex: 1,
+    marginHorizontal: 4,
   },
 
-  // 단위 선택
+  // edit mode : unit select section
   unitSelector: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -146,29 +223,14 @@ export const Cardstyles = StyleSheet.create({
     marginRight: 2,
   },
 
-  // 카테고리
+  // item category
   itemCategory: {
     fontSize: 12,
     color: '#999',
     fontStyle: 'italic',
   },
 
-  // 삭제 버튼
-  deleteButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    padding: 4,
-    opacity: 0.6,
-  },
-
-  // 드래그 핸들
-  dragHandle: {
-    paddingLeft: 8,
-    opacity: 0.5,
-  },
-
-  // 단위 선택 모달 (기존 modalStyles 기반)
+  // modal style : unit select
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
