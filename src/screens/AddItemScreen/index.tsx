@@ -168,8 +168,9 @@ const AddItemScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       {/* 헤더 */}
       <View style={styles.header}>
-        <BackButton onPress={() => navigation.goBack()} />
-
+        <CustomText style={styles.backbutton}>
+          <BackButton onPress={() => navigation.goBack()} />
+        </CustomText>
         <CustomText style={styles.headerTitle}>식재료 추가</CustomText>
 
         <TouchableOpacity

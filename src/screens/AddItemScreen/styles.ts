@@ -17,6 +17,9 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
   },
+  backbutton: {
+    width: 80,
+  },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
@@ -27,14 +30,17 @@ export const styles = StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: '#007AFF',
     borderRadius: 8,
+    width: 80,
   },
   headerButtonDisabled: {
     backgroundColor: '#CCC',
+    width: 80,
   },
   headerButtonText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',
+    width: 80,
   },
 
   // 컨텐츠
