@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
     minHeight: 56,
   },
   leftSection: {
-    width: 56,
+    width: 80,
     alignItems: 'flex-start',
   },
   centerSection: {
@@ -34,7 +34,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   rightSection: {
-    width: 80, // 편집 버튼을 위해 너비 증가
+    width: 80,
     alignItems: 'flex-end',
   },
   headerTitle: {
