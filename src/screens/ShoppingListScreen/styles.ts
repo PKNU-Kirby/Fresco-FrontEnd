@@ -13,7 +13,30 @@ export const styles = StyleSheet.create({
   listContainer: {
     paddingBottom: 20,
   },
-  // header
+});
+
+export const buttonsStyles = StyleSheet.create({
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f8f8f8',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    minHeight: 40,
+  },
+  leftButtonGroup: {
+    flexDirection: 'row',
+    gap: 10,
+    flex: 1,
+  },
+  rightButtonGroup: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+});
+
+export const headerStyles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -24,37 +47,34 @@ export const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
     minHeight: 56,
   },
-  leftSection: {
-    width: 80,
-    alignItems: 'flex-start',
-  },
-  centerSection: {
+  headerTitle: {
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 8,
-  },
-  rightSection: {
-    width: 80,
-    alignItems: 'flex-end',
-  },
-  headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#444',
     textAlign: 'center',
     maxWidth: '100%',
   },
-  editButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    minHeight: 32,
-  },
-  editButtonText: {
-    fontSize: 13,
+});
+
+export const addItemStyles = StyleSheet.create({
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#d6d6d6',
+    borderRadius: '50%',
+    padding: 8,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    marginTop: 10,
+    alignSelf: 'center',
   },
 });
 
-export const Cardstyles = StyleSheet.create({
+export const cardStyles = StyleSheet.create({
   itemCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
@@ -109,11 +129,6 @@ export const Cardstyles = StyleSheet.create({
     color: '#333',
     marginBottom: 8,
   },
-  editableItemName: {
-    textDecorationLine: 'underline',
-    textDecorationStyle: 'dashed',
-    textDecorationColor: '#999',
-  },
   nameInput: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -125,32 +140,12 @@ export const Cardstyles = StyleSheet.create({
     borderColor: '#ddd',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    width: 150,
     minHeight: 32,
+    width: 200,
   },
   checkedText: {
     color: '#999',
     textDecorationLine: 'line-through',
-  },
-  simpleQuantityText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginRight: 8,
-  },
-  simpleUnitText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
-  },
-
-  // delete button
-  deleteButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    padding: 4,
-    opacity: 0.6,
   },
 
   // quantity & unit
@@ -160,53 +155,15 @@ export const Cardstyles = StyleSheet.create({
     marginBottom: 4,
   },
 
-  // edit mode : quantity container
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginRight: 12,
-    width: 130,
-  },
-  quantityButton: {
-    padding: 4,
-    opacity: 0.7,
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  quantityTextContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  quantityText: {
+  // 일반 모드 - 간단한 수량 표시
+  simpleQuantityText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    minWidth: 30,
-    textAlign: 'center',
-    marginHorizontal: 8,
-  },
-  quantityInput: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    minWidth: 40,
-    textAlign: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 4,
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    flex: 1,
-    marginHorizontal: 4,
+    marginRight: 8,
   },
 
-  // edit mode : unit select section
+  // 편집 모드 - 단위 선택
   unitSelector: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -223,72 +180,80 @@ export const Cardstyles = StyleSheet.create({
     marginRight: 2,
   },
 
-  // item category
-  itemCategory: {
-    fontSize: 12,
-    color: '#999',
-    fontStyle: 'italic',
-  },
-
-  // modal style : unit select
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    width: '80%',
-    maxHeight: 400,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  unitOptions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 20,
-    justifyContent: 'center',
-  },
-  unitOption: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 16,
-    minWidth: 50,
-    alignItems: 'center',
-  },
-  selectedUnitOption: {
-    backgroundColor: '#333',
-  },
-  unitOptionText: {
-    fontSize: 14,
-    color: '#333',
+  // Show Unit
+  simpleUnitText: {
+    fontSize: 16,
+    color: '#666',
     fontWeight: '500',
   },
-  selectedUnitOptionText: {
-    color: '#fff',
-    fontWeight: 'bold',
+
+  // Delete Button
+  deleteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    padding: 4,
+    opacity: 0.6,
   },
-  modalCloseButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
+});
+
+export const newItemCardStyles = StyleSheet.create({
+  itemCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
     alignItems: 'center',
   },
-  modalCloseText: {
+  newItemCard: {
+    borderColor: '#4fbb53',
+    borderWidth: 1,
+    backgroundColor: '#f9fff9',
+  },
+  itemInfo: {
+    flex: 1,
+  },
+  nameInput: {
     fontSize: 16,
-    color: '#333',
     fontWeight: '600',
+    color: '#333',
+    borderBottomWidth: 1,
+    borderBottomColor: '#4fbb53',
+    paddingVertical: 4,
+    marginBottom: 8,
+    marginLeft: 8,
+    width: 200,
+  },
+  itemDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginLeft: 8,
+  },
+
+  // New item actions
+  newItemActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginLeft: 12,
+  },
+  cancelButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#d5d5d5',
+  },
+  saveButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#cbe8cb',
   },
 });
