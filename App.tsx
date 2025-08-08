@@ -20,8 +20,6 @@ import UsageHistoryScreen from './src/screens/UsageHistoryScreen';
 import AddItemScreen from './src/screens/AddItemScreen';
 import CameraScreen from './src/screens/CameraScreen';
 import PhotoPreview from './src/screens/CameraScreen/PhotoPreview';
-import CropView from './src/screens/CameraScreen/CropView';
-import CameraView from './src/screens/CameraScreen/CameraView';
 
 // Stack Navigator Type
 export type RootStackParamList = {
@@ -43,21 +41,17 @@ export type RootStackParamList = {
   };
   CameraScreen: {
     fridgeId: number;
-    photo?: any;
-    onRetake?: () => void;
-    onUse?: (photo: string) => void;
-    onCancel?: () => void;
   };
   PhotoPreview: {
-    croppedPhotoUri?: string;
-    additionalPhotoUri?: string;
-  };
-  CropView: {
-    photoUri: string;
-    onCropComplete: (croppedUri: string) => void;
-  };
-  CameraView: {
-    onPhotoCapture: (photoUri: string) => void;
+    photo: {
+      uri: string;
+      width?: number;
+      height?: number;
+      fileSize?: number;
+      type?: string;
+      fileName?: string;
+    };
+    fridgeId: number;
   };
   FridgeSettings: {
     fridgeId: number;
@@ -68,6 +62,7 @@ export type RootStackParamList = {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // Tab Navigator Type
 export type MainTabParamList = {
@@ -75,8 +70,6 @@ export type MainTabParamList = {
   Recipe: { fridgeId: number; fridgeName: string };
   ShoppingList: { fridgeId: number; fridgeName: string };
 };
-
-const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // Main Tab Navigator
 function MainTabNavigator({
@@ -175,14 +168,6 @@ function App(): React.JSX.Element {
             }}
           />
           <Stack.Screen
-            name="AddItemScreen"
-            component={AddItemScreen}
-            options={{
-              presentation: 'modal',
-              animation: 'slide_from_bottom',
-            }}
-          />
-          <Stack.Screen
             name="CameraScreen"
             component={CameraScreen}
             options={{
@@ -193,19 +178,19 @@ function App(): React.JSX.Element {
           <Stack.Screen
             name="PhotoPreview"
             component={PhotoPreview}
-            options={{ title: 'Photo Preview', headerShown: true }}
-          />
-          <Stack.Screen
-            name="CropView"
-            component={CropView}
-            options={{ title: 'CropImage' }}
-          />
-          <Stack.Screen
-            name="CameraView"
-            component={CameraView}
             options={{
-              title: 'Additional Photo',
-              headerShown: false,
+              title: '미리보기',
+              headerShown: true,
+              presentation: 'modal',
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="AddItemScreen"
+            component={AddItemScreen}
+            options={{
+              presentation: 'modal',
+              animation: 'slide_from_bottom',
             }}
           />
         </Stack.Navigator>
