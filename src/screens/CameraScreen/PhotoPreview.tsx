@@ -121,14 +121,9 @@ const PhotoPreviewScreen: React.FC = () => {
           <MaterialIcons name="arrow-back-ios-new" size={24} color="#f8f8f8" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>미리보기</Text>
-        <TouchableOpacity
-          style={styles.useButton}
-          onPress={handleUse}
-          accessibilityLabel="등록"
-          accessibilityRole="button"
-        >
-          <Text style={styles.useButtonText}>등록</Text>
-        </TouchableOpacity>
+        <View style={styles.rightSection}>
+          <></>
+        </View>
       </View>
 
       <View style={styles.imageContainer}>

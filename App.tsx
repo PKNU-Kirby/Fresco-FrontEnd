@@ -180,7 +180,6 @@ function App(): React.JSX.Element {
             component={PhotoPreview}
             options={{
               title: '미리보기',
-              headerShown: true,
               presentation: 'modal',
               animation: 'slide_from_right',
             }}
