@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// screens/CameraScreen/CameraView.tsx
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -19,8 +20,8 @@ import {
 } from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import CustomText from '../../components/common/CustomText';
+import { cameraViewStyles as styles } from './styles';
 
-// Navigation 타입
 type RootStackParamList = {
   CameraView: {
     onPhotoCapture: (photoUri: string) => void;
@@ -33,7 +34,20 @@ type CameraViewNavigationProp = NativeStackNavigationProp<
   'CameraView'
 >;
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+type CameraType = 'back' | 'front';
+type FlashMode = 'off' | 'on' | 'auto';
+
+interface CameraSettings {
+  cameraType: CameraType;
+  flashMode: FlashMode;
+  photoQuality: PhotoQuality;
+}
+
+interface QualityOption {
+  quality: PhotoQuality;
+  label: string;
+  description: string;
+}
 
 const CameraView: React.FC = () => {
   const navigation = useNavigation<CameraViewNavigationProp>();
@@ -41,84 +55,126 @@ const CameraView: React.FC = () => {
   const { onPhotoCapture } = route.params;
 
   const [isLoading, setIsLoading] = useState(false);
-  const [cameraType, setCameraType] = useState<'back' | 'front'>('back');
-  const [flashMode, setFlashMode] = useState<'off' | 'on' | 'auto'>('auto');
-  const [photoQuality, setPhotoQuality] = useState<PhotoQuality>(0.8);
+  const [settings, setSettings] = useState<CameraSettings>({
+    cameraType: 'back',
+    flashMode: 'auto',
+    photoQuality: 0.8,
+  });
 
-  // 카메라 실행
-  const openCamera = () => {
-    const options = {
+  const qualityOptions: QualityOption[] = [
+    { quality: 0.5, label: '기본', description: '빠른 처리' },
+    { quality: 0.8, label: '고화질', description: '권장' },
+    { quality: 1.0, label: '최고', description: '용량 큼' },
+  ];
+
+  const getFlashIcon = useCallback((mode: FlashMode): string => {
+    switch (mode) {
+      case 'on':
+        return 'flash-on';
+      case 'auto':
+        return 'flash-auto';
+      default:
+        return 'flash-off';
+    }
+  }, []);
+
+  const getFlashLabel = useCallback((mode: FlashMode): string => {
+    switch (mode) {
+      case 'on':
+        return '켜짐';
+      case 'auto':
+        return '자동';
+      default:
+        return '꺼짐';
+    }
+  }, []);
+
+  const getCameraOptions = useCallback(
+    () => ({
       mediaType: 'photo' as MediaType,
       includeBase64: false,
       maxHeight: 3000,
       maxWidth: 2000,
-      quality: photoQuality,
+      quality: settings.photoQuality,
       saveToPhotos: false,
-      cameraType: cameraType,
+      cameraType: settings.cameraType,
       presentationStyle: 'fullScreen' as const,
-    };
+    }),
+    [settings],
+  );
 
+  const handleCameraResponse = useCallback((response: ImagePickerResponse) => {
+    setIsLoading(false);
+
+    if (response.didCancel) {
+      console.log('User canceled additional camera');
+      return;
+    }
+
+    if (response.errorMessage) {
+      console.error('Additional Camera Error:', response.errorMessage);
+      Alert.alert('오류', '카메라를 실행할 수 없습니다.');
+      return;
+    }
+
+    if (response.assets?.[0]?.uri) {
+      handlePhotoSuccess(response.assets[0].uri);
+    }
+  }, []);
+
+  const openCamera = useCallback(() => {
     setIsLoading(true);
+    const options = getCameraOptions();
+    launchCamera(options, handleCameraResponse);
+  }, [getCameraOptions, handleCameraResponse]);
 
-    launchCamera(options, (response: ImagePickerResponse) => {
-      setIsLoading(false);
-
-      if (response.didCancel) {
-        console.log('User canceled additional camera');
-        return;
-      }
-
-      if (response.errorMessage) {
-        console.error('Additional Camera Error:', response.errorMessage);
-        Alert.alert('오류', '카메라를 실행할 수 없습니다.');
-        return;
-      }
-
-      if (response.assets && response.assets[0]) {
-        const asset = response.assets[0];
-        handlePhotoSuccess(asset.uri!);
-      }
-    });
-  };
-
-  // 촬영 성공 처리
-  const handlePhotoSuccess = (photoUri: string) => {
-    Alert.alert('촬영 완료', '추가 사진이 촬영되었습니다.', [
-      {
-        text: '다시 촬영',
-        onPress: () => openCamera(),
-      },
-      {
-        text: '사용하기',
-        onPress: () => {
-          (navigation as any).navigate('PhotoPreview', {
-            additionalPhotoUri: photoUri,
-          });
+  const handlePhotoSuccess = useCallback(
+    (photoUri: string) => {
+      Alert.alert('촬영 완료', '추가 사진이 촬영되었습니다.', [
+        {
+          text: '다시 촬영',
+          onPress: openCamera,
         },
-      },
-    ]);
-  };
+        {
+          text: '사용하기',
+          onPress: () => {
+            (navigation as any).navigate('PhotoPreview', {
+              additionalPhotoUri: photoUri,
+            });
+          },
+        },
+      ]);
+    },
+    [navigation, openCamera],
+  );
 
-  // 카메라 타입 변경
-  const toggleCameraType = () => {
-    setCameraType(prev => (prev === 'back' ? 'front' : 'back'));
-  };
+  const toggleCameraType = useCallback(() => {
+    setSettings(prev => ({
+      ...prev,
+      cameraType: prev.cameraType === 'back' ? 'front' : 'back',
+    }));
+  }, []);
 
-  // 플래시 모드 변경
-  const toggleFlashMode = () => {
-    const modes: Array<'off' | 'on' | 'auto'> = ['off', 'on', 'auto'];
-    const currentIndex = modes.indexOf(flashMode);
-    const nextIndex = (currentIndex + 1) % modes.length;
-    setFlashMode(modes[nextIndex]);
-  };
+  const toggleFlashMode = useCallback(() => {
+    setSettings(prev => {
+      const modes: FlashMode[] = ['off', 'on', 'auto'];
+      const currentIndex = modes.indexOf(prev.flashMode);
+      const nextIndex = (currentIndex + 1) % modes.length;
+      return {
+        ...prev,
+        flashMode: modes[nextIndex],
+      };
+    });
+  }, []);
 
-  // 화질 변경
-  const changeQuality = (quality: PhotoQuality) => {
-    setPhotoQuality(quality);
-  };
+  const changeQuality = useCallback((quality: PhotoQuality) => {
+    setSettings(prev => ({
+      ...prev,
+      photoQuality: quality,
+    }));
+  }, []);
 
-  // 취소 처리
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     Alert.alert('촬영 취소', '추가 촬영을 종료하시겠습니까?', [
       { text: '계속 촬영', style: 'cancel' },
       {
@@ -127,17 +183,12 @@ const CameraView: React.FC = () => {
         onPress: () => navigation.goBack(),
       },
     ]);
-  };
+  }, [navigation]);
 
-  // 자동 촬영 시작 (화면 진입 시)
   useEffect(() => {
-    // 약간의 딜레이 후 자동으로 카메라 실행
-    const timer = setTimeout(() => {
-      openCamera();
-    }, 500);
-
+    const timer = setTimeout(openCamera, 500);
     return () => clearTimeout(timer);
-  }, []);
+  }, [openCamera]);
 
   if (isLoading) {
     return (
@@ -157,9 +208,13 @@ const CameraView: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000" />
 
-      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+        <TouchableOpacity
+          style={styles.cancelButton}
+          onPress={handleCancel}
+          accessibilityLabel="촬영 취소"
+          accessibilityRole="button"
+        >
           <MaterialIcons name="close" size={24} color="#fff" />
         </TouchableOpacity>
         <CustomText style={styles.headerTitle}>추가 촬영</CustomText>
@@ -167,15 +222,13 @@ const CameraView: React.FC = () => {
           <TouchableOpacity
             style={styles.headerButton}
             onPress={toggleFlashMode}
+            accessibilityLabel={`플래시 모드: ${getFlashLabel(
+              settings.flashMode,
+            )}`}
+            accessibilityRole="button"
           >
             <MaterialIcons
-              name={
-                flashMode === 'on'
-                  ? 'flash-on'
-                  : flashMode === 'auto'
-                  ? 'flash-auto'
-                  : 'flash-off'
-              }
+              name={getFlashIcon(settings.flashMode)}
               size={20}
               color="#fff"
             />
@@ -183,7 +236,6 @@ const CameraView: React.FC = () => {
         </View>
       </View>
 
-      {/* Content */}
       <View style={styles.content}>
         <View style={styles.instructionContainer}>
           <CustomText style={styles.instructionTitle}>
@@ -194,77 +246,74 @@ const CameraView: React.FC = () => {
           </CustomText>
         </View>
 
-        {/* Camera Settings */}
         <View style={styles.settingsContainer}>
           <CustomText style={styles.settingsTitle}>카메라 설정</CustomText>
 
-          {/* Camera Type */}
           <View style={styles.settingItem}>
             <CustomText style={styles.settingLabel}>카메라</CustomText>
             <TouchableOpacity
               style={styles.settingButton}
               onPress={toggleCameraType}
-            >
-              <MaterialIcons
-                name={cameraType === 'back' ? 'camera-rear' : 'camera-front'}
-                size={20}
-                color="#007AFF"
-              />
-              <CustomText style={styles.settingButtonText}>
-                {cameraType === 'back' ? '후면' : '전면'}
-              </CustomText>
-            </TouchableOpacity>
-          </View>
-
-          {/* Flash Mode */}
-          <View style={styles.settingItem}>
-            <CustomText style={styles.settingLabel}>플래시</CustomText>
-            <TouchableOpacity
-              style={styles.settingButton}
-              onPress={toggleFlashMode}
+              accessibilityLabel={`카메라 전환: 현재 ${
+                settings.cameraType === 'back' ? '후면' : '전면'
+              }`}
+              accessibilityRole="button"
             >
               <MaterialIcons
                 name={
-                  flashMode === 'on'
-                    ? 'flash-on'
-                    : flashMode === 'auto'
-                    ? 'flash-auto'
-                    : 'flash-off'
+                  settings.cameraType === 'back'
+                    ? 'camera-rear'
+                    : 'camera-front'
                 }
                 size={20}
                 color="#007AFF"
               />
               <CustomText style={styles.settingButtonText}>
-                {flashMode === 'on'
-                  ? '켜짐'
-                  : flashMode === 'auto'
-                  ? '자동'
-                  : '꺼짐'}
+                {settings.cameraType === 'back' ? '후면' : '전면'}
               </CustomText>
             </TouchableOpacity>
           </View>
 
-          {/* Quality */}
+          <View style={styles.settingItem}>
+            <CustomText style={styles.settingLabel}>플래시</CustomText>
+            <TouchableOpacity
+              style={styles.settingButton}
+              onPress={toggleFlashMode}
+              accessibilityLabel={`플래시 모드: ${getFlashLabel(
+                settings.flashMode,
+              )}`}
+              accessibilityRole="button"
+            >
+              <MaterialIcons
+                name={getFlashIcon(settings.flashMode)}
+                size={20}
+                color="#007AFF"
+              />
+              <CustomText style={styles.settingButtonText}>
+                {getFlashLabel(settings.flashMode)}
+              </CustomText>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.settingItem}>
             <CustomText style={styles.settingLabel}>화질</CustomText>
             <View style={styles.qualityButtons}>
-              {[
-                { quality: 0.5 as PhotoQuality, label: '기본' },
-                { quality: 0.8 as PhotoQuality, label: '고화질' },
-                { quality: 1.0 as PhotoQuality, label: '최고' },
-              ].map(({ quality, label }) => (
+              {qualityOptions.map(({ quality, label, description }) => (
                 <TouchableOpacity
                   key={quality}
                   style={[
                     styles.qualityButton,
-                    photoQuality === quality && styles.qualityButtonActive,
+                    settings.photoQuality === quality &&
+                      styles.qualityButtonActive,
                   ]}
                   onPress={() => changeQuality(quality)}
+                  accessibilityLabel={`화질 설정: ${label} (${description})`}
+                  accessibilityRole="button"
                 >
                   <CustomText
                     style={[
                       styles.qualityButtonText,
-                      photoQuality === quality &&
+                      settings.photoQuality === quality &&
                         styles.qualityButtonTextActive,
                     ]}
                   >
@@ -276,7 +325,6 @@ const CameraView: React.FC = () => {
           </View>
         </View>
 
-        {/* Main Camera Button */}
         <View style={styles.cameraButtonContainer}>
           <TouchableOpacity
             style={[
@@ -285,6 +333,8 @@ const CameraView: React.FC = () => {
             ]}
             onPress={openCamera}
             disabled={isLoading}
+            accessibilityLabel="추가 촬영하기"
+            accessibilityRole="button"
           >
             <MaterialIcons
               name="camera-alt"
@@ -298,7 +348,6 @@ const CameraView: React.FC = () => {
         </View>
       </View>
 
-      {/* Bottom Guide */}
       <View style={styles.bottomGuide}>
         <CustomText style={styles.guideText}>
           💡 팁: 여러 각도에서 촬영하면 더 정확한 식재료 인식이 가능합니다
@@ -307,171 +356,5 @@ const CameraView: React.FC = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingContent: {
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: '#fff',
-    fontSize: 16,
-    marginTop: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-  },
-  cancelButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  headerRight: {
-    flexDirection: 'row',
-  },
-  headerButton: {
-    padding: 8,
-    marginLeft: 8,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  instructionContainer: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  instructionTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  instructionText: {
-    color: '#ccc',
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  settingsContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 30,
-  },
-  settingsTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  settingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  settingLabel: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  settingButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 122, 255, 0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  settingButtonText: {
-    color: '#007AFF',
-    fontSize: 14,
-    marginLeft: 6,
-  },
-  qualityButtons: {
-    flexDirection: 'row',
-  },
-  qualityButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    marginLeft: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  qualityButtonActive: {
-    backgroundColor: '#007AFF',
-  },
-  qualityButtonText: {
-    color: '#ccc',
-    fontSize: 12,
-  },
-  qualityButtonTextActive: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  cameraButtonContainer: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  cameraButton: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#007AFF',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  cameraButtonDisabled: {
-    backgroundColor: '#666',
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  cameraButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  bottomGuide: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  guideText: {
-    color: '#999',
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-});
 
 export default CameraView;

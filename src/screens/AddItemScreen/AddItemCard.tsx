@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, TextInput, Alert, Image } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { View, TouchableOpacity, TextInput } from 'react-native';
 import CustomText from '../../components/common/CustomText';
+import DeleteButton from '../FridgeHomeScreen/FridgeItemCard/DeleteButton';
+import QuantityEditor from '../FridgeHomeScreen/FridgeItemCard/QuantityEditor';
 import UnitSelector from '../FridgeHomeScreen/FridgeItemCard/UnitSelector';
 import DatePicker from '../../components/modals/DatePicker';
+import ItemCategoryModal from '../../components/modals/ItemCategoryModal';
+import StorageTypeModal from '../../components/modals/StorageTypeModal';
 import { ItemFormData } from './index';
 import { cardStyles } from './styles';
 
 interface AddItemCardProps {
   item: ItemFormData;
+  index: number;
   isEditMode: boolean;
   showDeleteButton: boolean;
   onUpdateItem: (
@@ -18,188 +21,216 @@ interface AddItemCardProps {
     value: string,
   ) => void;
   onRemoveItem: (itemId: string) => void;
+  focusedItemId?: string | null;
+  onFocusComplete?: () => void;
 }
 
 const AddItemCard: React.FC<AddItemCardProps> = ({
   item,
+  // index,
   isEditMode,
   showDeleteButton,
   onUpdateItem,
   onRemoveItem,
+  focusedItemId,
+  onFocusComplete,
 }) => {
+  const nameInputRef = useRef<TextInput>(null);
+  // Modal states
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showStorageModal, setShowStorageModal] = useState(false);
 
-  const unitOptions = ['개', 'kg', 'g', 'L', 'ml', '봉지', '포', '상자', '병'];
-  const storageTypes = ['냉장', '냉동', '실온'];
-  const categories = [
-    '야채',
-    '과일',
-    '육류',
-    '해산물',
-    '유제품',
-    '조미료',
+  // Options for modals
+  const unitOptions = ['개', 'kg', 'g', 'L', 'ml'];
+
+  // 카테고리 목록 상태 (실제로는 상위 컴포넌트나 Context에서 관리해야 함)
+  const [itemCategories, setItemCategories] = useState([
+    '베이커리',
+    '채소 / 과일',
+    '정육 / 계란',
+    '가공식품',
+    '수산 / 건어물',
+    '쌀 / 잡곡',
+    '우유 / 유제품',
+    '건강식품',
+    '장 / 양념 / 소스',
     '기타',
-  ];
+  ]);
 
-  // 수량 조절
-  const handleQuantityChange = (newQuantity: string) => {
-    const numericText = newQuantity.replace(/[^0-9]/g, '');
-    onUpdateItem(item.id, 'quantity', numericText || '1');
+  // 보관방법 목록 상태
+  const [storageTypes, setStorageTypes] = useState(['냉장', '냉동', '실온']);
+
+  useEffect(() => {
+    if (focusedItemId === item.id && isEditMode) {
+      setTimeout(() => {
+        nameInputRef.current?.focus();
+        onFocusComplete?.();
+      }, 0); // 스크롤 애니메이션 후 포커스
+    }
+  }, [focusedItemId, item.id, isEditMode, onFocusComplete]);
+
+  // Quantity handlers
+  // 기존 핸들러들을 하나로 통합
+  const handleQuantityChange = useCallback(
+    (newQuantity: string) => {
+      onUpdateItem(item.id, 'quantity', newQuantity || '0');
+    },
+    [item.id, onUpdateItem],
+  );
+
+  const handleQuantityBlur = useCallback(() => {
+    // 빈값이면 1로 설정
+    if (!item.quantity || item.quantity === '0') {
+      onUpdateItem(item.id, 'quantity', '1');
+    }
+  }, [item.id, item.quantity, onUpdateItem]);
+
+  // 기존의 handleIncrement, handleDecrement는 삭제
+
+  // Delete handler
+  const handleDelete = useCallback(() => {
+    onRemoveItem(item.id);
+  }, [item.id, onRemoveItem]);
+
+  const getDefaultExpiryDate = (): string => {
+    const today = new Date();
+    const oneWeekLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    const year = oneWeekLater.getFullYear();
+    const month = String(oneWeekLater.getMonth() + 1).padStart(2, '0');
+    const day = String(oneWeekLater.getDate()).padStart(2, '0');
+
+    return `${year}.${month}.${day}`;
   };
 
-  const handleIncrement = () => {
-    const currentNum = parseInt(item.quantity) || 0;
-    onUpdateItem(item.id, 'quantity', (currentNum + 1).toString());
-  };
+  // Date handler
+  const handleDateSelect = useCallback(
+    (year: number, month: number, day: number) => {
+      const formattedDate = `${year}.${String(month).padStart(2, '0')}.${String(
+        day,
+      ).padStart(2, '0')}`;
+      onUpdateItem(item.id, 'expirationDate', formattedDate);
+      setShowDatePicker(false);
+    },
+    [item.id, onUpdateItem],
+  );
 
-  const handleDecrement = () => {
-    const currentNum = parseInt(item.quantity) || 0;
-    onUpdateItem(item.id, 'quantity', Math.max(1, currentNum - 1).toString());
-  };
+  // Modal handlers
+  const handleUnitSelect = useCallback(
+    (unit: string) => {
+      onUpdateItem(item.id, 'unit', unit);
+      setShowUnitModal(false);
+    },
+    [item.id, onUpdateItem],
+  );
 
-  // 삭제 확인
-  const handleDelete = () => {
-    Alert.alert('삭제 확인', '이 식재료를 삭제하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: () => onRemoveItem(item.id),
-      },
-    ]);
-  };
+  const handleStorageSelect = useCallback(
+    (storage: string) => {
+      onUpdateItem(item.id, 'storageType', storage);
+    },
+    [item.id, onUpdateItem],
+  );
 
-  // 날짜 변경 (DatePicker 컴포넌트용)
-  const handleDateSelect = (year: number, month: number, day: number) => {
-    const formattedDate = `${year}.${String(month).padStart(2, '0')}.${String(
-      day,
-    ).padStart(2, '0')}`;
-    onUpdateItem(item.id, 'expiryDate', formattedDate);
-    setShowDatePicker(false);
-  };
+  const handleCategorySelect = useCallback(
+    (category: string) => {
+      onUpdateItem(item.id, 'itemCategory', category);
+    },
+    [item.id, onUpdateItem],
+  );
 
-  // 카메라 열기
-  const openCamera = () => {
-    // TODO: 카메라 화면으로 이동
-    console.log('카메라 열기');
-  };
+  const handleNameChange = useCallback(
+    (text: string) => {
+      onUpdateItem(item.id, 'name', text);
+    },
+    [item.id, onUpdateItem],
+  );
+
+  // 카테고리 업데이트 핸들러
+  const handleUpdateCategories = useCallback((categories: string[]) => {
+    setItemCategories(categories);
+    // TODO: 실제로는 상위 컴포넌트나 Context로 전달해야 함
+  }, []);
+
+  // 보관방법 업데이트 핸들러
+  const handleUpdateStorageTypes = useCallback((types: string[]) => {
+    setStorageTypes(types);
+    // TODO: 실제로는 상위 컴포넌트나 Context로 전달해야 함
+  }, []);
 
   return (
     <>
       <View style={cardStyles.itemCard}>
-        {/* 삭제 버튼 */}
+        {/* Delete Button */}
         {isEditMode && showDeleteButton && (
-          <TouchableOpacity
-            style={cardStyles.deleteButton}
-            onPress={handleDelete}
-          >
-            <FontAwesome6 name="circle-xmark" size={24} color="#666" solid />
-          </TouchableOpacity>
+          <DeleteButton onPress={handleDelete} />
         )}
 
-        {/* 사진 영역 */}
-        <TouchableOpacity
-          style={cardStyles.imageContainer}
-          onPress={isEditMode ? openCamera : undefined}
-          disabled={!isEditMode}
-        >
-          {item.photo ? (
-            <Image source={{ uri: item.photo }} style={cardStyles.itemImage} />
-          ) : (
-            <View style={cardStyles.imagePlaceholder}>
-              <MaterialIcons
-                name={isEditMode ? 'add-a-photo' : 'image'}
-                size={24}
-                color="#999"
-              />
-            </View>
-          )}
-        </TouchableOpacity>
+        {/* Image Section */}
+        <View style={cardStyles.imageContainer}>
+          <View style={cardStyles.imagePlaceholder} />
+        </View>
 
-        {/* 아이템 정보 */}
+        {/* Item Info */}
         <View style={cardStyles.itemInfo}>
-          {/* 식재료 이름 */}
+          {/* Name Input/Display */}
           {isEditMode ? (
             <TextInput
+              ref={nameInputRef}
               style={cardStyles.nameInput}
               value={item.name}
-              onChangeText={text => onUpdateItem(item.id, 'name', text)}
-              placeholder="식재료 이름"
+              onChangeText={handleNameChange}
+              placeholder="식재료 이름 입력"
               placeholderTextColor="#999"
+              accessibilityLabel="식재료 이름 입력"
+              maxLength={50}
             />
           ) : (
-            <CustomText style={cardStyles.itemName}>{item.name}</CustomText>
+            <CustomText style={cardStyles.itemName}>
+              {item.name || '이름 없음'}
+            </CustomText>
           )}
 
-          {/* 수량 및 단위 */}
+          {/* Quantity and Unit */}
           <View style={cardStyles.itemDetails}>
             {isEditMode ? (
-              <View style={cardStyles.quantityContainer}>
-                <TouchableOpacity
-                  style={cardStyles.quantityButton}
-                  onPress={handleDecrement}
-                >
-                  <FontAwesome6 name="circle-minus" size={20} color="#666" />
-                </TouchableOpacity>
-
-                <TextInput
-                  style={cardStyles.quantityInput}
-                  value={item.quantity}
-                  onChangeText={handleQuantityChange}
-                  keyboardType="numeric"
-                  selectTextOnFocus
-                />
-
-                <TouchableOpacity
-                  style={cardStyles.unitSelector}
-                  onPress={() => setShowUnitModal(true)}
-                >
-                  <CustomText style={cardStyles.unitText}>
-                    {item.unit}
-                  </CustomText>
-                  <CustomText style={cardStyles.dropdownIcon}>▼</CustomText>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={cardStyles.quantityButton}
-                  onPress={handleIncrement}
-                >
-                  <FontAwesome6 name="circle-plus" size={20} color="#666" />
-                </TouchableOpacity>
-              </View>
+              <QuantityEditor
+                quantity={item.quantity}
+                unit={item.unit}
+                onQuantityChange={handleQuantityChange}
+                onTextBlur={handleQuantityBlur}
+                onUnitPress={() => setShowUnitModal(true)}
+              />
             ) : (
               <CustomText style={cardStyles.quantityText}>
-                {item.quantity} {item.unit}
+                {item.quantity} {item.unit || '개'}
               </CustomText>
             )}
 
-            {/* 유통기한 */}
+            {/* Expiry Date */}
             {isEditMode ? (
-              <TouchableOpacity
-                style={cardStyles.dateButton}
-                onPress={() => setShowDatePicker(true)}
-              >
+              <TouchableOpacity onPress={() => setShowDatePicker(true)}>
                 <CustomText style={cardStyles.dateButtonText}>
-                  {item.expiryDate || '유통기한 선택'}
+                  {item.expirationDate || getDefaultExpiryDate()}
                 </CustomText>
               </TouchableOpacity>
             ) : (
               <CustomText style={cardStyles.expiryText}>
-                {item.expiryDate}
+                {item.expirationDate || getDefaultExpiryDate()}
               </CustomText>
             )}
           </View>
 
-          {/* 보관방법 및 카테고리 */}
+          {/* Storage Type and Category */}
           <View style={cardStyles.statusRow}>
             {isEditMode ? (
               <>
                 <TouchableOpacity
                   style={cardStyles.categoryButton}
                   onPress={() => setShowStorageModal(true)}
+                  accessibilityLabel={`보관방법: ${item.storageType}`}
+                  accessibilityRole="button"
                 >
                   <CustomText style={cardStyles.categoryButtonText}>
                     {item.storageType}
@@ -211,6 +242,8 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
                 <TouchableOpacity
                   style={cardStyles.categoryButton}
                   onPress={() => setShowCategoryModal(true)}
+                  accessibilityLabel={`카테고리: ${item.itemCategory}`}
+                  accessibilityRole="button"
                 >
                   <CustomText style={cardStyles.categoryButtonText}>
                     {item.itemCategory}
@@ -226,47 +259,42 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
         </View>
       </View>
 
-      {/* 단위 선택 모달 */}
+      {/* Modals */}
+
+      {/* Unit Selector */}
       <UnitSelector
         visible={showUnitModal}
         selectedUnit={item.unit}
         options={unitOptions}
-        onSelect={unit => {
-          onUpdateItem(item.id, 'unit', unit);
-          setShowUnitModal(false);
-        }}
+        onSelect={handleUnitSelect}
         onClose={() => setShowUnitModal(false)}
       />
 
-      {/* 보관방법 선택 모달 */}
-      <UnitSelector
+      {/* Storage Type Modal */}
+      <StorageTypeModal
         visible={showStorageModal}
-        selectedUnit={item.storageType}
-        options={storageTypes}
-        onSelect={storage => {
-          onUpdateItem(item.id, 'storageType', storage);
-          setShowStorageModal(false);
-        }}
+        storageTypes={storageTypes}
+        activeStorageType={item.storageType}
         onClose={() => setShowStorageModal(false)}
+        onSelect={handleStorageSelect}
+        onUpdateStorageTypes={handleUpdateStorageTypes}
       />
 
-      {/* 카테고리 선택 모달 */}
-      <UnitSelector
+      {/* Category Modal */}
+      <ItemCategoryModal
         visible={showCategoryModal}
-        selectedUnit={item.itemCategory}
-        options={categories}
-        onSelect={category => {
-          onUpdateItem(item.id, 'itemCategory', category);
-          setShowCategoryModal(false);
-        }}
+        itemCategories={itemCategories}
+        activeItemCategory={item.itemCategory}
         onClose={() => setShowCategoryModal(false)}
+        onSelect={handleCategorySelect}
+        onUpdateCategories={handleUpdateCategories}
       />
 
-      {/* 날짜 선택기 */}
+      {/* Date Picker */}
       <DatePicker
         visible={showDatePicker}
         initialDate={
-          item.expiryDate ||
+          item.expirationDate ||
           new Date().toISOString().split('T')[0].replace(/-/g, '.')
         }
         onDateSelect={handleDateSelect}

@@ -1,5 +1,13 @@
-import React, { useState } from 'react';
-import { View, Image, TouchableOpacity, Dimensions, Alert } from 'react-native';
+// screens/CameraScreen/PhotoPreview.tsx
+import React, { useState, useCallback, useEffect } from 'react';
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  Dimensions,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
   useNavigation,
@@ -8,15 +16,7 @@ import {
 } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import CustomText from '../../components/common/CustomText';
-import { styles } from './styles';
-
-type RootStackParamList = {
-  CropView: {
-    photoUri: string;
-    onCropComplete: (croppedUri: string) => void;
-  };
-  CameraView: { onPhotoCapture: (photoUri: string) => void };
-};
+import { previewStyles as styles } from './styles';
 
 type PhotoPreviewNavigationProp = NativeStackNavigationProp<any>;
 
@@ -50,54 +50,12 @@ const PhotoPreview: React.FC<PhotoPreviewProps> = ({
 }) => {
   const navigation = useNavigation<PhotoPreviewNavigationProp>();
   const route = useRoute();
+
   const [currentPhoto, setCurrentPhoto] = useState<CapturedPhoto>(photo);
   const [additionalPhotos, setAdditionalPhotos] = useState<CapturedPhoto[]>([]);
-  console.log('additionalPhotos: ', additionalPhotos);
+  const [imageLoading, setImageLoading] = useState(true);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const params = route.params as any;
-
-      if (params?.croppedPhotoUri) {
-        const croppedPhoto: CapturedPhoto = {
-          ...currentPhoto,
-          uri: params.croppedPhotoUri,
-          fileName: `cropped_${Date.now()}.jpg`,
-        };
-
-        setCurrentPhoto(croppedPhoto);
-
-        if (onPhotoUpdate) {
-          onPhotoUpdate(croppedPhoto);
-        }
-
-        navigation.setParams({ croppedPhotoUri: undefined });
-      }
-
-      if (params?.additionalPhotoUri) {
-        const newPhoto: CapturedPhoto = {
-          uri: params.additionalPhotoUri,
-          fileName: `additional_${Date.now()}.jpg`,
-        };
-
-        setAdditionalPhotos(prev => [...prev, newPhoto]);
-
-        if (onAdditionalPhoto) {
-          onAdditionalPhoto(newPhoto);
-        }
-
-        navigation.setParams({ additionalPhotoUri: undefined });
-      }
-    }, [
-      route.params,
-      currentPhoto,
-      navigation,
-      onPhotoUpdate,
-      onAdditionalPhoto,
-    ]),
-  );
-
-  const getImageStyle = () => {
+  const getImageStyle = useCallback(() => {
     if (photo.width && photo.height) {
       const aspectRatio = photo.width / photo.height;
       const maxWidth = screenWidth;
@@ -116,32 +74,66 @@ const PhotoPreview: React.FC<PhotoPreviewProps> = ({
         height: imageHeight,
       };
     }
+
     return {
       width: screenWidth * 0.9,
-      height: screenWidth * 0.9 * 0.75, // 4:3
+      height: screenWidth * 0.9 * 0.75,
     };
-  };
+  }, [photo.width, photo.height]);
 
-  const handleCropPress = () => {
+  useFocusEffect(
+    useCallback(() => {
+      const params = route.params as any;
+
+      if (params?.croppedPhotoUri) {
+        const croppedPhoto: CapturedPhoto = {
+          ...currentPhoto,
+          uri: params.croppedPhotoUri,
+          fileName: `cropped_${Date.now()}.jpg`,
+        };
+
+        setCurrentPhoto(croppedPhoto);
+        onPhotoUpdate?.(croppedPhoto);
+        navigation.setParams({ croppedPhotoUri: undefined });
+      }
+
+      if (params?.additionalPhotoUri) {
+        const newPhoto: CapturedPhoto = {
+          uri: params.additionalPhotoUri,
+          fileName: `additional_${Date.now()}.jpg`,
+        };
+
+        setAdditionalPhotos(prev => [...prev, newPhoto]);
+        onAdditionalPhoto?.(newPhoto);
+        navigation.setParams({ additionalPhotoUri: undefined });
+      }
+    }, [
+      route.params,
+      currentPhoto,
+      navigation,
+      onPhotoUpdate,
+      onAdditionalPhoto,
+    ]),
+  );
+
+  const handleCropPress = useCallback(() => {
     navigation.navigate('CropView', {
-      photoUri: photo.uri,
+      photoUri: currentPhoto.uri,
       onCropComplete: (croppedUri: string) => {
         const croppedPhoto: CapturedPhoto = {
-          ...photo,
+          ...currentPhoto,
           uri: croppedUri,
           fileName: `cropped_${Date.now()}.jpg`,
         };
 
-        if (onPhotoUpdate) {
-          onPhotoUpdate(croppedPhoto);
-        }
-
+        setCurrentPhoto(croppedPhoto);
+        onPhotoUpdate?.(croppedPhoto);
         navigation.goBack();
       },
     });
-  };
+  }, [currentPhoto, navigation, onPhotoUpdate]);
 
-  const handleAdditionalPhotoPress = () => {
+  const handleAdditionalPhotoPress = useCallback(() => {
     navigation.navigate('CameraView', {
       onPhotoCapture: (photoUri: string) => {
         const newPhoto: CapturedPhoto = {
@@ -149,66 +141,122 @@ const PhotoPreview: React.FC<PhotoPreviewProps> = ({
           fileName: `additional_${Date.now()}.jpg`,
         };
 
-        if (onAdditionalPhoto) {
-          onAdditionalPhoto(newPhoto);
-        }
+        setAdditionalPhotos(prev => [...prev, newPhoto]);
+        onAdditionalPhoto?.(newPhoto);
 
         Alert.alert('완료', '추가 사진이 저장되었습니다!');
       },
     });
-  };
+  }, [navigation, onAdditionalPhoto]);
+
+  const handleImageLoad = useCallback(() => {
+    setImageLoading(false);
+  }, []);
+
+  const handleImageError = useCallback(() => {
+    setImageLoading(false);
+    Alert.alert('오류', '이미지를 불러올 수 없습니다.');
+  }, []);
+
+  const formatFileSize = useCallback((bytes?: number): string => {
+    if (!bytes) return '';
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  }, []);
+
   return (
     <View style={styles.previewContainer}>
-      {/* Header */}
       <View style={styles.previewHeader}>
-        <TouchableOpacity style={styles.closeButton} onPress={onCancel}>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={onCancel}
+          accessibilityLabel="닫기"
+          accessibilityRole="button"
+        >
           <MaterialIcons name="close" size={24} color="#fff" />
         </TouchableOpacity>
         <CustomText style={styles.headerTitle}>미리보기</CustomText>
-        <TouchableOpacity style={styles.useButton} onPress={onUse}>
+        <TouchableOpacity
+          style={styles.useButton}
+          onPress={onUse}
+          accessibilityLabel="등록"
+          accessibilityRole="button"
+        >
           <CustomText style={styles.useButtonText}>등록</CustomText>
         </TouchableOpacity>
       </View>
 
-      {/* Photo Preview */}
       <View style={styles.imageContainer}>
+        {imageLoading && (
+          <View
+            style={[
+              styles.previewImage,
+              getImageStyle(),
+              { justifyContent: 'center', alignItems: 'center' },
+            ]}
+          >
+            <ActivityIndicator size="large" color="#fff" />
+          </View>
+        )}
         <Image
           source={{ uri: currentPhoto.uri }}
           style={[styles.previewImage, getImageStyle()]}
           resizeMode="contain"
+          onLoad={handleImageLoad}
+          onError={handleImageError}
         />
       </View>
 
-      {/* Photo Info */}
       <View style={styles.photoInfoContainer}>
         {photo.fileSize && (
           <CustomText style={styles.photoSizeText}>
-            {(photo.fileSize / 1024 / 1024).toFixed(1)} MB
+            {formatFileSize(photo.fileSize)}
+          </CustomText>
+        )}
+        {additionalPhotos.length > 0 && (
+          <CustomText style={styles.photoSizeText}>
+            추가 사진: {additionalPhotos.length}개
           </CustomText>
         )}
       </View>
 
-      {/* Bottom Buttons */}
       <View style={styles.bottomButtons}>
-        <TouchableOpacity style={styles.retakeButton} onPress={onRetake}>
+        <TouchableOpacity
+          style={styles.retakeButton}
+          onPress={onRetake}
+          accessibilityLabel="다시 촬영"
+          accessibilityRole="button"
+        >
           <MaterialIcons name="camera-alt" size={20} color="#333" />
           <CustomText style={styles.retakeButtonText}>다시 촬영</CustomText>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.usePhotoButton} onPress={onUse}>
+
+        <TouchableOpacity
+          style={styles.usePhotoButton}
+          onPress={onUse}
+          accessibilityLabel="사진 사용"
+          accessibilityRole="button"
+        >
           <MaterialIcons name="check" size={20} color="#fff" />
           <CustomText style={styles.usePhotoButtonText}>사진 사용</CustomText>
         </TouchableOpacity>
       </View>
 
-      {/* Additional Option Buttons */}
       <View style={styles.additionalOptions}>
-        <TouchableOpacity style={styles.optionButton} onPress={handleCropPress}>
+        <TouchableOpacity
+          style={styles.optionButton}
+          onPress={handleCropPress}
+          accessibilityLabel="이미지 자르기"
+          accessibilityRole="button"
+        >
           <MaterialIcons name="crop" size={18} color="#666" />
           <CustomText style={styles.optionButtonText}>자르기</CustomText>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.optionButton}
           onPress={handleAdditionalPhotoPress}
+          accessibilityLabel="추가 촬영"
+          accessibilityRole="button"
         >
           <MaterialIcons name="add-a-photo" size={18} color="#666" />
           <CustomText style={styles.optionButtonText}>추가 촬영</CustomText>

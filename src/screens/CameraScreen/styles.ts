@@ -1,415 +1,664 @@
+// screens/CameraScreen/styles.ts
 import { StyleSheet, Dimensions } from 'react-native';
+
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-export const styles = StyleSheet.create({
-  // 기본 컨테이너
+const colors = {
+  primary: '#007AFF',
+  secondary: '#4CAF50',
+  danger: '#FF3B30',
+
+  black: '#000000',
+  darkGray: '#333333',
+  gray: '#666666',
+  lightGray: '#999999',
+  veryLightGray: '#CCCCCC',
+  white: '#FFFFFF',
+
+  blackOverlay: 'rgba(0, 0, 0, 0.8)',
+  blackOverlayLight: 'rgba(0, 0, 0, 0.5)',
+  whiteOverlay: 'rgba(255, 255, 255, 0.9)',
+  whiteOverlayLight: 'rgba(255, 255, 255, 0.1)',
+};
+
+const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
+};
+
+const shadows = {
+  small: {
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  medium: {
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+};
+
+// Main CameraScreen styles
+export const cameraStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: colors.black,
   },
 
-  // 카메라 실행 화면
   cameraLaunchContainer: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: colors.black,
   },
 
-  // 공통 헤더
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
+    backgroundColor: colors.blackOverlay,
   },
+
   closeButton: {
     width: 60,
-    padding: 8,
+    padding: spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.white,
+    textAlign: 'center',
   },
+
   placeholder: {
     width: 60,
   },
 
-  // 카메라 실행 화면 중앙 컨텐츠
   centerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: spacing.xl,
   },
+
   cameraButton: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: colors.whiteOverlayLight,
     borderWidth: 3,
-    borderColor: '#fff',
+    borderColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
-  },
-  cameraButtonDisabled: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderColor: '#666',
-  },
-  cameraButtonText: {
-    fontSize: 16,
-    color: '#fff',
-    textAlign: 'center',
+    marginBottom: spacing.xxl,
+    ...shadows.medium,
   },
 
-  // 하단 안내
+  cameraButtonDisabled: {
+    backgroundColor: colors.whiteOverlayLight,
+    borderColor: colors.lightGray,
+    opacity: 0.6,
+  },
+
+  cameraButtonText: {
+    fontSize: 16,
+    color: colors.white,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+  },
+
   bottomGuide: {
-    paddingHorizontal: 32,
+    paddingHorizontal: spacing.xxxl,
     paddingBottom: 48,
     alignItems: 'center',
   },
+
   guideText: {
     fontSize: 16,
-    color: '#fff',
+    color: colors.white,
     textAlign: 'center',
-    marginBottom: 8,
-  },
-  subGuideText: {
-    fontSize: 14,
-    color: '#ccc',
-    textAlign: 'center',
+    marginBottom: spacing.sm,
   },
 
-  // Photo Preview Screen
+  subGuideText: {
+    fontSize: 14,
+    color: colors.veryLightGray,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+});
+
+// PhotoPreview styles
+export const previewStyles = StyleSheet.create({
   previewContainer: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: colors.black,
   },
+
   previewHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-  },
-  useButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    width: 60,
-  },
-  useButtonText: {
-    width: 60,
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4CAF50',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
+    backgroundColor: colors.blackOverlay,
   },
 
-  // Image Container
+  closeButton: {},
+  headerTitle: {},
+  useButton: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+
+  useButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.secondary,
+  },
+
   imageContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000',
-    marginTop: 16,
-  },
-  previewImage: {
-    borderRadius: 8,
+    backgroundColor: colors.black,
+    marginTop: spacing.lg,
+    paddingHorizontal: spacing.lg,
   },
 
-  // Image Info
+  previewImage: {
+    borderRadius: spacing.sm,
+    maxWidth: '100%',
+    maxHeight: '100%',
+  },
+
   photoInfoContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.blackOverlay,
     borderTopWidth: 1,
-    borderTopColor: '#333',
+    borderTopColor: colors.darkGray,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  photoInfoText: {
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: '500',
-  },
+
   photoSizeText: {
     fontSize: 12,
-    color: '#ccc',
-    marginTop: 4,
+    color: colors.veryLightGray,
   },
 
-  // Bottom Buttons
   bottomButtons: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    gap: 12,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
+    backgroundColor: colors.blackOverlay,
+    gap: spacing.md,
   },
+
   retakeButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    gap: 8,
+    backgroundColor: '#F0F0F0',
+    borderRadius: spacing.sm,
+    gap: spacing.sm,
+    minHeight: 48,
   },
+
   retakeButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: colors.darkGray,
   },
+
   usePhotoButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
-    backgroundColor: '#4CAF50',
-    borderRadius: 8,
-    gap: 8,
+    backgroundColor: colors.secondary,
+    borderRadius: spacing.sm,
+    gap: spacing.sm,
+    minHeight: 48,
+    ...shadows.small,
   },
+
   usePhotoButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
+    color: colors.white,
   },
 
-  // Addditional Option Buttons
   additionalOptions: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxxl,
+    backgroundColor: colors.blackOverlay,
     justifyContent: 'center',
-    gap: 32,
+    gap: spacing.xxxl,
   },
+
   optionButton: {
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: spacing.sm,
+    minWidth: 60,
   },
+
   optionButtonText: {
     fontSize: 12,
-    color: '#666',
-  },
-
-  // Photo navigation
-  photoNavigation: {
-    position: 'absolute',
-    top: '50%',
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    zIndex: 10,
-  },
-  navButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 20,
-    padding: 8,
-  },
-  navButtonDisabled: {
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-  },
-
-  // thumbnail container
-  thumbnailContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#f8f9fa',
-    borderTopWidth: 1,
-    borderTopColor: '#e9ecef',
-  },
-  thumbnailWrapper: {
-    position: 'relative',
-    marginRight: 10,
-  },
-  thumbnail: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    overflow: 'hidden',
-  },
-  selectedThumbnail: {
-    borderColor: '#007AFF',
-  },
-  thumbnailImage: {
-    width: '100%',
-    height: '100%',
-  },
-  deleteThumbnailButton: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-    backgroundColor: '#FF3B30',
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  // option button : inactived
-  optionButtonDisabled: {
-    opacity: 0.5,
-  },
-  optionButtonTextDisabled: {
-    color: '#999',
+    color: colors.lightGray,
+    textAlign: 'center',
   },
 });
 
-/* CROP VIEW STYLE ******************************************************/
-export const cropViewStyles = StyleSheet.create({
+// CropView styles
+export const cropStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: colors.black,
   },
+
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: colors.black,
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   loadingContent: {
     alignItems: 'center',
   },
+
   loadingText: {
-    color: '#fff',
+    fontSize: 16,
+    color: colors.white,
+    marginTop: spacing.lg,
+    textAlign: 'center',
+  },
+
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.blackOverlay,
+  },
+
+  cancelButton: {
+    padding: spacing.sm,
+  },
+
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.white,
+  },
+
+  doneButton: {
+    backgroundColor: colors.darkGray,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: spacing.sm,
+    minWidth: 70,
+    alignItems: 'center',
+  },
+
+  doneButtonText: {
+    fontSize: 16,
+    color: colors.white,
+    fontWeight: '600',
+  },
+
+  content: {
+    flex: 1,
+    paddingHorizontal: spacing.xl,
+    paddingTop: 40,
+  },
+
+  instructionText: {
+    fontSize: 16,
+    color: colors.white,
+    textAlign: 'center',
+    marginBottom: 40,
+    lineHeight: 24,
+  },
+
+  cropModeContainer: {
+    marginBottom: 40,
+  },
+
+  cropModeTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.white,
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+
+  cropModeButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+
+  cropModeButton: {
+    backgroundColor: colors.whiteOverlayLight,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.whiteOverlayLight,
+    minWidth: 70,
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+
+  cropModeButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+
+  cropModeButtonText: {
+    fontSize: 14,
+    color: colors.white,
+    fontWeight: '500',
+  },
+
+  cropModeButtonTextActive: {
+    color: colors.white,
+    fontWeight: 'bold',
+  },
+
+  actionButtons: {
+    alignItems: 'center',
+    gap: spacing.lg,
+  },
+
+  cropButton: {
+    backgroundColor: colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xxxl,
+    paddingVertical: spacing.lg,
+    borderRadius: spacing.md,
+    minWidth: screenWidth * 0.7,
+    ...shadows.medium,
+  },
+
+  cropButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.white,
+    marginLeft: spacing.sm,
+  },
+
+  previewButton: {
+    backgroundColor: colors.whiteOverlayLight,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.md,
+    borderRadius: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.whiteOverlayLight,
+  },
+
+  previewButtonText: {
+    fontSize: 14,
+    color: colors.lightGray,
+    marginLeft: 6,
+  },
+
+  bottomGuide: {
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.lg,
+    backgroundColor: colors.whiteOverlayLight,
+  },
+
+  guideText: {
+    fontSize: 14,
+    color: colors.lightGray,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+});
+
+// CameraView styles
+export const cameraViewStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.black,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: colors.black,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  loadingContent: {
+    alignItems: 'center',
+  },
+
+  loadingText: {
+    color: colors.white,
     fontSize: 16,
     marginTop: 16,
+    textAlign: 'center',
   },
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: colors.blackOverlay,
   },
+
   cancelButton: {
     padding: 8,
   },
+
   headerTitle: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 18,
     fontWeight: 'bold',
   },
-  doneButton: {
-    backgroundColor: '#333',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
+
+  headerRight: {
+    flexDirection: 'row',
   },
-  doneButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+
+  headerButton: {
+    padding: 8,
+    marginLeft: 8,
   },
+
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: 20,
   },
+
+  instructionContainer: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+
+  instructionTitle: {
+    color: colors.white,
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+
   instructionText: {
-    color: '#fff',
+    color: colors.veryLightGray,
     fontSize: 16,
     textAlign: 'center',
-    marginBottom: 40,
     lineHeight: 24,
   },
-  cropModeContainer: {
-    marginBottom: 40,
-  },
-  cropModeTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  cropModeButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    flexWrap: 'wrap',
-  },
-  cropModeButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 20,
-    marginHorizontal: 4,
-    marginVertical: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  cropModeButtonActive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
-  cropModeButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  cropModeButtonTextActive: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  actionButtons: {
-    alignItems: 'center',
-  },
-  cropButton: {
-    backgroundColor: '#007AFF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
+
+  settingsContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
-    marginBottom: 16,
-    minWidth: screenWidth * 0.7,
+    padding: 16,
+    marginBottom: 30,
   },
-  cropButtonText: {
-    color: '#fff',
-    fontSize: 18,
+
+  settingsTitle: {
+    color: colors.white,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 8,
+    marginBottom: 16,
   },
-  previewButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+
+  settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+    justifyContent: 'space-between',
     paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
-  previewButtonText: {
-    color: '#666',
+
+  settingLabel: {
+    color: colors.white,
+    fontSize: 16,
+    flex: 1,
+  },
+
+  settingButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 122, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    minWidth: 80,
+    justifyContent: 'center',
+  },
+
+  settingButtonText: {
+    color: colors.primary,
     fontSize: 14,
     marginLeft: 6,
+    fontWeight: '500',
   },
+
+  qualityButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+
+  qualityButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    minWidth: 50,
+    alignItems: 'center',
+  },
+
+  qualityButtonActive: {
+    backgroundColor: colors.primary,
+  },
+
+  qualityButtonText: {
+    color: colors.veryLightGray,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+
+  qualityButtonTextActive: {
+    color: colors.white,
+    fontWeight: 'bold',
+  },
+
+  cameraButtonContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+
+  cameraButton: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    shadowColor: colors.primary,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+
+  cameraButtonDisabled: {
+    backgroundColor: colors.gray,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+
+  cameraButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+
   bottomGuide: {
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
+
   guideText: {
-    color: '#999',
+    color: colors.lightGray,
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
   },
 });
+
+export { colors, spacing, shadows };

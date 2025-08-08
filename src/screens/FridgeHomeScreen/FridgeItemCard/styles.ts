@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 
 // Item Card Styles : './index.tsx'
 export const cardStyles = StyleSheet.create({
@@ -104,17 +104,6 @@ export const quantityStyles = StyleSheet.create({
     fontSize: 10,
     color: '#666',
     marginLeft: 2,
-  },
-});
-
-// Item Delete Button Style : './DeleteButton.tsx'
-export const deleteStyles = StyleSheet.create({
-  deleteItemButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 1,
-    opacity: 0.5,
   },
 });
 
