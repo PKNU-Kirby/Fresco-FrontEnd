@@ -13,14 +13,16 @@ import { Recipe, RecipeStackParamList } from './RecipeNavigator';
 import {
   RecipeStorage,
   FavoriteStorage,
+  SearchHistoryStorage,
   SharedRecipeStorage,
 } from '../../utils/AsyncStorageUtils';
 
 // 컴포넌트 imports
-import RecipeHeader from './components/RecipeHeader';
+import SearchBar from './components/SearchBar';
 import FloatingButton from './components/FloatingButton';
 import SharedRecipeFolder from './components/SharedRecipeFolder';
 import RenderRecipeItem from './components/RenderRecipeItem';
+import PaginationButton from './components/PaginationButton';
 import { ListHeader, ListFooter } from './components/ListComponents';
 
 type RecipeHomeNavigationProp = NativeStackNavigationProp<
@@ -112,34 +114,97 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   const navigation = useNavigation<RecipeHomeNavigationProp>();
   const { fridgeId, fridgeName } = route.params;
 
-  // State 관리 (검색 관련 state 모두 제거)
+  // State 관리
   const [personalRecipes, setPersonalRecipes] = useState<Recipe[]>([]);
   const [sharedRecipes, setSharedRecipes] = useState<Recipe[]>([]);
   const [favoriteRecipeIds, setFavoriteRecipeIds] = useState<string[]>([]);
   const [currentTab, setCurrentTab] = useState<'all' | 'favorites'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [_showSearchHistory, setShowSearchHistory] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [showFloatingMenu, setShowFloatingMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const [lastScrollY, setLastScrollY] = useState(0); // 🔧 이전 스크롤 위치 저장
 
   // Refs
   const scrollViewRef = useRef<ScrollView>(null);
   const flatListRef = useRef<any>(null);
   const ITEMS_PER_PAGE = 15;
 
+  // 🔧 함수들을 useCallback으로 정의 (호이스팅 문제 해결)
+  const handleSearch = React.useCallback(async () => {
+    if (searchQuery.trim()) {
+      try {
+        // 검색 히스토리에 추가하고 AsyncStorage에 저장
+        const newHistory = await SearchHistoryStorage.addSearchQuery(
+          searchQuery,
+        );
+        setSearchHistory(newHistory);
+        setShowSearchHistory(false);
+        navigation.navigate('SearchResult', { query: searchQuery });
+      } catch (error) {
+        console.error('검색 히스토리 저장 실패:', error);
+        // 에러가 나도 검색은 진행
+        navigation.navigate('SearchResult', { query: searchQuery });
+      }
+    }
+  }, [searchQuery, navigation]);
+
+  const handleHistoryItemPress = React.useCallback(
+    async (item: string) => {
+      setSearchQuery(item);
+      setShowSearchHistory(false);
+
+      try {
+        // 검색 히스토리 업데이트
+        const newHistory = await SearchHistoryStorage.addSearchQuery(item);
+        setSearchHistory(newHistory);
+        navigation.navigate('SearchResult', { query: item });
+      } catch (error) {
+        console.error('검색 히스토리 업데이트 실패:', error);
+        navigation.navigate('SearchResult', { query: item });
+      }
+    },
+    [navigation],
+  );
+
+  const removeHistoryItem = React.useCallback(async (item: string) => {
+    try {
+      const newHistory = await SearchHistoryStorage.removeSearchQuery(item);
+      setSearchHistory(newHistory);
+    } catch (error) {
+      console.error('검색 히스토리 항목 삭제 실패:', error);
+    }
+  }, []);
+
+  const clearAllHistory = React.useCallback(async () => {
+    try {
+      await SearchHistoryStorage.clearSearchHistory();
+      setSearchHistory([]);
+    } catch (error) {
+      console.error('검색 히스토리 전체 삭제 실패:', error);
+    }
+  }, []);
+
   // 🔧 초기 데이터 로드
   const loadInitialData = async () => {
     try {
       setIsLoading(true);
 
-      // 병렬로 모든 데이터 로드 (검색 히스토리 제거)
-      const [storedPersonalRecipes, storedFavoriteIds, storedSharedRecipes] =
-        await Promise.all([
-          RecipeStorage.getPersonalRecipes(),
-          FavoriteStorage.getFavoriteIds(),
-          SharedRecipeStorage.getSharedRecipes(),
-        ]);
+      // 병렬로 모든 데이터 로드
+      const [
+        storedPersonalRecipes,
+        storedFavoriteIds,
+        storedSearchHistory,
+        storedSharedRecipes,
+      ] = await Promise.all([
+        RecipeStorage.getPersonalRecipes(),
+        FavoriteStorage.getFavoriteIds(),
+        SearchHistoryStorage.getSearchHistory(),
+        SharedRecipeStorage.getSharedRecipes(),
+      ]);
 
       // 개인 레시피 설정 (없으면 초기 mock 데이터 사용)
       if (storedPersonalRecipes.length > 0) {
@@ -159,8 +224,9 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
         await SharedRecipeStorage.saveSharedRecipes(mockSharedRecipes);
       }
 
-      // 즐겨찾기 설정
+      // 즐겨찾기 및 검색 히스토리 설정
       setFavoriteRecipeIds(storedFavoriteIds);
+      setSearchHistory(storedSearchHistory);
     } catch (error) {
       console.error('초기 데이터 로드 실패:', error);
       // 에러 시 기본값 설정
@@ -179,7 +245,9 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   // 🔧 화면 포커스 시 데이터 동기화
   useFocusEffect(
     React.useCallback(() => {
-      // 검색에서 돌아올 때 상태 초기화 (검색 관련 제거)
+      // 검색에서 돌아올 때 상태 초기화
+      setSearchQuery('');
+      setShowSearchHistory(false);
       setCurrentPage(1);
 
       // 데이터 다시 로드 (다른 화면에서 변경될 수 있으므로)
@@ -196,11 +264,16 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     return personalRecipes.filter(recipe => isFavorite(recipe.id));
   };
 
-  // 현재 표시할 레시피들 필터링 (검색 쿼리 제거)
+  // 현재 표시할 레시피들 필터링
   const getFilteredRecipes = () => {
     let recipes = personalRecipes;
     if (currentTab === 'favorites') {
       recipes = getFavoriteRecipes();
+    }
+    if (searchQuery) {
+      recipes = recipes.filter(recipe =>
+        recipe.title.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
     }
     return recipes.slice(0, currentPage * ITEMS_PER_PAGE);
   };
@@ -263,7 +336,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   };
 
   const handleDragEnd = async ({ data }: { data: Recipe[] }) => {
-    if (currentTab === 'all') {
+    if (currentTab === 'all' && !searchQuery) {
       try {
         // AsyncStorage에 새로운 순서 저장
         await RecipeStorage.savePersonalRecipes(data);
@@ -288,7 +361,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     // 스크롤 방향 계산
     const isScrollingUp = scrollY < lastScrollY;
     const isScrollingDown = scrollY > lastScrollY;
-    const hasScrolledEnough = scrollY > 100;
+    const hasScrolledEnough = scrollY > 300; // 최소 스크롤 거리
 
     // 위로 스크롤 중이고 충분히 스크롤했을 때 버튼 표시
     if (isScrollingUp && hasScrolledEnough) {
@@ -339,45 +412,62 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <GestureHandlerRootView style={styles.container}>
-        <RecipeHeader />
+        <View style={styles.header}>
+          {/* 검색바 */}
+          <SearchBar
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onSearch={handleSearch}
+            searchHistory={searchHistory}
+            onHistoryItemPress={handleHistoryItemPress}
+            onHistoryItemRemove={removeHistoryItem}
+            onClearAllHistory={clearAllHistory}
+            headerTitle="레시피 목록"
+            showBackButton={false}
+          />
 
-        {/* 탭 */}
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[styles.tab, currentTab === 'all' && styles.activeTab]}
-            onPress={() => {
-              setCurrentTab('all');
-              setCurrentPage(1);
-            }}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                currentTab === 'all' && styles.activeTabText,
-              ]}
+          {/* 탭 */}
+          <View style={styles.tabContainer}>
+            <TouchableOpacity
+              style={[styles.tab, currentTab === 'all' && styles.activeTab]}
+              onPress={() => {
+                setCurrentTab('all');
+                setCurrentPage(1);
+              }}
             >
-              전체 레시피 ({personalRecipes.length})
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, currentTab === 'favorites' && styles.activeTab]}
-            onPress={() => {
-              setCurrentTab('favorites');
-              setCurrentPage(1);
-            }}
-          >
-            <Text
+              <Text
+                style={[
+                  styles.tabText,
+                  currentTab === 'all' && styles.activeTabText,
+                ]}
+              >
+                전체 레시피 ({personalRecipes.length})
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
               style={[
-                styles.tabText,
-                currentTab === 'favorites' && styles.activeTabText,
+                styles.tab,
+                currentTab === 'favorites' && styles.activeTab,
               ]}
+              onPress={() => {
+                setCurrentTab('favorites');
+                setCurrentPage(1);
+              }}
             >
-              즐겨찾기 ({getFavoriteRecipes().length})
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[
+                  styles.tabText,
+                  currentTab === 'favorites' && styles.activeTabText,
+                ]}
+              >
+                즐겨찾기 ({getFavoriteRecipes().length})
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
+
         {/* 레시피 리스트 */}
-        {filteredRecipes.length === 0 ? (
+        {filteredRecipes.length === 0 && !searchQuery ? (
           <ScrollView
             ref={scrollViewRef}
             style={styles.content}
@@ -414,7 +504,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
               onDragEnd={handleDragEnd}
               keyExtractor={item => item.id}
               renderItem={({ item, drag, isActive }) => {
-                const isDragEnabled = currentTab === 'all';
+                const isDragEnabled = currentTab === 'all' && !searchQuery;
                 return (
                   <RenderRecipeItem
                     item={item}
@@ -434,18 +524,11 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                   />
                 );
               }}
-              onScrollOffsetChange={offset => {
-                // 간단한 스크롤 로직: 100px 이상 스크롤하면 버튼 표시
-                if (offset > 100) {
-                  setShowScrollToTop(true);
-                } else {
-                  setShowScrollToTop(false);
-                }
-                setLastScrollY(offset);
-              }}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
               ListHeaderComponent={
                 <ListHeader
-                  shouldShow={currentTab === 'all'}
+                  shouldShow={currentTab === 'all' && !searchQuery}
                   recipeCount={sharedRecipes.length}
                   onPress={() => navigation.navigate('SharedFolder')}
                 />

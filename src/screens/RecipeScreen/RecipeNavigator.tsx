@@ -1,0 +1,107 @@
+import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import RecipeHomeScreen from './index';
+import AIRecipeScreen from './screens/AIRecipeScreen';
+import RecipeDetailScreen from './screens/RecipeDetailScreen';
+import SearchScreen from './screens/SearchScreen';
+import SearchResultScreen from './screens/SearchResultScreen';
+import SharedFolderScreen from './screens/SharedFolderScreen';
+
+// Recipe 타입 정의 (공통으로 사용)
+export interface Recipe {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  createdAt: string;
+  updatedAt?: string;
+  isShared?: boolean;
+  sharedBy?: string;
+  // RecipeDetail에서 사용하는 추가 필드들
+  ingredients?: RecipeIngredient[];
+  steps?: string[];
+  referenceUrl?: string;
+}
+
+// RecipeIngredient 타입도 export
+export interface RecipeIngredient {
+  id: string;
+  name: string;
+  quantity: string;
+  unit: string;
+}
+
+// 네비게이션 타입 정의
+export type RecipeStackParamList = {
+  RecipeHome: {
+    fridgeId: number;
+    fridgeName: string;
+  };
+  AIRecipe: undefined;
+  RecipeDetail: {
+    recipe?: Recipe;
+    isEditing?: boolean;
+    isNewRecipe?: boolean;
+    fridgeId: number;
+    fridgeName: string;
+    aiGeneratedData?: Partial<Recipe>; // 🔧 AI 생성 데이터 전달용 추가
+  };
+  Search: undefined; // 파라미터 없음으로 정의
+  SearchResult: {
+    query: string;
+  };
+  SharedFolder: undefined;
+};
+
+const RecipeStack = createNativeStackNavigator<RecipeStackParamList>();
+
+interface RecipeNavigatorProps {
+  route: {
+    params: {
+      fridgeId: number;
+      fridgeName: string;
+    };
+  };
+}
+
+const RecipeNavigator: React.FC<RecipeNavigatorProps> = ({ route }) => {
+  const { fridgeId, fridgeName } = route.params;
+
+  return (
+    <RecipeStack.Navigator
+      initialRouteName="RecipeHome"
+      screenOptions={{
+        headerShown: false,
+        animation: 'slide_from_right',
+      }}
+    >
+      <RecipeStack.Screen
+        name="RecipeHome"
+        component={RecipeHomeScreen}
+        initialParams={{ fridgeId, fridgeName }}
+      />
+
+      <RecipeStack.Screen
+        name="AIRecipe"
+        component={AIRecipeScreen}
+        options={{
+          animation: 'slide_from_bottom',
+        }}
+      />
+
+      <RecipeStack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
+
+      <RecipeStack.Screen name="Search" component={SearchScreen} />
+
+      <RecipeStack.Screen name="SearchResult" component={SearchResultScreen} />
+
+      <RecipeStack.Screen
+        name="SharedFolder"
+        component={SharedFolderScreen}
+        options={{}}
+      />
+    </RecipeStack.Navigator>
+  );
+};
+
+export default RecipeNavigator;
