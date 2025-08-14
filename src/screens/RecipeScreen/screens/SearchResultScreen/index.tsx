@@ -4,7 +4,8 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  StyleSheet,
+  TextInput,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -15,8 +16,9 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Recipe, RecipeStackParamList } from '../../RecipeNavigator';
+import { styles } from './styles';
 
-// 🔧 AsyncStorage 유틸리티 import
+// utility funcs
 import {
   RecipeStorage,
   FavoriteStorage,
@@ -40,24 +42,47 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   const { query: initialQuery } = route.params;
 
   const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [_searchHistory, setSearchHistory] = useState<string[]>([]);
   const [searchResults, setSearchResults] = useState<Recipe[]>([]);
   const [favoriteRecipeIds, setFavoriteRecipeIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isInputActive, setIsInputActive] = useState(false); // 입력 활성 상태 추가
 
   const scrollViewRef = useRef<ScrollView>(null);
+  const searchInputRef = useRef<TextInput>(null);
   const ITEMS_PER_PAGE = 15;
 
-  // 즐겨찾기 여부 확인 함수
+  // 초기 검색 실행
+  useEffect(() => {
+    if (initialQuery) {
+      handleSearch();
+      loadFavorites();
+    }
+  }, [initialQuery]);
+
+  // 즐겨찾기 목록 로드
+  const loadFavorites = async () => {
+    try {
+      const favorites = await FavoriteStorage.getFavoriteIds();
+      setFavoriteRecipeIds(favorites);
+    } catch (error) {
+      console.error('즐겨찾기 로드 실패:', error);
+    }
+  };
+
+  // is Stared Recipe
   const isFavorite = (recipeId: string): boolean => {
     return favoriteRecipeIds.includes(recipeId);
   };
 
-  // 🔧 함수들을 useCallback으로 정의 (호이스팅 문제 해결)
   const handleSearch = React.useCallback(async () => {
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
 
     setIsLoading(true);
 
@@ -84,9 +109,40 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     }
   }, [searchQuery]);
 
+  // 검색어 변경 시 실시간 검색
+  const handleSearchQueryChange = (text: string) => {
+    setSearchQuery(text);
+
+    // 디바운싱을 위한 타이머 (선택사항)
+    // clearTimeout(searchTimer.current);
+    // searchTimer.current = setTimeout(() => {
+    //   if (text.trim()) {
+    //     handleSearch();
+    //   } else {
+    //     setSearchResults([]);
+    //   }
+    // }, 300);
+  };
+
+  // 검색어 제출 (키보드 완료 버튼)
+  const handleSearchSubmit = () => {
+    Keyboard.dismiss();
+    setIsSearchFocused(false);
+    handleSearch();
+  };
+
+  // 검색어 지우기
+  const clearSearchQuery = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setIsInputActive(true); // X 버튼 클릭 시에도 활성 상태 유지
+    searchInputRef.current?.focus();
+  };
+
   // 검색 히스토리 항목 클릭
   const handleHistoryItemPress = (item: string) => {
     setSearchQuery(item);
+    handleSearch();
   };
 
   // 검색 히스토리 항목 삭제
@@ -109,12 +165,12 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     }
   };
 
-  // 🔧 즐겨찾기 토글 (AsyncStorage 연결)
+  // toggle Star
   const toggleFavorite = async (recipeId: string) => {
     try {
       const isNowFavorite = await FavoriteStorage.toggleFavorite(recipeId);
 
-      // 로컬 상태 업데이트
+      // Update local state
       if (isNowFavorite) {
         setFavoriteRecipeIds(prev => [...prev, recipeId]);
       } else {
@@ -125,16 +181,16 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     }
   };
 
-  // 🔧 레시피 삭제 (AsyncStorage 연결)
+  // Delete Recipe
   const deleteRecipe = async (recipeId: string) => {
     try {
-      // AsyncStorage에서 삭제
+      // from asyncstorage
       await RecipeStorage.deletePersonalRecipe(recipeId);
 
-      // 검색 결과에서도 제거
+      // from research result
       setSearchResults(prev => prev.filter(r => r.id !== recipeId));
 
-      // 즐겨찾기에서도 제거
+      // from stared recipe
       if (favoriteRecipeIds.includes(recipeId)) {
         await FavoriteStorage.removeFavorite(recipeId);
         setFavoriteRecipeIds(prev => prev.filter(id => id !== recipeId));
@@ -144,18 +200,18 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     }
   };
 
-  // 스크롤 이벤트 처리
+  // event : scroll
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
     setShowScrollToTop(scrollY > 300);
   };
 
-  // 맨 위로 스크롤
+  // scroll to top
   const scrollToTop = () => {
     scrollViewRef.current?.scrollTo({ y: 0, animated: true });
   };
 
-  // 더보기
+  // load more
   const loadMore = () => {
     setCurrentPage(prev => prev + 1);
   };
@@ -163,7 +219,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   const displayedResults = searchResults.slice(0, currentPage * ITEMS_PER_PAGE);
   const hasMoreResults = displayedResults.length < searchResults.length;
 
-  // 레시피 카드 컴포넌트
+  // Component : Recipe Card
   const RecipeCard: React.FC<{ recipe: Recipe }> = ({ recipe }) => {
     const renderRightActions = () => (
       <TouchableOpacity
@@ -198,9 +254,9 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
               onPress={() => toggleFavorite(recipe.id)}
             >
               <Icon
-                name={isFavorite(recipe.id) ? 'favorite' : 'favorite-border'}
+                name={isFavorite(recipe.id) ? 'star' : 'star-border'}
                 size={24}
-                color={isFavorite(recipe.id) ? '#FF6B6B' : '#999'}
+                color={isFavorite(recipe.id) ? '#ffd000' : '#999'}
               />
             </TouchableOpacity>
           </View>
@@ -212,49 +268,80 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <GestureHandlerRootView style={styles.container}>
-        {/* 검색 결과 헤더 */}
+        {/* Header */}
         <View style={styles.searchResultHeader}>
-          {/* 뒤로가기 버튼 */}
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.navigate('RecipeHome' as never)}
           >
-            <Icon name="arrow-back" size={24} color="#fff" />
+            <Icon name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
 
-          {/* 검색창 (클릭하면 검색 화면으로) */}
-          <TouchableOpacity
-            style={styles.searchBarContainer}
-            onPress={() => navigation.navigate('Search')}
+          {/* Improved Search Bar */}
+          <View
+            style={[
+              styles.searchBarContainer,
+              (isSearchFocused || isInputActive) && styles.searchBarFocused,
+            ]}
           >
             <Icon
               name="search"
               size={20}
-              color="#999"
+              color="#333"
               style={styles.searchIcon}
             />
-            <Text style={styles.searchText}>
-              {searchQuery || 'Title, text, hashtag'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* X 버튼 (검색 화면으로) */}
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => navigation.navigate('Search')}
-          >
-            <Icon name="close" size={24} color="#999" />
-          </TouchableOpacity>
+            <TextInput
+              ref={searchInputRef}
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={text => {
+                handleSearchQueryChange(text);
+                setIsInputActive(text.length > 0); // 텍스트 있으면 활성 상태
+              }}
+              onSubmitEditing={handleSearchSubmit}
+              onFocus={() => {
+                console.log('포커스됨');
+                setIsSearchFocused(true);
+                setIsInputActive(true);
+              }}
+              onBlur={() => {
+                console.log('블러됨');
+                setIsSearchFocused(false);
+                // 텍스트가 있으면 활성 상태 유지, 없으면 비활성
+                setIsInputActive(searchQuery.length > 0);
+              }}
+              placeholder="Title, text, hashtag"
+              placeholderTextColor="#999"
+              selectionColor="#29a448ff"
+              returnKeyType="search"
+              autoCorrect={false}
+              autoCapitalize="none"
+              blurOnSubmit={false}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={clearSearchQuery}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                activeOpacity={0.7}
+              >
+                <View style={styles.clearButtonCircle}>
+                  <Icon name="close" size={16} color="white" />
+                </View>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
-        {/* 검색 결과 */}
+        {/* Result */}
         <ScrollView
           ref={scrollViewRef}
           style={styles.content}
           onScroll={handleScroll}
           scrollEventThrottle={16}
+          keyboardShouldPersistTaps="handled"
         >
-          {/* 검색 결과 헤더 */}
+          {/* header */}
           {searchResults.length > 0 && (
             <View style={styles.resultHeader}>
               <Text style={styles.resultCount}>
@@ -263,31 +350,31 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
             </View>
           )}
 
-          {/* 로딩 상태 */}
+          {/* Loading */}
           {isLoading && (
             <View style={styles.loadingContainer}>
               <Text style={styles.loadingText}>검색 중...</Text>
             </View>
           )}
 
-          {/* 검색 결과 없음 */}
+          {/* No Result */}
           {!isLoading && searchResults.length === 0 && searchQuery && (
             <View style={styles.noResultContainer}>
               <Icon name="search-off" size={48} color="#ccc" />
               <Text style={styles.noResultText}>검색 결과가 없습니다</Text>
               <Text style={styles.noResultSubText}>
-                다른 키워드로 검색해보세요
+                다른 레시피를 검색해보세요
               </Text>
             </View>
           )}
 
-          {/* 검색 결과 리스트 */}
+          {/* Result List */}
           {!isLoading &&
             displayedResults.map(recipe => (
               <RecipeCard key={recipe.id} recipe={recipe} />
             ))}
 
-          {/* 더보기 버튼 */}
+          {/* load more */}
           {hasMoreResults && !isLoading && (
             <View style={styles.loadMoreContainer}>
               <TouchableOpacity
@@ -302,7 +389,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
           )}
         </ScrollView>
 
-        {/* 맨 위로 버튼 */}
+        {/* scroll to top */}
         {showScrollToTop && (
           <TouchableOpacity
             style={styles.scrollToTopButton}
@@ -316,204 +403,5 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#1a1a1a',
-  },
-
-  container: {
-    flex: 1,
-  },
-
-  // 검색 결과 헤더 스타일
-  searchResultHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#1a1a1a',
-  },
-
-  backButton: {
-    padding: 8,
-    marginRight: 8,
-  },
-
-  searchBarContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#333',
-    borderRadius: 25,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginHorizontal: 8,
-  },
-
-  searchIcon: {
-    marginRight: 8,
-  },
-
-  searchText: {
-    flex: 1,
-    fontSize: 16,
-    color: '#fff',
-  },
-
-  closeButton: {
-    padding: 8,
-    marginLeft: 8,
-  },
-
-  content: {
-    flex: 1,
-    paddingHorizontal: 16,
-    backgroundColor: '#f8f9fa',
-  },
-
-  resultHeader: {
-    paddingVertical: 16,
-  },
-
-  resultCount: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-  },
-
-  loadingContainer: {
-    paddingVertical: 40,
-    alignItems: 'center',
-  },
-
-  loadingText: {
-    fontSize: 16,
-    color: '#666',
-  },
-
-  noResultContainer: {
-    paddingVertical: 60,
-    alignItems: 'center',
-  },
-
-  noResultText: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: '#666',
-    marginTop: 16,
-  },
-
-  noResultSubText: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 8,
-  },
-
-  // 레시피 카드 스타일들
-  recipeCard: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
-  },
-
-  recipeCardContent: {
-    flexDirection: 'row',
-    padding: 16,
-    alignItems: 'center',
-  },
-
-  recipeInfo: {
-    flex: 1,
-  },
-
-  recipeTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-
-  recipeDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-    lineHeight: 20,
-  },
-
-  recipeDate: {
-    fontSize: 12,
-    color: '#999',
-  },
-
-  favoriteButton: {
-    padding: 8,
-    marginLeft: 12,
-  },
-
-  deleteButton: {
-    backgroundColor: '#FF3B30',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 80,
-    marginBottom: 12,
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
-  },
-
-  deleteButtonText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '500',
-    marginTop: 4,
-  },
-
-  scrollToTopButton: {
-    position: 'absolute',
-    bottom: 30,
-    right: 20,
-    backgroundColor: '#007AFF',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-
-  loadMoreContainer: {
-    paddingVertical: 20,
-    alignItems: 'center',
-  },
-
-  loadMoreButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-
-  loadMoreText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-});
 
 export default SearchResultScreen;

@@ -303,61 +303,77 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
       >
         {/* header */}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Icon name="arrow-back" size={24} color="#333" />
-          </TouchableOpacity>
-
-          <Text style={styles.headerTitle}>
-            {isNewRecipe
-              ? '새 레시피'
-              : isEditMode
-              ? '레시피 편집'
-              : '레시피 상세'}
-          </Text>
-
-          <View style={styles.headerActions}>
-            {/* Favorite Button */}
-            {currentRecipe.id && !isSharedRecipe && (
-              <TouchableOpacity
-                style={styles.favoriteButton}
-                onPress={toggleFavorite}
-              >
-                <Icon
-                  name={isFavorite ? 'favorite' : 'favorite-border'}
-                  size={24}
-                  color={isFavorite ? '#ffd000' : '#999'}
-                />
+          {isEditMode ? (
+            <View style={styles.leftEditHeader}>
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Icon name="arrow-back" size={24} color="#333" />
               </TouchableOpacity>
-            )}
+            </View>
+          ) : (
+            <View style={styles.leftHeader}>
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Icon name="arrow-back" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+          )}
 
-            {/* edit / save button */}
-            {isEditMode ? (
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={handleSave}
-                disabled={isLoading}
-              >
-                <FontAwesome6 name="circle-check" size={24} color="#333" />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={() => setIsEditMode(true)}
-              >
-                <Icon name="edit" size={24} color="#007AFF" />
-              </TouchableOpacity>
-            )}
+          <View style={styles.centerHeader}>
+            <Text style={styles.headerTitle}>
+              {isNewRecipe
+                ? '새 레시피'
+                : isEditMode
+                ? '레시피 편집'
+                : '레시피 상세'}
+            </Text>
           </View>
+
+          {/* edit / save button */}
+          {isEditMode ? (
+            <View style={styles.rightEditHeader}>
+              <View style={styles.headerActions}>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleSave}
+                  disabled={isLoading}
+                >
+                  <FontAwesome6
+                    name="circle-check"
+                    size={24}
+                    color="limegreen"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            // Favorite Button
+            <View style={styles.rightHeader}>
+              <View style={styles.headerActions}>
+                <TouchableOpacity
+                  style={styles.favoriteButton}
+                  onPress={toggleFavorite}
+                >
+                  <Icon
+                    name={isFavorite ? 'star' : 'star-border'}
+                    size={24}
+                    color={isFavorite ? '#ffd000' : '#999'}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => setIsEditMode(true)}
+                >
+                  <Icon name="edit" size={24} color="#333" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {/* 공유 레시피 -> 안내 메시지 표시 */}
+          {/* Shared Recipe Message*/}
           {isSharedRecipe && (
             <View style={styles.sharedIndicator}>
-              <Icon name="group" size={20} color="#34C759" />
+              <Icon name="group" size={20} color="limegreen" />
               <Text style={styles.sharedText}>
                 {currentRecipe.sharedBy}님이 공유한 레시피입니다
               </Text>
@@ -366,7 +382,6 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
 
           {/* Recipe Title */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>레시피 제목</Text>
             {isEditMode ? (
               <TextInput
                 style={styles.titleInput}
@@ -406,6 +421,9 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
 
           {/* Ingredients */}
           <View style={styles.section}>
+            <View style={styles.sectionContour}>
+              <></>
+            </View>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>재료</Text>
               {isEditMode && (
@@ -413,13 +431,13 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
                   style={styles.addButton}
                   onPress={addIngredient}
                 >
-                  <Icon name="add" size={20} color="#007AFF" />
+                  <Icon name="add" size={20} color="#29a448ff" />
                   <Text style={styles.addButtonText}>재료 추가</Text>
                 </TouchableOpacity>
               )}
             </View>
 
-            {currentRecipe.ingredients?.map((ingredient, index) => (
+            {currentRecipe.ingredients?.map((ingredient, _index) => (
               <View key={ingredient.id} style={styles.ingredientItem}>
                 {isEditMode ? (
                   <View style={styles.ingredientEditRow}>
@@ -457,7 +475,7 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
                       style={styles.removeButton}
                       onPress={() => removeIngredient(ingredient.id)}
                     >
-                      <Icon name="remove" size={20} color="#FF3B30" />
+                      <Icon name="remove" size={20} color="tomato" />
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -470,13 +488,16 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
             ))}
           </View>
 
-          {/* 조리법 */}
+          {/* Steps */}
           <View style={styles.section}>
+            <View style={styles.sectionContour}>
+              <></>
+            </View>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>조리법</Text>
               {isEditMode && (
                 <TouchableOpacity style={styles.addButton} onPress={addStep}>
-                  <Icon name="add" size={20} color="#007AFF" />
+                  <Icon name="add" size={20} color="#29a448ff" />
                   <Text style={styles.addButtonText}>단계 추가</Text>
                 </TouchableOpacity>
               )}
@@ -496,23 +517,28 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
                       multiline
                     />
                     <TouchableOpacity
-                      style={styles.removeButton}
+                      style={styles.removeStepsButton}
                       onPress={() => removeStep(index)}
                     >
                       <Icon name="remove" size={20} color="#FF3B30" />
                     </TouchableOpacity>
                   </View>
                 ) : (
-                  <View style={styles.stepRow}>
+                  <>
                     <Text style={styles.stepNumber}>{index + 1}.</Text>
-                    <Text style={styles.stepText}>{step}</Text>
-                  </View>
+                    <View style={styles.stepRow}>
+                      <Text style={styles.stepText}>{step}</Text>
+                      <View style={styles.stepsContour}>
+                        <></>
+                      </View>
+                    </View>
+                  </>
                 )}
               </View>
             ))}
           </View>
 
-          {/* 참고 URL */}
+          {/* URL */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>참고 URL</Text>
             {isEditMode ? (
@@ -532,17 +558,16 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
             )}
           </View>
 
-          {/* 🔧 구성원과 공유 버튼 - 개인 레시피인 경우에만 표시 */}
+          {/* Share Button */}
           {!isEditMode && currentRecipe.id && !isSharedRecipe && (
             <TouchableOpacity
               style={styles.shareButton}
               onPress={shareWithMembers}
             >
-              <Icon name="group" size={24} color="white" />
-              <Text style={styles.shareButtonText}>구성원과 공유</Text>
+              <Icon name="group" size={24} color="#f8f8f8" />
+              <Text style={styles.shareButtonText}>구성원과 공유하기</Text>
             </TouchableOpacity>
           )}
-
           <View style={styles.bottomSpacer} />
         </ScrollView>
       </KeyboardAvoidingView>

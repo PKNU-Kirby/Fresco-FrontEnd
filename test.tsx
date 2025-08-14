@@ -1,301 +1,180 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import DraggableFlatList from 'react-native-draggable-flatlist';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Keyboard,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import {
+  GestureHandlerRootView,
+  Swipeable,
+} from 'react-native-gesture-handler';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Recipe, RecipeStackParamList } from '../../RecipeNavigator';
 import { styles } from './styles';
-import { Recipe, RecipeStackParamList } from './RecipeNavigator';
 
-// 🔧 AsyncStorage 유틸리티 import
+// utility funcs
 import {
   RecipeStorage,
   FavoriteStorage,
   SearchHistoryStorage,
-  SharedRecipeStorage,
-} from '../../utils/AsyncStorageUtils';
+} from '../../../../utils/AsyncStorageUtils';
 
-// 컴포넌트 imports
-import SearchBar from './components/SearchBar';
-import FloatingButton from './components/FloatingButton';
-import SharedRecipeFolder from './components/SharedRecipeFolder';
-import RenderRecipeItem from './components/RenderRecipeItem';
-import PaginationButton from './components/PaginationButton';
-import { ListHeader, ListFooter } from './components/ListComponents';
-
-type RecipeHomeNavigationProp = NativeStackNavigationProp<
+type SearchResultScreenNavigationProp = NativeStackNavigationProp<
   RecipeStackParamList,
-  'RecipeHome'
+  'SearchResult'
+>;
+type SearchResultScreenRouteProp = RouteProp<
+  RecipeStackParamList,
+  'SearchResult'
 >;
 
-// Mock 공동 레시피 데이터 (초기값)
-const mockSharedRecipes: Recipe[] = [
-  {
-    id: 'shared-1',
-    title: '우리 가족 김치찌개',
-    description: '엄마가 알려준 김치찌개 레시피',
-    createdAt: '2024-01-16',
-    isShared: true,
-    sharedBy: '엄마',
-  },
-  {
-    id: 'shared-2',
-    title: '아빠의 된장찌개',
-    description: '아빠 특제 된장찌개',
-    createdAt: '2024-01-15',
-    isShared: true,
-    sharedBy: '아빠',
-  },
-  {
-    id: 'shared-3',
-    title: '언니의 계란말이',
-    description: '언니가 공유한 계란말이',
-    createdAt: '2024-01-14',
-    isShared: true,
-    sharedBy: '언니',
-  },
-  {
-    id: 'shared-4',
-    title: '할머니 비빔밥',
-    description: '할머니의 특제 비빔밥',
-    createdAt: '2024-01-13',
-    isShared: true,
-    sharedBy: '할머니',
-  },
-  {
-    id: 'shared-5',
-    title: '동생의 크림파스타',
-    description: '동생이 만든 크림파스타',
-    createdAt: '2024-01-12',
-    isShared: true,
-    sharedBy: '동생',
-  },
-];
+interface SearchResultScreenProps {}
 
-// Mock 데이터 생성 함수 (초기 데이터용)
-const generateInitialMockRecipes = (count: number): Recipe[] => {
-  const baseRecipes = [
-    { title: '김치찌개', description: '맛있는 김치찌개 레시피입니다.' },
-    { title: '된장찌개', description: '구수한 된장찌개 만들기' },
-    { title: '불고기', description: '달콤한 불고기 레시피' },
-    { title: '계란말이', description: '부드러운 계란말이 만들기' },
-    { title: '김치볶음밥', description: '간단한 김치볶음밥' },
-    { title: '라면', description: '맛있는 라면 끓이기' },
-    { title: '제육볶음', description: '매콤한 제육볶음' },
-    { title: '미역국', description: '시원한 미역국' },
-  ];
+const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
+  const navigation = useNavigation<SearchResultScreenNavigationProp>();
+  const route = useRoute<SearchResultScreenRouteProp>();
+  const { query: initialQuery } = route.params;
 
-  return Array.from({ length: count }, (_, index) => {
-    const baseRecipe = baseRecipes[index % baseRecipes.length];
-    return {
-      id: (index + 1).toString(),
-      title: `${baseRecipe.title} ${
-        Math.floor(index / baseRecipes.length) + 1
-      }`,
-      description: baseRecipe.description,
-      createdAt: `2024-01-${String(15 - (index % 15)).padStart(2, '0')}`,
-    };
-  });
-};
-
-// 메인 컴포넌트 props 인터페이스
-interface RecipeScreenProps {
-  route: {
-    params: {
-      fridgeId: number;
-      fridgeName: string;
-    };
-  };
-}
-
-const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
-  const navigation = useNavigation<RecipeHomeNavigationProp>();
-  const { fridgeId, fridgeName } = route.params;
-
-  // State 관리
-  const [personalRecipes, setPersonalRecipes] = useState<Recipe[]>([]);
-  const [sharedRecipes, setSharedRecipes] = useState<Recipe[]>([]);
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [_searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [searchResults, setSearchResults] = useState<Recipe[]>([]);
   const [favoriteRecipeIds, setFavoriteRecipeIds] = useState<string[]>([]);
-  const [currentTab, setCurrentTab] = useState<'all' | 'favorites'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchHistory, setSearchHistory] = useState<string[]>([]);
-  const [_showSearchHistory, setShowSearchHistory] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
-  const [showFloatingMenu, setShowFloatingMenu] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0); // 🔧 이전 스크롤 위치 저장
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-  // Refs
   const scrollViewRef = useRef<ScrollView>(null);
-  const flatListRef = useRef<any>(null);
+  const searchInputRef = useRef<TextInput>(null);
   const ITEMS_PER_PAGE = 15;
 
-  // 🔧 함수들을 useCallback으로 정의 (호이스팅 문제 해결)
-  const handleSearch = React.useCallback(async () => {
-    if (searchQuery.trim()) {
-      try {
-        // 검색 히스토리에 추가하고 AsyncStorage에 저장
-        const newHistory = await SearchHistoryStorage.addSearchQuery(
-          searchQuery,
-        );
-        setSearchHistory(newHistory);
-        setShowSearchHistory(false);
-        navigation.navigate('SearchResult', { query: searchQuery });
-      } catch (error) {
-        console.error('검색 히스토리 저장 실패:', error);
-        // 에러가 나도 검색은 진행
-        navigation.navigate('SearchResult', { query: searchQuery });
-      }
+  // 초기 검색 실행
+  useEffect(() => {
+    if (initialQuery) {
+      handleSearch();
+      loadFavorites();
     }
-  }, [searchQuery, navigation]);
+  }, [initialQuery]);
 
-  const handleHistoryItemPress = React.useCallback(
-    async (item: string) => {
-      setSearchQuery(item);
-      setShowSearchHistory(false);
+  // 즐겨찾기 목록 로드
+  const loadFavorites = async () => {
+    try {
+      const favorites = await FavoriteStorage.getFavorites();
+      setFavoriteRecipeIds(favorites);
+    } catch (error) {
+      console.error('즐겨찾기 로드 실패:', error);
+    }
+  };
 
-      try {
-        // 검색 히스토리 업데이트
-        const newHistory = await SearchHistoryStorage.addSearchQuery(item);
-        setSearchHistory(newHistory);
-        navigation.navigate('SearchResult', { query: item });
-      } catch (error) {
-        console.error('검색 히스토리 업데이트 실패:', error);
-        navigation.navigate('SearchResult', { query: item });
-      }
-    },
-    [navigation],
-  );
+  // is Stared Recipe
+  const isFavorite = (recipeId: string): boolean => {
+    return favoriteRecipeIds.includes(recipeId);
+  };
 
-  const removeHistoryItem = React.useCallback(async (item: string) => {
+  const handleSearch = React.useCallback(async () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // 검색 히스토리 업데이트
+      const newHistory = await SearchHistoryStorage.addSearchQuery(searchQuery);
+      setSearchHistory(newHistory);
+
+      // 실제 레시피 데이터에서 검색
+      const allRecipes = await RecipeStorage.getPersonalRecipes();
+      const results = allRecipes.filter(
+        recipe =>
+          recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          recipe.description
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          (recipe.tags &&
+            recipe.tags.some(tag =>
+              tag.toLowerCase().includes(searchQuery.toLowerCase()),
+            )),
+      );
+
+      setSearchResults(results);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('검색 실패:', error);
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchQuery]);
+
+  // 검색어 변경 시 실시간 검색
+  const handleSearchQueryChange = (text: string) => {
+    setSearchQuery(text);
+
+    // 디바운싱을 위한 타이머 (선택사항)
+    // clearTimeout(searchTimer.current);
+    // searchTimer.current = setTimeout(() => {
+    //   if (text.trim()) {
+    //     handleSearch();
+    //   } else {
+    //     setSearchResults([]);
+    //   }
+    // }, 300);
+  };
+
+  // 검색어 제출 (키보드 완료 버튼)
+  const handleSearchSubmit = () => {
+    Keyboard.dismiss();
+    setIsSearchFocused(false);
+    handleSearch();
+  };
+
+  // 검색어 지우기
+  const clearSearchQuery = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+    searchInputRef.current?.focus();
+  };
+
+  // 검색 히스토리 항목 클릭
+  const handleHistoryItemPress = (item: string) => {
+    setSearchQuery(item);
+    handleSearch();
+  };
+
+  // 검색 히스토리 항목 삭제
+  const removeHistoryItem = async (item: string) => {
     try {
       const newHistory = await SearchHistoryStorage.removeSearchQuery(item);
       setSearchHistory(newHistory);
     } catch (error) {
       console.error('검색 히스토리 항목 삭제 실패:', error);
     }
-  }, []);
+  };
 
-  const clearAllHistory = React.useCallback(async () => {
+  // 검색 히스토리 전체 삭제
+  const clearAllHistory = async () => {
     try {
       await SearchHistoryStorage.clearSearchHistory();
       setSearchHistory([]);
     } catch (error) {
       console.error('검색 히스토리 전체 삭제 실패:', error);
     }
-  }, []);
-
-  // 🔧 초기 데이터 로드
-  const loadInitialData = async () => {
-    try {
-      setIsLoading(true);
-
-      // 병렬로 모든 데이터 로드
-      const [
-        storedPersonalRecipes,
-        storedFavoriteIds,
-        storedSearchHistory,
-        storedSharedRecipes,
-      ] = await Promise.all([
-        RecipeStorage.getPersonalRecipes(),
-        FavoriteStorage.getFavoriteIds(),
-        SearchHistoryStorage.getSearchHistory(),
-        SharedRecipeStorage.getSharedRecipes(),
-      ]);
-
-      // 개인 레시피 설정 (없으면 초기 mock 데이터 사용)
-      if (storedPersonalRecipes.length > 0) {
-        setPersonalRecipes(storedPersonalRecipes);
-      } else {
-        // 첫 실행 시 초기 데이터 생성 및 저장
-        const initialRecipes = generateInitialMockRecipes(20);
-        setPersonalRecipes(initialRecipes);
-        await RecipeStorage.savePersonalRecipes(initialRecipes);
-      }
-
-      // 공유 레시피 설정 (없으면 mock 데이터 사용)
-      if (storedSharedRecipes.length > 0) {
-        setSharedRecipes(storedSharedRecipes);
-      } else {
-        setSharedRecipes(mockSharedRecipes);
-        await SharedRecipeStorage.saveSharedRecipes(mockSharedRecipes);
-      }
-
-      // 즐겨찾기 및 검색 히스토리 설정
-      setFavoriteRecipeIds(storedFavoriteIds);
-      setSearchHistory(storedSearchHistory);
-    } catch (error) {
-      console.error('초기 데이터 로드 실패:', error);
-      // 에러 시 기본값 설정
-      setPersonalRecipes(generateInitialMockRecipes(20));
-      setSharedRecipes(mockSharedRecipes);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
-  // 컴포넌트 마운트 시 데이터 로드
-  React.useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  // 🔧 화면 포커스 시 데이터 동기화
-  useFocusEffect(
-    React.useCallback(() => {
-      // 검색에서 돌아올 때 상태 초기화
-      setSearchQuery('');
-      setShowSearchHistory(false);
-      setCurrentPage(1);
-
-      // 데이터 다시 로드 (다른 화면에서 변경될 수 있으므로)
-      loadInitialData();
-    }, []),
-  );
-
-  // 즐겨찾기 헬퍼 함수들
-  const isFavorite = (recipeId: string) => {
-    return favoriteRecipeIds.includes(recipeId);
-  };
-
-  const getFavoriteRecipes = () => {
-    return personalRecipes.filter(recipe => isFavorite(recipe.id));
-  };
-
-  // 현재 표시할 레시피들 필터링
-  const getFilteredRecipes = () => {
-    let recipes = personalRecipes;
-    if (currentTab === 'favorites') {
-      recipes = getFavoriteRecipes();
-    }
-    if (searchQuery) {
-      recipes = recipes.filter(recipe =>
-        recipe.title.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    }
-    return recipes.slice(0, currentPage * ITEMS_PER_PAGE);
-  };
-
-  const filteredRecipes = getFilteredRecipes();
-
-  const getAllRecipesCount = () => {
-    if (currentTab === 'all') {
-      return personalRecipes.length;
-    } else {
-      return getFavoriteRecipes().length;
-    }
-  };
-
-  const allFilteredRecipes = getAllRecipesCount();
-  const hasMoreRecipes = filteredRecipes.length < allFilteredRecipes;
-
+  // toggle Star
   const toggleFavorite = async (recipeId: string) => {
     try {
       const isNowFavorite = await FavoriteStorage.toggleFavorite(recipeId);
 
-      // 로컬 상태 업데이트
+      // Update local state
       if (isNowFavorite) {
         setFavoriteRecipeIds(prev => [...prev, recipeId]);
       } else {
@@ -303,270 +182,216 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
       }
     } catch (error) {
       console.error('즐겨찾기 토글 실패:', error);
-      Alert.alert('오류', '즐겨찾기 설정에 실패했습니다.');
     }
   };
 
-  const deleteRecipe = (recipeId: string) => {
-    Alert.alert('레시피 삭제', '이 레시피를 삭제하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            // AsyncStorage에서 삭제
-            await RecipeStorage.deletePersonalRecipe(recipeId);
+  // Delete Recipe
+  const deleteRecipe = async (recipeId: string) => {
+    try {
+      // from asyncstorage
+      await RecipeStorage.deletePersonalRecipe(recipeId);
 
-            // 로컬 상태 업데이트
-            setPersonalRecipes(prev => prev.filter(r => r.id !== recipeId));
+      // from research result
+      setSearchResults(prev => prev.filter(r => r.id !== recipeId));
 
-            // 즐겨찾기에서도 제거
-            if (favoriteRecipeIds.includes(recipeId)) {
-              await FavoriteStorage.removeFavorite(recipeId);
-              setFavoriteRecipeIds(prev => prev.filter(id => id !== recipeId));
-            }
-          } catch (error) {
-            console.error('레시피 삭제 실패:', error);
-            Alert.alert('오류', '레시피 삭제에 실패했습니다.');
-          }
-        },
-      },
-    ]);
-  };
-
-  const handleDragEnd = async ({ data }: { data: Recipe[] }) => {
-    if (currentTab === 'all' && !searchQuery) {
-      try {
-        // AsyncStorage에 새로운 순서 저장
-        await RecipeStorage.savePersonalRecipes(data);
-        setPersonalRecipes(data);
-      } catch (error) {
-        console.error('레시피 순서 저장 실패:', error);
-        Alert.alert('오류', '레시피 순서 변경에 실패했습니다.');
+      // from stared recipe
+      if (favoriteRecipeIds.includes(recipeId)) {
+        await FavoriteStorage.removeFavorite(recipeId);
+        setFavoriteRecipeIds(prev => prev.filter(id => id !== recipeId));
       }
-    } else {
-      Alert.alert(
-        '순서 변경 불가',
-        '전체 레시피 탭에서만 순서를 변경할 수 있습니다.',
-        [{ text: '확인' }],
-      );
+    } catch (error) {
+      console.error('레시피 삭제 실패:', error);
     }
   };
 
-  // 🔧 스크롤 방향 기반 버튼 표시 로직
+  // event : scroll
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
-
-    // 스크롤 방향 계산
-    const isScrollingUp = scrollY < lastScrollY;
-    const isScrollingDown = scrollY > lastScrollY;
-    const hasScrolledEnough = scrollY > 300; // 최소 스크롤 거리
-
-    // 위로 스크롤 중이고 충분히 스크롤했을 때 버튼 표시
-    if (isScrollingUp && hasScrolledEnough) {
-      setShowScrollToTop(true);
-    }
-    // 아래로 스크롤 중일 때 버튼 숨김
-    else if (isScrollingDown) {
-      setShowScrollToTop(false);
-    }
-    // 맨 위에 거의 도달했을 때도 버튼 숨김
-    else if (scrollY < 100) {
-      setShowScrollToTop(false);
-    }
-
-    setLastScrollY(scrollY);
+    setShowScrollToTop(scrollY > 300);
   };
 
+  // scroll to top
   const scrollToTop = () => {
-    if (filteredRecipes.length === 0) {
-      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
-    } else {
-      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-    }
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
   };
 
+  // load more
   const loadMore = () => {
     setCurrentPage(prev => prev + 1);
   };
 
-  // 로딩 중일 때
-  if (isLoading) {
-    return (
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <View
-          style={[
-            styles.container,
-            { justifyContent: 'center', alignItems: 'center' },
-          ]}
-        >
-          <Text style={{ fontSize: 16, color: '#666' }}>
-            레시피 데이터를 불러오는 중...
-          </Text>
-        </View>
-      </SafeAreaView>
+  const displayedResults = searchResults.slice(0, currentPage * ITEMS_PER_PAGE);
+  const hasMoreResults = displayedResults.length < searchResults.length;
+
+  // Component : Recipe Card
+  const RecipeCard: React.FC<{ recipe: Recipe }> = ({ recipe }) => {
+    const renderRightActions = () => (
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => deleteRecipe(recipe.id)}
+      >
+        <Icon name="delete" size={24} color="white" />
+        <Text style={styles.deleteButtonText}>삭제</Text>
+      </TouchableOpacity>
     );
-  }
+
+    return (
+      <Swipeable renderRightActions={renderRightActions}>
+        <TouchableOpacity
+          style={styles.recipeCard}
+          onPress={() =>
+            navigation.navigate('RecipeDetail', {
+              recipe,
+              fridgeId: 1,
+              fridgeName: '우리집 냉장고',
+            })
+          }
+        >
+          <View style={styles.recipeCardContent}>
+            <View style={styles.recipeInfo}>
+              <Text style={styles.recipeTitle}>{recipe.title}</Text>
+              <Text style={styles.recipeDescription}>{recipe.description}</Text>
+              <Text style={styles.recipeDate}>{recipe.createdAt}</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.favoriteButton}
+              onPress={() => toggleFavorite(recipe.id)}
+            >
+              <Icon
+                name={isFavorite(recipe.id) ? 'favorite' : 'favorite-border'}
+                size={24}
+                color={isFavorite(recipe.id) ? '#FF6B6B' : '#999'}
+              />
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Swipeable>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <GestureHandlerRootView style={styles.container}>
-        <View style={styles.header}>
-          {/* 검색바 */}
-          <SearchBar
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onSearch={handleSearch}
-            searchHistory={searchHistory}
-            onHistoryItemPress={handleHistoryItemPress}
-            onHistoryItemRemove={removeHistoryItem}
-            onClearAllHistory={clearAllHistory}
-            headerTitle="레시피 목록"
-            showBackButton={false}
-          />
+        {/* Header */}
+        <View style={styles.searchResultHeader}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.navigate('RecipeHome' as never)}
+          >
+            <Icon name="arrow-back" size={24} color="#333" />
+          </TouchableOpacity>
 
-          {/* 탭 */}
-          <View style={styles.tabContainer}>
-            <TouchableOpacity
-              style={[styles.tab, currentTab === 'all' && styles.activeTab]}
-              onPress={() => {
-                setCurrentTab('all');
-                setCurrentPage(1);
-              }}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  currentTab === 'all' && styles.activeTabText,
-                ]}
+          {/* Improved Search Bar */}
+          <View
+            style={[
+              styles.searchBarContainer,
+              isSearchFocused && styles.searchBarFocused,
+            ]}
+          >
+            <Icon
+              name="search"
+              size={20}
+              color="#333"
+              style={styles.searchIcon}
+            />
+            <TextInput
+              ref={searchInputRef}
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={handleSearchQueryChange}
+              onSubmitEditing={handleSearchSubmit}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
+              placeholder="Title, text, hashtag"
+              placeholderTextColor="#999"
+              selectionColor="#007AFF" // iOS 커서 색상
+              returnKeyType="search"
+              autoCorrect={false}
+              autoCapitalize="none"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={clearSearchQuery}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                전체 레시피 ({personalRecipes.length})
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.tab,
-                currentTab === 'favorites' && styles.activeTab,
-              ]}
-              onPress={() => {
-                setCurrentTab('favorites');
-                setCurrentPage(1);
-              }}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  currentTab === 'favorites' && styles.activeTabText,
-                ]}
-              >
-                즐겨찾기 ({getFavoriteRecipes().length})
-              </Text>
-            </TouchableOpacity>
+                <View style={styles.clearButtonCircle}>
+                  <Icon name="close" size={16} color="white" />
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
-        {/* 레시피 리스트 */}
-        {filteredRecipes.length === 0 && !searchQuery ? (
-          <ScrollView
-            ref={scrollViewRef}
-            style={styles.content}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-          >
-            {/* 공동 레시피 폴더 */}
-            {currentTab === 'all' && (
-              <SharedRecipeFolder
-                recipeCount={sharedRecipes.length}
-                onPress={() => navigation.navigate('SharedFolder')}
-              />
-            )}
-
-            <View style={styles.emptyContainer}>
-              <Icon name="restaurant" size={48} color="#ccc" />
-              <Text style={styles.emptyText}>
-                {currentTab === 'favorites'
-                  ? '즐겨찾기한 레시피가 없습니다'
-                  : '레시피가 없습니다'}
-              </Text>
-              <Text style={styles.emptySubText}>
-                {currentTab === 'favorites'
-                  ? '하트 버튼을 눌러 레시피를 즐겨찾기에 추가해보세요'
-                  : '새 레시피를 추가해보세요'}
+        {/* Result */}
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.content}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* header */}
+          {searchResults.length > 0 && (
+            <View style={styles.resultHeader}>
+              <Text style={styles.resultCount}>
+                "{searchQuery}" 검색 결과 {searchResults.length}개
               </Text>
             </View>
-          </ScrollView>
-        ) : (
-          <View style={styles.content}>
-            <DraggableFlatList
-              ref={flatListRef}
-              data={filteredRecipes}
-              onDragEnd={handleDragEnd}
-              keyExtractor={item => item.id}
-              renderItem={({ item, drag, isActive }) => {
-                const isDragEnabled = currentTab === 'all' && !searchQuery;
-                return (
-                  <RenderRecipeItem
-                    item={item}
-                    drag={drag}
-                    isActive={isActive}
-                    isDragEnabled={isDragEnabled}
-                    onDelete={deleteRecipe}
-                    onToggleFavorite={toggleFavorite}
-                    onPress={recipe =>
-                      navigation.navigate('RecipeDetail', {
-                        recipe,
-                        fridgeId,
-                        fridgeName,
-                      })
-                    }
-                    isFavorite={isFavorite(item.id)}
-                  />
-                );
-              }}
-              onScroll={handleScroll}
-              scrollEventThrottle={16}
-              ListHeaderComponent={
-                <ListHeader
-                  shouldShow={currentTab === 'all' && !searchQuery}
-                  recipeCount={sharedRecipes.length}
-                  onPress={() => navigation.navigate('SharedFolder')}
-                />
-              }
-              ListFooterComponent={
-                <ListFooter
-                  hasMoreRecipes={hasMoreRecipes}
-                  onLoadMore={loadMore}
-                  currentCount={filteredRecipes.length}
-                  totalCount={allFilteredRecipes}
-                />
-              }
-            />
-          </View>
-        )}
+          )}
 
-        {/* 플로팅 버튼 */}
-        <FloatingButton
-          isMenuOpen={showFloatingMenu}
-          onToggleMenu={() => setShowFloatingMenu(!showFloatingMenu)}
-          onRecipeRegister={() => {
-            setShowFloatingMenu(false);
-            navigation.navigate('RecipeDetail', {
-              isNewRecipe: true,
-              fridgeId,
-              fridgeName,
-            });
-          }}
-          onAIRecommend={() => {
-            setShowFloatingMenu(false);
-            navigation.navigate('AIRecipe');
-          }}
-          showScrollToTop={showScrollToTop}
-          onScrollToTop={scrollToTop}
-        />
+          {/* Loading */}
+          {isLoading && (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>검색 중...</Text>
+            </View>
+          )}
+
+          {/* No Result */}
+          {!isLoading && searchResults.length === 0 && searchQuery && (
+            <View style={styles.noResultContainer}>
+              <Icon name="search-off" size={48} color="#ccc" />
+              <Text style={styles.noResultText}>검색 결과가 없습니다</Text>
+              <Text style={styles.noResultSubText}>
+                다른 레시피를 검색해보세요
+              </Text>
+            </View>
+          )}
+
+          {/* Result List */}
+          {!isLoading &&
+            displayedResults.map(recipe => (
+              <RecipeCard key={recipe.id} recipe={recipe} />
+            ))}
+
+          {/* load more */}
+          {hasMoreResults && !isLoading && (
+            <View style={styles.loadMoreContainer}>
+              <TouchableOpacity
+                style={styles.loadMoreButton}
+                onPress={loadMore}
+              >
+                <Text style={styles.loadMoreText}>
+                  더보기 ({displayedResults.length}/{searchResults.length})
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
+
+        {/* scroll to top */}
+        {showScrollToTop && (
+          <TouchableOpacity
+            style={styles.scrollToTopButton}
+            onPress={scrollToTop}
+            activeOpacity={0.8}
+          >
+            <Icon name="keyboard-arrow-up" size={28} color="white" />
+          </TouchableOpacity>
+        )}
       </GestureHandlerRootView>
     </SafeAreaView>
   );
 };
 
-export default RecipeScreen;
+export default SearchResultScreen;
