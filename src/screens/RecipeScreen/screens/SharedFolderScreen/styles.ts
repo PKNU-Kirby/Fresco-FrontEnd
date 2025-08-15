@@ -3,169 +3,85 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#e8f5e8',
   },
-
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 20,
+    color: '#666',
+  },
   container: {
     flex: 1,
   },
 
   header: {
-    backgroundColor: 'white',
+    backgroundColor: '#e8f5e8',
     paddingHorizontal: 16,
     paddingVertical: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#333',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 5,
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
   },
-
   backButton: {
-    padding: 8,
-    marginRight: 8,
+    marginRight: 16,
   },
-
   headerContent: {
     flex: 1,
   },
-
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: '#333',
   },
-
   headerSubtitle: {
     fontSize: 14,
     color: '#666',
     marginTop: 2,
   },
 
-  headerAction: {
-    padding: 8,
-  },
-
   content: {
     flex: 1,
-    paddingHorizontal: 16,
+    marginHorizontal: 4,
     paddingTop: 16,
   },
-
   infoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#e8f5e8',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-
-  infoText: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 8,
     flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    marginBottom: 12,
+  },
+  infoIcon: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  infoText: {
+    fontSize: 15,
+    color: '#666',
+    marginRight: 8,
+    flex: 12,
     lineHeight: 18,
   },
 
-  // 공동 레시피 카드
-  sharedRecipeCard: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
-    borderLeftWidth: 4,
-    borderLeftColor: '#34C759',
-  },
-
-  cardContent: {
-    flexDirection: 'row',
-    padding: 16,
-    alignItems: 'center',
-  },
-
-  recipeInfo: {
-    flex: 1,
-  },
-
-  recipeTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-
-  recipeDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-    lineHeight: 20,
-  },
-
-  recipeMetaInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-
-  recipeDate: {
-    fontSize: 12,
-    color: '#999',
-  },
-
-  sharedByContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  sharedByText: {
-    fontSize: 12,
-    color: '#34C759',
-    marginLeft: 4,
-    fontWeight: '500',
-  },
-
-  cardIcon: {
-    marginLeft: 12,
-  },
-
-  // 삭제 버튼
-  deleteButton: {
-    backgroundColor: '#FF3B30',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 80,
-    marginBottom: 12,
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
-  },
-
-  deleteButtonText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '500',
-    marginTop: 4,
-  },
-
-  // 빈 상태
+  // empty state
   emptyContainer: {
     paddingVertical: 60,
     alignItems: 'center',
   },
-
   emptyText: {
     fontSize: 18,
     fontWeight: '500',
@@ -173,7 +89,6 @@ export const styles = StyleSheet.create({
     marginTop: 16,
     textAlign: 'center',
   },
-
   emptySubText: {
     fontSize: 14,
     color: '#999',
@@ -182,7 +97,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 32,
     lineHeight: 20,
   },
-
   scrollToTopButton: {
     position: 'absolute',
     bottom: 30,
@@ -193,13 +107,95 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-
   favoriteButton: {
     padding: 4,
   },
-
   dragHandle: {
     padding: 4,
     marginLeft: 4,
+  },
+
+  // fridge folder card
+  fridgeFolderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 12,
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  folderIcon: {
+    marginRight: 16,
+  },
+  folderInfo: {
+    flex: 1,
+  },
+  folderName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  folderSubInfo: {
+    fontSize: 14,
+    color: '#666',
+  },
+
+  // recipe card
+  fridgeRecipeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 12,
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  recipeIcon: {
+    width: 30,
+    height: 30,
+    marginRight: 16,
+  },
+  recipeInfo: {
+    flex: 1,
+  },
+
+  recipeTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  sharedByText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  person: {
+    color: 'limegreen',
+    fontWeight: '800',
+  },
+  sharedRecipeIcon: {
+    marginRight: 8,
+  },
+  sharedByContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });

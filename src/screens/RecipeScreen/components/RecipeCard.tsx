@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { ScaleDecorator } from 'react-native-draggable-flatlist';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import IconA from 'react-native-vector-icons/MaterialIcons';
 import { Recipe } from '../RecipeNavigator';
 import { recipeCardStyles as styles } from './styles';
 
@@ -14,7 +14,7 @@ interface RecipeCardProps {
   onLongPress?: () => void;
   isDragEnabled?: boolean;
   isBeingDragged?: boolean;
-  isFavorite: boolean;
+  isFavorite?: boolean;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({
@@ -35,7 +35,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         style={[styles.actionButton, styles.deleteActionButton]}
         onPress={onDelete}
       >
-        <Icon name="delete" size={28} color="#f8f8f8" />
+        <IconA name="delete" size={28} color="#f8f8f8" />
       </TouchableOpacity>
     </View>
   );
@@ -62,6 +62,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           delayLongPress={400}
         >
           <View style={styles.recipeCardContent}>
+            <Image
+              source={require('../../../assets/icons/chef_hat_96dp.png')}
+              style={styles.recipeIcon}
+              resizeMode="contain"
+            />
             <View style={styles.recipeInfo}>
               <Text
                 style={[
@@ -70,14 +75,6 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                 ]}
               >
                 {recipe.title}
-              </Text>
-              <Text
-                style={[
-                  styles.recipeDescription,
-                  isSwipeOpen && styles.swipeOpenDescription,
-                ]}
-              >
-                {recipe.description}
               </Text>
             </View>
             <View style={styles.cardActions}>
@@ -88,7 +85,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                   onToggleFavorite();
                 }}
               >
-                <Icon
+                <IconA
                   name={isFavorite ? 'star' : 'star-outline'}
                   size={28}
                   color={isFavorite ? '#ffd000' : '#999'}

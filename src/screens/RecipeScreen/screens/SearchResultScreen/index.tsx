@@ -6,12 +6,10 @@ import {
   TouchableOpacity,
   TextInput,
   Keyboard,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  GestureHandlerRootView,
-  Swipeable,
-} from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -36,6 +34,44 @@ type SearchResultScreenRouteProp = RouteProp<
 
 interface SearchResultScreenProps {}
 
+// Component : Recipe Card
+const SearchRecipeCard: React.FC<{
+  recipe: Recipe;
+  isFavorite: boolean;
+  onToggleFavorite: (recipeId: string) => void;
+  onPress: (recipe: Recipe) => void;
+}> = ({ recipe, isFavorite, onToggleFavorite, onPress }) => {
+  return (
+    <TouchableOpacity
+      style={[styles.recipeCard]}
+      onPress={() => onPress(recipe)}
+    >
+      <View style={styles.recipeCardContent}>
+        <Image
+          source={require('../../../../assets/icons/chef_hat_96dp.png')}
+          style={styles.recipeIcon}
+          resizeMode="contain"
+        />
+        <View style={styles.recipeInfo}>
+          <Text style={styles.recipeTitle}>{recipe.title}</Text>
+        </View>
+        <View style={styles.cardActions}>
+          <TouchableOpacity
+            style={styles.favoriteButton}
+            onPress={() => onToggleFavorite(recipe.id)}
+          >
+            <Icon
+              name={isFavorite ? 'star' : 'star-outline'}
+              size={28}
+              color={isFavorite ? '#ffd000' : '#999'}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   const navigation = useNavigation<SearchResultScreenNavigationProp>();
   const route = useRoute<SearchResultScreenRouteProp>();
@@ -48,8 +84,8 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [isInputActive, setIsInputActive] = useState(false); // 입력 활성 상태 추가
+  const [_isSearchFocused, setIsSearchFocused] = useState(false);
+  const [_isInputActive, setIsInputActive] = useState(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
   const searchInputRef = useRef<TextInput>(null);
@@ -61,7 +97,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
       handleSearch();
       loadFavorites();
     }
-  }, [initialQuery]);
+  }, []);
 
   // 즐겨찾기 목록 로드
   const loadFavorites = async () => {
@@ -112,16 +148,6 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   // 검색어 변경 시 실시간 검색
   const handleSearchQueryChange = (text: string) => {
     setSearchQuery(text);
-
-    // 디바운싱을 위한 타이머 (선택사항)
-    // clearTimeout(searchTimer.current);
-    // searchTimer.current = setTimeout(() => {
-    //   if (text.trim()) {
-    //     handleSearch();
-    //   } else {
-    //     setSearchResults([]);
-    //   }
-    // }, 300);
   };
 
   // 검색어 제출 (키보드 완료 버튼)
@@ -135,34 +161,8 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   const clearSearchQuery = () => {
     setSearchQuery('');
     setSearchResults([]);
-    setIsInputActive(true); // X 버튼 클릭 시에도 활성 상태 유지
+    setIsInputActive(true);
     searchInputRef.current?.focus();
-  };
-
-  // 검색 히스토리 항목 클릭
-  const handleHistoryItemPress = (item: string) => {
-    setSearchQuery(item);
-    handleSearch();
-  };
-
-  // 검색 히스토리 항목 삭제
-  const removeHistoryItem = async (item: string) => {
-    try {
-      const newHistory = await SearchHistoryStorage.removeSearchQuery(item);
-      setSearchHistory(newHistory);
-    } catch (error) {
-      console.error('검색 히스토리 항목 삭제 실패:', error);
-    }
-  };
-
-  // 검색 히스토리 전체 삭제
-  const clearAllHistory = async () => {
-    try {
-      await SearchHistoryStorage.clearSearchHistory();
-      setSearchHistory([]);
-    } catch (error) {
-      console.error('검색 히스토리 전체 삭제 실패:', error);
-    }
   };
 
   // toggle Star
@@ -178,25 +178,6 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
       }
     } catch (error) {
       console.error('즐겨찾기 토글 실패:', error);
-    }
-  };
-
-  // Delete Recipe
-  const deleteRecipe = async (recipeId: string) => {
-    try {
-      // from asyncstorage
-      await RecipeStorage.deletePersonalRecipe(recipeId);
-
-      // from research result
-      setSearchResults(prev => prev.filter(r => r.id !== recipeId));
-
-      // from stared recipe
-      if (favoriteRecipeIds.includes(recipeId)) {
-        await FavoriteStorage.removeFavorite(recipeId);
-        setFavoriteRecipeIds(prev => prev.filter(id => id !== recipeId));
-      }
-    } catch (error) {
-      console.error('레시피 삭제 실패:', error);
     }
   };
 
@@ -219,52 +200,6 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   const displayedResults = searchResults.slice(0, currentPage * ITEMS_PER_PAGE);
   const hasMoreResults = displayedResults.length < searchResults.length;
 
-  // Component : Recipe Card
-  const RecipeCard: React.FC<{ recipe: Recipe }> = ({ recipe }) => {
-    const renderRightActions = () => (
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => deleteRecipe(recipe.id)}
-      >
-        <Icon name="delete" size={24} color="white" />
-        <Text style={styles.deleteButtonText}>삭제</Text>
-      </TouchableOpacity>
-    );
-
-    return (
-      <Swipeable renderRightActions={renderRightActions}>
-        <TouchableOpacity
-          style={styles.recipeCard}
-          onPress={() =>
-            navigation.navigate('RecipeDetail', {
-              recipe,
-              fridgeId: 1,
-              fridgeName: '우리집 냉장고',
-            })
-          }
-        >
-          <View style={styles.recipeCardContent}>
-            <View style={styles.recipeInfo}>
-              <Text style={styles.recipeTitle}>{recipe.title}</Text>
-              <Text style={styles.recipeDescription}>{recipe.description}</Text>
-              <Text style={styles.recipeDate}>{recipe.createdAt}</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.favoriteButton}
-              onPress={() => toggleFavorite(recipe.id)}
-            >
-              <Icon
-                name={isFavorite(recipe.id) ? 'star' : 'star-border'}
-                size={24}
-                color={isFavorite(recipe.id) ? '#ffd000' : '#999'}
-              />
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Swipeable>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <GestureHandlerRootView style={styles.container}>
@@ -274,20 +209,15 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
             style={styles.backButton}
             onPress={() => navigation.navigate('RecipeHome' as never)}
           >
-            <Icon name="arrow-back" size={24} color="#333" />
+            <Icon name="arrow-back" size={24} color="#444" />
           </TouchableOpacity>
 
           {/* Improved Search Bar */}
-          <View
-            style={[
-              styles.searchBarContainer,
-              (isSearchFocused || isInputActive) && styles.searchBarFocused,
-            ]}
-          >
+          <View style={styles.searchBarContainer}>
             <Icon
               name="search"
               size={20}
-              color="#333"
+              color="#444"
               style={styles.searchIcon}
             />
             <TextInput
@@ -310,9 +240,9 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
                 // 텍스트가 있으면 활성 상태 유지, 없으면 비활성
                 setIsInputActive(searchQuery.length > 0);
               }}
-              placeholder="Title, text, hashtag"
+              placeholder="레시피 제목을 검색해 보세요"
               placeholderTextColor="#999"
-              selectionColor="#29a448ff"
+              selectionColor="#333"
               returnKeyType="search"
               autoCorrect={false}
               autoCapitalize="none"
@@ -371,7 +301,19 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
           {/* Result List */}
           {!isLoading &&
             displayedResults.map(recipe => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
+              <SearchRecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                isFavorite={isFavorite(recipe.id)}
+                onToggleFavorite={toggleFavorite}
+                onPress={recipe =>
+                  navigation.navigate('RecipeDetail', {
+                    recipe,
+                    fridgeId: 1,
+                    fridgeName: '우리집 냉장고',
+                  })
+                }
+              />
             ))}
 
           {/* load more */}
@@ -396,7 +338,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
             onPress={scrollToTop}
             activeOpacity={0.8}
           >
-            <Icon name="keyboard-arrow-up" size={28} color="white" />
+            <Icon name="north" size={24} color="white" />
           </TouchableOpacity>
         )}
       </GestureHandlerRootView>

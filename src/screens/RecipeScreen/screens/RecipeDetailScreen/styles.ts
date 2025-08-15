@@ -4,7 +4,7 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#e8f5e8',
   },
   container: {
     flex: 1,
@@ -15,26 +15,42 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    backgroundColor: '#e8f5e8',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: 'white',
+    paddingTop: 8,
+    paddingBottom: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
   },
-  leftHeader: { width: 75, alignItems: 'flex-start' },
-  centerHeader: { flex: 1, alignItems: 'center', paddingHorizontal: 8 },
+  leftHeader: {
+    width: 88,
+    alignItems: 'flex-start',
+  },
+  centerHeader: {
+    flex: 1,
+    alignItems: 'center',
+  },
   rightHeader: {
     flexDirection: 'row',
-    width: 75,
+    width: 88,
     alignItems: 'flex-end',
   },
-  leftEditHeader: { width: 56, alignItems: 'flex-start' },
-  rightEditHeader: { width: 56, alignItems: 'flex-end' },
+  leftEditHeader: {
+    width: 96,
+    alignItems: 'flex-start',
+  },
+  rightEditHeader: {
+    width: 96,
+    alignItems: 'flex-end',
+  },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
     color: '#333',
   },
@@ -42,6 +58,9 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  backButton: {
+    padding: 8,
   },
   favoriteButton: {
     padding: 8,
@@ -188,7 +207,7 @@ export const styles = StyleSheet.create({
     lineHeight: 24,
   },
 
-  // Steps
+  // Steps ////////////////////////////////////////////////
   stepItem: {
     marginBottom: 12,
   },
@@ -240,7 +259,7 @@ export const styles = StyleSheet.create({
     marginLeft: 8,
   },
 
-  // URL
+  // URL //////////////////////////////////////////////////
   urlInput: {
     fontSize: 14,
     color: 'limegreen',
@@ -256,23 +275,114 @@ export const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
 
-  // Share Button
+  // Action Buttons ///////////////////////////////////////
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 32,
+    gap: 12,
+  },
+  useRecipeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FF6B35',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 8,
+  },
   shareButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'limegreen',
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 12,
-    marginVertical: 32,
-    marginHorizontal: 110,
+    gap: 8,
   },
-  shareButtonText: {
+  buttonText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#f8f8f8',
   },
   bottomSpacer: {
     height: 20,
+  },
+
+  // Modal Styles /////////////////////////////////////////
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  modalContent: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  checklistContainer: {
+    flex: 1,
+    marginBottom: 20,
+  },
+  checklistItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: 'white',
+    marginBottom: 8,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  checklistText: {
+    fontSize: 16,
+    color: '#333',
+    marginLeft: 12,
+    flex: 1,
+  },
+  checkedText: {
+    textDecorationLine: 'line-through',
+    color: '#999',
+  },
+  modalActionButton: {
+    backgroundColor: 'limegreen',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalActionButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'white',
   },
 });

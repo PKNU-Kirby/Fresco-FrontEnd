@@ -7,7 +7,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { RecipeStackParamList } from '../../RecipeNavigator';
@@ -18,20 +18,18 @@ type SearchScreenNavigationProp = NativeStackNavigationProp<
   RecipeStackParamList,
   'Search'
 >;
-type SearchScreenRouteProp = RouteProp<RecipeStackParamList, 'Search'>;
 
 interface SearchScreenProps {}
 
 const SearchScreen: React.FC<SearchScreenProps> = () => {
   const navigation = useNavigation<SearchScreenNavigationProp>();
-  const route = useRoute<SearchScreenRouteProp>();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
   const searchInputRef = useRef<TextInput>(null);
 
-  // 🔧 초기 데이터 로드
+  // 초기 데이터 로드
   useEffect(() => {
     const loadSearchHistory = async () => {
       try {
@@ -60,7 +58,8 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
     navigation.navigate('RecipeHome' as never);
   };
 
-  // 🔧 검색 실행 (AsyncStorage 연결)
+  // 검색 실행
+  // (AsyncStorage 연결)
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
 
@@ -78,7 +77,8 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
     }
   };
 
-  // 🔧 검색 히스토리 항목 클릭 (AsyncStorage 연결)
+  // 검색 히스토리 항목 클릭
+  // (AsyncStorage 연결)
   const handleHistoryItemPress = async (item: string) => {
     setSearchQuery(item);
 
@@ -93,7 +93,8 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
     }
   };
 
-  // 🔧 검색 히스토리 항목 삭제 (AsyncStorage 연결)
+  // 검색 히스토리 항목 삭제
+  // (AsyncStorage 연결)
   const removeHistoryItem = async (item: string) => {
     try {
       const newHistory = await SearchHistoryStorage.removeSearchQuery(item);
@@ -103,7 +104,8 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
     }
   };
 
-  // 🔧 검색 히스토리 전체 삭제 (AsyncStorage 연결)
+  // 검색 히스토리 전체 삭제
+  // (AsyncStorage 연결)
   const clearAllHistory = async () => {
     try {
       await SearchHistoryStorage.clearSearchHistory();
@@ -115,17 +117,17 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* 검색 헤더 */}
+      {/* Search header */}
       <View style={styles.searchHeader}>
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Icon name="arrow-back" size={24} color="#fff" />
+          <Icon name="arrow-back" size={24} color="#444" />
         </TouchableOpacity>
 
         <View style={styles.searchInputContainer}>
           <Icon
             name="search"
             size={20}
-            color="#666"
+            color="#444"
             style={styles.searchIcon}
           />
           <TextInput
@@ -133,21 +135,24 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
             style={styles.searchInput}
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Title, text, hashtag"
+            placeholder="레시피 제목을 검색해 보세요"
             placeholderTextColor="#999"
             returnKeyType="search"
             onSubmitEditing={handleSearch}
+            selectionColor="#333"
+            autoCorrect={false}
+            autoCapitalize="none"
           />
         </View>
       </View>
 
-      {/* 최근 검색어 */}
+      {/* Recent Search History */}
       <View style={styles.recentSearchContainer}>
         <View style={styles.recentSearchHeader}>
-          <Text style={styles.recentSearchTitle}>Recent searches</Text>
+          <Text style={styles.recentSearchTitle}>최근 검색어</Text>
           {searchHistory.length > 0 && (
             <TouchableOpacity onPress={clearAllHistory}>
-              <Text style={styles.deleteAllText}>Delete all</Text>
+              <Text style={styles.deleteAllText}>모두 지우기</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -165,7 +170,7 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
                   style={styles.removeHistoryButton}
                   onPress={() => removeHistoryItem(item)}
                 >
-                  <Icon name="close" size={16} color="#666" />
+                  <Icon name="close" size={16} color="#333" />
                 </TouchableOpacity>
               </TouchableOpacity>
             ))}

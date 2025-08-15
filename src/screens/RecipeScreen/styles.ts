@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#e8f5e8',
   },
 
   container: {
@@ -12,14 +12,14 @@ export const styles = StyleSheet.create({
 
   // 헤더 영역
   header: {
-    backgroundColor: 'white',
+    backgroundColor: '#e8f5e8',
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 8,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 5,
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
@@ -30,12 +30,11 @@ export const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#e8f5e8',
     borderRadius: 12,
     paddingHorizontal: 12,
     marginBottom: 16,
   },
-
   searchInput: {
     flex: 1,
     height: 44,
@@ -43,7 +42,6 @@ export const styles = StyleSheet.create({
     color: '#333',
     paddingHorizontal: 8,
   },
-
   searchButton: {
     padding: 8,
   },
@@ -66,14 +64,12 @@ export const styles = StyleSheet.create({
     elevation: 5,
     zIndex: 1000,
   },
-
   searchHistoryItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-
   searchHistoryText: {
     marginLeft: 8,
     fontSize: 16,
@@ -83,38 +79,47 @@ export const styles = StyleSheet.create({
   // 탭 관련
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f8f8',
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
     borderRadius: 12,
     padding: 4,
+    shadowColor: '#333',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
-
   tab: {
     flex: 1,
     paddingVertical: 12,
-    alignItems: 'center',
+    paddingHorizontal: 16,
     borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-
   activeTab: {
-    backgroundColor: 'white',
-    shadowColor: '#000',
+    backgroundColor: '#666',
+    shadowColor: '#333',
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
-
   tabText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#666',
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#444',
   },
-
   activeTabText: {
-    color: '#007AFF',
+    color: '#f8f8f8',
   },
 
   // 콘텐츠 영역

@@ -86,7 +86,7 @@ function MainTabNavigator({
           borderTopWidth: 1,
           borderTopColor: '#e0e0e0',
           paddingVertical: 12,
-          height: 80,
+          height: 85,
         },
         tabBarLabelStyle: {
           fontSize: 14,

@@ -108,13 +108,13 @@ export const paginationButtonStyles = StyleSheet.create({
 
 export const recipeCardStyles = StyleSheet.create({
   recipeCard: {
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     marginBottom: 12,
     shadowColor: '#333',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 5,
     },
     shadowOpacity: 0.15,
     shadowRadius: 3.84,
@@ -125,6 +125,11 @@ export const recipeCardStyles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
   },
+  recipeIcon: {
+    width: 30,
+    height: 30,
+    marginRight: 16,
+  },
   recipeInfo: {
     flex: 1,
   },
@@ -133,12 +138,6 @@ export const recipeCardStyles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     marginBottom: 4,
-  },
-  recipeDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-    lineHeight: 20,
   },
   cardActions: {
     flexDirection: 'row',
@@ -159,10 +158,6 @@ export const recipeCardStyles = StyleSheet.create({
   swipeOpenTitle: {
     color: '#eb4e3d',
     fontWeight: '600',
-  },
-  swipeOpenDescription: {
-    color: '#666',
-    opacity: 0.8,
   },
 
   // Drag style : delete Button
@@ -205,14 +200,19 @@ export const renderRecipeItemStyles = StyleSheet.create({
 
 export const recipeHeaderStyles = StyleSheet.create({
   header: {
+    backgroundColor: '#e8f5e8',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#f8f8f8',
-    minHeight: 56,
+    shadowColor: '#333',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   leftSection: {
     width: 56,
@@ -246,67 +246,42 @@ export const recipeHeaderStyles = StyleSheet.create({
 
 export const sharedRecipeFolderStyles = StyleSheet.create({
   sharedFolderCard: {
-    backgroundColor: '#f8f8f8',
-    borderRadius: 16,
-    marginBottom: 20,
-    padding: 20,
-    shadowColor: '#333',
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 4.65,
-    elevation: 6,
-    borderLeftWidth: 3,
-    borderLeftColor: 'limegreen',
-  },
-
-  folderContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#20b2ab8d',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginBottom: 18,
   },
-  folderIconContainer: {
-    position: 'relative',
+  folderIcon: {
+    marginLeft: 4,
     marginRight: 16,
   },
-  folderBadge: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
-    backgroundColor: '#eb4e3d',
-    borderRadius: 12,
-    minWidth: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'white',
-  },
-  folderBadgeText: {
-    color: '#f8f8f8',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-
   folderInfo: {
     flex: 1,
   },
-  folderTitle: {
+  folderName: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
+    fontWeight: '800',
+    color: '#333333d6',
     marginBottom: 4,
   },
-  folderDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 6,
-    lineHeight: 20,
-  },
   folderSubInfo: {
-    fontSize: 12,
-    color: 'limegreen',
-    fontWeight: '500',
+    fontSize: 14,
+    color: '#333333d6',
+  },
+  // contour
+  contour: {
+    height: 2,
+    backgroundColor: '#c9ccceff',
+    marginBottom: 16,
   },
 });

@@ -3,60 +3,44 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#e8f5e8',
   },
   container: {
     flex: 1,
   },
+
   // 검색 결과 헤더 스타일
   searchResultHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#e8f5e8',
   },
   backButton: {
     marginRight: 8,
-    marginLeft: 4,
   },
   searchBarContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'lightgray',
-    borderRadius: 18,
+    backgroundColor: '#ffffff',
+    borderRadius: 25,
     paddingHorizontal: 16,
     marginHorizontal: 8,
+    marginRight: 0,
     position: 'relative',
   },
   searchIcon: {
     marginRight: 8,
   },
-  searchText: {
-    flex: 1,
-    fontSize: 16,
-    color: '#333',
-    paddingBottom: 2,
-  },
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
+    color: '#444',
     paddingLeft: 8,
     paddingRight: 40,
     height: 40,
-  },
-
-  searchBarFocused: {
-    borderColor: 'limegreen',
-    borderWidth: 2,
-    backgroundColor: '#FFFFFF',
-    shadowColor: 'limegreen',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
 
   clearButton: {
@@ -79,7 +63,7 @@ export const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 16,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#e8f5e8',
   },
   resultHeader: {
     paddingVertical: 16,
@@ -114,15 +98,15 @@ export const styles = StyleSheet.create({
   },
   // 레시피 카드 스타일들
   recipeCard: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     borderRadius: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: '#333',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 5,
     },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 3.84,
     elevation: 3,
   },
@@ -130,6 +114,11 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 16,
     alignItems: 'center',
+  },
+  recipeIcon: {
+    width: 30,
+    height: 30,
+    marginRight: 16,
   },
   recipeInfo: {
     flex: 1,
@@ -140,53 +129,33 @@ export const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 4,
   },
-  recipeDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-    lineHeight: 20,
+  cardActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  recipeDate: {
-    fontSize: 12,
-    color: '#999',
-  },
+  // favorite Button
   favoriteButton: {
     padding: 8,
-    marginLeft: 12,
-  },
-  deleteButton: {
-    backgroundColor: 'tomato',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 80,
-    marginBottom: 12,
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
-  },
-  deleteButtonText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '500',
-    marginTop: 4,
+    marginLeft: 8,
   },
   scrollToTopButton: {
     position: 'absolute',
     bottom: 30,
-    right: 20,
-    backgroundColor: '#29a448ff',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    right: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#666',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#333',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
   },
   loadMoreContainer: {
     paddingVertical: 20,
