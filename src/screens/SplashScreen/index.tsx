@@ -52,9 +52,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#e8f5e8',
   },
-  fresby: { width: 200, height: 200 },
+  fresby: {
+    width: 135,
+    height: 135,
+  },
   loader: {
-    marginTop: 20,
+    paddingTop: 60,
   },
 });
 

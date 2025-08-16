@@ -9,7 +9,7 @@ import KakaoLoginButton from './KakaoLoginButton';
 import NaverLoginButton from './NaverLoginButton';
 import styles from './styles';
 
-// 중앙 관리되는 타입들 import
+// 중앙 관리 types
 import type { RootStackParamList, SocialProvider } from '../../types/auth';
 
 const LoginScreen = (): React.JSX.Element => {
@@ -17,7 +17,7 @@ const LoginScreen = (): React.JSX.Element => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // TODO: API 연동 시 사용할 함수 (현재는 주석 처리)
+  // [API] 함수
   /*
   const loginAPI = async (provider: SocialProvider, accessToken: string): Promise<LoginResponse> => {
     const requestData: LoginRequest = {
@@ -80,7 +80,8 @@ const LoginScreen = (): React.JSX.Element => {
   };
   */
 
-  // 현재 사용 중인 함수 (AsyncStorage 테스트용)
+  // 현재 사용 중인 함수
+  // AsyncStorage 테스트
   const saveUserDataAndNavigate = async (
     provider: SocialProvider,
     providerId: string, // 소셜 로그인에서 받은 고유 ID
@@ -105,17 +106,15 @@ const LoginScreen = (): React.JSX.Element => {
         userDataArray.push(['userProfileImage', profileImage]);
       }
 
-      // ERD에 맞춘 사용자 정보 저장
       await AsyncStorage.multiSet(userDataArray);
 
-      // 테스트용 더미 토큰 저장
       const tokenArray: [string, string][] = [
         ['accessToken', `dummy_access_token_${providerId}`],
         ['refreshToken', `dummy_refresh_token_${providerId}`],
       ];
       await AsyncStorage.multiSet(tokenArray);
 
-      console.log('✅ 사용자 정보 저장 완료:');
+      console.log('>> 사용자 정보 저장 완료:');
       console.log(`   - Provider: ${provider}`);
       console.log(`   - Provider ID: ${providerId}`);
       console.log(`   - 이름: ${name}`);

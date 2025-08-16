@@ -92,7 +92,7 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
       console.log(`   - 이메일: ${userEmail || '미제공'}`);
       console.log(`   - 프로필 이미지: ${profileImageUrl || '미제공'}`);
 
-      //  [API] 백엔드 로그인 요청 데이터 로깅
+      // [API] 백엔드 로그인 요청 데이터 로깅
       logBackendLoginRequest('NAVER', successResponse.accessToken, providerId);
 
       // 사용자 정보 저장 & 화면 이동

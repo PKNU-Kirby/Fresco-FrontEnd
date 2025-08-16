@@ -20,10 +20,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flex: 2,
+    flex: 3,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 50,
+    marginTop: 72,
   },
   headerText: {
     fontSize: 36,
