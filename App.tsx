@@ -14,7 +14,6 @@ import LoginScreen from './src/screens/LoginScreen';
 import FridgeSelectScreen from './src/screens/FridgeSelectScreen';
 import FridgeHomeScreen from './src/screens/FridgeHomeScreen';
 
-import RecipeScreen from './src/screens/RecipeScreen';
 import RecipeNavigator from './src/screens/RecipeScreen/RecipeNavigator';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import FridgeSettingsScreen from './src/screens/FridgeSettingsScreen';
@@ -69,7 +68,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 // Tab Navigator Type
 export type MainTabParamList = {
   FridgeHomeScreen: { fridgeId: number; fridgeName: string };
-  RecipeScreen: { fridgeId: number; fridgeName: string };
+  Recipe: { fridgeId: number; fridgeName: string };
   ShoppingListScreen: { fridgeId: number; fridgeName: string };
 };
 
@@ -116,7 +115,7 @@ function MainTabNavigator({
         }}
       />
       <Tab.Screen
-        name="RecipeScreen"
+        name="Recipe"
         component={RecipeNavigator}
         initialParams={{ fridgeId, fridgeName }}
         options={{

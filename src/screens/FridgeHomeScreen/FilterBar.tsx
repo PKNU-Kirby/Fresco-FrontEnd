@@ -5,20 +5,16 @@ import ActionToggleButton from '../../components/common/ActionToggleButton';
 
 // Filter Bar Component
 interface FilterBarProps {
-  activeStorageType: string;
   activeItemCategory: string;
   isListEditMode: boolean;
-  onStorageTypePress: () => void;
   onItemCategoryPress: () => void;
   onEditModeToggle: () => void;
   disabled?: boolean;
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({
-  activeStorageType,
   activeItemCategory,
   isListEditMode,
-  onStorageTypePress,
   onItemCategoryPress,
   onEditModeToggle,
   disabled = false,
@@ -27,11 +23,6 @@ const FilterBar: React.FC<FilterBarProps> = ({
     <View style={styles.tabContainer}>
       {/* Filter Button Group */}
       <View style={styles.leftTabGroup}>
-        <FilterDropdownButton
-          label={activeStorageType}
-          onPress={onStorageTypePress}
-          disabled={disabled}
-        />
         <FilterDropdownButton
           label={activeItemCategory}
           onPress={onItemCategoryPress}

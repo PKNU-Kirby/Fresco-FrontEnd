@@ -14,6 +14,7 @@ export const loginButtonStyle = StyleSheet.create({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#e8f5e8',
   },
   loginBox: {
     flex: 1,
@@ -26,6 +27,8 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 36,
+    color: '#444',
+    fontWeight: '800',
     textAlign: 'center',
   },
   buttonWrapper: {

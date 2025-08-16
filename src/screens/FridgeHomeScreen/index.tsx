@@ -9,7 +9,6 @@ import { styles } from './styles';
 import FridgeHeader from './FridgeHeader';
 import FilterBar from './FilterBar';
 import FridgeItemList from './FridgeItemList';
-import StorageTypeModal from '../../components/modals/StorageTypeModal';
 import ItemCategoryModal from '../../components/modals/ItemCategoryModal';
 import AddItemModal from '../../components/modals/AddItemModal';
 
@@ -48,8 +47,6 @@ const FridgeHomeScreen = ({ route }: Props) => {
   // hooks
   const {
     // fridgeItems,
-    storageTypes,
-    setStorageTypes,
     itemCategories,
     setItemCategories,
     // deleteItem,
@@ -60,8 +57,6 @@ const FridgeHomeScreen = ({ route }: Props) => {
   } = useFridgeData(fridgeId);
 
   const {
-    activeStorageType,
-    setActiveStorageType,
     activeItemCategory,
     setActiveItemCategory,
     isListEditMode,
@@ -70,10 +65,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
   } = useFilterState(actualFridgeItems);
 
   const {
-    isStorageModalVisible,
     isItemCategoryModalVisible,
-    openStorageModal,
-    closeStorageModal,
     openItemCategoryModal,
     closeItemCategoryModal,
   } = useModalState();
@@ -196,10 +188,6 @@ const FridgeHomeScreen = ({ route }: Props) => {
     [loadActualFridgeItems],
   );
 
-  const handleStorageTypeSelect = (storageType: string) => {
-    setActiveStorageType(storageType);
-  };
-
   const handleItemCategorySelect = (category: string) => {
     setActiveItemCategory(category);
   };
@@ -215,10 +203,8 @@ const FridgeHomeScreen = ({ route }: Props) => {
 
       {/* 필터 바 */}
       <FilterBar
-        activeStorageType={activeStorageType}
         activeItemCategory={activeItemCategory}
         isListEditMode={isListEditMode}
-        onStorageTypePress={openStorageModal}
         onItemCategoryPress={openItemCategoryModal}
         onEditModeToggle={toggleEditMode}
       />
@@ -235,16 +221,6 @@ const FridgeHomeScreen = ({ route }: Props) => {
           onDeleteItem={handleDeleteItem}
         />
       </View>
-
-      {/* 보관 분류 선택 모달 */}
-      <StorageTypeModal
-        visible={isStorageModalVisible}
-        storageTypes={storageTypes}
-        activeStorageType={activeStorageType}
-        onClose={closeStorageModal}
-        onSelect={handleStorageTypeSelect}
-        onUpdateStorageTypes={setStorageTypes}
-      />
 
       {/* 식재료 유형 선택 모달 */}
       <ItemCategoryModal
