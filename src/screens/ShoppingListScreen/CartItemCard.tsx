@@ -1,64 +1,73 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, TextInput, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TouchableOpacity, TextInput, Text } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import CustomText from '../../components/common/CustomText';
-import { CartItem } from './index';
-import { Cardstyles as styles } from './styles';
+import UnitSelector from '../FridgeHomeScreen/FridgeItemCard/UnitSelector';
+import QuantityEditor from '../FridgeHomeScreen/FridgeItemCard/QuantityEditor';
+import { CartItem } from '../../types/CartItem';
+import { cardStyles as styles } from './styles';
 
 interface CartItemCardProps {
   item: CartItem;
-  onToggleCheck: (itemId: string) => void;
-  onQuantityChange: (itemId: string, newQuantity: number) => void;
-  onUnitChange: (itemId: string, newUnit: string) => void;
-  onDelete: (itemId: string) => void;
+  isEditMode?: boolean;
+  onToggleCheck: (itemId: number) => void;
+  onNameChange: (itemId: number, newName: string) => void;
+  onQuantityChange: (itemId: number, newQuantity: number) => void;
+  onUnitChange: (itemId: number, newUnit: string) => void;
+  onDelete: (itemId: number) => void;
   onDrag: () => void;
   isActive: boolean;
 }
 
-const UNITS = ['개', 'kg', 'g', 'L', 'ml', '봉지', '포', '상자', '병'];
+const UNITS = ['개', 'ml', 'g', 'kg', 'L'];
 
 const CartItemCard: React.FC<CartItemCardProps> = ({
   item,
+  isEditMode = false,
   onToggleCheck,
+  onNameChange,
   onQuantityChange,
   onUnitChange,
   onDelete,
   onDrag,
   isActive,
 }) => {
-  const [isEditingQuantity, setIsEditingQuantity] = useState(false);
+  const [tempName, setTempName] = useState(item.name);
   const [tempQuantity, setTempQuantity] = useState(item.quantity.toString());
   const [showUnitModal, setShowUnitModal] = useState(false);
 
-  const handleQuantityEdit = () => {
+  useEffect(() => {
     setTempQuantity(item.quantity.toString());
-    setIsEditingQuantity(true);
-  };
+  }, [item.quantity]);
 
-  const handleQuantitySubmit = () => {
-    const newQuantity = parseInt(tempQuantity, 10);
-    if (!isNaN(newQuantity) && newQuantity > 0) {
-      onQuantityChange(item.id, newQuantity);
-    } else {
-      setTempQuantity(item.quantity.toString());
-    }
-    setIsEditingQuantity(false);
-  };
+  useEffect(() => {
+    setTempName(item.name);
+  }, [item.name]);
 
-  const handleQuantityIncrease = () => {
-    onQuantityChange(item.id, item.quantity + 1);
-  };
-
-  const handleQuantityDecrease = () => {
-    if (item.quantity > 1) {
-      onQuantityChange(item.id, item.quantity - 1);
+  const handleNameSubmit = () => {
+    const trimmedName = tempName.trim();
+    if (trimmedName && trimmedName !== item.name) {
+      onNameChange(item.id!, trimmedName);
+    } else if (!trimmedName) {
+      setTempName(item.name);
     }
   };
 
+  const handleQuantityChange = (newQuantity: string) => {
+    setTempQuantity(newQuantity);
+
+    const quantity = parseInt(newQuantity, 10);
+    if (!isNaN(quantity) && quantity > 0) {
+      onQuantityChange(item.id!, quantity);
+    }
+  };
   const handleUnitSelect = (unit: string) => {
-    onUnitChange(item.id, unit);
+    onUnitChange(item.id!, unit);
     setShowUnitModal(false);
+  };
+
+  const handleUnitModalOpen = () => {
+    if (!isEditMode) return;
+    setShowUnitModal(true);
   };
 
   return (
@@ -66,167 +75,93 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
       <TouchableOpacity
         onLongPress={onDrag}
         disabled={isActive}
+        delayLongPress={100}
         style={[
           styles.itemCard,
-          item.isChecked && styles.checkedItemCard,
+          item.purchased && styles.checkedItemCard,
           isActive && styles.activeItemCard,
         ]}
       >
-        {/* 체크박스 (이미지 영역) */}
+        {/* **** Check Box Section ************************************************** */}
         <TouchableOpacity
           style={styles.checkboxContainer}
-          onPress={() => onToggleCheck(item.id)}
+          onPress={() => onToggleCheck(item.id!)}
         >
           <View
             style={[
               styles.itemImagePlaceholder,
-              item.isChecked && styles.checkedImagePlaceholder,
+              item.purchased && styles.checkedImagePlaceholder,
             ]}
           >
-            {item.isChecked && (
-              <MaterialIcons name="check" size={24} color="#fff" />
+            {item.purchased && (
+              <MaterialIcons name="check" size={16} color="#fff" />
             )}
           </View>
         </TouchableOpacity>
 
-        {/* 아이템 정보 */}
+        {/* **** Item Info ********************************************************** */}
         <View style={styles.itemInfo}>
-          <CustomText
-            style={[styles.itemName, item.isChecked && styles.checkedText]}
-          >
-            {item.name}
-          </CustomText>
+          {isEditMode ? (
+            <TextInput
+              style={styles.nameInput}
+              value={tempName}
+              onChangeText={setTempName}
+              onBlur={handleNameSubmit}
+              onSubmitEditing={handleNameSubmit}
+              selectTextOnFocus
+              autoFocus
+              returnKeyType="done"
+            />
+          ) : (
+            <Text
+              style={[styles.itemName, item.purchased && styles.checkedText]}
+            >
+              {item.name}
+            </Text>
+          )}
 
           <View style={styles.itemDetails}>
-            {/* 수량 편집 */}
-            <View style={styles.quantityContainer}>
-              {!isEditingQuantity ? (
-                <>
-                  <TouchableOpacity
-                    style={styles.quantityButton}
-                    onPress={handleQuantityDecrease}
-                  >
-                    <MaterialIcons name="remove" size={16} color="#666" />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity onPress={handleQuantityEdit}>
-                    <CustomText
-                      style={[
-                        styles.quantityText,
-                        item.isChecked && styles.checkedText,
-                      ]}
-                    >
-                      {item.quantity}
-                    </CustomText>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.quantityButton}
-                    onPress={handleQuantityIncrease}
-                  >
-                    <MaterialIcons name="add" size={16} color="#666" />
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <TextInput
-                  style={styles.quantityInput}
-                  value={tempQuantity}
-                  onChangeText={setTempQuantity}
-                  onBlur={handleQuantitySubmit}
-                  onSubmitEditing={handleQuantitySubmit}
-                  keyboardType="numeric"
-                  selectTextOnFocus
-                  autoFocus
-                />
-              )}
-            </View>
-
-            {/* 단위 선택 */}
-            <TouchableOpacity
-              style={styles.unitSelector}
-              onPress={() => setShowUnitModal(true)}
-            >
-              <CustomText
-                style={[styles.unitText, item.isChecked && styles.checkedText]}
-              >
-                {item.unit}
-              </CustomText>
-              <MaterialIcons
-                name="keyboard-arrow-down"
-                size={14}
-                color="#666"
+            {/* Edit Quantity */}
+            {isEditMode ? (
+              <QuantityEditor
+                quantity={tempQuantity}
+                unit={item.unit}
+                onQuantityChange={handleQuantityChange}
+                onTextBlur={() => {}}
+                onUnitPress={handleUnitModalOpen}
               />
-            </TouchableOpacity>
-          </View>
+            ) : (
+              <Text
+                style={[
+                  styles.simpleQuantityText,
+                  item.purchased && styles.checkedText,
+                ]}
+              >
+                {item.quantity} {item.unit}
+              </Text>
+            )}
 
-          {/* 카테고리 */}
-          <CustomText
-            style={[styles.itemCategory, item.isChecked && styles.checkedText]}
-          >
-            {item.category}
-          </CustomText>
+            {/* Edit Unit */}
+            {isEditMode && (
+              <UnitSelector
+                visible={showUnitModal}
+                selectedUnit={item.unit}
+                options={UNITS}
+                onSelect={handleUnitSelect}
+                onClose={() => setShowUnitModal(false)}
+              />
+            )}
+          </View>
         </View>
 
-        {/* 삭제 버튼 */}
+        {/* Delete Button */}
         <TouchableOpacity
           style={styles.deleteButton}
-          onPress={() => onDelete(item.id)}
+          onPress={() => onDelete(item.id!)}
         >
           <MaterialIcons name="close" size={20} color="#999" />
         </TouchableOpacity>
-
-        {/* 드래그 핸들 */}
-        <TouchableOpacity
-          style={styles.dragHandle}
-          onLongPress={onDrag}
-          disabled={isActive}
-        >
-          <MaterialIcons name="drag-handle" size={20} color="#ccc" />
-        </TouchableOpacity>
       </TouchableOpacity>
-
-      {/* 단위 선택 모달 */}
-      <Modal
-        visible={showUnitModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowUnitModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <CustomText style={styles.modalTitle}>단위 선택</CustomText>
-
-            <View style={styles.unitOptions}>
-              {UNITS.map(unit => (
-                <TouchableOpacity
-                  key={unit}
-                  style={[
-                    styles.unitOption,
-                    unit === item.unit && styles.selectedUnitOption,
-                  ]}
-                  onPress={() => handleUnitSelect(unit)}
-                >
-                  <CustomText
-                    style={[
-                      styles.unitOptionText,
-                      unit === item.unit && styles.selectedUnitOptionText,
-                    ]}
-                  >
-                    {unit}
-                  </CustomText>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => setShowUnitModal(false)}
-            >
-              <CustomText style={styles.modalCloseText}>닫기</CustomText>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </>
   );
 };

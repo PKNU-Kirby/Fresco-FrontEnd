@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 
 // Item Card Styles : './index.tsx'
 export const cardStyles = StyleSheet.create({
@@ -67,17 +67,20 @@ export const quantityStyles = StyleSheet.create({
   quantityEditContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginRight: 12,
     backgroundColor: '#f8f8f8',
     borderRadius: 8,
     paddingHorizontal: 4,
+    width: 172,
   },
   quantityButton: {
     margin: 3,
     opacity: 0.5,
   },
   quantityInput: {
-    minWidth: 40,
+    flex: 1,
+    minWidth: 30,
     textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
@@ -90,9 +93,10 @@ export const quantityStyles = StyleSheet.create({
     marginRight: 4,
   },
   unitSelector: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     paddingVertical: 4,
     backgroundColor: '#fff',
     borderRadius: 6,

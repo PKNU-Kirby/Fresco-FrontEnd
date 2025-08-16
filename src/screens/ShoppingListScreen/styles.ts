@@ -13,24 +13,68 @@ export const styles = StyleSheet.create({
   listContainer: {
     paddingBottom: 20,
   },
-  // 임시 테스트 버튼 스타일
-  testButton: {
-    backgroundColor: '#333',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+});
+
+export const buttonsStyles = StyleSheet.create({
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: '#f8f8f8',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    minHeight: 40,
   },
-  testButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+  leftButtonGroup: {
+    flexDirection: 'row',
+    gap: 10,
+    flex: 1,
+  },
+  rightButtonGroup: {
+    flexDirection: 'row',
+    gap: 8,
   },
 });
 
-export const Cardstyles = StyleSheet.create({
-  // 기본 카드 스타일 (기존 cardStyles.itemCard 기반)
+export const headerStyles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#f8f8f8',
+    minHeight: 56,
+  },
+  headerTitle: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#444',
+    textAlign: 'center',
+    maxWidth: '100%',
+  },
+});
+
+export const addItemStyles = StyleSheet.create({
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#d6d6d6',
+    borderRadius: '50%',
+    padding: 8,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    marginTop: 10,
+    alignSelf: 'center',
+  },
+});
+
+export const cardStyles = StyleSheet.create({
   itemCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
@@ -58,23 +102,23 @@ export const Cardstyles = StyleSheet.create({
     transform: [{ scale: 1.02 }],
   },
 
-  // 체크박스 (이미지 영역)
+  // checkbox section
   checkboxContainer: {
-    marginRight: 16,
+    marginRight: 18,
   },
   itemImagePlaceholder: {
-    width: 60,
-    height: 60,
+    width: 30,
+    height: 30,
     backgroundColor: '#e0e0e0',
-    borderRadius: 8,
+    borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkedImagePlaceholder: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: 'limegreen',
   },
 
-  // 아이템 정보
+  // item data
   itemInfo: {
     flex: 1,
     justifyContent: 'space-between',
@@ -85,51 +129,41 @@ export const Cardstyles = StyleSheet.create({
     color: '#333',
     marginBottom: 8,
   },
+  nameInput: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+    backgroundColor: '#fff',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    minHeight: 32,
+    width: 200,
+  },
   checkedText: {
     color: '#999',
     textDecorationLine: 'line-through',
   },
 
-  // 수량 및 단위
+  // quantity & unit
   itemDetails: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 4,
   },
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginRight: 12,
-  },
-  quantityButton: {
-    padding: 4,
-    opacity: 0.7,
-  },
-  quantityText: {
+
+  // 일반 모드 - 간단한 수량 표시
+  simpleQuantityText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    minWidth: 30,
-    textAlign: 'center',
-    marginHorizontal: 8,
-  },
-  quantityInput: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    minWidth: 40,
-    textAlign: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 4,
-    paddingVertical: 2,
-    paddingHorizontal: 8,
+    marginRight: 8,
   },
 
-  // 단위 선택
+  // 편집 모드 - 단위 선택
   unitSelector: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -146,14 +180,14 @@ export const Cardstyles = StyleSheet.create({
     marginRight: 2,
   },
 
-  // 카테고리
-  itemCategory: {
-    fontSize: 12,
-    color: '#999',
-    fontStyle: 'italic',
+  // Show Unit
+  simpleUnitText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
   },
 
-  // 삭제 버튼
+  // Delete Button
   deleteButton: {
     position: 'absolute',
     top: 8,
@@ -161,72 +195,65 @@ export const Cardstyles = StyleSheet.create({
     padding: 4,
     opacity: 0.6,
   },
+});
 
-  // 드래그 핸들
-  dragHandle: {
-    paddingLeft: 8,
-    opacity: 0.5,
-  },
-
-  // 단위 선택 모달 (기존 modalStyles 기반)
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    width: '80%',
-    maxHeight: 400,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  unitOptions: {
+export const newItemCardStyles = StyleSheet.create({
+  itemCard: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 20,
-    justifyContent: 'center',
-  },
-  unitOption: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 16,
-    minWidth: 50,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
     alignItems: 'center',
   },
-  selectedUnitOption: {
-    backgroundColor: '#333',
+  newItemCard: {
+    borderColor: '#4fbb53',
+    borderWidth: 1,
+    backgroundColor: '#f9fff9',
   },
-  unitOptionText: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
+  itemInfo: {
+    flex: 1,
   },
-  selectedUnitOptionText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  modalCloseButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  modalCloseText: {
+  nameInput: {
     fontSize: 16,
-    color: '#333',
     fontWeight: '600',
+    color: '#333',
+    borderBottomWidth: 1,
+    borderBottomColor: '#4fbb53',
+    paddingVertical: 4,
+    marginBottom: 8,
+    marginLeft: 8,
+    width: 200,
+  },
+  itemDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginLeft: 8,
+  },
+
+  // New item actions
+  newItemActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginLeft: 12,
+  },
+  cancelButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#d5d5d5',
+  },
+  saveButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#cbe8cb',
   },
 });

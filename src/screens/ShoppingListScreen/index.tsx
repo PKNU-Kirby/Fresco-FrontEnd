@@ -1,42 +1,97 @@
 import React, { useState, useEffect } from 'react';
-import { View, SafeAreaView, Alert } from 'react-native';
+import {
+  SafeAreaView,
+  Alert,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import CartItemCard from './CartItemCard';
-import { styles } from './styles';
+import { styles, addItemStyles } from './styles';
+import ShoppingListHeader from './ShoppingListHeader';
+import Buttons from './Buttons';
+import NewItemCard from './NewItemCard';
 
 export interface CartItem {
-  id: string;
+  id?: number;
+  groceryListId: number;
   name: string;
   quantity: number;
+  purchased: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+
+  // FE fields
   unit: string;
-  category: string;
-  imageUrl?: string;
-  isChecked: boolean;
   order: number;
-  createdAt: Date;
 }
 
 const STORAGE_KEY = '@shopping_cart_items';
 
-const ShoppingListScreen: React.FC = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+interface ShoppingListScreenProps {
+  onBackPress?: () => void;
+  onSettingsPress?: () => void;
+  listName?: string;
+}
 
-  // AsyncStorage에서 데이터 로드
+const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
+  listName = '장바구니',
+}) => {
+  // data
+  const [cartItems, setCartItems] = useState<CartItem[]>([
+    {
+      id: 1,
+      groceryListId: 1,
+      name: '양배추',
+      quantity: 1,
+      unit: '개',
+      purchased: false,
+      order: 0,
+      createdAt: new Date(),
+    },
+    {
+      id: 2,
+      groceryListId: 1,
+      name: '당가슴살',
+      quantity: 500,
+      unit: 'g',
+      purchased: false,
+      order: 1,
+      createdAt: new Date(),
+    },
+    {
+      id: 3,
+      groceryListId: 1,
+      name: '우유',
+      quantity: 1000,
+      unit: 'ml',
+      purchased: true,
+      order: 2,
+      createdAt: new Date(),
+    },
+  ]);
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isAddingNewItem, setIsAddingNewItem] = useState(false);
+  const hasCheckedItems = cartItems.some(item => item.purchased);
+
+  // load data from AsyncStorage
   useEffect(() => {
     loadCartItems();
   }, []);
 
-  // AsyncStorage에서 장바구니 아이템 로드
+  // load Cart Items from AsyncStorage
   const loadCartItems = async () => {
     try {
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
         const items: CartItem[] = JSON.parse(stored);
-        // 체크된 항목은 하단으로, 체크 안된 항목은 order 순으로 정렬
         const sortedItems = items.sort((a, b) => {
-          if (a.isChecked !== b.isChecked) {
-            return a.isChecked ? 1 : -1; // 체크된 항목을 뒤로
+          if (a.purchased !== b.purchased) {
+            return a.purchased ? 1 : -1;
           }
           return a.order - b.order;
         });
@@ -47,7 +102,7 @@ const ShoppingListScreen: React.FC = () => {
     }
   };
 
-  // AsyncStorage에 데이터 저장
+  // save data to AsyncStorage
   const saveCartItems = async (items: CartItem[]) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(items));
@@ -56,9 +111,31 @@ const ShoppingListScreen: React.FC = () => {
     }
   };
 
-  // 드래그 완료 시 순서 업데이트
+  const handleEditToggle = () => {
+    setIsEditMode(!isEditMode);
+  };
+
+  // flush Checked Cards
+  const handleClearCheckedItems = () => {
+    const checkedItems = cartItems.filter(item => item.purchased);
+    if (checkedItems.length === 0) return;
+
+    Alert.alert(`체크된 ${checkedItems.length}개의 아이템을 삭제합니다.`, ``, [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: () => {
+          const updatedItems = cartItems.filter(item => !item.purchased);
+          setCartItems(updatedItems);
+          saveCartItems(updatedItems);
+        },
+      },
+    ]);
+  };
+
+  // (Drag & Drop) -> Update Items order
   const handleDragEnd = ({ data }: { data: CartItem[] }) => {
-    // 체크 상태별로 order 재정렬
     const updatedItems = data.map((item, index) => ({
       ...item,
       order: index,
@@ -68,19 +145,21 @@ const ShoppingListScreen: React.FC = () => {
     saveCartItems(updatedItems);
   };
 
-  // 체크박스 토글
-  const handleToggleCheck = (itemId: string) => {
+  const handleToggleCheck = (itemId: number) => {
     const updatedItems = cartItems.map(item => {
       if (item.id === itemId) {
-        return { ...item, isChecked: !item.isChecked };
+        return {
+          ...item,
+          purchased: !item.purchased,
+          updatedAt: new Date(),
+        };
       }
       return item;
     });
 
-    // 체크 상태 변경 후 정렬 (체크된 항목을 하단으로)
     const sortedItems = updatedItems.sort((a, b) => {
-      if (a.isChecked !== b.isChecked) {
-        return a.isChecked ? 1 : -1;
+      if (a.purchased !== b.purchased) {
+        return a.purchased ? 1 : -1;
       }
       return a.order - b.order;
     });
@@ -89,20 +168,26 @@ const ShoppingListScreen: React.FC = () => {
     saveCartItems(sortedItems);
   };
 
-  // 수량 변경
-  const handleQuantityChange = (itemId: string, newQuantity: number) => {
+  // Change Quantity
+  const handleQuantityChange = (itemId: number, newQuantity: number) => {
     if (newQuantity <= 0) return;
 
     const updatedItems = cartItems.map(item =>
-      item.id === itemId ? { ...item, quantity: newQuantity } : item,
+      item.id === itemId
+        ? {
+            ...item,
+            quantity: newQuantity,
+            updatedAt: new Date(),
+          }
+        : item,
     );
 
     setCartItems(updatedItems);
     saveCartItems(updatedItems);
   };
 
-  // 단위 변경
-  const handleUnitChange = (itemId: string, newUnit: string) => {
+  // Change Unit
+  const handleUnitChange = (itemId: number, newUnit: string) => {
     const updatedItems = cartItems.map(item =>
       item.id === itemId ? { ...item, unit: newUnit } : item,
     );
@@ -111,65 +196,154 @@ const ShoppingListScreen: React.FC = () => {
     saveCartItems(updatedItems);
   };
 
-  // 아이템 삭제
-  const handleDeleteItem = (itemId: string) => {
-    const itemToDelete = cartItems.find(item => item.id === itemId);
-    if (!itemToDelete) return;
+  // Change Item Name
+  const handleNameChange = (itemId: number, newName: string) => {
+    if (!newName.trim()) return;
 
-    Alert.alert(
-      '삭제 확인',
-      `"${itemToDelete.name}"을(를) 장바구니에서 삭제하시겠습니까?`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: () => {
-            const updatedItems = cartItems.filter(item => item.id !== itemId);
-            setCartItems(updatedItems);
-            saveCartItems(updatedItems);
-          },
-        },
-      ],
+    const updatedItems = cartItems.map(item =>
+      item.id === itemId
+        ? {
+            ...item,
+            name: newName.trim(),
+            updatedAt: new Date(),
+          }
+        : item,
     );
-  };
 
-  // 테스트용 더미 데이터 추가 (개발 중에만 사용)
-  const addTestItem = () => {
-    const testItem: CartItem = {
-      id: Date.now().toString(),
-      name: `테스트 식재료 ${cartItems.length + 1}`,
-      quantity: 1,
-      unit: '개',
-      category: '야채',
-      isChecked: false,
-      order: cartItems.length,
-      createdAt: new Date(),
-    };
-
-    const updatedItems = [...cartItems, testItem];
     setCartItems(updatedItems);
     saveCartItems(updatedItems);
   };
 
+  // Delete Item
+  const handleDeleteItem = (itemId: number) => {
+    const itemToDelete = cartItems.find(item => item.id === itemId);
+    if (!itemToDelete) return;
+
+    Alert.alert(`"${itemToDelete.name}"을(를) 장바구니에서 삭제합니다.`, ``, [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: () => {
+          const updatedItems = cartItems.filter(item => item.id !== itemId);
+          setCartItems(updatedItems);
+          saveCartItems(updatedItems);
+        },
+      },
+    ]);
+  };
+
+  // Add New Item to Cart
+  const handleStartAddItem = () => {
+    setIsAddingNewItem(true);
+  };
+
+  const handleAddNewItem = (name: string, quantity: number, unit: string) => {
+    if (!name.trim()) {
+      Alert.alert('식재료 이름을 입력해주세요.', '');
+      return;
+    }
+
+    if (quantity <= 0) {
+      Alert.alert('올바른 수량을 입력해주세요.', '');
+      return;
+    }
+
+    const unpurchasedItemsCount = cartItems.filter(
+      item => !item.purchased,
+    ).length;
+
+    // (id 생성)
+    const maxId = Math.max(...cartItems.map(item => item.id || 0), 0);
+    const newId = maxId + 1;
+
+    const newItem: CartItem = {
+      id: newId, // (id 할당)
+      groceryListId: 1,
+      name: name.trim(),
+      quantity,
+      unit,
+      purchased: false,
+      order: unpurchasedItemsCount,
+      createdAt: new Date(),
+    };
+
+    const updatedItems = [...cartItems];
+    const reorderedItems = updatedItems.map(item => {
+      if (item.purchased && item.order >= unpurchasedItemsCount) {
+        return { ...item, order: item.order + 1 };
+      }
+      return item;
+    });
+
+    const finalItems = [...reorderedItems, newItem].sort((a, b) => {
+      if (a.purchased !== b.purchased) {
+        return a.purchased ? 1 : -1;
+      }
+      return a.order - b.order;
+    });
+
+    setCartItems(finalItems);
+    saveCartItems(finalItems);
+    setIsAddingNewItem(false);
+  };
+
+  const handleCancelAddItem = () => {
+    setIsAddingNewItem(false);
+  };
+
+  const renderFooter = () => (
+    <>
+      {!isEditMode && (
+        <>
+          {isAddingNewItem ? (
+            <NewItemCard
+              onSave={handleAddNewItem}
+              onCancel={handleCancelAddItem}
+            />
+          ) : (
+            <TouchableOpacity
+              style={addItemStyles.addButton}
+              onPress={handleStartAddItem}
+            >
+              <MaterialIcons name="add" size={32} color="#666" />
+            </TouchableOpacity>
+          )}
+        </>
+      )}
+    </>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* 임시 테스트 버튼 - 나중에 제거 */}
-        {/* <TouchableOpacity style={styles.testButton} onPress={addTestItem}>
-          <CustomText style={styles.testButtonText}>테스트 아이템 추가</CustomText>
-        </TouchableOpacity> */}
+      <ShoppingListHeader listName={listName} />
 
+      <Buttons
+        isListEditMode={isEditMode}
+        onEditModeToggle={handleEditToggle}
+        onClearCheckedItems={handleClearCheckedItems}
+        hasCheckedItems={hasCheckedItems}
+      />
+
+      <KeyboardAvoidingView
+        style={styles.content}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
         <DraggableFlatList
           data={cartItems}
           onDragEnd={handleDragEnd}
-          keyExtractor={item => item.id}
+          keyExtractor={item => `cart-item-${item.id}`}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContainer}
+          activationDistance={10}
+          dragItemOverflow={true}
           renderItem={({ item, drag, isActive }) => (
             <CartItemCard
               item={item}
+              isEditMode={isEditMode}
               onToggleCheck={handleToggleCheck}
+              onNameChange={handleNameChange}
               onQuantityChange={handleQuantityChange}
               onUnitChange={handleUnitChange}
               onDelete={handleDeleteItem}
@@ -177,8 +351,9 @@ const ShoppingListScreen: React.FC = () => {
               isActive={isActive}
             />
           )}
+          ListFooterComponent={renderFooter}
         />
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
