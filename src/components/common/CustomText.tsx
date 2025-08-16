@@ -1,12 +1,12 @@
 /**
  *
-<CustomText>안녕하세요</CustomText>
+  <CustomText>안녕하세요</CustomText>
 
-<CustomText weight="bold" color="limegreen" size={16}>제목 텍스트</CustomText>
+  <CustomText weight="bold" color="limegreen" size={16}>제목 텍스트</CustomText>
 
-<CustomText weight="medium" color="limegreen" style={{ marginTop: 10 }}>
-설명 텍스트
-</CustomText>
+  <CustomText weight="medium" color="limegreen" style={{ marginTop: 10 }}>
+  설명 텍스트
+  </CustomText>
 
 */
 

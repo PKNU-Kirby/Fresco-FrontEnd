@@ -13,6 +13,7 @@ import SplashScreen from './src/screens/SplashScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import FridgeSelectScreen from './src/screens/FridgeSelectScreen';
 import FridgeHomeScreen from './src/screens/FridgeHomeScreen';
+
 import RecipeScreen from './src/screens/RecipeScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import FridgeSettingsScreen from './src/screens/FridgeSettingsScreen';
@@ -20,6 +21,7 @@ import UsageHistoryScreen from './src/screens/UsageHistoryScreen';
 import AddItemScreen from './src/screens/AddItemScreen';
 import CameraScreen from './src/screens/CameraScreen';
 import PhotoPreview from './src/screens/CameraScreen/PhotoPreview';
+
 
 // Stack Navigator Type
 export type RootStackParamList = {
@@ -90,7 +92,7 @@ function MainTabNavigator({
           borderTopWidth: 1,
           borderTopColor: '#e0e0e0',
           paddingVertical: 12,
-          height: 80,
+          height: 85,
         },
         tabBarLabelStyle: {
           fontSize: 14,
@@ -114,8 +116,8 @@ function MainTabNavigator({
         }}
       />
       <Tab.Screen
-        name="RecipeScreen"
-        component={RecipeScreen}
+        name="Recipe"
+        component={RecipeNavigator}
         initialParams={{ fridgeId, fridgeName }}
         options={{
           tabBarLabel: '레시피',

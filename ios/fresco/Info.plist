@@ -106,7 +106,7 @@
 	<string>Pretendard-SemiBold.ttf</string>
 	<string>Pretendard-Thin.ttf</string>
 	</array>
-
+  
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs access to camera to take photos</string>
 	<key>NSPhotoLibraryUsageDescription</key>

@@ -1,154 +1,159 @@
-import { useState, useEffect, useCallback } from 'react';
-import {
-  getFridgeItemsByFridgeId,
-  deleteItemFromFridge,
-  updateFridgeItem,
-  type FridgeItem,
-} from '../utils/fridgeStorage';
+import { useState, useEffect } from 'react';
+import { FridgeStorage, ItemCategoryStorage } from '../utils/AsyncStorageUtils';
 
-export { type FridgeItem };
+export type FridgeItem = {
+  id: number;
+  name: string;
+  quantity: string;
+  expiryDate: string;
+  imageUri?: string;
+  itemCategory: string;
+  fridgeId: number;
+  unit?: string;
+};
+
+// 허용되는 단위 목록
+export const ALLOWED_UNITS = ['kg', 'g', 'L', 'ml', '개'] as const;
+export type UnitType = (typeof ALLOWED_UNITS)[number];
+
 
 export const useFridgeData = (fridgeId: number) => {
-  // 보관 분류 목록
-  const [storageTypes, setStorageTypes] = useState<string[]>([
-    '전체',
-    '냉장',
-    '냉동',
-    '실온',
-  ]);
-
-  // 식재료 카테고리 목록
-  const [itemCategories, setItemCategories] = useState([
-    '전체',
-    '베이커리',
-    '채소 / 과일',
-    '정육 / 계란',
-    '가공식품',
-    '수산 / 건어물',
-    '쌀 / 잡곡',
-    '우유 / 유제품',
-    '건강식품',
-    '장 / 양념 / 소스',
-    '기타',
-  ]);
+  // 식재료 카테고리 목록 (보관분류 제거)
+  const [itemCategories, setItemCategories] = useState<string[]>([]);
 
   // 실제 냉장고 아이템들을 상태로 관리
   const [fridgeItems, setFridgeItems] = useState<FridgeItem[]>([]);
-  const [_isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  // 실제 데이터 로드 함수
-  const loadFridgeItems = useCallback(async () => {
+  // AsyncStorage에서 데이터 로드
+  const loadFridgeData = async () => {
     try {
-      setIsLoading(true);
-      const items = await getFridgeItemsByFridgeId(fridgeId);
+      setLoading(true);
+
+      // 냉장고 아이템과 카테고리를 병렬로 로드
+      const [items, categories] = await Promise.all([
+        FridgeStorage.getFridgeItemsByFridgeId(fridgeId),
+        ItemCategoryStorage.getItemCategories(),
+      ]);
+
       setFridgeItems(items);
-      console.log(
-        `useFridgeData: 냉장고 ${fridgeId}에서 ${items.length}개 아이템 로드`,
-      );
+      setItemCategories(categories);
     } catch (error) {
-      console.error('useFridgeData: 아이템 로드 실패:', error);
-      // 에러 발생시 빈 배열로 설정
-      setFridgeItems([]);
+      console.error('냉장고 데이터 로드 실패:', error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [fridgeId]);
+  };
 
   // fridgeId가 변경될 때 실제 데이터 로드
   useEffect(() => {
-    loadFridgeItems();
-  }, [loadFridgeItems]);
+    loadFridgeData();
+  }, [fridgeId]);
 
-  // 아이템 삭제 함수 (실제 저장소에서 삭제)
-  const deleteItem = useCallback(async (itemId: number) => {
+  // 아이템 삭제 함수 (AsyncStorage와 동기화)
+  const deleteItem = async (itemId: number) => {
     try {
-      await deleteItemFromFridge(itemId);
-      // 로컬 상태에서도 제거
+      await FridgeStorage.deleteFridgeItem(itemId);
       setFridgeItems(prev => prev.filter(item => item.id !== itemId));
-      console.log(`useFridgeData: 아이템 ${itemId} 삭제 완료`);
     } catch (error) {
-      console.error('useFridgeData: 아이템 삭제 실패:', error);
+      console.error('아이템 삭제 실패:', error);
       throw error;
     }
-  }, []);
+  };
 
-  // 아이템 수량 변경 함수 (실제 저장소 업데이트)
-  const updateItemQuantity = useCallback(
-    async (itemId: number, newQuantity: string) => {
-      try {
-        await updateFridgeItem(itemId, { quantity: newQuantity });
-        // 로컬 상태도 업데이트
-        setFridgeItems(prev =>
-          prev.map(item =>
-            item.id === itemId ? { ...item, quantity: newQuantity } : item,
-          ),
-        );
-        console.log(
-          `useFridgeData: 아이템 ${itemId} 수량 변경: ${newQuantity}`,
-        );
-      } catch (error) {
-        console.error('useFridgeData: 수량 업데이트 실패:', error);
-        throw error;
-      }
-    },
-    [],
-  );
+  // 아이템 개수 변경 함수 (AsyncStorage와 동기화)
+  const updateItemQuantity = async (itemId: number, newQuantity: string) => {
+    try {
+      await FridgeStorage.updateItemQuantity(itemId, newQuantity);
+      setFridgeItems(prev =>
+        prev.map(item =>
+          item.id === itemId ? { ...item, quantity: newQuantity } : item,
+        ),
+      );
+    } catch (error) {
+      console.error('수량 업데이트 실패:', error);
+      throw error;
+    }
+  };
 
-  // 아이템 단위 변경 함수 (실제 저장소 업데이트)
-  const updateItemUnit = useCallback(
-    async (itemId: number, newUnit: string) => {
-      try {
-        await updateFridgeItem(itemId, { unit: newUnit });
-        // 로컬 상태도 업데이트
-        setFridgeItems(prev =>
-          prev.map(item =>
-            item.id === itemId ? { ...item, unit: newUnit } : item,
-          ),
-        );
-        console.log(`useFridgeData: 아이템 ${itemId} 단위 변경: ${newUnit}`);
-      } catch (error) {
-        console.error('useFridgeData: 단위 업데이트 실패:', error);
-        throw error;
-      }
-    },
-    [],
-  );
+  // 아이템 단위 변경 함수 (허용된 단위만, AsyncStorage와 동기화)
+  const updateItemUnit = async (itemId: number, newUnit: UnitType) => {
+    if (!ALLOWED_UNITS.includes(newUnit)) {
+      console.warn(`허용되지 않은 단위입니다: ${newUnit}`);
+      return;
+    }
 
-  // 아이템 소비기한 변경 함수 (실제 저장소 업데이트)
-  const updateItemExpiryDate = useCallback(
-    async (itemId: number, newDate: string) => {
-      try {
-        await updateFridgeItem(itemId, { expiryDate: newDate });
-        // 로컬 상태도 업데이트
-        setFridgeItems(prev =>
-          prev.map(item =>
-            item.id === itemId ? { ...item, expiryDate: newDate } : item,
-          ),
-        );
-        console.log(`useFridgeData: 아이템 ${itemId} 만료일 변경: ${newDate}`);
-      } catch (error) {
-        console.error('useFridgeData: 만료일 업데이트 실패:', error);
-        throw error;
-      }
-    },
-    [],
-  );
+    try {
+      await FridgeStorage.updateItemUnit(itemId, newUnit);
+      setFridgeItems(prev =>
+        prev.map(item =>
+          item.id === itemId ? { ...item, unit: newUnit } : item,
+        ),
+      );
+    } catch (error) {
+      console.error('단위 업데이트 실패:', error);
+      throw error;
+    }
+  };
 
-  // 데이터 새로고침 함수 (외부에서 호출 가능)
-  const refreshData = useCallback(() => {
-    loadFridgeItems();
-  }, [loadFridgeItems]);
+  // 아이템 소비기한 변경 함수 (AsyncStorage와 동기화)
+  const updateItemExpiryDate = async (itemId: number, newDate: string) => {
+    try {
+      await FridgeStorage.updateItemExpiryDate(itemId, newDate);
+      setFridgeItems(prev =>
+        prev.map(item =>
+          item.id === itemId ? { ...item, expiryDate: newDate } : item,
+        ),
+      );
+    } catch (error) {
+      console.error('소비기한 업데이트 실패:', error);
+      throw error;
+    }
+  };
+
+  // 새 아이템 추가 함수 (AsyncStorage와 동기화)
+  const addItem = async (newItem: Omit<FridgeItem, 'id'>) => {
+    // 단위 검증
+    if (newItem.unit && !ALLOWED_UNITS.includes(newItem.unit as UnitType)) {
+      throw new Error(
+        `허용되지 않은 단위입니다: ${
+          newItem.unit
+        }. 사용 가능한 단위: ${ALLOWED_UNITS.join(', ')}`,
+      );
+    }
+
+    try {
+      const addedItem = await FridgeStorage.addFridgeItem(newItem);
+      setFridgeItems(prev => [...prev, addedItem]);
+      return addedItem;
+    } catch (error) {
+      console.error('아이템 추가 실패:', error);
+      throw error;
+    }
+  };
+
+  // 카테고리 업데이트 함수 (AsyncStorage와 동기화)
+  const updateItemCategories = async (newCategories: string[]) => {
+    try {
+      await ItemCategoryStorage.saveItemCategories(newCategories);
+      setItemCategories(newCategories);
+    } catch (error) {
+      console.error('카테고리 업데이트 실패:', error);
+      throw error;
+    }
+  };
 
   return {
     fridgeItems,
-    storageTypes,
-    setStorageTypes,
     itemCategories,
-    setItemCategories,
+    loading,
+    setItemCategories: updateItemCategories,
     deleteItem,
     updateItemQuantity,
     updateItemUnit,
     updateItemExpiryDate,
-    refreshData,
+    addItem,
+    allowedUnits: ALLOWED_UNITS,
+    refreshData: loadFridgeData,
   };
 };
