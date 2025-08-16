@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Text, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -35,8 +35,12 @@ const SplashScreen = (): React.JSX.Element => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Fresco</Text>
-      <ActivityIndicator size="large" color="limegreen" style={styles.loader} />
+      <Image
+        source={require('../../assets/img/Fresby-ver1.png')}
+        style={styles.fresby}
+        resizeMode="contain"
+      />
+      <ActivityIndicator size="large" color="#444" style={styles.loader} />
     </View>
   );
 };
@@ -46,14 +50,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#e8f5e8',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-  },
+  fresby: { width: 200, height: 200 },
   loader: {
     marginTop: 20,
   },
