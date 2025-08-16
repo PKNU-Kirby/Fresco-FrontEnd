@@ -16,11 +16,12 @@ export type FridgeItem = {
 export const ALLOWED_UNITS = ['kg', 'g', 'L', 'ml', '개'] as const;
 export type UnitType = (typeof ALLOWED_UNITS)[number];
 
+
 export const useFridgeData = (fridgeId: number) => {
   // 식재료 카테고리 목록 (보관분류 제거)
   const [itemCategories, setItemCategories] = useState<string[]>([]);
 
-  // 냉장고 아이템들을 상태로 관리
+  // 실제 냉장고 아이템들을 상태로 관리
   const [fridgeItems, setFridgeItems] = useState<FridgeItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +45,7 @@ export const useFridgeData = (fridgeId: number) => {
     }
   };
 
-  // fridgeId가 변경될 때 해당 냉장고 데이터 로드
+  // fridgeId가 변경될 때 실제 데이터 로드
   useEffect(() => {
     loadFridgeData();
   }, [fridgeId]);

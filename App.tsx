@@ -12,17 +12,16 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import SplashScreen from './src/screens/SplashScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import FridgeSelectScreen from './src/screens/FridgeSelectScreen';
-
 import FridgeHomeScreen from './src/screens/FridgeHomeScreen';
 
-import RecipeNavigator from './src/screens/RecipeScreen/RecipeNavigator';
+import RecipeScreen from './src/screens/RecipeScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import FridgeSettingsScreen from './src/screens/FridgeSettingsScreen';
 import UsageHistoryScreen from './src/screens/UsageHistoryScreen';
-/*
 import AddItemScreen from './src/screens/AddItemScreen';
 import CameraScreen from './src/screens/CameraScreen';
-*/
+import PhotoPreview from './src/screens/CameraScreen/PhotoPreview';
+
 
 // Stack Navigator Type
 export type RootStackParamList = {
@@ -30,7 +29,7 @@ export type RootStackParamList = {
   Login: undefined;
   FridgeSelect: undefined;
   MainTabs: { fridgeId: number; fridgeName: string };
-  AddItem: {
+  AddItemScreen: {
     fridgeId: number;
     recognizedData?: {
       name?: string;
@@ -39,14 +38,22 @@ export type RootStackParamList = {
       expiryDate?: string;
       storageType?: string;
       itemCategory?: string;
+      photo?: string;
     };
   };
-  Camera: {
+  CameraScreen: {
     fridgeId: number;
-    photo?: any;
-    onRetake?: () => void;
-    onUse?: (photo?: string) => void;
-    onCancel?: () => void;
+  };
+  PhotoPreview: {
+    photo: {
+      uri: string;
+      width?: number;
+      height?: number;
+      fileSize?: number;
+      type?: string;
+      fileName?: string;
+    };
+    fridgeId: number;
   };
   FridgeSettings: {
     fridgeId: number;
@@ -57,6 +64,7 @@ export type RootStackParamList = {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // Tab Navigator Type
 export type MainTabParamList = {
@@ -64,8 +72,6 @@ export type MainTabParamList = {
   RecipeScreen: { fridgeId: number; fridgeName: string };
   ShoppingListScreen: { fridgeId: number; fridgeName: string };
 };
-
-const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // Main Tab Navigator
 function MainTabNavigator({
@@ -147,7 +153,6 @@ function App(): React.JSX.Element {
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="FridgeSelect" component={FridgeSelectScreen} />
           <Stack.Screen name="MainTabs" component={MainTabNavigator} />
-
           <Stack.Screen
             name="FridgeSettings"
             component={FridgeSettingsScreen}
@@ -164,25 +169,31 @@ function App(): React.JSX.Element {
               animation: 'slide_from_right',
             }}
           />
-          {/*
-          <Stack.Screen name="MainTabs" component={MainTabNavigator} />
           <Stack.Screen
-            name="AddItem"
-            component={AddItemScreen}
-            options={{
-              presentation: 'modal',
-              animation: 'slide_from_bottom', // 하단에서 올라오는 애니메이션
-            }}
-          />
-          <Stack.Screen
-            name="Camera"
+            name="CameraScreen"
             component={CameraScreen}
             options={{
-              presentation: 'fullScreenModal', // 전체화면 모달
+              presentation: 'fullScreenModal',
               animation: 'slide_from_bottom',
             }}
           />
-          */}
+          <Stack.Screen
+            name="PhotoPreview"
+            component={PhotoPreview}
+            options={{
+              title: '미리보기',
+              presentation: 'modal',
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="AddItemScreen"
+            component={AddItemScreen}
+            options={{
+              presentation: 'modal',
+              animation: 'slide_from_bottom',
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
