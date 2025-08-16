@@ -1,27 +1,20 @@
-import {useState, useEffect} from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  getFridgeItemsByFridgeId,
+  deleteItemFromFridge,
+  updateFridgeItem,
+  type FridgeItem,
+} from '../utils/fridgeStorage';
 
-export type FridgeItem = {
-  id: number;
-  name: string;
-  quantity: string;
-  expiryDate: string;
-  imageUri?: string;
-  storageType: string;
-  itemCategory: string;
-  fridgeId: number;
-  unit?: string;
-};
+export { type FridgeItem };
 
 export const useFridgeData = (fridgeId: number) => {
   // 보관 분류 목록
   const [storageTypes, setStorageTypes] = useState<string[]>([
     '전체',
-    '냉장실',
-    '냉동실',
+    '냉장',
+    '냉동',
     '실온',
-    '과자박스',
-    '아이스크림박스',
-    '기타',
   ]);
 
   // 식재료 카테고리 목록
@@ -39,225 +32,112 @@ export const useFridgeData = (fridgeId: number) => {
     '기타',
   ]);
 
-  // 냉장고 아이템들을 상태로 관리
+  // 실제 냉장고 아이템들을 상태로 관리
   const [fridgeItems, setFridgeItems] = useState<FridgeItem[]>([]);
+  const [_isLoading, setIsLoading] = useState(true);
 
-  // Mock data
-  const getMockDataByFridgeId = (fridgeId: number): FridgeItem[] => {
-    const dataMap: {[key: number]: FridgeItem[]} = {
-      1: [
-        // 본가
-        {
-          id: 1,
-          name: '식빵',
-          quantity: '1',
-          expiryDate: '2025.07.15',
-          storageType: '실온',
-          itemCategory: '베이커리',
-          fridgeId: 1,
-        },
-        {
-          id: 2,
-          name: '양배추',
-          quantity: '1',
-          expiryDate: '2025.07.20',
-          storageType: '냉장실',
-          itemCategory: '채소 / 과일',
-          fridgeId: 1,
-        },
-        {
-          id: 3,
-          name: '닭가슴살 500g',
-          quantity: '1',
-          expiryDate: '2025.07.18',
-          storageType: '냉장실',
-          itemCategory: '정육 / 계란',
-          fridgeId: 1,
-        },
-        {
-          id: 4,
-          name: '우유 1000ml',
-          quantity: '1',
-          expiryDate: '2025.07.25',
-          storageType: '냉장실',
-          itemCategory: '우유 / 유제품',
-          fridgeId: 1,
-        },
-        {
-          id: 5,
-          name: '냉동만두',
-          quantity: '1',
-          expiryDate: '2025.12.31',
-          storageType: '냉동실',
-          itemCategory: '가공식품',
-          fridgeId: 1,
-        },
-        {
-          id: 6,
-          name: '고추장',
-          quantity: '1',
-          expiryDate: '2026.03.20',
-          storageType: '실온',
-          itemCategory: '장 / 양념 / 소스',
-          fridgeId: 1,
-        },
-        {
-          id: 7,
-          name: '초코과자',
-          quantity: '3',
-          expiryDate: '2025.09.30',
-          storageType: '과자박스',
-          itemCategory: '기타',
-          fridgeId: 1,
-        },
-      ],
-      2: [
-        // 자취방
-        {
-          id: 8,
-          name: '계란',
-          quantity: '10',
-          expiryDate: '2025.08.15',
-          storageType: '냉장실',
-          itemCategory: '정육 / 계란',
-          fridgeId: 2,
-        },
-        {
-          id: 9,
-          name: '김치',
-          quantity: '1통',
-          expiryDate: '2025.12.31',
-          storageType: '냉장실',
-          itemCategory: '채소 / 과일',
-          fridgeId: 2,
-        },
-        {
-          id: 10,
-          name: '바나나',
-          quantity: '5',
-          expiryDate: '2025.07.20',
-          storageType: '실온',
-          itemCategory: '채소 / 과일',
-          fridgeId: 2,
-        },
-        {
-          id: 11,
-          name: '참치캔',
-          quantity: '3',
-          expiryDate: '2026.01.30',
-          storageType: '실온',
-          itemCategory: '수산 / 건어물',
-          fridgeId: 2,
-        },
-        {
-          id: 12,
-          name: '아이스크림',
-          quantity: '2',
-          expiryDate: '2025.12.31',
-          storageType: '아이스크림박스',
-          itemCategory: '우유 / 유제품',
-          fridgeId: 2,
-        },
-        {
-          id: 13,
-          name: '현미 5kg',
-          quantity: '1',
-          expiryDate: '2025.12.31',
-          storageType: '실온',
-          itemCategory: '쌀 / 잡곡',
-          fridgeId: 2,
-        },
-      ],
-      3: [
-        // 냉동고
-        {
-          id: 14,
-          name: '냉동새우 300g',
-          quantity: '1',
-          expiryDate: '2025.11.20',
-          storageType: '냉동실',
-          itemCategory: '수산 / 건어물',
-          fridgeId: 3,
-        },
-        {
-          id: 15,
-          name: '냉동삼겹살 1kg',
-          quantity: '1',
-          expiryDate: '2025.10.15',
-          storageType: '냉동실',
-          itemCategory: '정육 / 계란',
-          fridgeId: 3,
-        },
-        {
-          id: 16,
-          name: '냉동블루베리 500g',
-          quantity: '1',
-          expiryDate: '2025.12.31',
-          storageType: '냉동실',
-          itemCategory: '채소 / 과일',
-          fridgeId: 3,
-        },
-      ],
-      4: [
-        // 숨김냉장고
-        {
-          id: 17,
-          name: '오래된치즈',
-          quantity: '1',
-          expiryDate: '2025.06.01',
-          storageType: '냉장실',
-          itemCategory: '우유 / 유제품',
-          fridgeId: 4,
-        },
-        {
-          id: 18,
-          name: '홍삼 1박스',
-          quantity: '1',
-          expiryDate: '2026.05.20',
-          storageType: '실온',
-          itemCategory: '건강식품',
-          fridgeId: 4,
-        },
-      ],
-    };
-
-    return dataMap[fridgeId] || [];
-  };
-
-  // fridgeId가 변경될 때 해당 냉장고 데이터 로드
-  useEffect(() => {
-    const mockData = getMockDataByFridgeId(fridgeId);
-    setFridgeItems(mockData);
+  // 실제 데이터 로드 함수
+  const loadFridgeItems = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const items = await getFridgeItemsByFridgeId(fridgeId);
+      setFridgeItems(items);
+      console.log(
+        `useFridgeData: 냉장고 ${fridgeId}에서 ${items.length}개 아이템 로드`,
+      );
+    } catch (error) {
+      console.error('useFridgeData: 아이템 로드 실패:', error);
+      // 에러 발생시 빈 배열로 설정
+      setFridgeItems([]);
+    } finally {
+      setIsLoading(false);
+    }
   }, [fridgeId]);
 
-  const deleteItem = (itemId: number) => {
-    setFridgeItems(prev => prev.filter(item => item.id !== itemId));
-  };
+  // fridgeId가 변경될 때 실제 데이터 로드
+  useEffect(() => {
+    loadFridgeItems();
+  }, [loadFridgeItems]);
 
-  // 아이템 개수 변경 함수
-  const updateItemQuantity = (itemId: number, newQuantity: string) => {
-    setFridgeItems(prev =>
-      prev.map(item =>
-        item.id === itemId ? {...item, quantity: newQuantity} : item,
-      ),
-    );
-  };
+  // 아이템 삭제 함수 (실제 저장소에서 삭제)
+  const deleteItem = useCallback(async (itemId: number) => {
+    try {
+      await deleteItemFromFridge(itemId);
+      // 로컬 상태에서도 제거
+      setFridgeItems(prev => prev.filter(item => item.id !== itemId));
+      console.log(`useFridgeData: 아이템 ${itemId} 삭제 완료`);
+    } catch (error) {
+      console.error('useFridgeData: 아이템 삭제 실패:', error);
+      throw error;
+    }
+  }, []);
 
-  // 아이템 단위 변경 함수
-  const updateItemUnit = (itemId: number, newUnit: string) => {
-    setFridgeItems(prev =>
-      prev.map(item => (item.id === itemId ? {...item, unit: newUnit} : item)),
-    );
-  };
+  // 아이템 수량 변경 함수 (실제 저장소 업데이트)
+  const updateItemQuantity = useCallback(
+    async (itemId: number, newQuantity: string) => {
+      try {
+        await updateFridgeItem(itemId, { quantity: newQuantity });
+        // 로컬 상태도 업데이트
+        setFridgeItems(prev =>
+          prev.map(item =>
+            item.id === itemId ? { ...item, quantity: newQuantity } : item,
+          ),
+        );
+        console.log(
+          `useFridgeData: 아이템 ${itemId} 수량 변경: ${newQuantity}`,
+        );
+      } catch (error) {
+        console.error('useFridgeData: 수량 업데이트 실패:', error);
+        throw error;
+      }
+    },
+    [],
+  );
 
-  // 아이템 소비기한 변경 함수
-  const updateItemExpiryDate = (itemId: number, newDate: string) => {
-    setFridgeItems(prev =>
-      prev.map(item =>
-        item.id === itemId ? {...item, expiryDate: newDate} : item,
-      ),
-    );
-  };
+  // 아이템 단위 변경 함수 (실제 저장소 업데이트)
+  const updateItemUnit = useCallback(
+    async (itemId: number, newUnit: string) => {
+      try {
+        await updateFridgeItem(itemId, { unit: newUnit });
+        // 로컬 상태도 업데이트
+        setFridgeItems(prev =>
+          prev.map(item =>
+            item.id === itemId ? { ...item, unit: newUnit } : item,
+          ),
+        );
+        console.log(`useFridgeData: 아이템 ${itemId} 단위 변경: ${newUnit}`);
+      } catch (error) {
+        console.error('useFridgeData: 단위 업데이트 실패:', error);
+        throw error;
+      }
+    },
+    [],
+  );
+
+  // 아이템 소비기한 변경 함수 (실제 저장소 업데이트)
+  const updateItemExpiryDate = useCallback(
+    async (itemId: number, newDate: string) => {
+      try {
+        await updateFridgeItem(itemId, { expiryDate: newDate });
+        // 로컬 상태도 업데이트
+        setFridgeItems(prev =>
+          prev.map(item =>
+            item.id === itemId ? { ...item, expiryDate: newDate } : item,
+          ),
+        );
+        console.log(`useFridgeData: 아이템 ${itemId} 만료일 변경: ${newDate}`);
+      } catch (error) {
+        console.error('useFridgeData: 만료일 업데이트 실패:', error);
+        throw error;
+      }
+    },
+    [],
+  );
+
+  // 데이터 새로고침 함수 (외부에서 호출 가능)
+  const refreshData = useCallback(() => {
+    loadFridgeItems();
+  }, [loadFridgeItems]);
 
   return {
     fridgeItems,
@@ -269,5 +149,6 @@ export const useFridgeData = (fridgeId: number) => {
     updateItemQuantity,
     updateItemUnit,
     updateItemExpiryDate,
+    refreshData,
   };
 };

@@ -111,17 +111,6 @@ export const quantityStyles = StyleSheet.create({
   },
 });
 
-// Item Delete Button Style : './DeleteButton.tsx'
-export const deleteStyles = StyleSheet.create({
-  deleteItemButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 1,
-    opacity: 0.5,
-  },
-});
-
 // Unit Select Modal Style : './UnitSelector.tsx'
 export const modalStyles = StyleSheet.create({
   unitModalOverlay: {

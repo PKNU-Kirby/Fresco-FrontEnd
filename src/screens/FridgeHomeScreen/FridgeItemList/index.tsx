@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, FlatList } from 'react-native';
 import FridgeItemCard from '../FridgeItemCard';
 import AddButton from './ItemAddButton';
 import { listStyles as styles } from './styles';
+import { getFridgeItemsByFridgeId } from '../../../utils/fridgeStorage';
 
 type FridgeItem = {
   id: number;
@@ -48,6 +49,16 @@ const FridgeItemList: React.FC<FridgeItemListProps> = ({
       onDeleteItem={onDeleteItem}
     />
   );
+  const [_testItems, setTestItems] = useState<FridgeItem[]>([]);
+
+  useEffect(() => {
+    const loadTestData = async () => {
+      const loadedItems = await getFridgeItemsByFridgeId(1);
+      // console.log('테스트 로드된 아이템들:', loadedItems);
+      setTestItems(loadedItems);
+    };
+    loadTestData();
+  }, []);
 
   return (
     <View style={styles.content}>
