@@ -31,9 +31,8 @@ export type FridgeItem = {
   expiryDate: string;
   imageUri?: string;
   itemCategory: string;
-  fridgeId: number;
+  fridgeId: string;
   unit?: string;
-  storageType?: string;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -472,11 +471,13 @@ export class AsyncStorageService {
   }
 
   static async getFridgeItemsByFridgeId(
-    fridgeId: number,
+    fridgeId: string,
   ): Promise<FridgeItem[]> {
     try {
       const allItems = await this.getAllFridgeItems();
-      return allItems.filter(item => item.fridgeId === fridgeId);
+      return allItems.filter(
+        item => parseInt(item.fridgeId, 10) === parseInt(fridgeId, 10),
+      );
     } catch (error) {
       console.error('Get fridge items by fridge ID error:', error);
       return [];
@@ -582,24 +583,7 @@ export class AsyncStorageService {
         );
 
         // 기본 아이템들 추가
-        const defaultItems: Omit<FridgeItem, 'id'>[] = [
-          {
-            name: '우유',
-            quantity: '1',
-            unit: 'L',
-            expiryDate: '2025.08.20',
-            itemCategory: '우유 / 유제품',
-            fridgeId: defaultFridge.refrigerator.id,
-          },
-          {
-            name: '계란',
-            quantity: '10',
-            unit: '개',
-            expiryDate: '2025.08.25',
-            itemCategory: '정육 / 계란',
-            fridgeId: defaultFridge.refrigerator.id,
-          },
-        ];
+        const defaultItems: Omit<FridgeItem, 'id'>[] = [];
 
         for (const item of defaultItems) {
           await this.addFridgeItem(item);

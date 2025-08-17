@@ -8,14 +8,13 @@ import DeleteButton from './DeleteButton';
 import { cardStyles as styles } from './styles';
 
 type FridgeItem = {
-  id: number;
+  id: string;
+  fridgeId: string;
   name: string;
   quantity: string;
   expiryDate: string;
   imageUri?: string;
-  storageType: string;
   itemCategory: string;
-  fridgeId: number;
   unit?: string;
 };
 
@@ -23,10 +22,10 @@ type FridgeItemCardProps = {
   item: FridgeItem;
   isEditMode?: boolean;
   onPress?: () => void;
-  onQuantityChange?: (itemId: number, newQuantity: string) => void;
-  onExpiryDateChange?: (itemId: number, newDate: string) => void;
-  onUnitChange?: (itemId: number, newUnit: string) => void;
-  onDeleteItem?: (itemId: number) => void;
+  onQuantityChange?: (itemId: string, newQuantity: string) => void;
+  onExpiryDateChange?: (itemId: string, newDate: string) => void;
+  onUnitChange?: (itemId: string, newUnit: string) => void;
+  onDeleteItem?: (itemId: string) => void;
 };
 
 const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
@@ -149,9 +148,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
             )}
           </View>
 
-          <CustomText style={styles.itemStatus}>
-            {item.storageType} | {item.itemCategory}
-          </CustomText>
+          <CustomText style={styles.itemStatus}>{item.itemCategory}</CustomText>
         </View>
       </CardComponent>
 

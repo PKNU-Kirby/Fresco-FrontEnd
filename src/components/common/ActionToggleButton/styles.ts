@@ -1,19 +1,19 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   actionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: 'lightgray',
-    borderRadius: 12,
     minHeight: 36,
     alignItems: 'center',
     justifyContent: 'center',
+    fontSize: 16,
+    padding: 8,
+    backgroundColor: 'lightgray',
+    borderRadius: 8,
   },
   actionButtonText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
+    fontSize: 16,
+    color: '#444',
+    fontWeight: 'bold',
     textAlign: 'center',
   },
   actionButtonActive: {

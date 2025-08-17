@@ -1,33 +1,33 @@
-import {useState, useMemo} from 'react';
-import {FridgeItem} from './useFridgeData';
+import { useState, useMemo } from 'react';
+import { FridgeItem } from './useFridgeData';
 
 export const useFilterState = (fridgeItems: FridgeItem[]) => {
-  const [activeStorageType, setActiveStorageType] = useState('냉장실');
   const [activeItemCategory, setActiveItemCategory] = useState('전체');
   const [isListEditMode, setIsListEditMode] = useState(false);
 
-  // 이중 필터링 (보관 분류 + 식재료 유형)
+  // 필터링 + 정렬 (소비기한 임박순)
   const filteredItems = useMemo(() => {
-    return fridgeItems
-      .filter(
-        item =>
-          activeStorageType === '전체' ||
-          item.storageType === activeStorageType,
-      ) // 보관 분류 필터
-      .filter(
-        item =>
-          activeItemCategory === '전체' ||
-          item.itemCategory === activeItemCategory,
-      ); // 식재료 유형 필터
-  }, [fridgeItems, activeStorageType, activeItemCategory]);
+    const filtered = fridgeItems.filter(
+      item =>
+        activeItemCategory === '전체' ||
+        item.itemCategory === activeItemCategory,
+    );
+
+    // 소비기한 기준으로 정렬 (임박한 것부터)
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.expiryDate);
+      const dateB = new Date(b.expiryDate);
+
+      // 날짜가 빠른 것(임박한 것)이 위로 오도록 오름차순 정렬
+      return dateA.getTime() - dateB.getTime();
+    });
+  }, [fridgeItems, activeItemCategory]);
 
   const toggleEditMode = () => {
     setIsListEditMode(!isListEditMode);
   };
 
   return {
-    activeStorageType,
-    setActiveStorageType,
     activeItemCategory,
     setActiveItemCategory,
     isListEditMode,

@@ -48,12 +48,13 @@ export default FilterBar;
 
 const styles = StyleSheet.create({
   tabContainer: {
+    marginTop: 10,
+    paddingBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#e8f5e8',
     paddingHorizontal: 20,
-    paddingVertical: 10,
     minHeight: 56,
   },
   leftTabGroup: {

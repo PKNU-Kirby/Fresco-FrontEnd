@@ -6,13 +6,13 @@ import { listStyles as styles } from './styles';
 import { getFridgeItemsByFridgeId } from '../../../utils/fridgeStorage';
 
 type FridgeItem = {
-  id: number;
+  id: string;
+  fridgeId: string;
   name: string;
   quantity: string;
   expiryDate: string;
   imageUri?: string;
   itemCategory: string;
-  fridgeId: number;
   unit?: string;
 };
 
@@ -21,10 +21,10 @@ type FridgeItemListProps = {
   isEditMode: boolean;
   onAddItem: () => void;
   onItemPress?: (item: FridgeItem) => void;
-  onQuantityChange?: (itemId: number, newQuantity: string) => void;
-  onUnitChange?: (itemId: number, newUnit: string) => void;
-  onExpiryDateChange?: (itemId: number, newDate: string) => void;
-  onDeleteItem?: (itemId: number) => void;
+  onQuantityChange?: (itemId: string, newQuantity: string) => void;
+  onUnitChange?: (itemId: string, newUnit: string) => void;
+  onExpiryDateChange?: (itemId: string, newDate: string) => void;
+  onDeleteItem?: (itemId: string) => void;
 };
 
 const FridgeItemList: React.FC<FridgeItemListProps> = ({
@@ -52,12 +52,13 @@ const FridgeItemList: React.FC<FridgeItemListProps> = ({
 
   useEffect(() => {
     const loadTestData = async () => {
-      const loadedItems = await getFridgeItemsByFridgeId(1);
+      const fridgeId = items[0].fridgeId;
+      const loadedItems = await getFridgeItemsByFridgeId(fridgeId);
       // console.log('테스트 로드된 아이템들:', loadedItems);
       setTestItems(loadedItems);
     };
     loadTestData();
-  }, []);
+  }, [items]);
 
   return (
     <View style={styles.content}>

@@ -90,6 +90,7 @@ export interface Food {
   addedBy: string;
   createdAt: string;
   updatedAt: string;
+  imageUri?: string;
 }
 
 export type FoodCategory =

@@ -1,18 +1,19 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   filterButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: '#333',
-    borderRadius: 12,
     minHeight: 36,
     alignItems: 'center',
     justifyContent: 'center',
+    fontSize: 16,
+    padding: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#444',
+    borderRadius: 16,
   },
   filterButtonText: {
-    fontSize: 14,
-    color: '#fff',
+    fontSize: 16,
+    color: '#f8f8f8',
     fontWeight: 'bold',
     textAlign: 'center',
   },

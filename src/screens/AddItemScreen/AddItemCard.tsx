@@ -6,7 +6,6 @@ import QuantityEditor from '../FridgeHomeScreen/FridgeItemCard/QuantityEditor';
 import UnitSelector from '../FridgeHomeScreen/FridgeItemCard/UnitSelector';
 import DatePicker from '../../components/modals/DatePicker';
 import ItemCategoryModal from '../../components/modals/ItemCategoryModal';
-import StorageTypeModal from '../../components/modals/StorageTypeModal';
 import { ItemFormData } from './index';
 import { cardStyles } from './styles';
 
@@ -40,7 +39,6 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [showStorageModal, setShowStorageModal] = useState(false);
 
   // Options for modals
   const unitOptions = ['개', 'kg', 'g', 'L', 'ml'];
@@ -58,9 +56,6 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
     '장 / 양념 / 소스',
     '기타',
   ]);
-
-  // 보관방법 목록 상태
-  const [storageTypes, setStorageTypes] = useState(['냉장', '냉동', '실온']);
 
   useEffect(() => {
     if (focusedItemId === item.id && isEditMode) {
@@ -125,14 +120,6 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
     },
     [item.id, onUpdateItem],
   );
-
-  const handleStorageSelect = useCallback(
-    (storage: string) => {
-      onUpdateItem(item.id, 'storageType', storage);
-    },
-    [item.id, onUpdateItem],
-  );
-
   const handleCategorySelect = useCallback(
     (category: string) => {
       onUpdateItem(item.id, 'itemCategory', category);
@@ -150,12 +137,6 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
   // 카테고리 업데이트 핸들러
   const handleUpdateCategories = useCallback((categories: string[]) => {
     setItemCategories(categories);
-    // TODO: 실제로는 상위 컴포넌트나 Context로 전달해야 함
-  }, []);
-
-  // 보관방법 업데이트 핸들러
-  const handleUpdateStorageTypes = useCallback((types: string[]) => {
-    setStorageTypes(types);
     // TODO: 실제로는 상위 컴포넌트나 Context로 전달해야 함
   }, []);
 
@@ -222,37 +203,22 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
             )}
           </View>
 
-          {/* Storage Type and Category */}
+          {/* Category */}
           <View style={cardStyles.statusRow}>
             {isEditMode ? (
-              <>
-                <TouchableOpacity
-                  style={cardStyles.categoryButton}
-                  onPress={() => setShowStorageModal(true)}
-                  accessibilityLabel={`보관방법: ${item.storageType}`}
-                  accessibilityRole="button"
-                >
-                  <CustomText style={cardStyles.categoryButtonText}>
-                    {item.storageType}
-                  </CustomText>
-                </TouchableOpacity>
-
-                <CustomText style={cardStyles.separator}>|</CustomText>
-
-                <TouchableOpacity
-                  style={cardStyles.categoryButton}
-                  onPress={() => setShowCategoryModal(true)}
-                  accessibilityLabel={`카테고리: ${item.itemCategory}`}
-                  accessibilityRole="button"
-                >
-                  <CustomText style={cardStyles.categoryButtonText}>
-                    {item.itemCategory}
-                  </CustomText>
-                </TouchableOpacity>
-              </>
+              <TouchableOpacity
+                style={cardStyles.categoryButton}
+                onPress={() => setShowCategoryModal(true)}
+                accessibilityLabel={`카테고리: ${item.itemCategory}`}
+                accessibilityRole="button"
+              >
+                <CustomText style={cardStyles.categoryButtonText}>
+                  {item.itemCategory}
+                </CustomText>
+              </TouchableOpacity>
             ) : (
               <CustomText style={cardStyles.statusText}>
-                {item.storageType} | {item.itemCategory}
+                {item.itemCategory}
               </CustomText>
             )}
           </View>
@@ -268,16 +234,6 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
         options={unitOptions}
         onSelect={handleUnitSelect}
         onClose={() => setShowUnitModal(false)}
-      />
-
-      {/* Storage Type Modal */}
-      <StorageTypeModal
-        visible={showStorageModal}
-        storageTypes={storageTypes}
-        activeStorageType={item.storageType}
-        onClose={() => setShowStorageModal(false)}
-        onSelect={handleStorageSelect}
-        onUpdateStorageTypes={handleUpdateStorageTypes}
       />
 
       {/* Category Modal */}

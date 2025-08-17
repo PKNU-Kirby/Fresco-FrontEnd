@@ -15,7 +15,7 @@ export interface Recipe {
   sharedBy?: string;
   sharedById?: string; // 공유한 사용자의 실제 ID
   originalRecipeId?: string; // 원본 개인 레시피 ID
-  fridgeIds?: number[]; // 공유된 냉장고 ID 목록
+  fridgeIds?: string[]; // 공유된 냉장고 ID 목록
 }
 
 export interface RecipeIngredient {
@@ -65,7 +65,7 @@ export const FridgeStorage = {
   async getFridgeItemsByFridgeId(fridgeId: number): Promise<FridgeItem[]> {
     try {
       const allItems = await this.getAllFridgeItems();
-      return allItems.filter(item => item.fridgeId === fridgeId);
+      return allItems.filter(item => parseInt(item.fridgeId, 10) === fridgeId);
     } catch (error) {
       console.error('특정 냉장고 아이템 조회 실패:', error);
       return [];
@@ -78,10 +78,13 @@ export const FridgeStorage = {
       const allItems = await this.getAllFridgeItems();
 
       // 새 ID 생성 (기존 ID 중 최대값 + 1)
-      const maxId = allItems.reduce((max, item) => Math.max(max, item.id), 0);
+      const maxId = allItems.reduce(
+        (max, item) => Math.max(max, parseInt(item.id, 10)),
+        0,
+      );
       const itemWithId: FridgeItem = {
         ...newItem,
-        id: maxId + 1,
+        id: (maxId + 1).toString(),
       };
 
       const updatedItems = [...allItems, itemWithId];
@@ -112,7 +115,9 @@ export const FridgeStorage = {
   async deleteFridgeItem(itemId: number): Promise<void> {
     try {
       const allItems = await this.getAllFridgeItems();
-      const filteredItems = allItems.filter(item => item.id !== itemId);
+      const filteredItems = allItems.filter(
+        item => parseInt(item.id, 10) !== itemId,
+      );
       await this.saveFridgeItems(filteredItems);
     } catch (error) {
       console.error('냉장고 아이템 삭제 실패:', error);
@@ -124,7 +129,9 @@ export const FridgeStorage = {
   async deleteFridgeItemsByFridgeId(fridgeId: number): Promise<void> {
     try {
       const allItems = await this.getAllFridgeItems();
-      const filteredItems = allItems.filter(item => item.fridgeId !== fridgeId);
+      const filteredItems = allItems.filter(
+        item => parseInt(item.fridgeId, 10) !== fridgeId,
+      );
       await this.saveFridgeItems(filteredItems);
     } catch (error) {
       console.error('냉장고별 아이템 삭제 실패:', error);
@@ -137,7 +144,9 @@ export const FridgeStorage = {
     try {
       const allItems = await this.getAllFridgeItems();
       const updatedItems = allItems.map(item =>
-        item.id === itemId ? { ...item, quantity: newQuantity } : item,
+        parseInt(item.id, 10) === itemId
+          ? { ...item, quantity: newQuantity }
+          : item,
       );
       await this.saveFridgeItems(updatedItems);
     } catch (error) {
@@ -151,7 +160,7 @@ export const FridgeStorage = {
     try {
       const allItems = await this.getAllFridgeItems();
       const updatedItems = allItems.map(item =>
-        item.id === itemId ? { ...item, unit: newUnit } : item,
+        parseInt(item.id, 10) === itemId ? { ...item, unit: newUnit } : item,
       );
       await this.saveFridgeItems(updatedItems);
     } catch (error) {
@@ -165,7 +174,9 @@ export const FridgeStorage = {
     try {
       const allItems = await this.getAllFridgeItems();
       const updatedItems = allItems.map(item =>
-        item.id === itemId ? { ...item, expiryDate: newDate } : item,
+        parseInt(item.id, 10) === itemId
+          ? { ...item, expiryDate: newDate }
+          : item,
       );
       await this.saveFridgeItems(updatedItems);
     } catch (error) {
@@ -608,22 +619,22 @@ export const FridgeInitializer = {
       if (existingItems.length === 0) {
         const defaultItems: FridgeItem[] = [
           {
-            id: 1,
+            id: '1',
             name: '양배추',
             quantity: '1',
             unit: 'kg',
             expiryDate: '2025.07.20',
             itemCategory: '채소 / 과일',
-            fridgeId: 1,
+            fridgeId: '1',
           },
           {
-            id: 2,
+            id: '2',
             name: '우유',
             quantity: '1',
             unit: 'L',
             expiryDate: '2025.07.25',
             itemCategory: '우유 / 유제품',
-            fridgeId: 1,
+            fridgeId: '1',
           },
         ];
         await FridgeStorage.saveFridgeItems(defaultItems);

@@ -3,14 +3,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const FRIDGE_ITEMS_KEY = 'fridgeItems';
 
 export type FridgeItem = {
-  id: number;
+  id: string;
   name: string;
   quantity: string;
   expiryDate: string;
   imageUri?: string;
   storageType: string;
   itemCategory: string;
-  fridgeId: number;
+  fridgeId: string;
   unit?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -29,7 +29,7 @@ export const getFridgeItems = async (): Promise<FridgeItem[]> => {
 
 // get Local Fridge Items by Id
 export const getFridgeItemsByFridgeId = async (
-  fridgeId: number,
+  fridgeId: string,
 ): Promise<FridgeItem[]> => {
   try {
     const allItems = await getFridgeItems();
@@ -42,7 +42,7 @@ export const getFridgeItemsByFridgeId = async (
 
 // Add Items to Fridge
 export const addItemsToFridge = async (
-  fridgeId: number,
+  fridgeId: string,
   newItems: Omit<FridgeItem, 'id' | 'createdAt' | 'updatedAt'>[],
 ): Promise<FridgeItem[]> => {
   try {
@@ -52,12 +52,12 @@ export const addItemsToFridge = async (
     // creage New ID
     const maxId =
       existingItems.length > 0
-        ? Math.max(...existingItems.map(item => item.id))
+        ? Math.max(...existingItems.map(item => parseInt(item.id, 10)))
         : 0;
 
     const itemsToAdd: FridgeItem[] = newItems.map((item, index) => ({
       ...item,
-      id: maxId + index + 1,
+      id: (maxId + index + 1).toString(),
       fridgeId,
       createdAt: currentTime,
       updatedAt: currentTime,
@@ -77,7 +77,9 @@ export const addItemsToFridge = async (
 export const deleteItemFromFridge = async (itemId: number): Promise<void> => {
   try {
     const existingItems = await getFridgeItems();
-    const updatedItems = existingItems.filter(item => item.id !== itemId);
+    const updatedItems = existingItems.filter(
+      item => parseInt(item.id, 10) !== itemId,
+    );
     await AsyncStorage.setItem(FRIDGE_ITEMS_KEY, JSON.stringify(updatedItems));
   } catch (error) {
     console.error('아이템 삭제 실패:', error);
@@ -93,7 +95,7 @@ export const updateFridgeItem = async (
   try {
     const existingItems = await getFridgeItems();
     const updatedItems = existingItems.map(item =>
-      item.id === itemId
+      parseInt(item.id, 10) === itemId
         ? { ...item, ...updates, updatedAt: new Date().toISOString() }
         : item,
     );

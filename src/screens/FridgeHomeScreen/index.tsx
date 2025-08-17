@@ -28,7 +28,7 @@ import {
 type Props = {
   route: {
     params: {
-      fridgeId: number;
+      fridgeId: string;
       fridgeName: string;
       shouldRefresh?: boolean;
     };
@@ -136,9 +136,9 @@ const FridgeHomeScreen = ({ route }: Props) => {
 
   // 실제 데이터 업데이트 핸들러들
   const handleQuantityChange = useCallback(
-    async (itemId: number, newQuantity: string) => {
+    async (itemId: string, newQuantity: string) => {
       try {
-        await updateFridgeItem(itemId, { quantity: newQuantity });
+        await updateFridgeItem(parseInt(itemId, 10), { quantity: newQuantity });
         await loadActualFridgeItems(); // 업데이트 후 새로고침
       } catch (error) {
         console.error('수량 업데이트 실패:', error);
@@ -149,9 +149,9 @@ const FridgeHomeScreen = ({ route }: Props) => {
   );
 
   const handleUnitChange = useCallback(
-    async (itemId: number, newUnit: string) => {
+    async (itemId: string, newUnit: string) => {
       try {
-        await updateFridgeItem(itemId, { unit: newUnit });
+        await updateFridgeItem(parseInt(itemId, 10), { unit: newUnit });
         await loadActualFridgeItems();
       } catch (error) {
         console.error('단위 업데이트 실패:', error);
@@ -162,9 +162,9 @@ const FridgeHomeScreen = ({ route }: Props) => {
   );
 
   const handleExpiryDateChange = useCallback(
-    async (itemId: number, newDate: string) => {
+    async (itemId: string, newDate: string) => {
       try {
-        await updateFridgeItem(itemId, { expiryDate: newDate });
+        await updateFridgeItem(parseInt(itemId, 10), { expiryDate: newDate });
         await loadActualFridgeItems();
       } catch (error) {
         console.error('만료일 업데이트 실패:', error);
@@ -175,9 +175,9 @@ const FridgeHomeScreen = ({ route }: Props) => {
   );
 
   const handleDeleteItem = useCallback(
-    async (itemId: number) => {
+    async (itemId: string) => {
       try {
-        await deleteItemFromFridge(itemId);
+        await deleteItemFromFridge(parseInt(itemId, 10));
         await loadActualFridgeItems(); // 삭제 후 새로고침
         Alert.alert('완료', '아이템이 삭제되었습니다.');
       } catch (error) {

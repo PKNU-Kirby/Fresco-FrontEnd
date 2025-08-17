@@ -27,9 +27,9 @@ export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   FridgeSelect: undefined;
-  MainTabs: { fridgeId: number; fridgeName: string };
+  MainTabs: { fridgeId: string; fridgeName: string };
   AddItemScreen: {
-    fridgeId: number;
+    fridgeId: string;
     recognizedData?: {
       name?: string;
       quantity?: string;
@@ -41,7 +41,7 @@ export type RootStackParamList = {
     };
   };
   CameraScreen: {
-    fridgeId: number;
+    fridgeId: string;
   };
   PhotoPreview: {
     photo: {
@@ -55,7 +55,7 @@ export type RootStackParamList = {
     fridgeId: number;
   };
   FridgeSettings: {
-    fridgeId: number;
+    fridgeId: string;
     fridgeName: string;
     userRole: 'owner' | 'member'; // 권한에 따른 UI 분리
   };
@@ -67,16 +67,16 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // Tab Navigator Type
 export type MainTabParamList = {
-  FridgeHomeScreen: { fridgeId: number; fridgeName: string };
-  Recipe: { fridgeId: number; fridgeName: string };
-  ShoppingListScreen: { fridgeId: number; fridgeName: string };
+  FridgeHomeScreen: { fridgeId: string; fridgeName: string };
+  Recipe: { fridgeId: string; fridgeName: string };
+  ShoppingListScreen: { fridgeId: string; fridgeName: string };
 };
 
 // Main Tab Navigator
 function MainTabNavigator({
   route,
 }: {
-  route: { params: { fridgeId: number; fridgeName: string } };
+  route: { params: { fridgeId: string; fridgeName: string } };
 }) {
   const { fridgeId, fridgeName } = route.params;
 
