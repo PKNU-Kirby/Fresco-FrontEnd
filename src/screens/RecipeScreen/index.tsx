@@ -388,7 +388,10 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
             {currentTab === 'all' && (
               <SharedRecipeFolder
                 recipeCount={sharedRecipes.length}
-                onPress={() => navigation.navigate('SharedFolder')}
+                onPress={() => {
+                  setShowFloatingMenu(false);
+                  navigation.navigate('SharedFolder');
+                }}
               />
             )}
 
@@ -423,13 +426,14 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                     isDragEnabled={isDragEnabled}
                     onDelete={deleteRecipe}
                     onToggleFavorite={toggleFavorite}
-                    onPress={recipe =>
+                    onPress={recipe => {
+                      setShowFloatingMenu(false);
                       navigation.navigate('RecipeDetail', {
                         recipe,
                         fridgeId,
                         fridgeName,
-                      })
-                    }
+                      });
+                    }}
                     isFavorite={isFavorite(item.id)}
                   />
                 );
@@ -447,7 +451,10 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                 <ListHeader
                   shouldShow={currentTab === 'all'}
                   recipeCount={sharedRecipes.length}
-                  onPress={() => navigation.navigate('SharedFolder')}
+                  onPress={() => {
+                    setShowFloatingMenu(false);
+                    navigation.navigate('SharedFolder');
+                  }}
                 />
               }
               ListFooterComponent={
