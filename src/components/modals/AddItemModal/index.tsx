@@ -25,7 +25,6 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
       onRequestClose={onClose}
     >
       {' '}
-      {/* 전체 화면 블러 배경 */}
       <TouchableOpacity
         style={styles.fullScreenOverlay}
         activeOpacity={1}
