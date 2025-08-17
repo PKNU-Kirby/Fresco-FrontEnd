@@ -1,8 +1,8 @@
 import React from 'react';
-import {View, Modal, TouchableOpacity} from 'react-native';
+import { View, Modal, TouchableOpacity } from 'react-native';
 import CustomText from '../../common/CustomText';
 import OptionButton from './OptionButton';
-import {modalStyles as styles} from './styles';
+import { modalStyles as styles } from './styles';
 
 interface AddItemModalProps {
   visible: boolean;
@@ -22,7 +22,15 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+    >
+      {' '}
+      {/* 전체 화면 블러 배경 */}
+      <TouchableOpacity
+        style={styles.fullScreenOverlay}
+        activeOpacity={1}
+        onPress={onClose}
+      />
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
@@ -49,7 +57,8 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
               accessible={true}
               accessibilityLabel="모달 닫기"
               accessibilityRole="button"
-              activeOpacity={0.7}>
+              activeOpacity={0.7}
+            >
               <CustomText style={styles.cancelButtonText}>닫기</CustomText>
             </TouchableOpacity>
           </View>

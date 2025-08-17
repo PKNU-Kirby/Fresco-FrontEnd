@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#e8f5e8',
   },
   content: {
     flex: 1,
@@ -20,9 +20,10 @@ export const buttonsStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#e8f5e8',
     paddingHorizontal: 20,
-    paddingTop: 10,
+    marginTop: 10,
+    paddingBottom: 10,
     minHeight: 40,
   },
   leftButtonGroup: {
@@ -40,17 +41,25 @@ export const headerStyles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#f8f8f8',
     minHeight: 56,
+    backgroundColor: '#e8f5e8',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginBottom: 8,
   },
   headerTitle: {
     flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
     fontSize: 20,
     fontWeight: 'bold',
     color: '#444',

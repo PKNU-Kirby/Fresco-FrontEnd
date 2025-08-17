@@ -1,78 +1,108 @@
-import React, { useState, useEffect } from 'react';
-import { View, FlatList } from 'react-native';
-import FridgeItemCard from '../FridgeItemCard';
-import AddButton from './ItemAddButton';
-import { listStyles as styles } from './styles';
-import { getFridgeItemsByFridgeId } from '../../../utils/fridgeStorage';
+import React from 'react';
+import { View, Modal, TouchableOpacity, Animated } from 'react-native';
+import CustomText from '../../common/CustomText';
+import OptionButton from './OptionButton';
+import { modalStyles as styles } from './styles';
 
-type FridgeItem = {
-  id: number;
-  name: string;
-  quantity: string;
-  expiryDate: string;
-  imageUri?: string;
-  storageType: string;
-  itemCategory: string;
-  fridgeId: number;
-  unit?: string;
-};
+interface AddItemModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onDirectAdd: () => void;
+  onCameraAdd: () => void;
+}
 
-type FridgeItemListProps = {
-  items: FridgeItem[];
-  isEditMode: boolean;
-  onAddItem: () => void;
-  onItemPress?: (item: FridgeItem) => void;
-  onQuantityChange?: (itemId: number, newQuantity: string) => void;
-  onUnitChange?: (itemId: number, newUnit: string) => void;
-  onExpiryDateChange?: (itemId: number, newDate: string) => void;
-  onDeleteItem?: (itemId: number) => void;
-};
-
-const FridgeItemList: React.FC<FridgeItemListProps> = ({
-  items,
-  isEditMode,
-  onAddItem,
-  onItemPress,
-  onQuantityChange,
-  onUnitChange,
-  onExpiryDateChange,
-  onDeleteItem,
+const AddItemModal: React.FC<AddItemModalProps> = ({
+  visible,
+  onClose,
+  onDirectAdd,
+  onCameraAdd,
 }) => {
-  const renderItem = ({ item }: { item: FridgeItem }) => (
-    <FridgeItemCard
-      item={item}
-      isEditMode={isEditMode}
-      onPress={() => onItemPress?.(item)}
-      onQuantityChange={onQuantityChange}
-      onUnitChange={onUnitChange}
-      onExpiryDateChange={onExpiryDateChange}
-      onDeleteItem={onDeleteItem}
-    />
-  );
-  const [_testItems, setTestItems] = useState<FridgeItem[]>([]);
+  const scaleAnimation = React.useRef(new Animated.Value(0)).current;
+  const opacityAnimation = React.useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    const loadTestData = async () => {
-      const loadedItems = await getFridgeItemsByFridgeId(1);
-      // console.log('테스트 로드된 아이템들:', loadedItems);
-      setTestItems(loadedItems);
-    };
-    loadTestData();
-  }, []);
+  React.useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.spring(scaleAnimation, {
+          toValue: 1,
+          tension: 100,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnimation, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(scaleAnimation, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnimation, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [visible]);
 
   return (
-    <View style={styles.content}>
-      <FlatList
-        data={items}
-        renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-      />
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none" // 커스텀 애니메이션 사용
+      onRequestClose={onClose}
+    >
+      <Animated.View
+        style={[
+          styles.modalOverlay,
+          {
+            opacity: opacityAnimation,
+            transform: [{ scale: scaleAnimation }],
+          },
+        ]}
+      >
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <CustomText style={styles.modalTitle}>식재료 추가하기</CustomText>
+          </View>
 
-      <AddButton onPress={onAddItem} visible={!isEditMode} />
-    </View>
+          <View style={styles.optionContainer}>
+            <OptionButton
+              iconName="pen"
+              text="직접 추가"
+              onPress={onDirectAdd}
+              iconColor="#3498db"
+            />
+            <OptionButton
+              iconName="camera"
+              text="카메라"
+              onPress={onCameraAdd}
+              iconColor="#e74c3c"
+            />
+          </View>
+
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={onClose}
+              accessible={true}
+              accessibilityLabel="모달 닫기"
+              accessibilityRole="button"
+              activeOpacity={0.8}
+            >
+              <CustomText style={styles.cancelButtonText}>닫기</CustomText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Animated.View>
+    </Modal>
   );
 };
 
-export default FridgeItemList;
+export default AddItemModal;
