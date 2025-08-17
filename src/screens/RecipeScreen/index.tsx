@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { styles } from './styles';
 import { Recipe, RecipeStackParamList } from './RecipeNavigator';
 
-// 🔧 AsyncStorage 유틸리티 import
+// AsyncStorage 유틸리티 import
 import {
   RecipeStorage,
   FavoriteStorage,
@@ -29,61 +29,11 @@ type RecipeHomeNavigationProp = NativeStackNavigationProp<
 >;
 
 // Mock 공동 레시피 데이터 (초기값)
-const mockSharedRecipes: Recipe[] = [
-  {
-    id: 'shared-1',
-    title: '우리 가족 김치찌개',
-    description: '엄마가 알려준 김치찌개 레시피',
-    createdAt: '2024-01-16',
-    isShared: true,
-    sharedBy: '엄마',
-  },
-  {
-    id: 'shared-2',
-    title: '아빠의 된장찌개',
-    description: '아빠 특제 된장찌개',
-    createdAt: '2024-01-15',
-    isShared: true,
-    sharedBy: '아빠',
-  },
-  {
-    id: 'shared-3',
-    title: '언니의 계란말이',
-    description: '언니가 공유한 계란말이',
-    createdAt: '2024-01-14',
-    isShared: true,
-    sharedBy: '언니',
-  },
-  {
-    id: 'shared-4',
-    title: '할머니 비빔밥',
-    description: '할머니의 특제 비빔밥',
-    createdAt: '2024-01-13',
-    isShared: true,
-    sharedBy: '할머니',
-  },
-  {
-    id: 'shared-5',
-    title: '동생의 크림파스타',
-    description: '동생이 만든 크림파스타',
-    createdAt: '2024-01-12',
-    isShared: true,
-    sharedBy: '동생',
-  },
-];
+const mockSharedRecipes: Recipe[] = [];
 
 // Mock 데이터 생성 함수 (초기 데이터용)
 const generateInitialMockRecipes = (count: number): Recipe[] => {
-  const baseRecipes = [
-    { title: '김치찌개', description: '맛있는 김치찌개 레시피입니다.' },
-    { title: '된장찌개', description: '구수한 된장찌개 만들기' },
-    { title: '불고기', description: '달콤한 불고기 레시피' },
-    { title: '계란말이', description: '부드러운 계란말이 만들기' },
-    { title: '김치볶음밥', description: '간단한 김치볶음밥' },
-    { title: '라면', description: '맛있는 라면 끓이기' },
-    { title: '제육볶음', description: '매콤한 제육볶음' },
-    { title: '미역국', description: '시원한 미역국' },
-  ];
+  const baseRecipes = [];
 
   return Array.from({ length: count }, (_, index) => {
     const baseRecipe = baseRecipes[index % baseRecipes.length];
