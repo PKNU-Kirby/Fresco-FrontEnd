@@ -36,10 +36,6 @@ const FridgeSelectScreen = () => {
   );
   const [bottomSheetHeight] = useState(new Animated.Value(80));
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
-  const [draggedFridge, setDraggedFridge] = useState<FridgeWithRole | null>(
-    null,
-  );
-  const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -227,39 +223,6 @@ const FridgeSelectScreen = () => {
     }
   };
 
-  // 드래그 앤 드롭 핸들러들
-  const handleDragStart = (fridge: FridgeWithRole) => {
-    setDraggedFridge(fridge);
-  };
-
-  const handleDragMove = (x: number, y: number) => {
-    // 드래그 위치에 따라 어느 타일 위에 있는지 계산
-    // 실제 구현에서는 각 타일의 위치를 계산해서 draggedOverIndex 설정
-    // 여기서는 간단한 예시만 제공
-  };
-
-  const handleDragEnd = () => {
-    if (draggedFridge && draggedOverIndex !== null) {
-      // 냉장고 순서 변경 로직 구현
-      const newFridges = [...fridges];
-      const draggedIndex = newFridges.findIndex(f => f.id === draggedFridge.id);
-
-      if (draggedIndex !== -1 && draggedIndex !== draggedOverIndex) {
-        // 배열에서 드래그된 항목 제거하고 새 위치에 삽입
-        const [removed] = newFridges.splice(draggedIndex, 1);
-        newFridges.splice(draggedOverIndex, 0, removed);
-
-        setFridges(newFridges);
-
-        // AsyncStorage에 순서 저장 (실제 구현 필요)
-        // await AsyncStorageService.updateFridgeOrder(currentUser.id, newFridges);
-      }
-    }
-
-    setDraggedFridge(null);
-    setDraggedOverIndex(null);
-  };
-
   const handleCloseModal = () => {
     setIsAddModalVisible(false);
   };
@@ -400,7 +363,7 @@ const FridgeSelectScreen = () => {
             numColumns={2}
             contentContainerStyle={styles.list}
             columnWrapperStyle={{ justifyContent: 'center' }}
-            renderItem={({ item, index }) => {
+            renderItem={({ item }) => {
               if (isEditMode && item.id === -2) {
                 return <View style={[fridgeTileStyles.tile, { opacity: 0 }]} />;
               } else if (isEditMode && item.id === -1) {
@@ -427,11 +390,6 @@ const FridgeSelectScreen = () => {
                     onEdit={isEditMode ? handleEditFridge : undefined}
                     onLeave={isEditMode ? handleLeaveFridge : undefined}
                     onToggleHidden={isEditMode ? handleToggleHidden : undefined}
-                    onDragStart={!isEditMode ? handleDragStart : undefined}
-                    onDragEnd={!isEditMode ? handleDragEnd : undefined}
-                    onDragMove={!isEditMode ? handleDragMove : undefined}
-                    isDragging={draggedFridge?.id === item.id}
-                    draggedOver={draggedOverIndex === index}
                   />
                 );
               }
