@@ -82,6 +82,10 @@ const FridgeSettingsScreen = ({ route }: Props) => {
     setShowInviteModal(true);
   };
 
+  const handleNotificationSettings = () => {
+    navigation.navigate('NotificationSettingsScreen');
+  };
+
   // Func 3. 로그아웃
   const handleLogout = () => {
     Alert.alert('로그아웃', '로그아웃 하시겠습니까?', [
@@ -298,6 +302,15 @@ const FridgeSettingsScreen = ({ route }: Props) => {
           <CustomText style={styles.bottomButtonText}>구성원 초대</CustomText>
         </TouchableOpacity>
 
+        {/* 새로 추가: 알림 설정 버튼 */}
+        <TouchableOpacity
+          style={styles.bottomButton}
+          onPress={handleNotificationSettings}
+        >
+          <Ionicons name="notifications-outline" size={24} color="#666" />
+          <CustomText style={styles.bottomButtonText}>알림 설정</CustomText>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.bottomButton} onPress={handleLogout}>
           <Feather name="log-out" size={24} color="#495057" />
           <CustomText style={styles.bottomButtonText}>로그아웃</CustomText>
@@ -327,7 +340,6 @@ const FridgeSettingsScreen = ({ route }: Props) => {
           </TouchableOpacity>
         )}
       </View>
-
       {/* 구성원 초대 모달 */}
       <InviteMemberModal
         visible={showInviteModal}

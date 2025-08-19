@@ -52,7 +52,7 @@ const generateInitialMockRecipes = (count: number): Recipe[] => {
 interface RecipeScreenProps {
   route: {
     params: {
-      fridgeId: number;
+      fridgeId: string;
       fridgeName: string;
     };
   };

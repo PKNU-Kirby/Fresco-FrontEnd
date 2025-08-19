@@ -34,7 +34,7 @@ export interface RecipeIngredient {
 // 네비게이션 타입 정의
 export type RecipeStackParamList = {
   RecipeHome: {
-    fridgeId: number;
+    fridgeId: string;
     fridgeName: string;
   };
   AIRecipe: undefined;
@@ -42,7 +42,7 @@ export type RecipeStackParamList = {
     recipe?: Recipe;
     isEditing?: boolean;
     isNewRecipe?: boolean;
-    fridgeId: number;
+    fridgeId: string;
     fridgeName: string;
     aiGeneratedData?: Partial<Recipe>; // 🔧 AI 생성 데이터 전달용 추가
   };
@@ -58,7 +58,7 @@ const RecipeStack = createNativeStackNavigator<RecipeStackParamList>();
 interface RecipeNavigatorProps {
   route: {
     params: {
-      fridgeId: number;
+      fridgeId: string;
       fridgeName: string;
     };
   };
