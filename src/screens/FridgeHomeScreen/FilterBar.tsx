@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import FilterDropdownButton from '../../components/common/FilterDropdownButton';
 import ActionToggleButton from '../../components/common/ActionToggleButton';
+import { filterBarStyles as styles } from './styles';
 
 // Filter Bar Component
 interface FilterBarProps {
@@ -45,25 +46,3 @@ const FilterBar: React.FC<FilterBarProps> = ({
 };
 
 export default FilterBar;
-
-const styles = StyleSheet.create({
-  tabContainer: {
-    marginTop: 10,
-    paddingBottom: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#e8f5e8',
-    paddingHorizontal: 20,
-    minHeight: 56,
-  },
-  leftTabGroup: {
-    flexDirection: 'row',
-    gap: 10,
-    flex: 1,
-  },
-  rightTabGroup: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});

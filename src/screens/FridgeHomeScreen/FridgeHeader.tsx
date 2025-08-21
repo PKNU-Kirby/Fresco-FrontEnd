@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import CustomText from '../../components/common/CustomText';
 import BackButton from '../../components/common/BackButton';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { fridgeHeaderStyles as styles } from './styles';
 
 type FridgeHeaderProps = {
   fridgeName: string;
@@ -48,51 +49,3 @@ const FridgeHeader: React.FC<FridgeHeaderProps> = ({
 };
 
 export default FridgeHeader;
-
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: 56,
-    backgroundColor: '#e8f5e8',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  leftSection: {
-    width: 56,
-    alignItems: 'flex-start',
-  },
-  centerSection: {
-    flex: 1,
-    alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  rightSection: {
-    width: 56,
-    alignItems: 'flex-end',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#444',
-    textAlign: 'center',
-    maxWidth: '100%',
-  },
-  settingsButton: {
-    padding: 8,
-    minWidth: 40,
-    minHeight: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-  },
-});
