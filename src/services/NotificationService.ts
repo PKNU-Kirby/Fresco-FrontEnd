@@ -1,3 +1,4 @@
+/*
 // services/NotificationService.ts
 import messaging from '@react-native-firebase/messaging';
 import { Alert, Platform } from 'react-native';
@@ -203,3 +204,6 @@ class NotificationService {
 }
 
 export default new NotificationService();
+
+
+*/

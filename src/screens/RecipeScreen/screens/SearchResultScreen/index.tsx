@@ -207,7 +207,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
         <View style={styles.searchResultHeader}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.navigate('RecipeHome' as never)}
+            onPress={() => navigation.navigate('Search' as never)}
           >
             <Icon name="arrow-back" size={24} color="#444" />
           </TouchableOpacity>
@@ -309,7 +309,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
                 onPress={recipe =>
                   navigation.navigate('RecipeDetail', {
                     recipe,
-                    fridgeId: 1,
+                    fridgeId: '1',
                     fridgeName: '우리집 냉장고',
                   })
                 }

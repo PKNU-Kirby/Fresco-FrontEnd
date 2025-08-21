@@ -10,14 +10,16 @@ import DraggableFlatList from 'react-native-draggable-flatlist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import CartItemCard from './CartItemCard';
+import ItemDeleteConfirmModal from './ItemDeleteConfirmModal';
+import FlushConfirmModal from './FlushConfirmModal';
 import { styles, addItemStyles } from './styles';
 import ShoppingListHeader from './ShoppingListHeader';
 import Buttons from './Buttons';
 import NewItemCard from './NewItemCard';
 
 export interface CartItem {
-  id?: number;
-  groceryListId: number;
+  id: string;
+  groceryListId: string;
   name: string;
   quantity: number;
   purchased: boolean;
@@ -41,42 +43,16 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
   listName = '장바구니',
 }) => {
   // data
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      groceryListId: 1,
-      name: '양배추',
-      quantity: 1,
-      unit: '개',
-      purchased: false,
-      order: 0,
-      createdAt: new Date(),
-    },
-    {
-      id: 2,
-      groceryListId: 1,
-      name: '당가슴살',
-      quantity: 500,
-      unit: 'g',
-      purchased: false,
-      order: 1,
-      createdAt: new Date(),
-    },
-    {
-      id: 3,
-      groceryListId: 1,
-      name: '우유',
-      quantity: 1000,
-      unit: 'ml',
-      purchased: true,
-      order: 2,
-      createdAt: new Date(),
-    },
-  ]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [isAddingNewItem, setIsAddingNewItem] = useState(false);
   const hasCheckedItems = cartItems.some(item => item.purchased);
+  // 삭제 확인 모달 상태
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<CartItem | null>(null);
+  // 비우기 확인 모달 상태
+  const [showClearModal, setShowClearModal] = useState(false);
 
   // load data from AsyncStorage
   useEffect(() => {
@@ -120,18 +96,17 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
     const checkedItems = cartItems.filter(item => item.purchased);
     if (checkedItems.length === 0) return;
 
-    Alert.alert(`체크된 ${checkedItems.length}개의 아이템을 삭제합니다.`, ``, [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: () => {
-          const updatedItems = cartItems.filter(item => !item.purchased);
-          setCartItems(updatedItems);
-          saveCartItems(updatedItems);
-        },
-      },
-    ]);
+    setShowClearModal(true);
+  };
+  const handleConfirmClear = () => {
+    const updatedItems = cartItems.filter(item => !item.purchased);
+    setCartItems(updatedItems);
+    saveCartItems(updatedItems);
+    setShowClearModal(false);
+  };
+
+  const handleCancelClear = () => {
+    setShowClearModal(false);
   };
 
   // (Drag & Drop) -> Update Items order
@@ -145,7 +120,7 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
     saveCartItems(updatedItems);
   };
 
-  const handleToggleCheck = (itemId: number) => {
+  const handleToggleCheck = (itemId: string) => {
     const updatedItems = cartItems.map(item => {
       if (item.id === itemId) {
         return {
@@ -169,7 +144,7 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
   };
 
   // Change Quantity
-  const handleQuantityChange = (itemId: number, newQuantity: number) => {
+  const handleQuantityChange = (itemId: string, newQuantity: number) => {
     if (newQuantity <= 0) return;
 
     const updatedItems = cartItems.map(item =>
@@ -187,7 +162,7 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
   };
 
   // Change Unit
-  const handleUnitChange = (itemId: number, newUnit: string) => {
+  const handleUnitChange = (itemId: string, newUnit: string) => {
     const updatedItems = cartItems.map(item =>
       item.id === itemId ? { ...item, unit: newUnit } : item,
     );
@@ -197,7 +172,7 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
   };
 
   // Change Item Name
-  const handleNameChange = (itemId: number, newName: string) => {
+  const handleNameChange = (itemId: string, newName: string) => {
     if (!newName.trim()) return;
 
     const updatedItems = cartItems.map(item =>
@@ -215,22 +190,28 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
   };
 
   // Delete Item
-  const handleDeleteItem = (itemId: number) => {
-    const itemToDelete = cartItems.find(item => item.id === itemId);
+  const handleDeleteItem = (itemId: string) => {
+    const itemToDeleteData = cartItems.find(item => item.id === itemId);
+    if (!itemToDeleteData) return;
+
+    setItemToDelete(itemToDeleteData);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
     if (!itemToDelete) return;
 
-    Alert.alert(`"${itemToDelete.name}"을(를) 장바구니에서 삭제합니다.`, ``, [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: () => {
-          const updatedItems = cartItems.filter(item => item.id !== itemId);
-          setCartItems(updatedItems);
-          saveCartItems(updatedItems);
-        },
-      },
-    ]);
+    const updatedItems = cartItems.filter(item => item.id !== itemToDelete.id);
+    setCartItems(updatedItems);
+    saveCartItems(updatedItems);
+
+    setShowDeleteModal(false);
+    setItemToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setItemToDelete(null);
   };
 
   // Add New Item to Cart
@@ -254,12 +235,15 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
     ).length;
 
     // (id 생성)
-    const maxId = Math.max(...cartItems.map(item => item.id || 0), 0);
+    const maxId = Math.max(
+      ...cartItems.map(item => Number(item.id || '0') || 0),
+      0,
+    );
     const newId = maxId + 1;
 
     const newItem: CartItem = {
-      id: newId, // (id 할당)
-      groceryListId: 1,
+      id: newId.toString(), // (id 할당)
+      groceryListId: '1',
       name: name.trim(),
       quantity,
       unit,
@@ -318,18 +302,17 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
     <SafeAreaView style={styles.container}>
       <ShoppingListHeader listName={listName} />
 
-      <Buttons
-        isListEditMode={isEditMode}
-        onEditModeToggle={handleEditToggle}
-        onClearCheckedItems={handleClearCheckedItems}
-        hasCheckedItems={hasCheckedItems}
-      />
-
       <KeyboardAvoidingView
         style={styles.content}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
+        <Buttons
+          isListEditMode={isEditMode}
+          onEditModeToggle={handleEditToggle}
+          onClearCheckedItems={handleClearCheckedItems}
+          hasCheckedItems={hasCheckedItems}
+        />
         <DraggableFlatList
           data={cartItems}
           onDragEnd={handleDragEnd}
@@ -354,6 +337,21 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
           ListFooterComponent={renderFooter}
         />
       </KeyboardAvoidingView>
+
+      {/* 삭제 확인 모달 */}
+      <ItemDeleteConfirmModal
+        visible={showDeleteModal}
+        itemName={itemToDelete?.name || ''}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+      {/* 비우기 확인 모달 */}
+      <FlushConfirmModal
+        visible={showClearModal}
+        itemCount={cartItems.filter(item => item.purchased).length}
+        onConfirm={handleConfirmClear}
+        onCancel={handleCancelClear}
+      />
     </SafeAreaView>
   );
 };

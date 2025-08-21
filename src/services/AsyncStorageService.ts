@@ -2,17 +2,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, SocialProvider } from '../types/auth';
 
 export type Refrigerator = {
-  id: number;
+  id: string;
   name: string;
   createdAt: string;
   updatedAt: string;
 };
 
 export type RefrigeratorUser = {
-  id: number;
-  refrigeratorId: number;
-  inviterId: number;
-  inviteeId: number;
+  id: string;
+  refrigeratorId: string;
+  inviterId: string;
+  inviteeId: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -25,7 +25,7 @@ export type FridgeWithRole = Refrigerator & {
 };
 
 export type FridgeItem = {
-  id: number;
+  id: string;
   name: string;
   quantity: string;
   expiryDate: string;

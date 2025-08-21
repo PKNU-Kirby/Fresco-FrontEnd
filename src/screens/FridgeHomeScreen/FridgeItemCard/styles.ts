@@ -1,4 +1,26 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+// const baseHeight = 874;
+
+// 반응형 함수
+// const wp = (percentage: number) => (width * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
+
+// Delete Button Styles : './DeleteButton.tsx'
+export const deleteButtonStyles = StyleSheet.create({
+  deleteItemButton: {
+    position: 'absolute',
+    top: scale(8),
+    right: scale(8),
+    zIndex: 1,
+    opacity: 0.5,
+  },
+});
 
 // Item Card Styles : './index.tsx'
 export const cardStyles = StyleSheet.create({

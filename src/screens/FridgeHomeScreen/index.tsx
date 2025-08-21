@@ -138,7 +138,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
   const handleQuantityChange = useCallback(
     async (itemId: string, newQuantity: string) => {
       try {
-        await updateFridgeItem(parseInt(itemId, 10), { quantity: newQuantity });
+        await updateFridgeItem(itemId, { quantity: newQuantity });
         await loadActualFridgeItems(); // 업데이트 후 새로고침
       } catch (error) {
         console.error('수량 업데이트 실패:', error);
@@ -151,7 +151,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
   const handleUnitChange = useCallback(
     async (itemId: string, newUnit: string) => {
       try {
-        await updateFridgeItem(parseInt(itemId, 10), { unit: newUnit });
+        await updateFridgeItem(itemId, { unit: newUnit });
         await loadActualFridgeItems();
       } catch (error) {
         console.error('단위 업데이트 실패:', error);
@@ -164,7 +164,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
   const handleExpiryDateChange = useCallback(
     async (itemId: string, newDate: string) => {
       try {
-        await updateFridgeItem(parseInt(itemId, 10), { expiryDate: newDate });
+        await updateFridgeItem(itemId, { expiryDate: newDate });
         await loadActualFridgeItems();
       } catch (error) {
         console.error('만료일 업데이트 실패:', error);
@@ -177,7 +177,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
   const handleDeleteItem = useCallback(
     async (itemId: string) => {
       try {
-        await deleteItemFromFridge(parseInt(itemId, 10));
+        await deleteItemFromFridge(itemId);
         await loadActualFridgeItems(); // 삭제 후 새로고침
         Alert.alert('완료', '아이템이 삭제되었습니다.');
       } catch (error) {

@@ -20,12 +20,12 @@ const QuantityEditor: React.FC<QuantityEditorProps> = ({
   onUnitPress,
 }) => {
   const handleIncrement = () => {
-    const currentNum = parseInt(quantity) || 0;
+    const currentNum = parseInt(quantity, 10) || 0;
     onQuantityChange((currentNum + 1).toString());
   };
 
   const handleDecrement = () => {
-    const currentNum = parseInt(quantity) || 0;
+    const currentNum = parseInt(quantity, 10) || 0;
     onQuantityChange(Math.max(0, currentNum - 1).toString());
   };
 

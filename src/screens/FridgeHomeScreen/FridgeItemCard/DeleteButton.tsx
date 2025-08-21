@@ -1,6 +1,7 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import { deleteButtonStyles as styles } from './styles';
 
 interface DeleteButtonProps {
   onPress: () => void;
@@ -17,15 +18,5 @@ const DeleteButton: React.FC<DeleteButtonProps> = ({ onPress }) => {
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  deleteItemButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 1,
-    opacity: 0.5,
-  },
-});
 
 export default DeleteButton;

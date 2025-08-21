@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import FlushConfirmModal from './FlushConfirmModal';
 
 export const styles = StyleSheet.create({
   container: {
@@ -11,21 +12,26 @@ export const styles = StyleSheet.create({
     paddingTop: 16,
   },
   listContainer: {
+    paddingTop: 56,
     paddingBottom: 20,
   },
 });
 
 export const buttonsStyles = StyleSheet.create({
   buttonContainer: {
+    position: 'absolute',
+    top: 16,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#e8f5e8',
     paddingHorizontal: 20,
-    marginTop: 10,
     paddingBottom: 10,
-    minHeight: 40,
+    backgroundColor: '#e8f5e875',
   },
+
   leftButtonGroup: {
     flexDirection: 'row',
     gap: 10,
@@ -41,7 +47,7 @@ export const headerStyles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 56,
+    minHeight: 60,
     backgroundColor: '#e8f5e8',
     paddingHorizontal: 16,
     paddingTop: 8,
@@ -54,14 +60,13 @@ export const headerStyles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
-    marginBottom: 8,
   },
   headerTitle: {
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 16,
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '800',
     color: '#444',
     textAlign: 'center',
     maxWidth: '100%',
@@ -264,5 +269,166 @@ export const newItemCardStyles = StyleSheet.create({
     padding: 8,
     borderRadius: 8,
     backgroundColor: '#cbe8cb',
+  },
+});
+
+export const itemDeleteConfirmModalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    maxWidth: 320,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#FFE5E5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  message: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  itemName: {
+    fontWeight: '600',
+    color: '#333',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+  },
+  cancelButton: {
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  confirmButton: {
+    backgroundColor: '#FF6B6B',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#666',
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#fff',
+  },
+});
+export const flushConfirmModalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    maxWidth: 320,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: '50%',
+    backgroundColor: '#ffe3d9ff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  message: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  itemCount: {
+    fontWeight: '600',
+    color: 'coral',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+  },
+  cancelButton: {
+    backgroundColor: '#f2f2f2',
+    borderWidth: 1,
+    borderColor: '#e8e8e8',
+  },
+  confirmButton: {
+    backgroundColor: 'coral',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#666',
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#f8f8f8',
   },
 });

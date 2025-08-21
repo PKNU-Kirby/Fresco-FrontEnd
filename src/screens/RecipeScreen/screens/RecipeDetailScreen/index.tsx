@@ -668,33 +668,8 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
             )}
           </View>
 
-          {/* Recipe Summary */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>소개</Text>
-            {isEditMode ? (
-              <TextInput
-                style={styles.descriptionInput}
-                value={currentRecipe.description}
-                onChangeText={text =>
-                  setCurrentRecipe(prev => ({ ...prev, description: text }))
-                }
-                placeholder="레시피 설명을 입력하세요"
-                placeholderTextColor="#999"
-                multiline
-                numberOfLines={3}
-              />
-            ) : (
-              <Text style={styles.description}>
-                {currentRecipe.description}
-              </Text>
-            )}
-          </View>
-
           {/* Ingredients */}
           <View style={styles.section}>
-            <View style={styles.sectionContour}>
-              <></>
-            </View>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>재료</Text>
               {isEditMode && (

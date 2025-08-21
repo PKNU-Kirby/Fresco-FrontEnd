@@ -28,12 +28,25 @@ export const getFridgeItems = async (): Promise<FridgeItem[]> => {
 };
 
 // get Local Fridge Items by Id
+// get Local Fridge Items by Id
 export const getFridgeItemsByFridgeId = async (
   fridgeId: string,
 ): Promise<FridgeItem[]> => {
   try {
     const allItems = await getFridgeItems();
-    return allItems.filter(item => item.fridgeId === fridgeId);
+    return allItems.filter(item => {
+      // 다양한 타입 비교를 통해 매칭
+      const itemFridgeId = item.fridgeId;
+      const targetFridgeId = fridgeId;
+
+      // string과 string 비교
+      const stringMatch = itemFridgeId.toString() === targetFridgeId.toString();
+
+      // number와 number 비교 (둘 다 변환 가능한 경우)
+      const numberMatch = Number(itemFridgeId) === Number(targetFridgeId);
+
+      return stringMatch || numberMatch;
+    });
   } catch (error) {
     console.error('특정 냉장고 아이템 가져오기 실패:', error);
     return [];
@@ -74,12 +87,10 @@ export const addItemsToFridge = async (
 };
 
 // delete Item
-export const deleteItemFromFridge = async (itemId: number): Promise<void> => {
+export const deleteItemFromFridge = async (itemId: string): Promise<void> => {
   try {
     const existingItems = await getFridgeItems();
-    const updatedItems = existingItems.filter(
-      item => parseInt(item.id, 10) !== itemId,
-    );
+    const updatedItems = existingItems.filter(item => item.id !== itemId);
     await AsyncStorage.setItem(FRIDGE_ITEMS_KEY, JSON.stringify(updatedItems));
   } catch (error) {
     console.error('아이템 삭제 실패:', error);
@@ -89,13 +100,13 @@ export const deleteItemFromFridge = async (itemId: number): Promise<void> => {
 
 // update Item
 export const updateFridgeItem = async (
-  itemId: number,
+  itemId: string,
   updates: Partial<Omit<FridgeItem, 'id' | 'createdAt'>>,
 ): Promise<void> => {
   try {
     const existingItems = await getFridgeItems();
     const updatedItems = existingItems.map(item =>
-      parseInt(item.id, 10) === itemId
+      item.id === itemId
         ? { ...item, ...updates, updatedAt: new Date().toISOString() }
         : item,
     );
