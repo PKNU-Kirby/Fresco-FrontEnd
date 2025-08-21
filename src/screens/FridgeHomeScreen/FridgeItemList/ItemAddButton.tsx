@@ -25,7 +25,7 @@ const ItemAddButton: React.FC<ItemAddButtonProps> = ({
       accessibilityLabel="식재료 추가"
       accessibilityRole="button"
     >
-      <FontAwesome6 name="plus" size={24} color="#fff" />
+      <FontAwesome6 name="plus" size={24} color="#f8f8f8" />
     </TouchableOpacity>
   );
 };

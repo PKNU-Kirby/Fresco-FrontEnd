@@ -54,7 +54,6 @@ const FridgeItemList: React.FC<FridgeItemListProps> = ({
     const loadTestData = async () => {
       const fridgeId = items[0].fridgeId;
       const loadedItems = await getFridgeItemsByFridgeId(fridgeId);
-      // console.log('테스트 로드된 아이템들:', loadedItems);
       setTestItems(loadedItems);
     };
     loadTestData();

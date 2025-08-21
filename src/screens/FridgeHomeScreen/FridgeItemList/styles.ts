@@ -1,15 +1,26 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+const baseHeight = 874;
+
+// 반응형 함수
+const wp = (percentage: number) => (width * percentage) / 100;
+const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 // List Style : './index.tsx'
 export const listStyles = StyleSheet.create({
   content: {
     flex: 1,
     position: 'relative',
-    marginTop: 10,
+    marginTop: scale(10),
   },
   listContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 100,
+    paddingHorizontal: scale(16),
+    paddingBottom: scale(100),
   },
 });
 
@@ -17,21 +28,21 @@ export const listStyles = StyleSheet.create({
 export const itemAddButtonStyles = StyleSheet.create({
   addButton: {
     position: 'absolute',
-    bottom: 30,
-    right: 30,
-    width: 56,
-    height: 56,
+    bottom: scale(30),
+    right: scale(30),
+    width: scale(56),
+    height: scale(56),
     backgroundColor: '#666',
-    borderRadius: 28,
+    borderRadius: scale(28),
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#333',
     shadowOffset: {
-      width: 0,
-      height: 4,
+      width: scale(0),
+      height: scale(4),
     },
     shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
+    shadowRadius: scale(6),
+    elevation: scale(8),
   },
 });
