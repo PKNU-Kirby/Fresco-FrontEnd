@@ -4,7 +4,7 @@ import CustomText from '../../common/CustomText';
 import { styles } from './styles';
 
 type Fridge = {
-  id: number;
+  id: string;
   name: string;
   isHidden: boolean;
 };
@@ -41,7 +41,7 @@ const FridgeModalForm = ({
       onAddFridge(updatedFridge);
     } else {
       const newFridge: Fridge = {
-        id: Date.now(), // 임시 ID
+        id: Date.now().toString(), // 임시 ID
         name: trimmedName,
         isHidden: false,
       };

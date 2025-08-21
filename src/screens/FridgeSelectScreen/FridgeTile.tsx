@@ -1,15 +1,14 @@
 import React from 'react';
-import { TouchableOpacity, View, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { TouchableOpacity, View, Alert, Text } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import CustomText from '../../components/common/CustomText';
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { fridgeTileStyles as styles } from './styles';
 import { FridgeWithRole } from '../../services/AsyncStorageService';
+import { fridgeTileStyles as styles } from './styles';
 
 type RootStackParamList = {
-  MainTabs: { fridgeId: number; fridgeName: string };
+  MainTabs: { fridgeId: string; fridgeName: string };
 };
 
 interface FridgeTileProps {
@@ -198,7 +197,7 @@ const FridgeTile: React.FC<FridgeTileProps> = ({
       </TouchableOpacity>
 
       {/* 냉장고 이름*/}
-      <CustomText
+      <Text
         style={[
           styles.fridgeName,
           isSmall && styles.smallFridgeName,
@@ -208,7 +207,7 @@ const FridgeTile: React.FC<FridgeTileProps> = ({
         numberOfLines={1}
       >
         {fridge.name}
-      </CustomText>
+      </Text>
     </View>
   );
 };
