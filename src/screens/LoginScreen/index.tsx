@@ -13,7 +13,7 @@ const LoginScreen = (): React.JSX.Element => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // AsyncStorage 로그인 처리
+  // AsyncStorage 로그인
   const saveUserDataAndNavigate = async (
     provider: SocialProvider,
     providerId: string,
@@ -36,18 +36,19 @@ const LoginScreen = (): React.JSX.Element => {
       // 현재 사용자로 설정
       await AsyncStorageService.setCurrentUserId(user.id);
 
-      // 사용자의 기본 냉장고 초기화 (최초 로그인)
+      // 사용자의 기본 냉장고 초기화 : 최초 로그인
       await AsyncStorageService.initializeDefaultFridgeForUser(
         parseInt(user.id, 10),
       );
 
+      /*
       console.log('>> ERD 기반 사용자 정보 저장 완료:');
       console.log(`   - User ID: ${user.id}`);
       console.log(`   - Provider: ${provider}`);
       console.log(`   - Provider ID: ${providerId}`);
       console.log(`   - 이름: ${name}`);
       console.log(`   - 이메일: ${email || '미제공'}`);
-
+      */
       navigation.replace('FridgeSelect');
     } catch (error) {
       console.error('사용자 정보 저장 실패:', error);

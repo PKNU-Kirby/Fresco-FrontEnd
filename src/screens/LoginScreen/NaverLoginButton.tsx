@@ -77,7 +77,7 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
         throw new Error('네이버 사용자 정보를 가져올 수 없습니다');
       }
 
-      console.log('>> 네이버 소셜 로그인 성공!');
+      //console.log('>> 네이버 소셜 로그인 성공!');
 
       const profile = profileResult.response as NaverProfile;
       const providerId = String(profile.id);
@@ -85,12 +85,6 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
         profile.name || profile.nickname || `네이버사용자_${profile.id}`;
       const userEmail = profile.email || undefined;
       const profileImageUrl = profile.profile_image || undefined;
-
-      console.log('>> 네이버 사용자 정보:');
-      console.log(`   - Provider ID: ${providerId}`);
-      console.log(`   - 이름: ${userName}`);
-      console.log(`   - 이메일: ${userEmail || '미제공'}`);
-      console.log(`   - 프로필 이미지: ${profileImageUrl || '미제공'}`);
 
       // [API] 백엔드 로그인 요청 데이터 로깅
       logBackendLoginRequest('NAVER', successResponse.accessToken, providerId);
@@ -109,7 +103,7 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
         logCurrentTokens();
       }, 100);
     } catch (error) {
-      console.error('>> 네이버 로그인 실패:', error);
+      // console.error('>> 네이버 로그인 실패:', error);
       const message =
         error instanceof Error ? error.message : '네이버 로그인 실패';
       showErrorAlert(message);
@@ -121,7 +115,7 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
   return (
     <TouchableOpacity
       onPress={handleNaverLogin}
-      style={[styles.loginButton, isLoading && { opacity: 0.7 }]}
+      style={[styles.loginButton, isLoading && styles.loadingLoginButton]}
       disabled={isLoading}
     >
       <Image

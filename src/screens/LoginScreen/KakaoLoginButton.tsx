@@ -92,7 +92,7 @@ const KakaoLoginButton: React.FC<KakaoLoginButtonProps> = ({
   return (
     <TouchableOpacity
       onPress={handleKakaoLogin}
-      style={[styles.loginButton, isLoading && { opacity: 0.7 }]}
+      style={[styles.loginButton, isLoading && styles.loadingLoginButton]}
       disabled={isLoading}
     >
       <Image
