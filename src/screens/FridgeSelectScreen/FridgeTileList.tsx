@@ -43,9 +43,9 @@ export const FridgeList: React.FC<FridgeListProps> = ({
   };
 
   const renderFridgeItem = ({ item }: { item: FridgeWithRole }) => {
-    if (isEditMode && item.id === '-2') {
+    if (isEditMode && parseInt(item.id, 10) === -2) {
       return <View style={[fridgeTileStyles.tile, { opacity: 0 }]} />;
-    } else if (isEditMode && item.id === '-1') {
+    } else if (isEditMode && parseInt(item.id, 10) === -1) {
       return (
         <View style={fridgeTileStyles.plusTile}>
           <TouchableOpacity
@@ -58,7 +58,7 @@ export const FridgeList: React.FC<FridgeListProps> = ({
           </TouchableOpacity>
         </View>
       );
-    } else if (!isEditMode && item.id === '-3') {
+    } else if (!isEditMode && parseInt(item.id, 10) === -3) {
       return <View style={[fridgeTileStyles.tile, { opacity: 0 }]} />;
     } else {
       return (

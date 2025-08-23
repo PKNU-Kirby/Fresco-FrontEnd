@@ -1,7 +1,7 @@
 import React from 'react';
-import {TouchableOpacity, ViewStyle, TextStyle} from 'react-native';
+import { TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import CustomText from '../CustomText';
-import {styles} from './styles';
+import { styles } from './styles';
 
 // Action Button Component : Edit Toggle Button
 interface ActionToggleButtonProps {
@@ -37,14 +37,16 @@ const ActionToggleButton: React.FC<ActionToggleButtonProps> = ({
       ]}
       onPress={onPress}
       disabled={disabled}
-      activeOpacity={0.7}>
+      activeOpacity={0.7}
+    >
       <CustomText
         style={[
           styles.actionButtonText,
           isActive && styles.actionButtonTextActive,
           isActive && activeTextStyle,
           textStyle,
-        ]}>
+        ]}
+      >
         {isActive ? activeText : inactiveText}
       </CustomText>
     </TouchableOpacity>

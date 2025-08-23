@@ -22,33 +22,11 @@ export const styles = StyleSheet.create({
   },
 });
 
-export const filterBarStyles = StyleSheet.create({
-  tabContainer: {
-    marginTop: scale(10),
-    paddingBottom: scale(10),
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#e8f5e8',
-    paddingHorizontal: scale(20),
-    minHeight: scale(56),
-  },
-  leftTabGroup: {
-    flexDirection: 'row',
-    gap: scale(10),
-    flex: 1,
-  },
-  rightTabGroup: {
-    flexDirection: 'row',
-    gap: scale(8),
-  },
-});
-
 export const fridgeHeaderStyles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: scale(56),
+    minHeight: scale(60),
     backgroundColor: '#e8f5e8',
     paddingHorizontal: scale(16),
     paddingTop: scale(8),
@@ -61,6 +39,7 @@ export const fridgeHeaderStyles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
+    zIndex: 1001,
   },
   leftSection: {
     width: scale(56),

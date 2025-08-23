@@ -13,14 +13,44 @@ const scale = (size: number) => (width / baseWidth) * size;
 
 // List Style : './index.tsx'
 export const listStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#e8f5e8',
+  },
   content: {
     flex: 1,
-    position: 'relative',
-    marginTop: scale(10),
+    paddingHorizontal: scale(16),
+    paddingTop: scale(16),
   },
   listContainer: {
-    paddingHorizontal: scale(16),
-    paddingBottom: scale(100),
+    paddingTop: scale(56),
+    paddingBottom: scale(88),
+  },
+  floatingContainer: {},
+});
+
+export const filterBarStyles = StyleSheet.create({
+  tabContainer: {
+    position: 'absolute',
+    top: scale(16),
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: scale(20),
+    paddingBottom: scale(10),
+    backgroundColor: '#e8f5e875',
+  },
+  leftTabGroup: {
+    flexDirection: 'row',
+    gap: scale(10),
+    flex: 1,
+  },
+  rightTabGroup: {
+    flexDirection: 'row',
+    gap: scale(8),
   },
 });
 

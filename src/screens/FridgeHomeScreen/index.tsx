@@ -7,7 +7,6 @@ import { styles } from './styles';
 
 // Components
 import FridgeHeader from './FridgeHeader';
-import FilterBar from './FilterBar';
 import FridgeItemList from './FridgeItemList';
 import ItemCategoryModal from '../../components/modals/ItemCategoryModal';
 import AddItemModal from '../../components/modals/AddItemModal';
@@ -178,11 +177,9 @@ const FridgeHomeScreen = ({ route }: Props) => {
     async (itemId: string) => {
       try {
         await deleteItemFromFridge(itemId);
-        await loadActualFridgeItems(); // 삭제 후 새로고침
-        Alert.alert('완료', '아이템이 삭제되었습니다.');
+        await loadActualFridgeItems();
       } catch (error) {
         console.error('아이템 삭제 실패:', error);
-        Alert.alert('오류', '아이템 삭제에 실패했습니다.');
       }
     },
     [loadActualFridgeItems],
@@ -201,14 +198,6 @@ const FridgeHomeScreen = ({ route }: Props) => {
         onSettingsPress={handleSettingsPress}
       />
 
-      {/* 필터 바 */}
-      <FilterBar
-        activeItemCategory={activeItemCategory}
-        isListEditMode={isListEditMode}
-        onItemCategoryPress={openItemCategoryModal}
-        onEditModeToggle={toggleEditMode}
-      />
-
       {/* 메인 콘텐츠 영역 */}
       <View style={styles.mainContent}>
         <FridgeItemList
@@ -219,6 +208,10 @@ const FridgeHomeScreen = ({ route }: Props) => {
           onUnitChange={handleUnitChange}
           onExpiryDateChange={handleExpiryDateChange}
           onDeleteItem={handleDeleteItem}
+          // FilterBar 관련 props
+          activeItemCategory={activeItemCategory}
+          onItemCategoryPress={openItemCategoryModal}
+          onEditModeToggle={toggleEditMode}
         />
       </View>
 

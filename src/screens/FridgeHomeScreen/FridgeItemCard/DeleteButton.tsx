@@ -9,12 +9,8 @@ interface DeleteButtonProps {
 
 const DeleteButton: React.FC<DeleteButtonProps> = ({ onPress }) => {
   return (
-    <TouchableOpacity
-      style={styles.deleteItemButton}
-      activeOpacity={1}
-      onPress={onPress}
-    >
-      <FontAwesome6 name="circle-xmark" size={24} color="#666" solid />
+    <TouchableOpacity style={styles.deleteItemButton} onPress={onPress}>
+      <FontAwesome6 name={'xmark'} size={16} color={'#e8e8e8'} />
     </TouchableOpacity>
   );
 };

@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
-import {View, Modal, TouchableOpacity, Platform} from 'react-native';
+import React, { useState } from 'react';
+import { View, Modal, TouchableOpacity, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CustomText from '../../common/CustomText';
-import {styles} from './styles';
+import { styles } from './styles';
 
 type DatePickerProps = {
   visible: boolean;
@@ -19,8 +19,19 @@ const DatePicker: React.FC<DatePickerProps> = ({
 }) => {
   // 초기 날짜를 Date 객체로 변환
   const parseInitialDate = (dateString: string): Date => {
-    const [year, month, day] = dateString.split('.').map(Number);
-    return new Date(year, month - 1, day);
+    try {
+      // 하이픈이나 점으로 구분된 날짜 파싱
+      const parts = dateString.split(/[-.]/).map(Number);
+
+      if (parts.length !== 3 || parts.some(isNaN)) {
+        return new Date();
+      }
+
+      const [year, month, day] = parts;
+      return new Date(year, month - 1, day);
+    } catch (error) {
+      return new Date();
+    }
   };
 
   const [selectedDate, setSelectedDate] = useState(
@@ -81,7 +92,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
       visible={visible}
       transparent
       animationType="slide"
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+    >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.header}>

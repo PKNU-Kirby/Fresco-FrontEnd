@@ -1,5 +1,4 @@
 import { StyleSheet } from 'react-native';
-import FlushConfirmModal from './FlushConfirmModal';
 
 export const styles = StyleSheet.create({
   container: {
@@ -31,7 +30,6 @@ export const buttonsStyles = StyleSheet.create({
     paddingBottom: 10,
     backgroundColor: '#e8f5e875',
   },
-
   leftButtonGroup: {
     flexDirection: 'row',
     gap: 10,

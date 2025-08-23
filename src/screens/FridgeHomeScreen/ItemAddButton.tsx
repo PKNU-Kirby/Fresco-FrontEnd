@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import { itemAddButtonStyles as styles } from './styles';
+import { itemAddButtonStyles as styles } from './listStyles';
 
 interface ItemAddButtonProps {
   onPress: () => void;
