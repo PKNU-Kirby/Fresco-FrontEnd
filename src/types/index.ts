@@ -94,15 +94,16 @@ export interface Food {
 }
 
 export type FoodCategory =
-  | 'vegetables'
-  | 'fruits'
-  | 'meat'
-  | 'dairy'
-  | 'grains'
-  | 'beverages'
-  | 'condiments'
-  | 'frozen'
-  | 'others';
+  | '베이커리'
+  | '채소 / 과일'
+  | '정육 / 계란'
+  | '가공식품'
+  | '수산 / 건어물'
+  | '쌀 / 잡곡'
+  | '우유 / 유제품'
+  | '건강식품'
+  | '장 / 양념 / 소스'
+  | '기타';
 
 // ============================================================================
 // 레시피 관련 타입들
@@ -111,11 +112,8 @@ export type FoodCategory =
 export interface Recipe {
   id: string;
   title: string;
-  description: string;
   ingredients: RecipeIngredient[];
   instructions: string[];
-  cookingTime: number; // 분 단위
-  difficulty: 'easy' | 'medium' | 'hard';
   servings: number;
   imageUrl?: string;
   tags: string[];
@@ -139,21 +137,20 @@ export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   FridgeSelect: undefined;
-  MainTabs: { fridgeId: number; fridgeName: string };
+  MainTabs: { fridgeId: string; fridgeName: string };
   AddItemScreen: {
-    fridgeId: number;
+    fridgeId: string;
     recognizedData?: {
       name?: string;
       quantity?: string;
       unit?: string;
       expiryDate?: string;
-      storageType?: string;
       itemCategory?: string;
       photo?: string;
     };
   };
   CameraScreen: {
-    fridgeId: number;
+    fridgeId: string;
   };
   PhotoPreview: {
     photo: {
@@ -164,20 +161,20 @@ export type RootStackParamList = {
       type?: string;
       fileName?: string;
     };
-    fridgeId: number;
+    fridgeId: string;
   };
   FridgeSettings: {
-    fridgeId: number;
+    fridgeId: string;
     fridgeName: string;
     userRole: 'owner' | 'member';
   };
-  UsageHistoryScreen: { fridgeId: number };
+  UsageHistoryScreen: { fridgeId: string };
 };
 
 export type MainTabParamList = {
-  FridgeHomeScreen: { fridgeId: number; fridgeName: string };
-  Recipe: { fridgeId: number; fridgeName: string };
-  ShoppingListScreen: { fridgeId: number; fridgeName: string };
+  FridgeHomeScreen: { fridgeId: string; fridgeName: string };
+  Recipe: { fridgeId: string; fridgeName: string };
+  ShoppingListScreen: { fridgeId: string; fridgeName: string };
 };
 
 export type NavigationProps<T extends keyof RootStackParamList> = {

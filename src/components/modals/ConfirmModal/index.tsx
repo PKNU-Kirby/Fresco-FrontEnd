@@ -11,9 +11,11 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { styles } from './styles';
 
 interface ConfirmModalProps {
+  isAlert?: boolean; // true: Alert, false: Confirm
   visible: boolean;
   title: string;
   message: string | React.ReactNode;
+  iconContainer?: { backgroundColor: string };
   icon?: {
     name: string;
     color: string;
@@ -32,9 +34,11 @@ interface ConfirmModalProps {
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
+  isAlert = true,
   visible,
   title,
   message,
+  iconContainer = { backgroundColor: '#FFE5E5' },
   icon = { name: 'help-outline', color: '#666', size: 48 },
   confirmText = '확인',
   cancelText = '취소',
@@ -82,7 +86,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             >
               {/* 아이콘 */}
               {icon && (
-                <View style={styles.iconContainer}>
+                <View style={[styles.iconContainer, iconContainer]}>
                   <MaterialIcons
                     name={icon.name}
                     size={icon.size || 48}
@@ -105,19 +109,21 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
               {/* 버튼들 */}
               <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={[styles.button, styles.cancelButton]}
-                  onPress={onCancel}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.cancelButtonText}>{cancelText}</Text>
-                </TouchableOpacity>
+                {isAlert && (
+                  <TouchableOpacity
+                    style={[styles.button, styles.cancelButton]}
+                    onPress={onCancel}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.cancelButtonText}>{cancelText}</Text>
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity
                   style={[
                     styles.button,
                     confirmButtonStyle === 'danger'
                       ? styles.dangerButton
-                      : styles.confirmButton,
+                      : styles.successButton,
                   ]}
                   onPress={onConfirm}
                   activeOpacity={0.7}
@@ -126,7 +132,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                     style={[
                       confirmButtonStyle === 'danger'
                         ? styles.dangerButtonText
-                        : styles.confirmButtonText,
+                        : styles.successButtonText,
                     ]}
                   >
                     {confirmText}

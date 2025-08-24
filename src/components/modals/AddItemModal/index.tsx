@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Modal, TouchableOpacity } from 'react-native';
-import CustomText from '../../common/CustomText';
+import { View, Modal, TouchableOpacity, Text } from 'react-native';
 import OptionButton from './OptionButton';
 import { modalStyles as styles } from './styles';
 
@@ -33,7 +32,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <CustomText style={styles.modalTitle}>식재료 추가하기</CustomText>
+            <Text style={styles.modalTitle}>식재료 추가하기</Text>
           </View>
 
           <View style={styles.optionContainer}>
@@ -58,7 +57,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
               accessibilityRole="button"
               activeOpacity={0.7}
             >
-              <CustomText style={styles.cancelButtonText}>닫기</CustomText>
+              <Text style={styles.cancelButtonText}>닫기</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -1,18 +1,29 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+//const baseHeight = 874;
+
+// 반응형 함수
+//const wp = (percentage: number) => (width * percentage) / 100;
+//const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 const shadows = {
   small: {
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: scale(2) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: scale(4),
     elevation: 3,
   },
   medium: {
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: scale(4) },
+    shadowOpacity: 0.5,
+    shadowRadius: scale(8),
     elevation: 5,
   },
 };
@@ -21,7 +32,7 @@ const shadows = {
 export const addItemStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#f2f7f2ff',
   },
 
   // header
@@ -29,30 +40,30 @@ export const addItemStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(12),
+    backgroundColor: '#f2f7f2ff',
+    borderBottomWidth: scale(1),
     borderBottomColor: '#E0E0E0',
     ...shadows.small,
   },
   backbutton: {
-    width: 50,
+    width: scale(50),
     alignItems: 'flex-start',
   },
   headerTitle: {
-    fontSize: 19,
+    fontSize: scale(20),
     fontWeight: '800',
-    color: '#222222',
+    color: '#444',
     flex: 1,
     textAlign: 'center',
   },
   headerButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingHorizontal: scale(10),
+    paddingVertical: scale(8),
     backgroundColor: '#333',
-    borderRadius: 8,
-    width: 50,
+    borderRadius: scale(8),
+    width: scale(50),
     alignItems: 'center',
     ...shadows.small,
   },
@@ -60,7 +71,7 @@ export const addItemStyles = StyleSheet.create({
     backgroundColor: '#CCCCCC',
   },
   headerButtonText: {
-    fontSize: 14,
+    fontSize: scale(14),
     fontWeight: '600',
     color: '#FFFFFF',
   },
@@ -77,27 +88,27 @@ export const addItemStyles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 16,
+    padding: scale(16),
   },
   scrollContentWithOverlay: {
-    paddingBottom: 120,
+    paddingBottom: scale(120),
   },
   scrollContentWithOverlayEditMode: {
-    paddingBottom: 30,
+    paddingBottom: scale(30),
   },
   fixedBottomSection: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: scale(16),
+    paddingBottom: scale(16),
   },
 
   // Add Item Card Button Style
   addButtonContainer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: scale(20),
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -106,30 +117,30 @@ export const addItemStyles = StyleSheet.create({
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: '#333',
-    borderRadius: 8,
-    gap: 8,
+    paddingHorizontal: scale(24),
+    paddingVertical: scale(12),
+    backgroundColor: '#32cd32e1',
+    borderRadius: scale(10),
+    gap: scale(8),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 6,
+      height: scale(6),
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    shadowOpacity: 0.5,
+    shadowRadius: scale(12),
     elevation: 12,
   },
   addButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#f8f8f8',
+    fontSize: scale(16),
+    fontWeight: '900',
+    color: '#444',
   },
 
   // Edit Button Style
   editModeContainer: {
     position: 'absolute',
-    bottom: 117,
+    bottom: scale(20),
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -138,51 +149,49 @@ export const addItemStyles = StyleSheet.create({
   backToEditButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: '#333',
-    borderRadius: 8,
-    gap: 8,
+    paddingHorizontal: scale(24),
+    paddingVertical: scale(12),
+    backgroundColor: '#444',
+    borderRadius: scale(10),
+    gap: scale(8),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 6,
+      height: scale(6),
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    shadowOpacity: 0.5,
+    shadowRadius: scale(12),
     elevation: 12,
   },
   backToEditButtonText: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '500',
     color: '#f8f8f8',
   },
 
   // Items Summary Style
   summaryContainer: {
-    backgroundColor: '#effce9ff',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'limegreen',
+    backgroundColor: '#e8f5e8',
+    borderRadius: scale(12),
     ...shadows.medium,
   },
   summaryTitle: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '600',
     color: '#222222',
-    marginBottom: 8,
-    padding: 16,
+    marginBottom: scale(8),
+    padding: scale(16),
     paddingBottom: 0,
   },
   summaryText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#666666',
-    lineHeight: 20,
-    padding: 16,
+    lineHeight: scale(20),
+    padding: scale(16),
     paddingTop: 0,
   },
   bottomPadding: {
-    height: 50,
+    height: scale(50),
   },
   bottomBlurSection: {
     backgroundColor: '#F5F5F5',
@@ -191,8 +200,8 @@ export const addItemStyles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: scale(16),
+    paddingBottom: scale(16),
   },
 });
 
@@ -201,34 +210,34 @@ export const cardStyles = StyleSheet.create({
   itemCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: scale(12),
+    padding: scale(16),
+    marginBottom: scale(12),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: scale(5),
     },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: scale(4),
     elevation: 3,
     position: 'relative',
   },
 
   // Image styles
   imageContainer: {
-    marginRight: 16,
+    marginRight: scale(16),
   },
   itemImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
+    width: scale(60),
+    height: scale(60),
+    borderRadius: scale(8),
   },
   imagePlaceholder: {
-    width: 60,
-    height: 60,
+    width: scale(60),
+    height: scale(60),
     backgroundColor: '#e0e0e0',
-    borderRadius: 8,
+    borderRadius: scale(8),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -240,56 +249,56 @@ export const cardStyles = StyleSheet.create({
 
   // name styles
   nameInput: {
-    width: 200,
-    fontSize: 18,
+    width: scale(200),
+    fontSize: scale(18),
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderWidth: 1,
+    marginBottom: scale(4),
+    paddingVertical: scale(4),
+    paddingHorizontal: scale(8),
+    borderWidth: scale(1),
     borderColor: '#E0E0E0',
-    borderRadius: 6,
+    borderRadius: scale(6),
     backgroundColor: '#F9F9F9',
-    minHeight: 40,
+    minHeight: scale(40),
   },
   itemName: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 4,
+    marginBottom: scale(4),
   },
 
   itemDetails: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: scale(4),
   },
   quantityText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#666',
-    marginRight: 12,
+    marginRight: scale(12),
   },
 
   // date styles
   dateButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
     backgroundColor: '#F0F0F0',
-    borderRadius: 6,
-    borderWidth: 1,
+    borderRadius: scale(6),
+    borderWidth: scale(1),
     borderColor: '#DDD',
-    minHeight: 32,
+    minHeight: scale(32),
     justifyContent: 'center',
   },
   dateButtonText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#666',
     textDecorationLine: 'underline',
     fontWeight: '500',
   },
   expiryText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#666',
   },
 
@@ -299,26 +308,26 @@ export const cardStyles = StyleSheet.create({
     alignItems: 'center',
   },
   statusText: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#999',
     fontStyle: 'italic',
   },
   categoryButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(2),
     backgroundColor: '#F0F0F0',
-    borderRadius: 4,
-    minHeight: 24,
+    borderRadius: scale(4),
+    minHeight: scale(24),
     justifyContent: 'center',
   },
   categoryButtonText: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#666',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   separator: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#999',
-    marginHorizontal: 8,
+    marginHorizontal: scale(8),
   },
 });

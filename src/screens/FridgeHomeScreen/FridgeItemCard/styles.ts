@@ -102,12 +102,12 @@ export const cardStyles = StyleSheet.create({
   editableitemStatus: {},
 
   message: {
-    fontSize: 15,
+    fontSize: scale(15),
     color: '#666',
     textAlign: 'center',
   },
   emphmessage: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: 'tomato',
     fontWeight: '700',
     textDecorationLine: 'underline',
@@ -232,7 +232,7 @@ export const sliderQuantityStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: 230,
+    width: scale(230),
   },
   stepper: {
     flex: 1,
@@ -280,7 +280,7 @@ export const sliderQuantityStyles = StyleSheet.create({
     height: scale(36),
     marginLeft: scale(8),
     backgroundColor: '#f6f6f6',
-    borderRadius: 4,
+    borderRadius: scale(4),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -289,7 +289,7 @@ export const sliderQuantityStyles = StyleSheet.create({
     height: scale(36),
     marginLeft: scale(8),
     backgroundColor: '#f6f6f6',
-    borderRadius: 4,
+    borderRadius: scale(4),
     alignItems: 'center',
     justifyContent: 'center',
   },

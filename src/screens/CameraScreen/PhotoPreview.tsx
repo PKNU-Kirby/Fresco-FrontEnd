@@ -101,7 +101,6 @@ const PhotoPreviewScreen: React.FC = () => {
         quantity: '1',
         unit: '개',
         expiryDate: '',
-        storageType: '냉장',
         itemCategory: '야채',
       },
     });

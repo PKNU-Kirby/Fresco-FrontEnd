@@ -1,8 +1,7 @@
 import React from 'react';
-import {TouchableOpacity, View} from 'react-native';
+import { TouchableOpacity, View, Text } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import CustomText from '../../common/CustomText';
-import {optionStyles as styles} from './styles';
+import { optionStyles as styles } from './styles';
 
 interface OptionButtonProps {
   iconName: string;
@@ -26,11 +25,12 @@ const OptionButton: React.FC<OptionButtonProps> = ({
       accessible={true}
       accessibilityLabel={`${text} 옵션`}
       accessibilityRole="button"
-      activeOpacity={0.7}>
+      activeOpacity={0.7}
+    >
       <View style={styles.optionIcon}>
         <FontAwesome6 name={iconName} size={iconSize} color={iconColor} />
       </View>
-      <CustomText style={styles.optionText}>{text}</CustomText>
+      <Text style={styles.optionText}>{text}</Text>
     </TouchableOpacity>
   );
 };

@@ -38,7 +38,6 @@ export interface ItemFormData {
   quantity: string; // UI에서는 문자열로 관리
   unit: string; // UI 표시용 (실제 DB에는 없음)
   expirationDate: string; // 소비기한 (DATE) - YYYY.MM.DD 형식
-  storageType: string; // 보관방법 (UI 표시용)
   itemCategory: string; // 카테고리명 (UI 표시용)
   photo?: string; // 사진 URI
 }
@@ -50,7 +49,6 @@ export interface RecognizedData {
   quantity: string;
   unit?: string;
   expirationDate?: string;
-  storageType?: string;
   itemCategory?: string;
   confidence?: number; // AI 인식 신뢰도 (추후 사용)
 }

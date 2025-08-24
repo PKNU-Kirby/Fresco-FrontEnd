@@ -28,27 +28,28 @@ export const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#FFE5E5',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
   },
   title: {
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: '600',
     color: '#333',
     marginBottom: 8,
+    marginTop: 4,
   },
   messageContainer: {
-    marginBottom: 24,
+    marginBottom: 16,
+    marginTop: 8,
   },
   message: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#666',
     fontWeight: '700',
     textAlign: 'center',
     lineHeight: 24,
-    marginBottom: 24,
+    marginBottom: 8,
   },
   itemName: {
     fontWeight: '600',
@@ -73,8 +74,8 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E0E0E0',
   },
-  confirmButton: {
-    backgroundColor: '#FF6B6B',
+  successButton: {
+    backgroundColor: 'limegreen',
   },
   dangerButton: {
     backgroundColor: 'tomato',
@@ -84,9 +85,9 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#666',
   },
-  confirmButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
+  successButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
     color: '#f8f8f8',
   },
   dangerButtonText: {

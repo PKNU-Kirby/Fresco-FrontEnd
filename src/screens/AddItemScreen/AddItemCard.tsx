@@ -1,13 +1,12 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, TouchableOpacity, TextInput } from 'react-native';
-import CustomText from '../../components/common/CustomText';
+import { View, TouchableOpacity, Text, TextInput } from 'react-native';
 import DeleteButton from '../FridgeHomeScreen/FridgeItemCard/DeleteButton';
 import QuantityEditor from '../FridgeHomeScreen/FridgeItemCard/QuantityEditor';
 import UnitSelector from '../FridgeHomeScreen/FridgeItemCard/UnitSelector';
 import DatePicker from '../../components/modals/DatePicker';
 import ItemCategoryModal from '../../components/modals/ItemCategoryModal';
 import { ItemFormData } from './index';
-import { cardStyles } from './styles';
+import { cardStyles as styles } from './styles';
 
 interface AddItemCardProps {
   item: ItemFormData;
@@ -40,10 +39,8 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
-  // Options for modals
   const unitOptions = ['개', 'kg', 'g', 'L', 'ml'];
 
-  // 카테고리 목록 상태 (실제로는 상위 컴포넌트나 Context에서 관리해야 함)
   const [itemCategories, setItemCategories] = useState([
     '베이커리',
     '채소 / 과일',
@@ -62,12 +59,11 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
       setTimeout(() => {
         nameInputRef.current?.focus();
         onFocusComplete?.();
-      }, 0); // 스크롤 애니메이션 후 포커스
+      }, 0);
     }
   }, [focusedItemId, item.id, isEditMode, onFocusComplete]);
 
   // Quantity handlers
-  // 기존 핸들러들을 하나로 통합
   const handleQuantityChange = useCallback(
     (newQuantity: string) => {
       onUpdateItem(item.id, 'quantity', newQuantity || '0');
@@ -82,8 +78,6 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
     }
   }, [item.id, item.quantity, onUpdateItem]);
 
-  // 기존의 handleIncrement, handleDecrement는 삭제
-
   // Delete handler
   const handleDelete = useCallback(() => {
     onRemoveItem(item.id);
@@ -97,13 +91,13 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
     const month = String(oneWeekLater.getMonth() + 1).padStart(2, '0');
     const day = String(oneWeekLater.getDate()).padStart(2, '0');
 
-    return `${year}.${month}.${day}`;
+    return `${year}-${month}-${day}`;
   };
 
   // Date handler
   const handleDateSelect = useCallback(
     (year: number, month: number, day: number) => {
-      const formattedDate = `${year}.${String(month).padStart(2, '0')}.${String(
+      const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(
         day,
       ).padStart(2, '0')}`;
       onUpdateItem(item.id, 'expirationDate', formattedDate);
@@ -134,7 +128,7 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
     [item.id, onUpdateItem],
   );
 
-  // 카테고리 업데이트 핸들러
+  // Category handlers
   const handleUpdateCategories = useCallback((categories: string[]) => {
     setItemCategories(categories);
     // TODO: 실제로는 상위 컴포넌트나 Context로 전달해야 함
@@ -142,39 +136,37 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
 
   return (
     <>
-      <View style={cardStyles.itemCard}>
+      <View style={styles.itemCard}>
         {/* Delete Button */}
         {isEditMode && showDeleteButton && (
           <DeleteButton onPress={handleDelete} />
         )}
 
         {/* Image Section */}
-        <View style={cardStyles.imageContainer}>
-          <View style={cardStyles.imagePlaceholder} />
+        <View style={styles.imageContainer}>
+          <View style={styles.imagePlaceholder} />
         </View>
 
         {/* Item Info */}
-        <View style={cardStyles.itemInfo}>
+        <View style={styles.itemInfo}>
           {/* Name Input/Display */}
           {isEditMode ? (
             <TextInput
               ref={nameInputRef}
-              style={cardStyles.nameInput}
+              style={styles.nameInput}
               value={item.name}
               onChangeText={handleNameChange}
               placeholder="식재료 이름 입력"
               placeholderTextColor="#999"
               accessibilityLabel="식재료 이름 입력"
-              maxLength={50}
+              maxLength={20}
             />
           ) : (
-            <CustomText style={cardStyles.itemName}>
-              {item.name || '이름 없음'}
-            </CustomText>
+            <Text style={styles.itemName}>{item.name || '이름 없음'}</Text>
           )}
 
           {/* Quantity and Unit */}
-          <View style={cardStyles.itemDetails}>
+          <View style={styles.itemDetails}>
             {isEditMode ? (
               <QuantityEditor
                 quantity={item.quantity}
@@ -184,42 +176,40 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
                 onUnitPress={() => setShowUnitModal(true)}
               />
             ) : (
-              <CustomText style={cardStyles.quantityText}>
+              <Text style={styles.quantityText}>
                 {item.quantity} {item.unit || '개'}
-              </CustomText>
+              </Text>
             )}
 
             {/* Expiry Date */}
             {isEditMode ? (
               <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-                <CustomText style={cardStyles.dateButtonText}>
+                <Text style={styles.dateButtonText}>
                   {item.expirationDate || getDefaultExpiryDate()}
-                </CustomText>
+                </Text>
               </TouchableOpacity>
             ) : (
-              <CustomText style={cardStyles.expiryText}>
+              <Text style={styles.expiryText}>
                 {item.expirationDate || getDefaultExpiryDate()}
-              </CustomText>
+              </Text>
             )}
           </View>
 
           {/* Category */}
-          <View style={cardStyles.statusRow}>
+          <View style={styles.statusRow}>
             {isEditMode ? (
               <TouchableOpacity
-                style={cardStyles.categoryButton}
+                style={styles.categoryButton}
                 onPress={() => setShowCategoryModal(true)}
                 accessibilityLabel={`카테고리: ${item.itemCategory}`}
                 accessibilityRole="button"
               >
-                <CustomText style={cardStyles.categoryButtonText}>
+                <Text style={styles.categoryButtonText}>
                   {item.itemCategory}
-                </CustomText>
+                </Text>
               </TouchableOpacity>
             ) : (
-              <CustomText style={cardStyles.statusText}>
-                {item.itemCategory}
-              </CustomText>
+              <Text style={styles.statusText}>{item.itemCategory}</Text>
             )}
           </View>
         </View>

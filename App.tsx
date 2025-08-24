@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -8,7 +8,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // Icons
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import NotificationService from './src/services/NotificationService';
 // Screens
 import SplashScreen from './src/screens/SplashScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -37,7 +36,6 @@ export type RootStackParamList = {
       quantity?: string;
       unit?: string;
       expiryDate?: string;
-      storageType?: string;
       itemCategory?: string;
       photo?: string;
     };
@@ -144,26 +142,6 @@ function MainTabNavigator({
 }
 
 function App(): React.JSX.Element {
-  useEffect(() => {
-    // 알림 서비스 초기화
-    const initializeNotifications = async () => {
-      try {
-        // 기존 권한 상태 확인
-        const status = await NotificationService.checkNotificationStatus();
-
-        if (status.hasPermission) {
-          // 이미 권한이 있으면 토큰 가져오기
-          await NotificationService.getFCMToken();
-        }
-
-        console.log('알림 서비스가 초기화되었습니다.');
-      } catch (error) {
-        console.error('알림 서비스 초기화 실패:', error);
-      }
-    };
-
-    initializeNotifications();
-  }, []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>

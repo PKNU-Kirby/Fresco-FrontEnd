@@ -8,7 +8,6 @@ export type FridgeItem = {
   quantity: string;
   expiryDate: string;
   imageUri?: string;
-  storageType: string;
   itemCategory: string;
   fridgeId: string;
   unit?: string;
