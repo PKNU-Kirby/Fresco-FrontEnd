@@ -5,7 +5,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  TextInput,
   Alert,
   FlatList,
 } from 'react-native';
@@ -16,6 +15,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Recipe, RecipeStackParamList } from '../../RecipeNavigator';
 
+// SliderQuantityInput import
+import SliderQuantityInput from './SliderQuantityInput';
+
 // FridgeStorage를 직접 import 대신 fridgeStorage.tsx 사용
 import {
   getFridgeItemsByFridgeId,
@@ -23,28 +25,20 @@ import {
   FridgeItem,
 } from '../../../../utils/fridgeStorage';
 import { styles } from './styles';
-// FridgeItem 타입 정의 (FridgeItemList와 동일하게 맞춤)
-interface FridgeItem {
-  id: string;
-  fridgeId: string;
-  name: string;
-  quantity: string;
-  expiryDate: string;
-  imageUri?: string;
-  itemCategory: string;
-  unit?: string;
-}
 
-// 레시피 재료와 냉장고 재료 매칭 타입
-interface MatchedIngredient {
+// 🔧 카드 분리 방식을 위한 단순한 타입 정의
+interface MatchedIngredientSeparate {
   recipeIngredient: {
     name: string;
     quantity: string;
   };
-  fridgeIngredient?: FridgeItem;
+  fridgeIngredient: FridgeItem | null; // 단일 아이템 (없을 수도 있음)
   isAvailable: boolean;
   userInputQuantity: string;
+  maxUserQuantity: number;
   isDeducted: boolean;
+  isMultipleOption?: boolean; // 같은 재료의 여러 옵션 중 하나인지 표시
+  optionIndex?: number; // 몇 번째 옵션인지 (1, 2, 3...)
 }
 
 type UseRecipeScreenNavigationProp = NativeStackNavigationProp<
@@ -59,10 +53,10 @@ const UseRecipeScreen: React.FC = () => {
 
   const { recipe, fridgeId } = route.params;
 
-  // 상태 관리
+  // 상태 관리 (카드 분리 방식 타입 사용)
   const [completedSteps, setCompletedSteps] = useState<boolean[]>([]);
   const [matchedIngredients, setMatchedIngredients] = useState<
-    MatchedIngredient[]
+    MatchedIngredientSeparate[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -80,153 +74,86 @@ const UseRecipeScreen: React.FC = () => {
       .replace(/[^\w가-힣]/g, ''); // 특수문자 제거, 한글/영문/숫자만 남김
   };
 
-  const findBestMatch = (
+  // 모든 매칭되는 옵션들을 찾는 함수
+  const findAllMatches = (
     recipeName: string,
     fridgeItems: FridgeItem[],
-  ): FridgeItem | null => {
-    console.log(`🔍 "${recipeName}" 매칭 시작`);
+  ): FridgeItem[] => {
+    console.log(`🔍 "${recipeName}" 다중 매칭 시작`);
 
     const normalizedRecipeName = normalizeString(recipeName);
     console.log(`   정규화된 레시피 재료명: "${normalizedRecipeName}"`);
 
-    // 1차: 정확 매칭 (정규화 후)
+    const matches: FridgeItem[] = [];
+
+    // 1차: 정확 매칭
     for (const item of fridgeItems) {
       const normalizedFridgeName = normalizeString(item.name);
-      console.log(
-        `   비교: "${normalizedFridgeName}" vs "${normalizedRecipeName}"`,
-      );
-
       if (normalizedFridgeName === normalizedRecipeName) {
-        console.log(`   ✅ 정확 매칭 성공: ${item.name}`);
-        return item;
+        matches.push(item);
+        console.log(
+          `   ✅ 정확 매칭: ${item.name} ${item.quantity}${item.unit}`,
+        );
       }
     }
 
-    // 2차: 부분 매칭 (포함 관계)
-    for (const item of fridgeItems) {
-      const normalizedFridgeName = normalizeString(item.name);
-
-      if (
-        normalizedFridgeName.includes(normalizedRecipeName) ||
-        normalizedRecipeName.includes(normalizedFridgeName)
-      ) {
-        console.log(`   ✅ 부분 매칭 성공: ${item.name}`);
-        return item;
+    // 2차: 부분 매칭 (정확 매칭이 없을 때만)
+    if (matches.length === 0) {
+      for (const item of fridgeItems) {
+        const normalizedFridgeName = normalizeString(item.name);
+        if (
+          normalizedFridgeName.includes(normalizedRecipeName) ||
+          normalizedRecipeName.includes(normalizedFridgeName)
+        ) {
+          matches.push(item);
+          console.log(
+            `   ✅ 부분 매칭: ${item.name} ${item.quantity}${item.unit}`,
+          );
+        }
       }
     }
 
-    // 3차: 유사 매칭 (키워드 기반)
-    const recipeKeywords = recipeName.toLowerCase().split(/[\s,]+/);
-    for (const item of fridgeItems) {
-      const fridgeKeywords = item.name.toLowerCase().split(/[\s,]+/);
+    // 3차: 키워드 매칭 (이전 매칭이 없을 때만)
+    if (matches.length === 0) {
+      const recipeKeywords = recipeName.toLowerCase().split(/[\s,]+/);
+      for (const item of fridgeItems) {
+        const fridgeKeywords = item.name.toLowerCase().split(/[\s,]+/);
 
-      for (const recipeKeyword of recipeKeywords) {
-        for (const fridgeKeyword of fridgeKeywords) {
-          if (
-            recipeKeyword.length > 1 &&
-            fridgeKeyword.length > 1 &&
-            (recipeKeyword.includes(fridgeKeyword) ||
-              fridgeKeyword.includes(recipeKeyword))
-          ) {
-            console.log(
-              `   ✅ 키워드 매칭 성공: ${item.name} (키워드: ${recipeKeyword} ↔ ${fridgeKeyword})`,
-            );
-            return item;
+        for (const recipeKeyword of recipeKeywords) {
+          for (const fridgeKeyword of fridgeKeywords) {
+            if (
+              recipeKeyword.length > 1 &&
+              fridgeKeyword.length > 1 &&
+              (recipeKeyword.includes(fridgeKeyword) ||
+                fridgeKeyword.includes(recipeKeyword))
+            ) {
+              if (!matches.find(m => m.id === item.id)) {
+                matches.push(item);
+                console.log(
+                  `   ✅ 키워드 매칭: ${item.name} ${item.quantity}${item.unit}`,
+                );
+              }
+            }
           }
         }
       }
     }
 
-    console.log(`   ❌ 매칭 실패`);
-    return null;
+    console.log(`   📋 총 ${matches.length}개 옵션 발견`);
+    return matches;
   };
 
-  // 냉장고 식재료와 레시피 재료 매칭
+  // 🔧 냉장고 식재료와 레시피 재료 매칭 (카드 분리 방식)
   const loadFridgeIngredients = async () => {
     try {
       setIsLoading(true);
 
-      console.log('🔧 fridgeId 타입 및 값:', typeof fridgeId, fridgeId);
-
-      // fridgeId를 string으로 변환
+      console.log('🔧 fridgeId:', fridgeId);
       const stringFridgeId = fridgeId.toString();
 
-      // fridgeStorage.tsx의 함수 사용 (FridgeItemList와 동일한 저장소)
-      console.log('🔧 string fridgeId:', stringFridgeId);
-
-      // 먼저 모든 아이템을 직접 확인해보기
-      const { getFridgeItems } = await import(
-        '../../../../utils/fridgeStorage'
-      );
-      const allFridgeItems = await getFridgeItems();
-      console.log('🔍 getFridgeItems()로 가져온 전체 아이템:', allFridgeItems);
-      console.log('🔍 전체 아이템 수:', allFridgeItems.length);
-      console.log(
-        '🔍 각 아이템의 fridgeId:',
-        allFridgeItems.map(
-          item =>
-            `${item.name}: fridgeId="${
-              item.fridgeId
-            }" (타입: ${typeof item.fridgeId})`,
-        ),
-      );
-
-      // 수동으로 필터링해서 확인
-      const manualFilter = allFridgeItems.filter(item => {
-        const stringComparison = item.fridgeId === stringFridgeId;
-        const numberComparison = item.fridgeId === fridgeId;
-        const mixedComparison1 = item.fridgeId.toString() === stringFridgeId;
-        const mixedComparison2 =
-          parseInt(item.fridgeId.toString()) === fridgeId;
-
-        console.log(`🔍 ${item.name} 필터링:`);
-        console.log(
-          `   item.fridgeId: ${item.fridgeId} (${typeof item.fridgeId})`,
-        );
-        console.log(
-          `   target: "${stringFridgeId}" (string) / ${fridgeId} (number)`,
-        );
-        console.log(`   string === string: ${stringComparison}`);
-        console.log(`   original === number: ${numberComparison}`);
-        console.log(`   toString === string: ${mixedComparison1}`);
-        console.log(`   parseInt === number: ${mixedComparison2}`);
-
-        return (
-          stringComparison ||
-          numberComparison ||
-          mixedComparison1 ||
-          mixedComparison2
-        );
-      });
-
-      console.log('🔍 수동 필터링 결과:', manualFilter.length, '개');
-
-      // fridgeStorage.tsx 함수 사용 (실제 데이터가 있는 저장소)
+      // 냉장고 재료 가져오기
       const fridgeIngredients = await getFridgeItemsByFridgeId(stringFridgeId);
-
-      console.log(
-        '🔍 getFridgeItemsByFridgeId()로 가져온 아이템 수:',
-        fridgeIngredients.length,
-      );
-      console.log(
-        '🔍 냉장고 식재료 목록:',
-        fridgeIngredients.map(item => ({
-          id: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          unit: item.unit,
-          fridgeId: item.fridgeId,
-        })),
-      );
-
-      console.log('🔍 레시피 재료 개수:', recipe.ingredients?.length || 0);
-      console.log(
-        '🔍 레시피 재료 목록:',
-        recipe.ingredients?.map(ing => ({
-          name: ing.name,
-          quantity: ing.quantity,
-        })) || [],
-      );
+      console.log('🔍 냉장고 식재료 목록:', fridgeIngredients.length, '개');
 
       // 레시피에 ingredients가 없는 경우 처리
       if (!recipe.ingredients || recipe.ingredients.length === 0) {
@@ -236,56 +163,43 @@ const UseRecipeScreen: React.FC = () => {
         return;
       }
 
-      // 레시피 재료와 냉장고 재료 매칭
-      const matched: MatchedIngredient[] = recipe.ingredients.map(
-        (recipeIng, index) => {
-          console.log(
-            `\n🔍 매칭 ${index + 1}/${recipe.ingredients.length}: "${
-              recipeIng.name
-            }"`,
-          );
+      // 🔧 각 레시피 재료별로 모든 매칭 옵션을 개별 카드로 변환
+      const matched: MatchedIngredientSeparate[] = [];
 
-          const fridgeIng = findBestMatch(recipeIng.name, fridgeIngredients);
+      recipe.ingredients.forEach(recipeIng => {
+        const fridgeOptions = findAllMatches(recipeIng.name, fridgeIngredients);
 
-          // quantity를 숫자로 파싱해서 확인
-          const fridgeQuantity = fridgeIng
-            ? parseFloat(fridgeIng.quantity) || 0
-            : 0;
-          console.log(`   매칭된 재료 수량:`, fridgeQuantity);
-
-          const result = {
+        if (fridgeOptions.length === 0) {
+          // 매칭되는 재료가 없는 경우 - 하나의 빈 카드
+          matched.push({
             recipeIngredient: recipeIng,
-            fridgeIngredient: fridgeIng || undefined,
-            isAvailable: !!fridgeIng && fridgeQuantity > 0,
-            userInputQuantity: '',
+            fridgeIngredient: null,
+            isAvailable: false,
+            userInputQuantity: '0',
+            maxUserQuantity: 0,
             isDeducted: false,
-          };
+          });
+        } else {
+          // 🔧 각 옵션을 별도 카드로 생성
+          fridgeOptions.forEach((option, index) => {
+            const recipeQuantity = parseFloat(recipeIng.quantity) || 1;
+            const availableQuantity = parseFloat(option.quantity) || 1;
 
-          console.log(
-            `   최종 매칭 결과:`,
-            result.isAvailable ? '✅ 있음' : '❌ 없음',
-          );
-          if (fridgeIng) {
-            console.log(`   매칭된 아이템:`, {
-              name: fridgeIng.name,
-              quantity: fridgeIng.quantity,
-              unit: fridgeIng.unit,
+            matched.push({
+              recipeIngredient: recipeIng,
+              fridgeIngredient: option,
+              isAvailable: true,
+              userInputQuantity: '0', // 🔧 항상 0으로 시작
+              maxUserQuantity: availableQuantity,
+              isDeducted: false,
+              isMultipleOption: fridgeOptions.length > 1,
+              optionIndex: index + 1,
             });
-          }
-
-          return result;
-        },
-      );
-
-      console.log('🔍 전체 매칭 결과 요약:');
-      matched.forEach((match, index) => {
-        console.log(
-          `   ${index + 1}. ${match.recipeIngredient.name} → ${
-            match.isAvailable ? `✅ ${match.fridgeIngredient?.name}` : '❌ 없음'
-          }`,
-        );
+          });
+        }
       });
 
+      console.log('🔧 생성된 카드 수:', matched.length);
       setMatchedIngredients(matched);
       setCompletedSteps(new Array(getStepsArray().length).fill(false));
     } catch (error) {
@@ -296,18 +210,32 @@ const UseRecipeScreen: React.FC = () => {
     }
   };
 
-  // Steps 배열로 변환
+  // Steps 배열로 변환 (안전한 처리)
   const getStepsArray = () => {
-    if (!recipe.steps) return [];
-
-    if (Array.isArray(recipe.steps)) {
-      return recipe.steps.filter(step => step && step.trim().length > 0);
+    if (!recipe.steps) {
+      console.log('⚠️ recipe.steps가 없습니다:', recipe.steps);
+      return [];
     }
 
-    return recipe.steps
-      .split('\n')
-      .map(step => step.trim())
-      .filter(step => step.length > 0);
+    if (Array.isArray(recipe.steps)) {
+      return recipe.steps.filter(
+        step => step && typeof step === 'string' && step.trim().length > 0,
+      );
+    }
+
+    if (typeof recipe.steps === 'string') {
+      return recipe.steps
+        .split('\n')
+        .map(step => step.trim())
+        .filter(step => step.length > 0);
+    }
+
+    console.warn(
+      '⚠️ recipe.steps가 예상치 못한 타입입니다:',
+      typeof recipe.steps,
+      recipe.steps,
+    );
+    return [];
   };
 
   // 단계 완료 토글
@@ -328,7 +256,16 @@ const UseRecipeScreen: React.FC = () => {
     });
   };
 
-  // 재료 차감하기
+  // 슬라이더 최대값 업데이트
+  const updateMaxUserQuantity = (index: number, newMaxQuantity: number) => {
+    setMatchedIngredients(prev => {
+      const updated = [...prev];
+      updated[index].maxUserQuantity = newMaxQuantity;
+      return updated;
+    });
+  };
+
+  // 🔧 재료 차감하기 (단순화됨)
   const deductIngredient = async (index: number) => {
     const ingredient = matchedIngredients[index];
 
@@ -337,7 +274,11 @@ const UseRecipeScreen: React.FC = () => {
       return;
     }
 
-    if (!ingredient.userInputQuantity.trim()) {
+    if (
+      !ingredient.userInputQuantity.trim() ||
+      ingredient.userInputQuantity === '0' ||
+      parseFloat(ingredient.userInputQuantity) <= 0
+    ) {
       Alert.alert('알림', '차감할 수량을 입력해주세요.');
       return;
     }
@@ -353,7 +294,7 @@ const UseRecipeScreen: React.FC = () => {
     if (inputQuantity > currentQuantity) {
       Alert.alert(
         '수량 부족',
-        `냉장고에 ${currentQuantity}${
+        `${ingredient.fridgeIngredient.name}은 ${currentQuantity}${
           ingredient.fridgeIngredient.unit || '개'
         }만 있습니다.`,
       );
@@ -372,10 +313,6 @@ const UseRecipeScreen: React.FC = () => {
           onPress: async () => {
             try {
               const newQuantity = currentQuantity - inputQuantity;
-              const updatedItem = {
-                ...ingredient.fridgeIngredient!,
-                quantity: newQuantity.toString(),
-              };
 
               await updateFridgeItem(
                 parseInt(ingredient.fridgeIngredient!.id),
@@ -442,17 +379,32 @@ const UseRecipeScreen: React.FC = () => {
     );
   };
 
-  // 재료 아이템 렌더링
+  // 🔧 재료 아이템 렌더링 (카드 분리 방식)
   const renderIngredientItem = ({
     item,
     index,
   }: {
-    item: MatchedIngredient;
+    item: MatchedIngredientSeparate;
     index: number;
   }) => (
     <View style={styles.ingredientCard}>
       <View style={styles.ingredientHeader}>
-        <Text style={styles.ingredientName}>{item.recipeIngredient.name}</Text>
+        <View style={styles.ingredientNameContainer}>
+          <Text style={styles.ingredientName}>
+            {item.recipeIngredient.name}
+            {/* 🔧 여러 옵션 중 하나인 경우 배지 표시 */}
+            {item.isMultipleOption && (
+              <Text style={styles.optionBadge}> #{item.optionIndex}</Text>
+            )}
+          </Text>
+          {/* 🔧 구체적인 아이템명 표시 (레시피명과 다른 경우) */}
+          {item.fridgeIngredient &&
+            item.fridgeIngredient.name !== item.recipeIngredient.name && (
+              <Text style={styles.optionDescription}>
+                {item.fridgeIngredient.name}
+              </Text>
+            )}
+        </View>
         <Text style={styles.recipeQuantity}>
           필요: {item.recipeIngredient.quantity}
         </Text>
@@ -462,17 +414,26 @@ const UseRecipeScreen: React.FC = () => {
         <View style={styles.availableIngredient}>
           <Text style={styles.availableText}>
             ✅ 보유: {item.fridgeIngredient.quantity}
-            {item.fridgeIngredient.unit || '개'}
+            {item.fridgeIngredient.unit}
           </Text>
-          <View style={styles.deductionRow}>
-            <TextInput
-              style={styles.quantityInput}
-              value={item.userInputQuantity}
-              onChangeText={text => updateUserQuantity(index, text)}
-              placeholder={`${item.fridgeIngredient.unit || '개'} 단위로 입력`}
-              keyboardType="numeric"
-              editable={!item.isDeducted}
+
+          <View style={styles.quantityEditorContainer}>
+            <Text style={styles.quantityLabel}>사용할 수량:</Text>
+            <SliderQuantityInput
+              quantity={item.userInputQuantity}
+              unit={item.fridgeIngredient.unit || '개'}
+              maxQuantity={item.maxUserQuantity}
+              availableQuantity={parseFloat(item.fridgeIngredient.quantity)}
+              isEditMode={!item.isDeducted}
+              onQuantityChange={quantity => updateUserQuantity(index, quantity)}
+              onMaxQuantityChange={maxQuantity =>
+                updateMaxUserQuantity(index, maxQuantity)
+              }
+              onTextBlur={() => {}}
             />
+          </View>
+
+          <View style={styles.deductionRow}>
             <TouchableOpacity
               style={[
                 styles.deductButton,
@@ -488,8 +449,17 @@ const UseRecipeScreen: React.FC = () => {
                 size={24}
                 color={item.isDeducted ? '#4CAF50' : '#FF5722'}
               />
+              <Text
+                style={[
+                  styles.deductButtonText,
+                  item.isDeducted && styles.deductButtonTextCompleted,
+                ]}
+              >
+                {item.isDeducted ? '차감 완료' : '차감하기'}
+              </Text>
             </TouchableOpacity>
           </View>
+
           {item.isDeducted && (
             <Text style={styles.deductedText}>
               ✓ {item.userInputQuantity}
@@ -500,32 +470,6 @@ const UseRecipeScreen: React.FC = () => {
       ) : (
         <View style={styles.unavailableIngredient}>
           <Text style={styles.unavailableText}>❌ 냉장고에 없음</Text>
-
-          {/* 상세 디버깅 정보 버튼 */}
-          <TouchableOpacity
-            style={styles.debugButton}
-            onPress={() => {
-              const fridgeItemNames =
-                matchedIngredients
-                  .map(m => m.fridgeIngredient?.name)
-                  .filter(Boolean)
-                  .join(', ') || '없음';
-
-              const debugInfo = `
-레시피 재료: "${item.recipeIngredient.name}"
-정규화된 이름: "${normalizeString(item.recipeIngredient.name)}"
-
-냉장고에 있는 재료들:
-${fridgeItemNames}
-
-매칭 실패 이유를 확인하세요.
-              `.trim();
-
-              Alert.alert('디버깅 정보', debugInfo);
-            }}
-          >
-            <Text style={styles.debugButtonText}>🔍 매칭 정보 보기</Text>
-          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -630,24 +574,6 @@ ${fridgeItemNames}
         {/* 레시피 제목 */}
         <Text style={styles.recipeTitle}>{recipe.title}</Text>
 
-        {/* 디버깅 정보 섹션 */}
-        <TouchableOpacity
-          style={styles.debugSection}
-          onPress={() => {
-            const debugInfo = `
-fridgeId: ${fridgeId} (타입: ${typeof fridgeId})
-레시피 재료 수: ${recipe.ingredients?.length || 0}
-매칭된 재료 수: ${matchedIngredients.length}
-사용 가능한 재료 수: ${matchedIngredients.filter(m => m.isAvailable).length}
-
-콘솔에서 더 자세한 로그를 확인하세요.
-            `.trim();
-            Alert.alert('디버깅 정보', debugInfo);
-          }}
-        >
-          <Text style={styles.debugSectionText}>🔧 디버깅 정보 보기</Text>
-        </TouchableOpacity>
-
         {/* 안내사항 */}
         <View style={styles.noticeContainer}>
           <View style={styles.noticeHeader}>
@@ -655,9 +581,10 @@ fridgeId: ${fridgeId} (타입: ${typeof fridgeId})
             <Text style={styles.noticeTitle}>사용 안내</Text>
           </View>
           <Text style={styles.noticeText}>
-            • 사용한 식재료는 사용한 만큼 정확히 입력해주세요{'\n'}• 식재료
-            단위는 냉장고에 등록된 단위로 차감됩니다{'\n'}• 차감된 재료는
-            냉장고에서 즉시 반영됩니다
+            • 같은 재료가 여러 종류 있으면 각각 별도 카드로 표시됩니다{'\n'}•
+            슬라이더나 직접 입력으로 사용할 수량을 조절하세요{'\n'}• 보유량을
+            초과하면 전체 사용 옵션이 제공됩니다{'\n'}• 차감된 재료는 냉장고에서
+            즉시 반영됩니다
           </Text>
         </View>
 
@@ -689,4 +616,5 @@ fridgeId: ${fridgeId} (타입: ${typeof fridgeId})
     </SafeAreaView>
   );
 };
+
 export default UseRecipeScreen;

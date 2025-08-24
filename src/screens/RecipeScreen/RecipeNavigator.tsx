@@ -6,6 +6,7 @@ import RecipeDetailScreen from './screens/RecipeDetailScreen';
 import SearchScreen from './screens/SearchScreen';
 import SearchResultScreen from './screens/SearchResultScreen';
 import SharedFolderScreen from './screens/SharedFolderScreen';
+import UseRecipeScreen from './screens/UseRecipeScreen'; // 🔧 UseRecipeScreen import 추가
 
 // Recipe 타입 정의 (공통으로 사용)
 export interface Recipe {
@@ -19,7 +20,7 @@ export interface Recipe {
   sharedBy?: string;
   // RecipeDetail에서 사용하는 추가 필드들
   ingredients?: RecipeIngredient[];
-  steps?: string[];
+  steps?: string[] | string; // 🔧 string 배열 또는 문자열 둘 다 허용
   referenceUrl?: string;
 }
 
@@ -51,6 +52,12 @@ export type RecipeStackParamList = {
     query: string;
   };
   SharedFolder: undefined;
+  // 🔧 UseRecipe 스크린 파라미터 타입 추가
+  UseRecipe: {
+    recipe: Recipe;
+    fridgeId: string;
+    fridgeName?: string; // 선택적으로 냉장고 이름도 전달 가능
+  };
 };
 
 const RecipeStack = createNativeStackNavigator<RecipeStackParamList>();
@@ -80,7 +87,6 @@ const RecipeNavigator: React.FC<RecipeNavigatorProps> = ({ route }) => {
         component={RecipeHomeScreen}
         initialParams={{ fridgeId, fridgeName }}
       />
-
       <RecipeStack.Screen
         name="AIRecipe"
         component={AIRecipeScreen}
@@ -88,17 +94,23 @@ const RecipeNavigator: React.FC<RecipeNavigatorProps> = ({ route }) => {
           animation: 'slide_from_bottom',
         }}
       />
-
       <RecipeStack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
-
       <RecipeStack.Screen name="Search" component={SearchScreen} />
-
       <RecipeStack.Screen name="SearchResult" component={SearchResultScreen} />
-
       <RecipeStack.Screen
         name="SharedFolder"
         component={SharedFolderScreen}
         options={{}}
+      />
+      {/* 🔧 UseRecipe 스크린 추가 */}
+      <RecipeStack.Screen
+        name="UseRecipe"
+        component={UseRecipeScreen}
+        options={{
+          animation: 'slide_from_right',
+          // 필요시 추가 옵션들
+          gestureEnabled: true,
+        }}
       />
     </RecipeStack.Navigator>
   );

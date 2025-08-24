@@ -1,4 +1,15 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+// const baseHeight = 874;
+
+// 반응형 함수
+// const wp = (percentage: number) => (width * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
   container: {
@@ -284,5 +295,288 @@ export const styles = StyleSheet.create({
 
   bottomSpacer: {
     height: 20,
+  },
+  /////////////////////////////////////////////////////////////////////////////////////
+
+  // 슬라이더 수량 조절기 관련 스타일
+  quantityEditorContainer: {
+    marginBottom: 16,
+  },
+  quantityLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 8,
+  },
+  deductButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  deductButtonTextCompleted: {
+    color: '#fff',
+  },
+  debugButton: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  debugButtonText: {
+    fontSize: 12,
+    color: '#666',
+  },
+  multipleOptionsContainer: {
+    marginBottom: 12,
+  },
+  selectedOptionButton: {
+    backgroundColor: '#f0f8ff',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#007AFF',
+  },
+  selectedOptionInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  selectedOptionText: {
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '500',
+    flex: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  optionsModal: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    maxHeight: '70%',
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  optionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  selectedOptionItem: {
+    backgroundColor: '#e8f5e8',
+  },
+  optionInfo: {
+    flex: 1,
+  },
+  optionName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  optionDetails: {
+    fontSize: 12,
+    color: '#666',
+  },
+  ingredientNameContainer: {
+    flex: 1,
+  },
+  optionBadge: {
+    fontSize: 12,
+    color: '#007AFF',
+    fontWeight: 'bold',
+  },
+  optionDescription: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
+  },
+  quantityEditorContainer: {
+    marginBottom: 16,
+  },
+  quantityLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 8,
+  },
+});
+
+// Slider Quantity Editor Style : './SliderQuantityEditor.tsx'
+export const sliderQuantityStyles = StyleSheet.create({
+  // Stepper and Input Section Styles
+  quantityEditContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: scale(230),
+  },
+  stepper: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: '#f6f6f6',
+    paddingVertical: scale(4),
+    borderRadius: scale(8),
+    marginRight: scale(8),
+  },
+  quantityButton: {
+    padding: scale(4),
+  },
+  quantityInput: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: scale(16),
+    fontWeight: 'bold',
+    color: '#444',
+  },
+  quantityUnit: {
+    fontSize: scale(14),
+    color: '#666',
+    fontWeight: '700',
+    marginRight: scale(4),
+  },
+  unitSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(6),
+    borderRadius: scale(6),
+    borderWidth: scale(1),
+    borderColor: '#e3e3e3',
+    backgroundColor: 'white',
+    marginRight: scale(8),
+  },
+  unitDropdownIcon: {
+    fontSize: scale(10),
+    color: '#666',
+    marginLeft: scale(2),
+  },
+  // Toggle Button Styles
+  isSlidderButton: {
+    width: scale(36),
+    height: scale(36),
+    marginLeft: scale(8),
+    backgroundColor: '#f6f6f6',
+    borderRadius: scale(4),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  isNotSlidderButton: {
+    width: scale(36),
+    height: scale(36),
+    marginLeft: scale(8),
+    backgroundColor: '#f6f6f6',
+    borderRadius: scale(4),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sliderQuantityContainer: {
+    marginTop: scale(8),
+    minWidth: scale(260),
+  },
+  maxQuantityInfo: {
+    alignItems: 'center',
+  },
+  maxQuantityText: {
+    fontSize: scale(10),
+    color: '#999',
+    fontStyle: 'italic',
+  },
+  // Slider Section Styles
+  sliderSection: {
+    marginTop: scale(18),
+  },
+  sliderContainer: {
+    position: 'relative',
+  },
+  slider: {
+    width: '100%',
+    height: scale(12),
+    backgroundColor: 'limegreen',
+    borderRadius: scale(6),
+  },
+  sliderLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: scale(10),
+    marginTop: scale(12),
+  },
+  sliderLabel: {
+    fontSize: scale(14),
+    color: '#666',
+    fontWeight: '800',
+  },
+  availableQuantityInfo: {
+    marginBottom: 8,
+    paddingHorizontal: 4,
+  },
+  availableQuantityText: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'right',
+    fontWeight: '500',
+  },
+  quantityInputError: {
+    borderColor: '#ff4444',
+    borderWidth: 2,
+    backgroundColor: '#fff5f5',
+  },
+  quantityButtonDisabled: {
+    opacity: 0.5,
+  },
+  availableQuantityInfo: {
+    marginBottom: 8,
+    paddingHorizontal: 4,
+  },
+  availableQuantityText: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'right',
+    fontWeight: '500',
+  },
+  quantityInputError: {
+    borderColor: '#ff4444',
+    borderWidth: 2,
+    backgroundColor: '#fff5f5',
+  },
+  quantityButtonDisabled: {
+    opacity: 0.5,
+  },
+  availableQuantityInfo: {
+    marginBottom: 8,
+    paddingHorizontal: 4,
+  },
+  availableQuantityText: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'right',
+    fontWeight: '500',
+  },
+  quantityInputError: {
+    borderColor: '#ff4444',
+    borderWidth: 2,
+    backgroundColor: '#fff5f5',
+  },
+  quantityButtonDisabled: {
+    opacity: 0.5,
   },
 });

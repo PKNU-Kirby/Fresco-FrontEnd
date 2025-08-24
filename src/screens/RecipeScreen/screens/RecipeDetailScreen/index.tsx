@@ -60,9 +60,52 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
     isEditing = false,
     isNewRecipe = false,
     fridgeId,
-    // fridgeName,
+    fridgeName,
     aiGeneratedData,
   } = route.params;
+
+  // 🔧 Steps 안전 처리 함수
+  const getStepsArray = (steps: string[] | string | undefined): string[] => {
+    // steps가 없는 경우 빈 배열 반환
+    if (!steps) {
+      console.log('⚠️ recipe.steps가 없습니다:', steps);
+      return [];
+    }
+
+    // 배열인 경우
+    if (Array.isArray(steps)) {
+      console.log('📋 steps가 배열입니다:', steps);
+      return steps.filter(
+        step => step && typeof step === 'string' && step.trim().length > 0,
+      );
+    }
+
+    // 문자열인 경우
+    if (typeof steps === 'string') {
+      console.log('📋 steps가 문자열입니다:', steps);
+      return steps
+        .split('\n')
+        .map(step => step.trim())
+        .filter(step => step.length > 0);
+    }
+
+    // 그 외의 경우 (객체, 숫자 등)
+    console.warn(
+      '⚠️ recipe.steps가 예상치 못한 타입입니다:',
+      typeof steps,
+      steps,
+    );
+    return [];
+  };
+
+  // 🔧 Ingredients 안전 처리 함수
+  const getIngredientsArray = (
+    ingredients: RecipeIngredient[] | undefined,
+  ): RecipeIngredient[] => {
+    if (!ingredients) return [];
+    if (Array.isArray(ingredients)) return ingredients;
+    return [];
+  };
 
   // AI 데이터/기존 레시피 데이터로 초기화
   const getInitialRecipe = (): Recipe => {
@@ -197,7 +240,22 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
     }
   };
 
-  // 레시피 사용하기 모달 열기
+  // 🔧 UseRecipeScreen으로 네비게이션 (새로운 방식)
+  const navigateToUseRecipe = () => {
+    if (!currentRecipe.ingredients || currentRecipe.ingredients.length === 0) {
+      Alert.alert('알림', '이 레시피에는 재료 정보가 없습니다.');
+      return;
+    }
+
+    // UseRecipeScreen으로 직접 네비게이션
+    navigation.navigate('UseRecipe', {
+      recipe: currentRecipe,
+      fridgeId: fridgeId,
+      fridgeName: fridgeName,
+    });
+  };
+
+  // 레시피 사용하기 모달 열기 (기존 방식 - 백업용으로 유지)
   const openUseRecipeModal = () => {
     if (!currentRecipe.ingredients || currentRecipe.ingredients.length === 0) {
       Alert.alert('알림', '이 레시피에는 재료 정보가 없습니다.');
@@ -536,25 +594,28 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
     }));
   };
 
-  // 조리법 관련 함수들 (기존과 동일)
+  // 조리법 관련 함수들 (🔧 안전한 처리 적용)
   const addStep = () => {
+    const currentSteps = getStepsArray(currentRecipe.steps);
     setCurrentRecipe(prev => ({
       ...prev,
-      steps: [...(prev.steps || []), ''],
+      steps: [...currentSteps, ''],
     }));
   };
 
   const removeStep = (index: number) => {
+    const currentSteps = getStepsArray(currentRecipe.steps);
     setCurrentRecipe(prev => ({
       ...prev,
-      steps: prev.steps?.filter((_, i) => i !== index) || [],
+      steps: currentSteps.filter((_, i) => i !== index),
     }));
   };
 
   const updateStep = (index: number, value: string) => {
+    const currentSteps = getStepsArray(currentRecipe.steps);
     setCurrentRecipe(prev => ({
       ...prev,
-      steps: prev.steps?.map((step, i) => (i === index ? value : step)) || [],
+      steps: currentSteps.map((step, i) => (i === index ? value : step)),
     }));
   };
 
@@ -683,55 +744,58 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
               )}
             </View>
 
-            {currentRecipe.ingredients?.map((ingredient, _index) => (
-              <View key={ingredient.id} style={styles.ingredientItem}>
-                {isEditMode ? (
-                  <View style={styles.ingredientEditRow}>
-                    <TextInput
-                      style={[styles.ingredientInput, styles.ingredientName]}
-                      value={ingredient.name}
-                      onChangeText={text =>
-                        updateIngredient(ingredient.id, 'name', text)
-                      }
-                      placeholder="재료명"
-                      placeholderTextColor="#999"
-                    />
-                    <TextInput
-                      style={[
-                        styles.ingredientInput,
-                        styles.ingredientQuantity,
-                      ]}
-                      value={ingredient.quantity}
-                      onChangeText={text =>
-                        updateIngredient(ingredient.id, 'quantity', text)
-                      }
-                      placeholder="양"
-                      placeholderTextColor="#999"
-                    />
-                    <TextInput
-                      style={[styles.ingredientInput, styles.ingredientUnit]}
-                      value={ingredient.unit}
-                      onChangeText={text =>
-                        updateIngredient(ingredient.id, 'unit', text)
-                      }
-                      placeholder="단위"
-                      placeholderTextColor="#999"
-                    />
-                    <TouchableOpacity
-                      style={styles.removeButton}
-                      onPress={() => removeIngredient(ingredient.id)}
-                    >
-                      <Icon name="remove" size={20} color="tomato" />
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <Text style={styles.ingredientText}>
-                    • {ingredient.name} {ingredient.quantity}
-                    {ingredient.unit}
-                  </Text>
-                )}
-              </View>
-            ))}
+            {/* 🔧 안전한 ingredients 처리 */}
+            {getIngredientsArray(currentRecipe.ingredients).map(
+              (ingredient, _index) => (
+                <View key={ingredient.id} style={styles.ingredientItem}>
+                  {isEditMode ? (
+                    <View style={styles.ingredientEditRow}>
+                      <TextInput
+                        style={[styles.ingredientInput, styles.ingredientName]}
+                        value={ingredient.name}
+                        onChangeText={text =>
+                          updateIngredient(ingredient.id, 'name', text)
+                        }
+                        placeholder="재료명"
+                        placeholderTextColor="#999"
+                      />
+                      <TextInput
+                        style={[
+                          styles.ingredientInput,
+                          styles.ingredientQuantity,
+                        ]}
+                        value={ingredient.quantity}
+                        onChangeText={text =>
+                          updateIngredient(ingredient.id, 'quantity', text)
+                        }
+                        placeholder="양"
+                        placeholderTextColor="#999"
+                      />
+                      <TextInput
+                        style={[styles.ingredientInput, styles.ingredientUnit]}
+                        value={ingredient.unit}
+                        onChangeText={text =>
+                          updateIngredient(ingredient.id, 'unit', text)
+                        }
+                        placeholder="단위"
+                        placeholderTextColor="#999"
+                      />
+                      <TouchableOpacity
+                        style={styles.removeButton}
+                        onPress={() => removeIngredient(ingredient.id)}
+                      >
+                        <Icon name="remove" size={20} color="tomato" />
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <Text style={styles.ingredientText}>
+                      • {ingredient.name} {ingredient.quantity}
+                      {ingredient.unit}
+                    </Text>
+                  )}
+                </View>
+              ),
+            )}
           </View>
 
           {/* Steps */}
@@ -749,7 +813,8 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
               )}
             </View>
 
-            {currentRecipe.steps?.map((step, index) => (
+            {/* 🔧 안전한 steps 처리 */}
+            {getStepsArray(currentRecipe.steps).map((step, index) => (
               <View key={index} style={styles.stepItem}>
                 {isEditMode ? (
                   <View style={styles.stepEditRow}>
@@ -807,13 +872,22 @@ const RecipeDetailScreen: React.FC<RecipeDetailScreenProps> = () => {
           {/* Action Buttons */}
           {!isEditMode && currentRecipe.id && (
             <View style={styles.actionButtonsContainer}>
-              {/* 레시피 사용하기 버튼 */}
+              {/* 🔧 새로운 레시피 사용하기 버튼 - UseRecipeScreen으로 네비게이션 */}
               <TouchableOpacity
                 style={styles.useRecipeButton}
-                onPress={openUseRecipeModal}
+                onPress={navigateToUseRecipe}
               >
                 <Icon name="restaurant" size={20} color="#f8f8f8" />
-                <Text style={styles.buttonText}>레시피 사용하기</Text>
+                <Text style={styles.buttonText}>조리하기</Text>
+              </TouchableOpacity>
+
+              {/* 🔧 기존 방식 레시피 사용하기 버튼 (백업용) */}
+              <TouchableOpacity
+                style={[styles.useRecipeButton, { backgroundColor: '#666' }]}
+                onPress={openUseRecipeModal}
+              >
+                <Icon name="checklist" size={20} color="#f8f8f8" />
+                <Text style={styles.buttonText}>간단 차감</Text>
               </TouchableOpacity>
 
               {/* 공유하기 버튼 (개인 레시피만) */}
