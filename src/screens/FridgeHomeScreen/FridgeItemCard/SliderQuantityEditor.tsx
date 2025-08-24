@@ -71,17 +71,8 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     const currentNum = parseFloat(quantity) || 0;
     const newQuantity = currentNum + 1;
 
-    console.log('➕ Increment pressed:', {
-      currentQuantity: quantity,
-      currentNum,
-      newQuantity,
-      maxQuantity,
-      willUpdateMax: newQuantity > maxQuantity,
-    });
-
     // 플러스 버튼으로 현재 maxQuantity를 초과하는 경우에만 maxQuantity 업데이트
     if (newQuantity > maxQuantity) {
-      console.log('📈 Updating maxQuantity to:', newQuantity);
       onMaxQuantityChange?.(newQuantity);
     }
 
@@ -190,7 +181,7 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
             activeOpacity={0.7}
             onPress={toggleInputMode}
           >
-            <FontAwesome6 name={'caret-up'} size={18} color={'#e8e8e8'} />
+            <FontAwesome6 name={'caret-up'} size={24} color={'#999'} />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
@@ -198,7 +189,7 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
             activeOpacity={0.7}
             onPress={toggleInputMode}
           >
-            <FontAwesome6 name={'caret-down'} size={18} color="#f8f8f8" />
+            <FontAwesome6 name={'caret-down'} size={24} color="#999" />
           </TouchableOpacity>
         )}
       </View>
