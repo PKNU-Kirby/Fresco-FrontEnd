@@ -1,8 +1,14 @@
-import React, {useState} from 'react';
-import {View, Modal, TouchableOpacity, Alert, Platform} from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Modal,
+  TouchableOpacity,
+  Alert,
+  Platform,
+  Text,
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import CustomText from '../../common/CustomText';
-import {styles} from './styles';
+import { styles } from './styles';
 
 type DateRangePickerProps = {
   visible: boolean;
@@ -86,22 +92,24 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={handleClose}>
+      onRequestClose={handleClose}
+    >
       <View style={styles.modalOverlay}>
         <View
           style={[
             styles.modalContent,
-            pickerMode !== 'range' && {height: '38.8%'}, // 날짜 선택 모드일 때 높이 증가
-          ]}>
+            pickerMode !== 'range' && { height: '38.8%' }, // 날짜 선택 모드일 때 높이 증가
+          ]}
+        >
           {/* 헤더 */}
           <View style={styles.modalHeader}>
-            <CustomText style={styles.modalTitle}>
+            <Text style={styles.modalTitle}>
               {pickerMode === 'startDate'
                 ? '시작일 선택'
                 : pickerMode === 'endDate'
                 ? '종료일 선택'
                 : '기간 선택하기'}
-            </CustomText>
+            </Text>
           </View>
 
           {/* 기간 선택 화면 */}
@@ -109,29 +117,27 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
             <>
               <View style={styles.dateContainer}>
                 <View style={styles.dateSection}>
-                  <CustomText style={styles.dateLabel}>시작일</CustomText>
+                  <Text style={styles.dateLabel}>시작일</Text>
                   <TouchableOpacity
                     style={styles.dateInput}
-                    onPress={handleStartDatePress}>
-                    <CustomText style={styles.dateInputText}>
+                    onPress={handleStartDatePress}
+                  >
+                    <Text style={styles.dateInputText}>
                       {formatDate(startDate)}
-                    </CustomText>
-                    <CustomText style={styles.dateInputArrow}>
-                      (달력아이콘)
-                    </CustomText>
+                    </Text>
+                    <Text style={styles.dateInputArrow}>(달력아이콘)</Text>
                   </TouchableOpacity>
                 </View>
                 <View style={styles.dateSection}>
-                  <CustomText style={styles.dateLabel}>종료일</CustomText>
+                  <Text style={styles.dateLabel}>종료일</Text>
                   <TouchableOpacity
                     style={styles.dateInput}
-                    onPress={handleEndDatePress}>
-                    <CustomText style={styles.dateInputText}>
+                    onPress={handleEndDatePress}
+                  >
+                    <Text style={styles.dateInputText}>
                       {formatDate(endDate)}
-                    </CustomText>
-                    <CustomText style={styles.dateInputArrow}>
-                      (달력아이콘)
-                    </CustomText>
+                    </Text>
+                    <Text style={styles.dateInputArrow}>(달력아이콘)</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -139,14 +145,16 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
               <View style={styles.modalButtons}>
                 <TouchableOpacity
                   style={styles.cancelButton}
-                  onPress={handleClose}>
-                  <CustomText style={styles.cancelButtonText}>취소</CustomText>
+                  onPress={handleClose}
+                >
+                  <Text style={styles.cancelButtonText}>취소</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.confirmButton}
-                  onPress={handleConfirm}>
-                  <CustomText style={styles.confirmButtonText}>확인</CustomText>
+                  onPress={handleConfirm}
+                >
+                  <Text style={styles.confirmButtonText}>확인</Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -169,14 +177,16 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
               <View style={styles.modalButtons}>
                 <TouchableOpacity
                   style={styles.cancelButton}
-                  onPress={handleDateCancel}>
-                  <CustomText style={styles.cancelButtonText}>취소</CustomText>
+                  onPress={handleDateCancel}
+                >
+                  <Text style={styles.cancelButtonText}>취소</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.confirmButton}
-                  onPress={handleDateConfirm}>
-                  <CustomText style={styles.confirmButtonText}>확인</CustomText>
+                  onPress={handleDateConfirm}
+                >
+                  <Text style={styles.confirmButtonText}>확인</Text>
                 </TouchableOpacity>
               </View>
             </>

@@ -7,11 +7,11 @@ import {
   Switch,
   Alert,
   ScrollView,
+  Text,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import CustomText from '../../components/common/CustomText';
-import BackButton from '../../components/common/BackButton';
+import BackButton from '../../components/_common/BackButton';
 import NotificationService, {
   NotificationSettings,
 } from '../../services/NotificationService';
@@ -116,7 +116,7 @@ const NotificationSettingsScreen = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <CustomText>설정을 불러오는 중...</CustomText>
+          <Text>설정을 불러오는 중...</Text>
         </View>
       </SafeAreaView>
     );
@@ -127,7 +127,7 @@ const NotificationSettingsScreen = () => {
       {/* 헤더 */}
       <View style={styles.header}>
         <BackButton onPress={() => navigation.goBack()} />
-        <CustomText style={styles.headerTitle}>알림 설정</CustomText>
+        <Text style={styles.headerTitle}>알림 설정</Text>
         <TouchableOpacity onPress={testNotification} style={styles.testButton}>
           <MaterialIcons name="send" size={24} color="#007AFF" />
         </TouchableOpacity>
@@ -146,11 +146,11 @@ const NotificationSettingsScreen = () => {
               size={24}
               color={hasPermission && settings.enabled ? '#4CAF50' : '#FF5722'}
             />
-            <CustomText style={styles.statusText}>
+            <Text style={styles.statusText}>
               {hasPermission && settings.enabled
                 ? '알림이 활성화되었습니다'
                 : '알림이 비활성화되었습니다'}
-            </CustomText>
+            </Text>
           </View>
         </View>
 
@@ -158,10 +158,10 @@ const NotificationSettingsScreen = () => {
         <View style={styles.settingSection}>
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <CustomText style={styles.settingTitle}>푸시 알림</CustomText>
-              <CustomText style={styles.settingDescription}>
+              <Text style={styles.settingTitle}>푸시 알림</Text>
+              <Text style={styles.settingDescription}>
                 소비기한 임박 알림을 받습니다
-              </CustomText>
+              </Text>
             </View>
             <Switch
               value={settings.enabled && hasPermission}
@@ -177,10 +177,10 @@ const NotificationSettingsScreen = () => {
           <>
             {/* 소비기한 알림 일수 설정 */}
             <View style={styles.settingSection}>
-              <CustomText style={styles.sectionTitle}>알림 시점</CustomText>
-              <CustomText style={styles.sectionDescription}>
+              <Text style={styles.sectionTitle}>알림 시점</Text>
+              <Text style={styles.sectionDescription}>
                 소비기한 며칠 전에 알림을 받을지 선택하세요
-              </CustomText>
+              </Text>
 
               <View style={styles.dayOptionsContainer}>
                 {[1, 2, 3, 5, 7].map(day => (
@@ -193,7 +193,7 @@ const NotificationSettingsScreen = () => {
                     ]}
                     onPress={() => handleExpiryDaysChange(day)}
                   >
-                    <CustomText
+                    <Text
                       style={[
                         styles.dayOptionText,
                         settings.expiryDaysBefore === day &&
@@ -201,7 +201,7 @@ const NotificationSettingsScreen = () => {
                       ]}
                     >
                       {day}일 전
-                    </CustomText>
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -209,16 +209,16 @@ const NotificationSettingsScreen = () => {
 
             {/* 알림 시간 설정 */}
             <View style={styles.settingSection}>
-              <CustomText style={styles.sectionTitle}>알림 시간</CustomText>
+              <Text style={styles.sectionTitle}>알림 시간</Text>
               <TouchableOpacity
                 style={styles.timeSelector}
                 onPress={() => setShowTimePicker(true)}
               >
                 <View style={styles.timeSelectorContent}>
                   <Ionicons name="time-outline" size={24} color="#666" />
-                  <CustomText style={styles.timeText}>
+                  <Text style={styles.timeText}>
                     {settings.notificationTime}
-                  </CustomText>
+                  </Text>
                   <Ionicons name="chevron-forward" size={20} color="#666" />
                 </View>
               </TouchableOpacity>
@@ -228,19 +228,17 @@ const NotificationSettingsScreen = () => {
 
         {/* 테스트 섹션 */}
         <View style={styles.settingSection}>
-          <CustomText style={styles.sectionTitle}>테스트</CustomText>
+          <Text style={styles.sectionTitle}>테스트</Text>
           <TouchableOpacity
             style={styles.testNotificationButton}
             onPress={testNotification}
           >
             <MaterialIcons name="send" size={20} color="#007AFF" />
-            <CustomText style={styles.testButtonText}>
-              테스트 알림 토큰 확인
-            </CustomText>
+            <Text style={styles.testButtonText}>테스트 알림 토큰 확인</Text>
           </TouchableOpacity>
-          <CustomText style={styles.testDescription}>
+          <Text style={styles.testDescription}>
             Firebase 콘솔에서 테스트 메시지를 보낼 수 있는 토큰을 확인합니다
-          </CustomText>
+          </Text>
         </View>
       </ScrollView>
 

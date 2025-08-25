@@ -3,10 +3,10 @@ import { ActivityIndicator, SafeAreaView, Text, Animated } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 //
-import { HiddenFridgesBottomSheet } from './HiddenFridgeBottomSheet';
-import { FridgeHeader } from './FridgeTileHeader';
-import { FridgeList } from './FridgeTileList';
-import { FridgeModals } from './FridgeModal';
+import { HiddenFridgesBottomSheet } from '../../components/FridgeSelect/HiddenFridgeBottomSheet';
+import { FridgeHeader } from '../../components/FridgeSelect/FridgeHeader';
+import { FridgeList } from '../../components/FridgeSelect/FridgeTileList';
+import { FridgeModals } from '../../components/FridgeSelect/FridgeModal';
 //
 import { useFridgeSelect } from '../../hooks/useFridgeSelect';
 import { useFridgeActions } from '../../hooks/useFridgeActions';

@@ -5,12 +5,12 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Text,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import CustomText from '../../components/common/CustomText';
-import BackButton from '../../components/common/BackButton';
+import BackButton from '../../components/_common/BackButton';
 import InviteMemberModal from '../../components/modals/InviteMemberModal';
 import { RootStackParamList } from '../../../App';
 import { styles } from './styles';
@@ -247,20 +247,18 @@ const FridgeSettingsScreen = ({ route }: Props) => {
         </View>
         <View style={styles.memberMainInfo}>
           <View style={styles.memberNameContainer}>
-            <CustomText style={styles.memberName}>{member.name}</CustomText>
+            <Text style={styles.memberName}>{member.name}</Text>
             {member.role === 'owner' && (
               <View style={styles.ownerBadge}>
                 <FontAwesome5 name="crown" size={12} color="#212529" />
-                <CustomText style={styles.ownerBadgeText}>방장</CustomText>
+                <Text style={styles.ownerBadgeText}>방장</Text>
               </View>
             )}
           </View>
         </View>
       </View>
       <View style={styles.memberCardFooter}>
-        <CustomText style={styles.memberJoinDateText}>
-          가입일: {member.joinDate}
-        </CustomText>
+        <Text style={styles.memberJoinDateText}>가입일: {member.joinDate}</Text>
       </View>
     </View>
   );
@@ -270,16 +268,16 @@ const FridgeSettingsScreen = ({ route }: Props) => {
       {/* 헤더 */}
       <View style={styles.header}>
         <BackButton onPress={handleBack} />
-        <CustomText style={styles.headerTitle}>냉장고 설정</CustomText>
+        <Text style={styles.headerTitle}>냉장고 설정</Text>
         <View style={styles.headerRight} />
       </View>
 
       {/* 구성원 목록 */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.membersSection}>
-          <CustomText style={styles.sectionTitle}>
+          <Text style={styles.sectionTitle}>
             구성원 ({mockMembers.length}명)
-          </CustomText>
+          </Text>
           {mockMembers.map(renderMember)}
         </View>
       </ScrollView>
@@ -291,7 +289,7 @@ const FridgeSettingsScreen = ({ route }: Props) => {
           onPress={handleUsageHistory}
         >
           <Ionicons name="bar-chart-outline" size={26} color="#666" />
-          <CustomText style={styles.bottomButtonText}>사용기록</CustomText>
+          <Text style={styles.bottomButtonText}>사용기록</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -299,7 +297,7 @@ const FridgeSettingsScreen = ({ route }: Props) => {
           onPress={handleMemberInvite}
         >
           <Ionicons name="people-outline" size={24} color="#666" />
-          <CustomText style={styles.bottomButtonText}>구성원 초대</CustomText>
+          <Text style={styles.bottomButtonText}>구성원 초대</Text>
         </TouchableOpacity>
 
         {/* 새로 추가: 알림 설정 버튼 */}
@@ -308,12 +306,12 @@ const FridgeSettingsScreen = ({ route }: Props) => {
           onPress={handleNotificationSettings}
         >
           <Ionicons name="notifications-outline" size={24} color="#666" />
-          <CustomText style={styles.bottomButtonText}>알림 설정</CustomText>
+          <Text style={styles.bottomButtonText}>알림 설정</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.bottomButton} onPress={handleLogout}>
           <Feather name="log-out" size={24} color="#495057" />
-          <CustomText style={styles.bottomButtonText}>로그아웃</CustomText>
+          <Text style={styles.bottomButtonText}>로그아웃</Text>
         </TouchableOpacity>
 
         {userRole === 'owner' ? (
@@ -323,9 +321,9 @@ const FridgeSettingsScreen = ({ route }: Props) => {
               onPress={handleFridgeDelete}
             >
               <MaterialIcons name="dangerous" size={24} color="tomato" />
-              <CustomText style={[styles.bottomButtonText, styles.dangerText]}>
+              <Text style={[styles.bottomButtonText, styles.dangerText]}>
                 냉장고 삭제
-              </CustomText>
+              </Text>
             </TouchableOpacity>
           </>
         ) : (
@@ -334,9 +332,9 @@ const FridgeSettingsScreen = ({ route }: Props) => {
             onPress={handleLeaveFridge}
           >
             <MaterialIcons name="dangerous" size={24} color="tomato" />
-            <CustomText style={[styles.bottomButtonText, styles.dangerText]}>
+            <Text style={[styles.bottomButtonText, styles.dangerText]}>
               냉장고 나가기
-            </CustomText>
+            </Text>
           </TouchableOpacity>
         )}
       </View>

@@ -4,8 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AsyncStorageService } from '../../services/AsyncStorageService';
 import type { RootStackParamList, SocialProvider } from '../../types/auth';
-import KakaoLoginButton from './KakaoLoginButton';
-import NaverLoginButton from './NaverLoginButton';
+import KakaoLoginButton from '../../components/Login/KakaoLoginButton';
+import NaverLoginButton from '../../components/Login/NaverLoginButton';
 import styles from './styles';
 
 const LoginScreen = (): React.JSX.Element => {

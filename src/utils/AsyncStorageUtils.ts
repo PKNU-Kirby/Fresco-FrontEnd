@@ -5,7 +5,6 @@ import { FridgeItem } from '../hooks/useFridgeData';
 export interface Recipe {
   id: string;
   title: string;
-  description: string;
   createdAt: string;
   updatedAt?: string;
   ingredients?: RecipeIngredient[];

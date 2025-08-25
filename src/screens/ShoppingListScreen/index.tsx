@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   SafeAreaView,
   Alert,
@@ -9,13 +10,13 @@ import {
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import CartItemCard from './CartItemCard';
-import ItemDeleteConfirmModal from './ItemDeleteConfirmModal';
-import FlushConfirmModal from './FlushConfirmModal';
+import CartItemCard from '../../components/ShoppingList/CartItemCard';
+import ItemDeleteConfirmModal from '../../components/ShoppingList/ItemDeleteConfirmModal';
+import FlushConfirmModal from '../../components/ShoppingList/FlushConfirmModal';
 import { styles, addItemStyles } from './styles';
-import ShoppingListHeader from './ShoppingListHeader';
-import Buttons from './Buttons';
-import NewItemCard from './NewItemCard';
+import ShoppingListHeader from '../../components/ShoppingList/ShoppingListHeader';
+import Buttons from '../../components/ShoppingList/Buttons';
+import NewItemCard from '../../components/ShoppingList/NewItemCard';
 
 export interface CartItem {
   id: string;
@@ -54,13 +55,19 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
   // 비우기 확인 모달 상태
   const [showClearModal, setShowClearModal] = useState(false);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadCartItems();
+    }, [loadCartItems]),
+  );
+
   // load data from AsyncStorage
   useEffect(() => {
     loadCartItems();
   }, []);
 
   // load Cart Items from AsyncStorage
-  const loadCartItems = async () => {
+  const loadCartItems = useCallback(async () => {
     try {
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -76,8 +83,7 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({
     } catch (error) {
       console.error('장바구니 로드 실패:', error);
     }
-  };
-
+  }, []);
   // save data to AsyncStorage
   const saveCartItems = async (items: CartItem[]) => {
     try {

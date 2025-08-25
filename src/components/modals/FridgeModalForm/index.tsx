@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, View, TextInput, TouchableOpacity } from 'react-native';
-import CustomText from '../../common/CustomText';
+import { Modal, View, TextInput, TouchableOpacity, Text } from 'react-native';
 import { styles } from './styles';
 
 type Fridge = {
@@ -73,16 +72,14 @@ const FridgeModalForm = ({
 
           {editMode && (
             <View style={styles.switchContainer}>
-              <CustomText style={styles.switchContainerText}>
-                냉장고 상태
-              </CustomText>
+              <Text style={styles.switchContainerText}>냉장고 상태</Text>
               <TouchableOpacity
                 style={[styles.switch, isHidden && styles.switchActive]}
                 onPress={() => setIsHidden(!isHidden)}
               >
-                <CustomText style={styles.switchText}>
+                <Text style={styles.switchText}>
                   {isHidden ? '숨기기' : '표시하기'}
-                </CustomText>
+                </Text>
               </TouchableOpacity>
             </View>
           )}
@@ -92,12 +89,12 @@ const FridgeModalForm = ({
               style={styles.buttonRowRight}
               onPress={handleClose}
             >
-              <CustomText style={styles.buttonRowRightText}>취소</CustomText>
+              <Text style={styles.buttonRowRightText}>취소</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.buttonRowLeft} onPress={handleAdd}>
-              <CustomText style={styles.buttonRowLeftText}>
+              <Text style={styles.buttonRowLeftText}>
                 {editMode ? '수정' : '추가'}
-              </CustomText>
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

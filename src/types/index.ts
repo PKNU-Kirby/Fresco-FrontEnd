@@ -106,28 +106,66 @@ export type FoodCategory =
   | '기타';
 
 // ============================================================================
-// 레시피 관련 타입들
+// 레시피 관련 타입들 (업데이트됨)
 // ============================================================================
 
 export interface Recipe {
   id: string;
   title: string;
   ingredients: RecipeIngredient[];
-  instructions: string[];
-  servings: number;
+  instructions?: string[];
+  steps?: string[] | string;
+  servings?: number;
   imageUrl?: string;
-  tags: string[];
-  createdBy: string;
-  createdAt: string;
+  tags?: string[];
+  createdBy?: string;
+  createdAt?: string;
 }
 
 export interface RecipeIngredient {
-  foodId: string;
+  id: string;
   name: string;
-  quantity: number;
+  quantity: string;
   unit: string;
-  optional?: boolean;
 }
+// UseRecipeScreen 전용 타입들
+export interface MatchedIngredientSeparate {
+  recipeIngredient: {
+    name: string;
+    quantity: string;
+  };
+  fridgeIngredient: FridgeItem | null;
+  isAvailable: boolean;
+  userInputQuantity: string;
+  maxUserQuantity: number;
+  isDeducted: boolean;
+  isMultipleOption?: boolean;
+  optionIndex?: number;
+}
+
+// FridgeItem 타입 (fridgeStorage에서 사용)
+export interface FridgeItem {
+  id: string;
+  name: string;
+  quantity: string;
+  unit?: string;
+  expiryDate?: string;
+  category?: string;
+  fridgeId: string;
+  addedBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// 레시피 네비게이션 타입들
+export type RecipeStackParamList = {
+  RecipeList: { fridgeId: number; fridgeName: string };
+  UseRecipe: {
+    recipe: Recipe;
+    fridgeId: number;
+  };
+  // 다른 레시피 관련 스크린들...
+};
 
 // ============================================================================
 // React Navigation 관련 타입들
@@ -338,7 +376,6 @@ export const isPendingInvitation = (status: string): boolean => {
 // ============================================================================
 
 export const INGREDIENT_UNITS = ['개', 'g', 'kg', 'ml', 'L'] as const;
-
 export type IngredientUnit = (typeof INGREDIENT_UNITS)[number];
 
 export const REFRIGERATOR_ROLES = {

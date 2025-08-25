@@ -17,11 +17,11 @@ import {
 } from '../../utils/AsyncStorageUtils';
 
 // 컴포넌트 imports
-import RecipeHeader from './components/RecipeHeader';
-import FloatingButton from './components/FloatingButton';
-import SharedRecipeFolder from './components/SharedRecipeFolder';
-import RenderRecipeItem from './components/RenderRecipeItem';
-import { ListHeader, ListFooter } from './components/ListComponents';
+import RecipeHeader from '../../components/Recipe/RecipeHeader';
+import FloatingButton from '../../components/Recipe/FloatingButton';
+import SharedRecipeFolder from '../../components/Recipe/SharedRecipeFolder';
+import RenderRecipeItem from '../../components/Recipe/RenderRecipeItem';
+import { ListHeader, ListFooter } from '../../components/Recipe/ListComponents';
 
 type RecipeHomeNavigationProp = NativeStackNavigationProp<
   RecipeStackParamList,

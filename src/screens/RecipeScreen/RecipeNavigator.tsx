@@ -1,20 +1,19 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import RecipeHomeScreen from './index';
-import AIRecipeScreen from './screens/AIRecipeScreen';
-import RecipeDetailScreen from './screens/RecipeDetailScreen';
-import SearchScreen from './screens/SearchScreen';
-import SearchResultScreen from './screens/SearchResultScreen';
-import SharedFolderScreen from './screens/SharedFolderScreen';
-import UseRecipeScreen from './screens/UseRecipeScreen'; // 🔧 UseRecipeScreen import 추가
+import AIRecipeScreen from './AIRecipeScreen';
+import RecipeDetailScreen from './RecipeDetailScreen';
+import SearchScreen from './SearchScreen';
+import SearchResultScreen from './SearchResultScreen';
+import SharedFolderScreen from './SharedFolderScreen';
+import UseRecipeScreen from './UseRecipeScreen'; // 🔧 UseRecipeScreen import 추가
 
 // Recipe 타입 정의 (공통으로 사용)
 export interface Recipe {
   id: string;
   title: string;
-  description: string;
   imageUrl?: string;
-  createdAt: string;
+  createdAt?: string;
   updatedAt?: string;
   isShared?: boolean;
   sharedBy?: string;

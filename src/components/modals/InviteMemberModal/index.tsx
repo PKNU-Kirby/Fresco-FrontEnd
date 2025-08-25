@@ -7,9 +7,9 @@ import {
   Clipboard,
   Share,
   Linking,
+  Text,
 } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import CustomText from '../../common/CustomText';
 import { styles } from './styles';
 
 type InviteMemberModalProps = {
@@ -115,34 +115,34 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
         <View style={styles.inviteModalContent}>
           {/* 헤더 */}
           <View style={styles.inviteModalHeader}>
-            <CustomText style={styles.invisiblebox}>x</CustomText>
-            <CustomText style={styles.inviteModalTitle}>구성원 초대</CustomText>
+            <Text style={styles.invisiblebox}>x</Text>
+            <Text style={styles.inviteModalTitle}>구성원 초대</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <CustomText style={styles.closeButtonText}>✕</CustomText>
+              <Text style={styles.closeButtonText}>✕</Text>
             </TouchableOpacity>
           </View>
 
           {/* 냉장고 정보 */}
           <View style={styles.fridgeInfoSection}>
-            <CustomText style={styles.fridgeNameText}>{fridgeName}</CustomText>
-            <CustomText style={styles.fridgeSubText}>
+            <Text style={styles.fridgeNameText}>{fridgeName}</Text>
+            <Text style={styles.fridgeSubText}>
               아래 링크를 공유해서 구성원을 초대하세요
-            </CustomText>
+            </Text>
           </View>
 
           {/* 초대 링크 */}
           <View style={styles.linkSection}>
             <View style={styles.linkContainer}>
               <View style={styles.linkTextContainer}>
-                <CustomText style={styles.linkText} numberOfLines={1}>
+                <Text style={styles.linkText} numberOfLines={1}>
                   초대 링크 : {inviteLink}
-                </CustomText>
+                </Text>
               </View>
               <TouchableOpacity
                 style={styles.copyLinkButton}
                 onPress={copyToClipboard}
               >
-                <CustomText style={styles.copyLinkButtonText}>복사</CustomText>
+                <Text style={styles.copyLinkButtonText}>복사</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -158,7 +158,7 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
                 <View style={styles.shareButtonIcon}>
                   <FontAwesome6 name="comment" size={24} color="#FEE500" />
                 </View>
-                <CustomText style={styles.shareButtonText}>카카오톡</CustomText>
+                <Text style={styles.shareButtonText}>카카오톡</Text>
               </TouchableOpacity>
 
               {/* 문자 */}
@@ -166,7 +166,7 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
                 <View style={styles.shareButtonIcon}>
                   <FontAwesome6 name="message" size={24} color="#333" />
                 </View>
-                <CustomText style={styles.shareButtonText}>문자</CustomText>
+                <Text style={styles.shareButtonText}>문자</Text>
               </TouchableOpacity>
 
               {/* 더 많은 공유 옵션 */}
@@ -177,7 +177,7 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
                 <View style={styles.shareButtonIcon}>
                   <FontAwesome6 name="share" size={24} color="#333" />
                 </View>
-                <CustomText style={styles.shareButtonText}>더보기</CustomText>
+                <Text style={styles.shareButtonText}>더보기</Text>
               </TouchableOpacity>
 
               {/* 복사하기 */}
@@ -188,7 +188,7 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
                 <View style={styles.shareButtonIcon}>
                   <FontAwesome6 name="clipboard" size={24} color="#333" />
                 </View>
-                <CustomText style={styles.shareButtonText}>복사하기</CustomText>
+                <Text style={styles.shareButtonText}>복사하기</Text>
               </TouchableOpacity>
             </View>
           </View>

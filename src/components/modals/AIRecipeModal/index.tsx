@@ -3,12 +3,12 @@ import {
   Modal,
   View,
   TextInput,
+  Text,
   TouchableOpacity,
   Alert,
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import CustomText from '../../common/CustomText';
 import { styles } from './styles';
 
 interface AIRecipeModalProps {
@@ -121,13 +121,13 @@ ${
         {/* 헤더 */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <CustomText size={16} color="#666">
+            <Text size={16} color="#666">
               취소
-            </CustomText>
+            </Text>
           </TouchableOpacity>
-          <CustomText weight="bold" size={18}>
+          <Text weight="bold" size={18}>
             AI 레시피 생성
-          </CustomText>
+          </Text>
           <TouchableOpacity
             onPress={handleGenerate}
             style={[styles.generateButton, isLoading && styles.disabledButton]}
@@ -136,9 +136,9 @@ ${
             {isLoading ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <CustomText weight="bold" size={16} color="#fff">
+              <Text weight="bold" size={16} color="#fff">
                 생성
-              </CustomText>
+              </Text>
             )}
           </TouchableOpacity>
         </View>
@@ -146,9 +146,9 @@ ${
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {/* 프롬프트 입력 */}
           <View style={styles.section}>
-            <CustomText weight="bold" size={16} style={styles.sectionTitle}>
+            <Text weight="bold" size={16} style={styles.sectionTitle}>
               🤖 AI에게 요청하기
-            </CustomText>
+            </Text>
             <TextInput
               style={styles.promptInput}
               placeholder="예: 매콤한 닭볶음탕을 만들고 싶어요"
@@ -159,16 +159,16 @@ ${
               maxLength={500}
               textAlignVertical="top"
             />
-            <CustomText size={12} color="#666" style={styles.charCount}>
+            <Text size={12} color="#666" style={styles.charCount}>
               {prompt.length}/500
-            </CustomText>
+            </Text>
           </View>
 
           {/* 빠른 프롬프트 */}
           <View style={styles.section}>
-            <CustomText weight="bold" size={14} style={styles.sectionTitle}>
+            <Text weight="bold" size={14} style={styles.sectionTitle}>
               💡 빠른 선택
-            </CustomText>
+            </Text>
             <View style={styles.quickPromptsContainer}>
               {quickPrompts.map((quickPrompt, index) => (
                 <TouchableOpacity
@@ -176,9 +176,9 @@ ${
                   style={styles.quickPromptButton}
                   onPress={() => setPrompt(quickPrompt)}
                 >
-                  <CustomText size={12} color="#4A90E2">
+                  <Text size={12} color="#4A90E2">
                     {quickPrompt}
-                  </CustomText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -186,9 +186,9 @@ ${
 
           {/* 난이도 선택 */}
           <View style={styles.section}>
-            <CustomText weight="bold" size={14} style={styles.sectionTitle}>
+            <Text weight="bold" size={14} style={styles.sectionTitle}>
               🎯 난이도
-            </CustomText>
+            </Text>
             <View style={styles.optionRow}>
               {difficulties.map(diff => (
                 <TouchableOpacity
@@ -204,7 +204,7 @@ ${
                     }))
                   }
                 >
-                  <CustomText
+                  <Text
                     size={12}
                     color={options.difficulty === diff.key ? '#fff' : '#666'}
                     weight={
@@ -212,13 +212,13 @@ ${
                     }
                   >
                     {diff.label}
-                  </CustomText>
-                  <CustomText
+                  </Text>
+                  <Text
                     size={10}
                     color={options.difficulty === diff.key ? '#fff' : '#999'}
                   >
                     {diff.desc}
-                  </CustomText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -226,9 +226,9 @@ ${
 
           {/* 조리시간 선택 */}
           <View style={styles.section}>
-            <CustomText weight="bold" size={14} style={styles.sectionTitle}>
+            <Text weight="bold" size={14} style={styles.sectionTitle}>
               ⏰ 조리시간
-            </CustomText>
+            </Text>
             <View style={styles.optionRow}>
               {cookingTimes.map(time => (
                 <TouchableOpacity
@@ -244,7 +244,7 @@ ${
                     }))
                   }
                 >
-                  <CustomText
+                  <Text
                     size={12}
                     color={options.cookingTime === time.key ? '#fff' : '#666'}
                     weight={
@@ -252,13 +252,13 @@ ${
                     }
                   >
                     {time.label}
-                  </CustomText>
-                  <CustomText
+                  </Text>
+                  <Text
                     size={10}
                     color={options.cookingTime === time.key ? '#fff' : '#999'}
                   >
                     {time.desc}
-                  </CustomText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -266,9 +266,9 @@ ${
 
           {/* 인분 선택 */}
           <View style={styles.section}>
-            <CustomText weight="bold" size={14} style={styles.sectionTitle}>
+            <Text weight="bold" size={14} style={styles.sectionTitle}>
               👥 인분
-            </CustomText>
+            </Text>
             <View style={styles.servingsContainer}>
               <TouchableOpacity
                 style={styles.servingsButton}
@@ -279,13 +279,13 @@ ${
                   }))
                 }
               >
-                <CustomText size={18} color="#4A90E2">
+                <Text size={18} color="#4A90E2">
                   -
-                </CustomText>
+                </Text>
               </TouchableOpacity>
-              <CustomText size={16} weight="bold" style={styles.servingsText}>
+              <Text size={16} weight="bold" style={styles.servingsText}>
                 {options.servings}인분
-              </CustomText>
+              </Text>
               <TouchableOpacity
                 style={styles.servingsButton}
                 onPress={() =>
@@ -295,18 +295,18 @@ ${
                   }))
                 }
               >
-                <CustomText size={18} color="#4A90E2">
+                <Text size={18} color="#4A90E2">
                   +
-                </CustomText>
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
 
           {/* 요리 스타일 */}
           <View style={styles.section}>
-            <CustomText weight="bold" size={14} style={styles.sectionTitle}>
+            <Text weight="bold" size={14} style={styles.sectionTitle}>
               🍜 요리 스타일
-            </CustomText>
+            </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.cuisineRow}>
                 {cuisines.map(cuisine => (
@@ -318,13 +318,13 @@ ${
                     ]}
                     onPress={() => setOptions(prev => ({ ...prev, cuisine }))}
                   >
-                    <CustomText
+                    <Text
                       size={12}
                       color={options.cuisine === cuisine ? '#fff' : '#666'}
                       weight={options.cuisine === cuisine ? 'bold' : 'regular'}
                     >
                       {cuisine}
-                    </CustomText>
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -333,9 +333,9 @@ ${
 
           {/* 식단 제한 */}
           <View style={styles.section}>
-            <CustomText weight="bold" size={14} style={styles.sectionTitle}>
+            <Text weight="bold" size={14} style={styles.sectionTitle}>
               🥗 식단 제한 (선택사항)
-            </CustomText>
+            </Text>
             <View style={styles.dietaryContainer}>
               {dietaryOptions.map(dietary => (
                 <TouchableOpacity
@@ -347,7 +347,7 @@ ${
                   ]}
                   onPress={() => toggleDietaryRestriction(dietary)}
                 >
-                  <CustomText
+                  <Text
                     size={12}
                     color={
                       options.dietaryRestrictions.includes(dietary)
@@ -356,7 +356,7 @@ ${
                     }
                   >
                     {dietary}
-                  </CustomText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -365,21 +365,21 @@ ${
           {/* 보유 식재료 정보 */}
           {availableIngredients.length > 0 && (
             <View style={styles.section}>
-              <CustomText weight="bold" size={14} style={styles.sectionTitle}>
+              <Text weight="bold" size={14} style={styles.sectionTitle}>
                 🥕 냉장고 보유 식재료
-              </CustomText>
+              </Text>
               <View style={styles.ingredientsContainer}>
                 {availableIngredients.slice(0, 10).map((ingredient, index) => (
                   <View key={index} style={styles.ingredientTag}>
-                    <CustomText size={11} color="#4A90E2">
+                    <Text size={11} color="#4A90E2">
                       {ingredient}
-                    </CustomText>
+                    </Text>
                   </View>
                 ))}
                 {availableIngredients.length > 10 && (
-                  <CustomText size={11} color="#999">
+                  <Text size={11} color="#999">
                     +{availableIngredients.length - 10}개 더
-                  </CustomText>
+                  </Text>
                 )}
               </View>
             </View>

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { View, Modal, TouchableOpacity, Platform } from 'react-native';
+import { View, Modal, TouchableOpacity, Platform, Text } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import CustomText from '../../common/CustomText';
 import { styles } from './styles';
 
 type DatePickerProps = {
@@ -98,13 +97,13 @@ const DatePicker: React.FC<DatePickerProps> = ({
         <View style={styles.modalContent}>
           <View style={styles.header}>
             <TouchableOpacity onPress={handleCancel}>
-              <CustomText style={styles.cancelButton}>취소</CustomText>
+              <Text style={styles.cancelButton}>취소</Text>
             </TouchableOpacity>
 
-            <CustomText style={styles.title}>소비기한 선택</CustomText>
+            <Text style={styles.title}>소비기한 선택</Text>
 
             <TouchableOpacity onPress={handleConfirm}>
-              <CustomText style={styles.confirmButton}>확인</CustomText>
+              <Text style={styles.confirmButton}>확인</Text>
             </TouchableOpacity>
           </View>
 

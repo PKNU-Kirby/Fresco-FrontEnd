@@ -4,11 +4,11 @@ import {
   View,
   TouchableOpacity,
   SectionList,
+  Text,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import CustomText from '../../components/common/CustomText';
-import BackButton from '../../components/common/BackButton';
+import BackButton from '../../components/_common/BackButton';
 import DateRangePicker from '../../components/modals/DateRangePicker';
 import { RootStackParamList } from '../../../App';
 import { styles } from './styles';
@@ -202,18 +202,18 @@ const UsageHistoryScreen = ({ route }: Props) => {
   const renderUsageItem = ({ item }: { item: UsageRecord }) => (
     <View style={styles.usageCard}>
       <View style={styles.usageHeader}>
-        <CustomText style={styles.usageAvatar}>{item.userAvatar}</CustomText>
+        <Text style={styles.usageAvatar}>{item.userAvatar}</Text>
         <View style={styles.usageInfo}>
-          <CustomText style={styles.usageText}>
-            <CustomText style={styles.userName}>{item.userName}</CustomText>님이{' '}
-            <CustomText style={styles.itemName}>{item.itemName}</CustomText>{' '}
-            <CustomText style={styles.quantity}>
+          <Text style={styles.usageText}>
+            <Text style={styles.userName}>{item.userName}</Text>님이{' '}
+            <Text style={styles.itemName}>{item.itemName}</Text>{' '}
+            <Text style={styles.quantity}>
               {item.quantity}
               {item.unit}
-            </CustomText>
+            </Text>
             를 사용했습니다
-          </CustomText>
-          <CustomText style={styles.usageTime}>{item.time}</CustomText>
+          </Text>
+          <Text style={styles.usageTime}>{item.time}</Text>
         </View>
       </View>
     </View>
@@ -221,7 +221,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
 
   const renderSectionHeader = ({ section }: { section: { title: string } }) => (
     <View style={styles.sectionHeader}>
-      <CustomText style={styles.sectionTitle}>- {section.title}</CustomText>
+      <Text style={styles.sectionTitle}>- {section.title}</Text>
     </View>
   );
 
@@ -230,7 +230,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
       {/* 헤더 */}
       <View style={styles.header}>
         <BackButton onPress={handleBack} />
-        <CustomText style={styles.headerTitle}>식재료 사용 기록</CustomText>
+        <Text style={styles.headerTitle}>식재료 사용 기록</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -245,7 +245,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
             ]}
             onPress={() => handleFilterPress(filter)}
           >
-            <CustomText
+            <Text
               style={[
                 styles.filterButtonText,
                 activeFilter === filter && styles.filterButtonTextActive,
@@ -254,7 +254,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
               {filter === '원하는 기간' && customDateRange
                 ? `${customDateRange.start} ~ ${customDateRange.end}`
                 : filter}
-            </CustomText>
+            </Text>
           </TouchableOpacity>
         ))}
       </View>

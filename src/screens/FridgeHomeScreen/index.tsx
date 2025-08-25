@@ -6,8 +6,8 @@ import { RootStackParamList } from '../../../App';
 import { styles } from './styles';
 
 // Components
-import FridgeHeader from './FridgeHeader';
-import FridgeItemList from './FridgeItemList';
+import FridgeHeader from '../../components/FridgeHome/FridgeHeader';
+import FridgeItemList from '../../components/FridgeHome/FridgeItemList';
 import ItemCategoryModal from '../../components/modals/ItemCategoryModal';
 import AddItemModal from '../../components/modals/AddItemModal';
 

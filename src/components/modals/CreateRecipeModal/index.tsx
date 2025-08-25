@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Text,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import CustomText from '../../../components/common/CustomText';
-import { Recipe, RecipeFolder } from '../../../screens/RecipeScreen';
+import type { Recipe, RecipeFolder } from '../../../types';
 import { createModalStyles } from './styles';
 
 interface CreateRecipeModalProps {
@@ -132,19 +132,19 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
         {/* 헤더 */}
         <View style={createModalStyles.header}>
           <TouchableOpacity onPress={handleClose}>
-            <CustomText size={16} color="#666">
+            <Text size={16} color="#666">
               취소
-            </CustomText>
+            </Text>
           </TouchableOpacity>
 
-          <CustomText weight="bold" size={18} color="#333">
+          <Text weight="bold" size={18} color="#333">
             레시피 제작
-          </CustomText>
+          </Text>
 
           <TouchableOpacity onPress={handleSave}>
-            <CustomText weight="bold" size={16} color="#007AFF">
+            <Text weight="bold" size={16} color="#007AFF">
               저장
-            </CustomText>
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -154,14 +154,14 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
         >
           {/* 제목 */}
           <View style={createModalStyles.section}>
-            <CustomText
+            <Text
               weight="bold"
               size={16}
               color="#333"
               style={{ marginBottom: 8 }}
             >
               제목
-            </CustomText>
+            </Text>
             <TextInput
               style={createModalStyles.input}
               value={title}
@@ -173,14 +173,14 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
 
           {/* 폴더 선택 */}
           <View style={createModalStyles.section}>
-            <CustomText
+            <Text
               weight="bold"
               size={16}
               color="#333"
               style={{ marginBottom: 8 }}
             >
               저장할 폴더
-            </CustomText>
+            </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {folders.map(folder => (
                 <TouchableOpacity
@@ -192,12 +192,12 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
                   ]}
                   onPress={() => setSelectedFolderId(folder.id)}
                 >
-                  <CustomText
+                  <Text
                     size={14}
                     color={selectedFolderId === folder.id ? '#FFFFFF' : '#666'}
                   >
                     {folder.name}
-                  </CustomText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -206,9 +206,9 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
           {/* 재료 */}
           <View style={createModalStyles.section}>
             <View style={createModalStyles.labelRow}>
-              <CustomText weight="bold" size={16} color="#333">
+              <Text weight="bold" size={16} color="#333">
                 재료
-              </CustomText>
+              </Text>
               <TouchableOpacity onPress={addIngredient}>
                 <MaterialIcons name="add" size={24} color="#007AFF" />
               </TouchableOpacity>
@@ -216,13 +216,13 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
 
             {ingredients.map((ingredient, index) => (
               <View key={index} style={createModalStyles.listItem}>
-                <CustomText
+                <Text
                   size={14}
                   color="#666"
                   style={{ width: 20, textAlign: 'center' }}
                 >
                   {index + 1}
-                </CustomText>
+                </Text>
                 <TextInput
                   style={createModalStyles.listInput}
                   value={ingredient}
@@ -242,9 +242,9 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
           {/* 조리방법 */}
           <View style={createModalStyles.section}>
             <View style={createModalStyles.labelRow}>
-              <CustomText weight="bold" size={16} color="#333">
+              <Text weight="bold" size={16} color="#333">
                 조리방법
-              </CustomText>
+              </Text>
               <TouchableOpacity onPress={addInstruction}>
                 <MaterialIcons name="add" size={24} color="#007AFF" />
               </TouchableOpacity>
@@ -252,13 +252,13 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
 
             {instructions.map((instruction, index) => (
               <View key={index} style={createModalStyles.listItem}>
-                <CustomText
+                <Text
                   size={14}
                   color="#666"
                   style={{ width: 20, textAlign: 'center' }}
                 >
                   {index + 1}
-                </CustomText>
+                </Text>
                 <TextInput
                   style={createModalStyles.listInput}
                   value={instruction}
@@ -279,14 +279,14 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
           {/* 조리시간 & 난이도 */}
           <View style={createModalStyles.row}>
             <View style={createModalStyles.halfSection}>
-              <CustomText
+              <Text
                 weight="bold"
                 size={16}
                 color="#333"
                 style={{ marginBottom: 8 }}
               >
                 조리시간
-              </CustomText>
+              </Text>
               <TextInput
                 style={createModalStyles.input}
                 value={cookingTime}
@@ -298,14 +298,14 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
             </View>
 
             <View style={createModalStyles.halfSection}>
-              <CustomText
+              <Text
                 weight="bold"
                 size={16}
                 color="#333"
                 style={{ marginBottom: 8 }}
               >
                 난이도
-              </CustomText>
+              </Text>
               <View style={createModalStyles.difficultyRow}>
                 {(['easy', 'medium', 'hard'] as const).map(level => (
                   <TouchableOpacity
@@ -317,7 +317,7 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
                     ]}
                     onPress={() => setDifficulty(level)}
                   >
-                    <CustomText
+                    <Text
                       size={12}
                       color={difficulty === level ? '#FFFFFF' : '#666'}
                     >
@@ -326,7 +326,7 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
                         : level === 'medium'
                         ? '보통'
                         : '어려움'}
-                    </CustomText>
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -335,14 +335,14 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
 
           {/* 링크 */}
           <View style={createModalStyles.section}>
-            <CustomText
+            <Text
               weight="bold"
               size={16}
               color="#333"
               style={{ marginBottom: 8 }}
             >
               참고 링크 (선택)
-            </CustomText>
+            </Text>
             <TextInput
               style={createModalStyles.input}
               value={link}
