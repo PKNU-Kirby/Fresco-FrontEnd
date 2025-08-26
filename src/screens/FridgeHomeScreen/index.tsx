@@ -13,7 +13,6 @@ import AddItemModal from '../../components/modals/AddItemModal';
 
 // Hooks
 import { useFridgeData } from '../../hooks/useFridgeData';
-import { useFilterState } from '../../hooks/useFilterState';
 import { useModalState } from '../../hooks/useModalState';
 
 // Storage utilities
@@ -23,6 +22,9 @@ import {
   updateFridgeItem,
   type FridgeItem,
 } from '../../utils/fridgeStorage';
+
+// Usage tracking
+import { UsageTrackingService } from '../../utils/UseageTrackingService';
 
 type Props = {
   route: {
@@ -39,30 +41,19 @@ const FridgeHomeScreen = ({ route }: Props) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  // Local state for actual fridge items
+  // 상태 관리
   const [actualFridgeItems, setActualFridgeItems] = useState<FridgeItem[]>([]);
   const [_isLoading, setIsLoading] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [activeItemCategory, setActiveItemCategory] = useState('전체');
 
-  // hooks
-  const {
-    // fridgeItems,
-    itemCategories,
-    setItemCategories,
-    // deleteItem,
-    // updateItemQuantity,
-    // updateItemUnit,
-    // updateItemExpiryDate,
-    // refreshData,
-  } = useFridgeData(fridgeId);
+  // 편집 모드용 상태
+  const [editModeStartState, setEditModeStartState] = useState<FridgeItem[]>(
+    [],
+  );
 
-  const {
-    activeItemCategory,
-    setActiveItemCategory,
-    isListEditMode,
-    toggleEditMode,
-    filteredItems,
-  } = useFilterState(actualFridgeItems);
-
+  // hooks (필요한 것만 사용)
+  const { itemCategories, setItemCategories } = useFridgeData(fridgeId);
   const {
     isItemCategoryModalVisible,
     openItemCategoryModal,
@@ -70,6 +61,12 @@ const FridgeHomeScreen = ({ route }: Props) => {
   } = useModalState();
 
   const [isAddItemModalVisible, setIsAddItemModalVisible] = useState(false);
+
+  // 필터링된 아이템들
+  const filteredItems = actualFridgeItems.filter(
+    item =>
+      activeItemCategory === '전체' || item.itemCategory === activeItemCategory,
+  );
 
   // 실제 냉장고 아이템 로드
   const loadActualFridgeItems = useCallback(async () => {
@@ -133,56 +130,172 @@ const FridgeHomeScreen = ({ route }: Props) => {
     });
   };
 
-  // 실제 데이터 업데이트 핸들러들
+  // 편집 모드 토글 (완전히 새로 구현)
+  const handleEditModeToggle = useCallback(async () => {
+    if (!isEditMode) {
+      // 편집 모드 진입
+      console.log('편집 모드 진입 - 현재 상태 저장');
+      setEditModeStartState([...actualFridgeItems]);
+      setIsEditMode(true);
+    } else {
+      // 편집 모드 종료 - 변경사항을 DB에 일괄 적용
+      console.log('편집 모드 종료 - 변경사항 일괄 적용 중...');
+
+      const changedItems = actualFridgeItems.filter(currentItem => {
+        const originalItem = editModeStartState.find(
+          item => item.id === currentItem.id,
+        );
+        if (!originalItem) return false;
+
+        return (
+          originalItem.quantity !== currentItem.quantity ||
+          (originalItem.unit || '개') !== (currentItem.unit || '개') ||
+          originalItem.expiryDate !== currentItem.expiryDate
+        );
+      });
+
+      console.log('변경된 아이템들:', changedItems);
+
+      // 변경사항 일괄 DB 업데이트
+      for (const changedItem of changedItems) {
+        const originalItem = editModeStartState.find(
+          item => item.id === changedItem.id,
+        );
+        if (!originalItem) continue;
+
+        try {
+          // DB 업데이트
+          await updateFridgeItem(changedItem.id, {
+            quantity: changedItem.quantity,
+            unit: changedItem.unit,
+            expiryDate: changedItem.expiryDate,
+          });
+
+          // 사용 기록 생성
+          const changes = [];
+          if (originalItem.quantity !== changedItem.quantity) {
+            changes.push(
+              `수량: ${originalItem.quantity} → ${changedItem.quantity}`,
+            );
+          }
+          if ((originalItem.unit || '개') !== (changedItem.unit || '개')) {
+            changes.push(
+              `단위: ${originalItem.unit || '개'} → ${
+                changedItem.unit || '개'
+              }`,
+            );
+          }
+          if (originalItem.expiryDate !== changedItem.expiryDate) {
+            changes.push(
+              `만료일: ${originalItem.expiryDate} → ${changedItem.expiryDate}`,
+            );
+          }
+
+          if (changes.length > 0) {
+            await UsageTrackingService.trackItemModification(
+              changedItem.id,
+              changedItem.name,
+              changedItem.quantity,
+              changedItem.unit || '개',
+              fridgeId,
+              changes.join(', '),
+            );
+          }
+        } catch (error) {
+          console.error(`아이템 ${changedItem.name} 업데이트 실패:`, error);
+        }
+      }
+
+      // DB에서 최신 데이터 다시 로드
+      await loadActualFridgeItems();
+
+      // 편집 상태 초기화
+      setEditModeStartState([]);
+      setIsEditMode(false);
+    }
+  }, [
+    isEditMode,
+    actualFridgeItems,
+    editModeStartState,
+    fridgeId,
+    loadActualFridgeItems,
+  ]);
+
+  // 핸들러들 - 편집 모드에서는 로컬 상태만 변경, 일반 모드에서는 차단
   const handleQuantityChange = useCallback(
-    async (itemId: string, newQuantity: string) => {
-      try {
-        await updateFridgeItem(itemId, { quantity: newQuantity });
-        await loadActualFridgeItems(); // 업데이트 후 새로고침
-      } catch (error) {
-        console.error('수량 업데이트 실패:', error);
-        Alert.alert('오류', '수량 변경에 실패했습니다.');
+    (itemId: string, newQuantity: string) => {
+      if (isEditMode) {
+        // 편집 모드: 로컬 상태만 변경
+        setActualFridgeItems(prev =>
+          prev.map(item =>
+            item.id === itemId ? { ...item, quantity: newQuantity } : item,
+          ),
+        );
+      } else {
+        // 일반 모드: 편집 모드가 아니면 차단
+        console.warn('일반 모드에서는 수량 변경이 불가능합니다.');
       }
     },
-    [loadActualFridgeItems],
+    [isEditMode],
   );
 
   const handleUnitChange = useCallback(
-    async (itemId: string, newUnit: string) => {
-      try {
-        await updateFridgeItem(itemId, { unit: newUnit });
-        await loadActualFridgeItems();
-      } catch (error) {
-        console.error('단위 업데이트 실패:', error);
-        Alert.alert('오류', '단위 변경에 실패했습니다.');
+    (itemId: string, newUnit: string) => {
+      if (isEditMode) {
+        // 편집 모드: 로컬 상태만 변경
+        setActualFridgeItems(prev =>
+          prev.map(item =>
+            item.id === itemId ? { ...item, unit: newUnit } : item,
+          ),
+        );
+      } else {
+        console.warn('일반 모드에서는 단위 변경이 불가능합니다.');
       }
     },
-    [loadActualFridgeItems],
+    [isEditMode],
   );
 
   const handleExpiryDateChange = useCallback(
-    async (itemId: string, newDate: string) => {
-      try {
-        await updateFridgeItem(itemId, { expiryDate: newDate });
-        await loadActualFridgeItems();
-      } catch (error) {
-        console.error('만료일 업데이트 실패:', error);
-        Alert.alert('오류', '만료일 변경에 실패했습니다.');
+    (itemId: string, newDate: string) => {
+      if (isEditMode) {
+        // 편집 모드: 로컬 상태만 변경
+        setActualFridgeItems(prev =>
+          prev.map(item =>
+            item.id === itemId ? { ...item, expiryDate: newDate } : item,
+          ),
+        );
+      } else {
+        console.warn('일반 모드에서는 만료일 변경이 불가능합니다.');
       }
     },
-    [loadActualFridgeItems],
+    [isEditMode],
   );
 
   const handleDeleteItem = useCallback(
     async (itemId: string) => {
       try {
+        const currentItem = actualFridgeItems.find(item => item.id === itemId);
+
         await deleteItemFromFridge(itemId);
+
+        // 삭제는 즉시 사용 기록 추가
+        if (currentItem) {
+          await UsageTrackingService.trackItemDeletion(
+            itemId,
+            currentItem.name,
+            currentItem.quantity,
+            currentItem.unit || '개',
+            fridgeId,
+            '완전 소진',
+          );
+        }
+
         await loadActualFridgeItems();
       } catch (error) {
         console.error('아이템 삭제 실패:', error);
       }
     },
-    [loadActualFridgeItems],
+    [actualFridgeItems, fridgeId, loadActualFridgeItems],
   );
 
   const handleItemCategorySelect = (category: string) => {
@@ -202,7 +315,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
       <View style={styles.mainContent}>
         <FridgeItemList
           items={filteredItems}
-          isEditMode={isListEditMode}
+          isEditMode={isEditMode}
           onAddItem={handleAddItem}
           onQuantityChange={handleQuantityChange}
           onUnitChange={handleUnitChange}
@@ -211,7 +324,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
           // FilterBar 관련 props
           activeItemCategory={activeItemCategory}
           onItemCategoryPress={openItemCategoryModal}
-          onEditModeToggle={toggleEditMode}
+          onEditModeToggle={handleEditModeToggle}
         />
       </View>
 

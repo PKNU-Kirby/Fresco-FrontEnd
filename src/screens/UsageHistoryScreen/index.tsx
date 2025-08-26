@@ -1,34 +1,27 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   SafeAreaView,
   View,
   TouchableOpacity,
   SectionList,
   Text,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import BackButton from '../../components/_common/BackButton';
 import DateRangePicker from '../../components/modals/DateRangePicker';
 import { RootStackParamList } from '../../../App';
+import {
+  UsageTrackingService,
+  UsageRecord,
+} from '../../utils/UseageTrackingService';
 import { styles } from './styles';
-
-type UsageRecord = {
-  id: number;
-  userId: number;
-  userName: string;
-  userAvatar: string;
-  itemName: string;
-  quantity: string;
-  unit: string;
-  usedAt: string; // ISO string
-  time: string; // "오후 2:30"
-};
 
 type Props = {
   route: {
     params: {
-      fridgeId: number;
+      fridgeId: string; // string으로 변경
     };
   };
 };
@@ -38,74 +31,34 @@ const UsageHistoryScreen = ({ route }: Props) => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { fridgeId } = route.params;
 
-  const [activeFilter, setActiveFilter] = useState('최근 한 주'); // 수정: 정확한 텍스트
+  const [activeFilter, setActiveFilter] = useState('최근 한 주');
   const [showDateRangePicker, setShowDateRangePicker] = useState(false);
   const [customDateRange, setCustomDateRange] = useState<{
     start: string;
     end: string;
   } | null>(null);
+  const [usageRecords, setUsageRecords] = useState<UsageRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock 사용 기록 데이터 (날짜 형식 수정)
-  const mockUsageData: UsageRecord[] = useMemo(
-    () => [
-      {
-        id: 1,
-        userId: 1,
-        userName: '김후정',
-        userAvatar: '♟',
-        itemName: '양배추',
-        quantity: '1',
-        unit: '개',
-        usedAt: '2024-07-14T14:30:00Z',
-        time: '오후 2:30',
-      },
-      {
-        id: 2,
-        userId: 2,
-        userName: '황정민',
-        userAvatar: '♟',
-        itemName: '우유',
-        quantity: '250',
-        unit: 'ml',
-        usedAt: '2024-07-14T09:15:00Z',
-        time: '오전 9:15',
-      },
-      {
-        id: 3,
-        userId: 3,
-        userName: '황유진',
-        userAvatar: '♟',
-        itemName: '계란',
-        quantity: '2',
-        unit: '개',
-        usedAt: '2025-07-03T19:45:00Z',
-        time: '오후 7:45',
-      },
-      {
-        id: 4,
-        userId: 1,
-        userName: '황유진',
-        userAvatar: '♟',
-        itemName: '닭가슴살',
-        quantity: '300',
-        unit: 'g',
-        usedAt: '2025-07-13T12:20:00Z',
-        time: '오후 12:20',
-      },
-      {
-        id: 5,
-        userId: 2,
-        userName: '김후정',
-        userAvatar: '♟',
-        itemName: '토마토',
-        quantity: '3',
-        unit: '개',
-        usedAt: '2024-07-12T16:10:00Z',
-        time: '오후 4:10',
-      },
-    ],
-    [],
-  );
+  // 사용 기록 로드
+  useEffect(() => {
+    loadUsageRecords();
+  }, [fridgeId]);
+
+  const loadUsageRecords = async () => {
+    try {
+      setIsLoading(true);
+      const records = await UsageTrackingService.getFridgeUsageRecords(
+        fridgeId,
+      );
+      setUsageRecords(records);
+    } catch (error) {
+      console.error('사용 기록 로드 실패:', error);
+      setUsageRecords([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleBack = () => {
     navigation.goBack();
@@ -116,7 +69,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
       setShowDateRangePicker(true);
     } else {
       setActiveFilter(filter);
-      setCustomDateRange(null); // 다른 필터 선택시 커스텀 기간 초기화
+      setCustomDateRange(null);
     }
   };
 
@@ -140,38 +93,53 @@ const UsageHistoryScreen = ({ route }: Props) => {
     }
   };
 
-  // 날짜별로 그룹핑 및 필터링 (수정된 버전)
+  // 사용 유형별 텍스트 생성
+  const getUsageText = (record: UsageRecord) => {
+    const baseText = `${record.userName}님이 ${record.itemName} ${record.quantity}${record.unit}를 `;
+
+    switch (record.usageType) {
+      case 'consume':
+        return baseText + '사용했습니다';
+      case 'modify':
+        return baseText + '수정했습니다';
+      case 'delete':
+        return baseText + '삭제했습니다';
+      case 'recipe_use':
+        return baseText + `사용했습니다 (${record.details})`;
+      default:
+        return baseText + '처리했습니다';
+    }
+  };
+
+  // 날짜별로 그룹핑 및 필터링
   const groupedData = useMemo(() => {
-    let filteredData = mockUsageData;
+    let filteredData = usageRecords;
 
     // 필터에 따른 데이터 필터링
     const now = new Date();
     if (activeFilter === '최근 한 주') {
-      // 수정: 정확한 텍스트
       const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      filteredData = mockUsageData.filter(
+      filteredData = usageRecords.filter(
         record => new Date(record.usedAt) >= oneWeekAgo,
       );
     } else if (activeFilter === '최근 한 달') {
-      // 수정: 정확한 텍스트
       const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      filteredData = mockUsageData.filter(
+      filteredData = usageRecords.filter(
         record => new Date(record.usedAt) >= oneMonthAgo,
       );
     } else if (activeFilter === '원하는 기간' && customDateRange) {
-      // 날짜 범위 필터링 로직 개선
       try {
         const startDate = new Date(customDateRange.start.replace(/\./g, '-'));
         const endDate = new Date(customDateRange.end.replace(/\./g, '-'));
-        endDate.setHours(23, 59, 59, 999); // 종료일 마지막 시간까지 포함
+        endDate.setHours(23, 59, 59, 999);
 
-        filteredData = mockUsageData.filter(record => {
+        filteredData = usageRecords.filter(record => {
           const recordDate = new Date(record.usedAt);
           return recordDate >= startDate && recordDate <= endDate;
         });
       } catch (error) {
         console.error('날짜 범위 필터링 오류:', error);
-        filteredData = mockUsageData; // 오류 시 전체 데이터 반환
+        filteredData = usageRecords;
       }
     }
 
@@ -197,7 +165,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
           new Date(b.data[0].usedAt).getTime() -
           new Date(a.data[0].usedAt).getTime(),
       );
-  }, [mockUsageData, activeFilter, customDateRange]);
+  }, [usageRecords, activeFilter, customDateRange]);
 
   const renderUsageItem = ({ item }: { item: UsageRecord }) => (
     <View style={styles.usageCard}>
@@ -211,8 +179,17 @@ const UsageHistoryScreen = ({ route }: Props) => {
               {item.quantity}
               {item.unit}
             </Text>
-            를 사용했습니다
+            {item.usageType === 'recipe_use'
+              ? '를 사용했습니다'
+              : item.usageType === 'delete'
+              ? '를 삭제했습니다'
+              : item.usageType === 'modify'
+              ? '를 수정했습니다'
+              : '를 사용했습니다'}
           </Text>
+          {item.details && (
+            <Text style={styles.usageDetails}>{item.details}</Text>
+          )}
           <Text style={styles.usageTime}>{item.time}</Text>
         </View>
       </View>
@@ -224,6 +201,31 @@ const UsageHistoryScreen = ({ route }: Props) => {
       <Text style={styles.sectionTitle}>- {section.title}</Text>
     </View>
   );
+
+  const renderEmptyList = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>사용 기록이 없습니다</Text>
+      <Text style={styles.emptySubText}>
+        식재료를 사용하거나 수정하면 기록이 나타납니다
+      </Text>
+    </View>
+  );
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <BackButton onPress={handleBack} />
+          <Text style={styles.headerTitle}>식재료 사용 기록</Text>
+          <View style={styles.headerRight} />
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+          <Text style={styles.loadingText}>사용 기록을 불러오는 중...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -262,13 +264,19 @@ const UsageHistoryScreen = ({ route }: Props) => {
       {/* 사용 기록 리스트 */}
       <SectionList
         sections={groupedData}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item.id}
         renderItem={renderUsageItem}
         renderSectionHeader={renderSectionHeader}
+        ListEmptyComponent={renderEmptyList}
         style={styles.listContainer}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          groupedData.length === 0 && styles.emptyListContent,
+        ]}
         showsVerticalScrollIndicator={false}
         stickySectionHeadersEnabled={false}
+        onRefresh={loadUsageRecords}
+        refreshing={isLoading}
       />
 
       {/* 기간 선택 모달 */}

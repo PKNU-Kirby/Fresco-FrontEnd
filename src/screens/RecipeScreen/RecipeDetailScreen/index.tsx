@@ -10,8 +10,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RecipeStackParamList, RecipeIngredient } from '../RecipeNavigator';
-import MockDataService from '../../../utils/MockDataService';
 import { SharedRecipeStorage } from '../../../utils/AsyncStorageUtils';
+import {
+  AsyncStorageService,
+  FridgeWithRole,
+} from '../../../services/AsyncStorageService';
 import { useRecipeDetail } from '../../../components/RecipeDetail/RecipeDetail';
 import { Header } from '../../../components/RecipeDetail/Header';
 import { SharedRecipeIndicator } from '../../../components/RecipeDetail/RecipeDetail';
@@ -55,7 +58,7 @@ const RecipeDetailScreen: React.FC = () => {
     isEditing = false,
     isNewRecipe = false,
     fridgeId,
-    fridgeName,
+    // fridgeName,
     aiGeneratedData,
   } = route.params;
 
@@ -115,12 +118,15 @@ const RecipeDetailScreen: React.FC = () => {
   const [enhancedIngredients, setEnhancedIngredients] = useState<
     EnhancedIngredient[]
   >([]);
+
   const handleEnhancedIngredientsChange = useCallback(
     (ingredients: EnhancedIngredient[]) => {
       setEnhancedIngredients(ingredients);
     },
     [],
   );
+
+  // UseRecipe 네비게이션 (향상된 재료 데이터 전달)
   const navigateToUseRecipe = () => {
     if (!currentRecipe.ingredients || currentRecipe.ingredients.length === 0) {
       Alert.alert('알림', '이 레시피에는 재료 정보가 없습니다.');
@@ -129,7 +135,7 @@ const RecipeDetailScreen: React.FC = () => {
 
     navigation.navigate('UseRecipe', {
       recipe: currentRecipe,
-      fridgeId: fridgeId,
+      fridgeId: fridgeId, // fridgeId를 그대로 전달 (string)
       enhancedIngredients: enhancedIngredients, // 향상된 재료 데이터 전달
     });
   };
@@ -195,30 +201,59 @@ const RecipeDetailScreen: React.FC = () => {
     }));
   };
 
-  // 모달 관련 함수들은 기존과 동일하게 유지...
+  // 레시피 공유 모달 - AsyncStorageService 사용
   const openShareModal = async () => {
     if (!currentRecipe.id || isSharedRecipe) {
       Alert.alert('오류', '저장된 개인 레시피만 공유할 수 있습니다.');
       return;
     }
+
     try {
-      const currentUserId = 1;
-      const userFridgeList = await MockDataService.getUserFridges(
-        currentUserId,
+      // 현재 사용자 ID 조회 (FridgeSelectScreen 방식)
+      const currentUserId = await AsyncStorageService.getCurrentUserId();
+      if (!currentUserId) {
+        Alert.alert('오류', '사용자 정보를 찾을 수 없습니다.');
+        return;
+      }
+
+      // 사용자 정보 조회
+      const currentUser = await AsyncStorageService.getUserById(currentUserId);
+      if (!currentUser) {
+        Alert.alert('오류', '사용자 정보를 찾을 수 없습니다.');
+        return;
+      }
+
+      // 사용자가 참여한 냉장고 목록 조회 (FridgeSelectScreen 시스템 사용)
+      const userFridgeList = await AsyncStorageService.getUserRefrigerators(
+        parseInt(currentUser.id, 10),
       );
-      const fridges: CheckableFridge[] = userFridgeList.map(fridge => ({
-        id: fridge.refrigeratorId,
-        name: fridge.name,
-        isChecked: false,
-      }));
+
+      const fridges: CheckableFridge[] = userFridgeList.map(
+        (fridge: FridgeWithRole) => ({
+          id: parseInt(fridge.id, 10), // string을 number로 변환
+          name: fridge.name,
+          isChecked: false,
+        }),
+      );
 
       if (fridges.length === 0) {
         Alert.alert(
           '알림',
           '참여 중인 냉장고가 없습니다.\n냉장고에 참여한 후 레시피를 공유해보세요.',
+          [
+            { text: '확인' },
+            {
+              text: '냉장고 관리',
+              onPress: () => {
+                // SharedFolderScreen으로 이동
+                navigation.navigate('SharedFolder' as any);
+              },
+            },
+          ],
         );
         return;
       }
+
       setCheckableFridges(fridges);
       setShowShareModal(true);
     } catch (error) {
@@ -254,6 +289,7 @@ const RecipeDetailScreen: React.FC = () => {
           sharedBy: '나',
         };
 
+        // 중복 공유 체크
         const alreadyShared = currentSharedRecipes.some(
           sr =>
             sr.title === currentRecipe.title &&
@@ -267,10 +303,16 @@ const RecipeDetailScreen: React.FC = () => {
       }
 
       await SharedRecipeStorage.saveSharedRecipes(currentSharedRecipes);
-      Alert.alert(
-        '공유 완료',
-        `${newRecipesAdded}개의 냉장고에 레시피가 새로 공유되었습니다.`,
-      );
+
+      if (newRecipesAdded > 0) {
+        Alert.alert(
+          '공유 완료',
+          `${newRecipesAdded}개의 냉장고에 레시피가 새로 공유되었습니다.`,
+        );
+      } else {
+        Alert.alert('알림', '선택한 냉장고에 이미 공유된 레시피입니다.');
+      }
+
       setShowShareModal(false);
     } catch (error) {
       console.error('레시피 공유 실패:', error);
@@ -312,7 +354,6 @@ const RecipeDetailScreen: React.FC = () => {
       Alert.alert('알림', '삭제할 재료를 선택해주세요.');
       return;
     }
-    // 기존 로직과 동일...
     Alert.alert('구현 중', '이 기능은 UseRecipeScreen에서 구현됩니다.');
   };
 
@@ -350,15 +391,15 @@ const RecipeDetailScreen: React.FC = () => {
             }
           />
 
-          {/* Ingredients - 향상된 버전 사용 */}
+          {/* Ingredients - fridgeId를 숫자로 변환해서 전달 */}
           <IngredientsSection
             ingredients={getIngredientsArray(currentRecipe.ingredients)}
             isEditMode={isEditMode}
-            fridgeId={parseInt(fridgeId, 10)} // 냉장고 ID 전달
+            fridgeId={fridgeId ? parseInt(fridgeId.toString(), 10) : undefined}
             onAddIngredient={addIngredient}
             onRemoveIngredient={removeIngredient}
             onUpdateIngredient={updateIngredient}
-            onEnhancedIngredientsChange={handleEnhancedIngredientsChange} // 콜백 추가
+            onEnhancedIngredientsChange={handleEnhancedIngredientsChange}
           />
 
           {/* Steps */}
@@ -383,7 +424,7 @@ const RecipeDetailScreen: React.FC = () => {
           {!isEditMode && currentRecipe.id && (
             <RecipeActionButtons
               isSharedRecipe={isSharedRecipe}
-              onUseRecipe={navigateToUseRecipe} // 수정된 함수 사용
+              onUseRecipe={navigateToUseRecipe}
               onShare={openShareModal}
             />
           )}

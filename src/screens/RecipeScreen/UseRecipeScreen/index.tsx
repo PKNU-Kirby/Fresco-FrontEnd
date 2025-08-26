@@ -13,17 +13,19 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import InfoModal from '../../../components/UseRecipe/InfoModal';
-import EnhancedIngredientCard from '../../../components/UseRecipe/EnhancedIngredientCard';
 import StepsSection from '../../../components/UseRecipe/StepsSection';
 import ConfirmModal from '../../../components/modals/ConfirmModal';
+import EnhancedIngredientCard from '../../../components/UseRecipe/EnhancedIngredientCard';
 
 import { updateFridgeItem } from '../../../utils/fridgeStorage';
 import { useIngredientMatching } from '../../../hooks/Recipe/useIngredientMatching';
 import { useRecipeSteps } from '../../../hooks/Recipe/useRecipeSteps';
-import { RecipeStackParamList } from '../../../types';
-
+import { RecipeStackParamList, Recipe } from '../../../types';
+import { EnhancedIngredient } from '../../../components/RecipeDetail/IngredientsSection';
+import { UsageTrackingService } from '../../../utils/UseageTrackingService';
 import { styles } from './styles';
 
+// route params 타입 수정
 type UseRecipeScreenNavigationProp = NativeStackNavigationProp<
   RecipeStackParamList,
   'UseRecipe'
@@ -33,8 +35,8 @@ type UseRecipeScreenRouteProp = RouteProp<
   {
     UseRecipe: {
       recipe: Recipe;
-      fridgeId: number;
-      enhancedIngredients?: EnhancedIngredient[]; // 새로 추가
+      fridgeId: string; // string으로 변경
+      enhancedIngredients?: EnhancedIngredient[];
     };
   },
   'UseRecipe'
@@ -43,9 +45,9 @@ type UseRecipeScreenRouteProp = RouteProp<
 const UseRecipeScreen: React.FC = () => {
   const navigation = useNavigation<UseRecipeScreenNavigationProp>();
   const route = useRoute<UseRecipeScreenRouteProp>();
-  const { recipe, fridgeId, enhancedIngredients } = route.params; // enhancedIngredients 추가
+  const { recipe, fridgeId, enhancedIngredients } = route.params;
 
-  // 모달 상태 관리 (간소화됨)
+  // 모달 상태 관리
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showCompleteConfirmModal, setShowCompleteConfirmModal] =
     useState(false);
@@ -62,32 +64,36 @@ const UseRecipeScreen: React.FC = () => {
   });
   const [errorMessage, setErrorMessage] = useState('');
 
+  // fridgeId를 number로 변환 (기존 로직과의 호환성을 위해)
+  const numericFridgeId = parseInt(fridgeId, 10);
+
   const {
     matchedIngredients,
     isLoading,
     updateUserQuantity,
     updateMaxUserQuantity,
     loadIngredients,
-    loadFromEnhancedIngredients, // 새로운 함수
+    loadFromEnhancedIngredients,
     setMatchedIngredients,
-  } = useIngredientMatching(recipe, fridgeId);
+  } = useIngredientMatching(recipe, numericFridgeId);
 
   const { completedSteps, toggleStepCompletion, getStepsArray } =
     useRecipeSteps(recipe);
 
+  // 초기 데이터 로드 (수정됨)
   useEffect(() => {
     if (enhancedIngredients && enhancedIngredients.length > 0) {
       // 향상된 재료 데이터가 있으면 그것을 사용
-      console.log('🔧 향상된 재료 데이터 사용:', enhancedIngredients);
+      console.log('향상된 재료 데이터 사용:', enhancedIngredients);
       loadFromEnhancedIngredients(enhancedIngredients);
     } else {
       // 없으면 기존 방식 사용
-      console.log('🔧 기존 재료 매칭 방식 사용');
+      console.log('기존 재료 매칭 방식 사용');
       loadIngredients();
     }
   }, [enhancedIngredients, loadIngredients, loadFromEnhancedIngredients]);
 
-  // 🔧 조리 완료 및 일괄 차감
+  // 조리 완료 및 일괄 차감
   const completeRecipe = () => {
     const completedStepsCount = completedSteps.filter(Boolean).length;
     const totalSteps = getStepsArray.length;
@@ -131,7 +137,7 @@ const UseRecipeScreen: React.FC = () => {
     setShowCompleteConfirmModal(true);
   };
 
-  // 🔧 일괄 차감 실행
+  // 일괄 차감 실행 (사용 기록 추가)
   const handleCompleteConfirm = async () => {
     setShowCompleteConfirmModal(false);
 
@@ -147,6 +153,16 @@ const UseRecipeScreen: React.FC = () => {
         await updateFridgeItem(ingredient.fridgeIngredient!.id, {
           quantity: newQuantity.toString(),
         });
+
+        // 레시피 사용 기록 추가
+        await UsageTrackingService.trackRecipeUsage(
+          ingredient.fridgeIngredient!.id,
+          ingredient.fridgeIngredient!.name,
+          inputQuantity.toString(),
+          ingredient.fridgeIngredient!.unit || '개',
+          fridgeId,
+          recipe.title,
+        );
       }
 
       // UI 상태 업데이트
@@ -223,22 +239,46 @@ const UseRecipeScreen: React.FC = () => {
         {/* 레시피 제목 */}
         <Text style={styles.recipeTitle}>{recipe.title}</Text>
 
+        {/* 디버그 정보 */}
+        {__DEV__ && (
+          <View style={styles.debugInfo}>
+            <Text style={styles.debugText}>
+              디버그 정보: fridgeId = {fridgeId} (string), enhancedIngredients ={' '}
+              {enhancedIngredients ? 'O' : 'X'}, matchedIngredients ={' '}
+              {matchedIngredients.length}개
+            </Text>
+          </View>
+        )}
+
         {/* 재료 섹션 - EnhancedIngredientCard 사용 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>재료 준비</Text>
-          <FlatList
-            data={matchedIngredients}
-            renderItem={({ item, index }) => (
-              <EnhancedIngredientCard // 향상된 카드 사용
-                item={item}
-                index={index}
-                onQuantityChange={updateUserQuantity}
-                onMaxQuantityChange={updateMaxUserQuantity}
-              />
-            )}
-            keyExtractor={(_, index) => index.toString()}
-            scrollEnabled={false}
-          />
+
+          {matchedIngredients.length === 0 ? (
+            <View style={styles.emptyIngredientsContainer}>
+              <Icon name="info" size={24} color="#666" />
+              <Text style={styles.emptyIngredientsText}>
+                표시할 재료가 없습니다.
+              </Text>
+              <Text style={styles.emptyIngredientsSubText}>
+                레시피 상세 화면에서 재료를 선택해주세요.
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={matchedIngredients}
+              renderItem={({ item, index }) => (
+                <EnhancedIngredientCard
+                  item={item}
+                  index={index}
+                  onQuantityChange={updateUserQuantity}
+                  onMaxQuantityChange={updateMaxUserQuantity}
+                />
+              )}
+              keyExtractor={(_, index) => index.toString()}
+              scrollEnabled={false}
+            />
+          )}
         </View>
 
         {/* 조리 과정 섹션 */}
@@ -250,8 +290,12 @@ const UseRecipeScreen: React.FC = () => {
 
         {/* 조리 완료 버튼 */}
         <TouchableOpacity
-          style={styles.completeButton}
+          style={[
+            styles.completeButton,
+            matchedIngredients.length === 0 && styles.disabledButton,
+          ]}
           onPress={completeRecipe}
+          disabled={matchedIngredients.length === 0}
         >
           <Icon name="restaurant" size={20} color="#fff" />
           <Text style={styles.completeButtonText}>조리 완료하기</Text>
@@ -294,14 +338,14 @@ const UseRecipeScreen: React.FC = () => {
         onCancel={handleCompleteSuccess}
       />
 
-      {/* 오류 모달 */}
+      {/* 조리 완료 오류 */}
       <ConfirmModal
         isAlert={false}
         visible={showCompleteErrorModal}
         title="오류"
         message={errorMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#ffeeee' }}
+        icon={{ name: 'error-outline', color: '#FF5722', size: 48 }}
         confirmText="확인"
         onConfirm={() => setShowCompleteErrorModal(false)}
         onCancel={() => setShowCompleteErrorModal(false)}
