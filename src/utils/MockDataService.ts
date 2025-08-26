@@ -1,7 +1,28 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Recipe } from '../screens/RecipeScreen/RecipeNavigator';
+import {
+  Recipe,
+  RecipeIngredient,
+} from '../screens/RecipeScreen/RecipeNavigator';
 
-// 냉장고 정보 인터페이스
+// 냉장고 식재료 인터페이스
+export interface FridgeIngredient {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  categoryId?: string;
+  expirationDate?: string;
+  fridgeId: number;
+}
+
+// 대체 재료 관계 인터페이스
+export interface AlternativeRelation {
+  originalName: string;
+  alternativeName: string;
+  reason: string; // 대체 가능한 이유
+}
+
+// 기존 인터페이스들...
 export interface FridgeInfo {
   refrigeratorId: number;
   name: string;
@@ -11,7 +32,6 @@ export interface FridgeInfo {
   joinedAt: string;
 }
 
-// 사용자-냉장고 관계 인터페이스
 export interface UserFridgeRelation {
   냉장고_사용자_id: number;
   냉장고Id: number;
@@ -21,330 +41,500 @@ export interface UserFridgeRelation {
   변경_시간: string;
 }
 
-// Mock 공동 레시피 데이터
-const MOCK_SHARED_RECIPES: Recipe[] = [
-  {
-    id: 'shared-1',
-    title: '우리 가족 김치찌개',
-    description: '엄마가 알려준 김치찌개 레시피',
-    createdAt: '2024-01-16',
-    isShared: true,
-    sharedBy: '엄마',
-  },
-  {
-    id: 'shared-2',
-    title: '아빠의 된장찌개',
-    description: '아빠 특제 된장찌개',
-    createdAt: '2024-01-15',
-    isShared: true,
-    sharedBy: '아빠',
-  },
-  {
-    id: 'shared-3',
-    title: '언니의 계란말이',
-    description: '언니가 공유한 계란말이',
-    createdAt: '2024-01-14',
-    isShared: true,
-    sharedBy: '언니',
-  },
-  {
-    id: 'shared-4',
-    title: '할머니 비빔밥',
-    description: '할머니의 특제 비빔밥',
-    createdAt: '2024-01-13',
-    isShared: true,
-    sharedBy: '할머니',
-  },
-  {
-    id: 'shared-5',
-    title: '동생의 크림파스타',
-    description: '동생이 만든 크림파스타',
-    createdAt: '2024-01-12',
-    isShared: true,
-    sharedBy: '동생',
-  },
-  {
-    id: 'shared-6',
-    title: '회사 동료의 샐러드',
-    description: '건강한 샐러드 레시피',
-    createdAt: '2024-01-11',
-    isShared: true,
-    sharedBy: '김과장',
-  },
-  {
-    id: 'shared-7',
-    title: '팀장님의 삼겹살',
-    description: '특제 삼겹살 굽는 법',
-    createdAt: '2024-01-10',
-    isShared: true,
-    sharedBy: '박팀장',
-  },
-  {
-    id: 'shared-8',
-    title: '신입의 라면',
-    description: '간단하지만 맛있는 라면',
-    createdAt: '2024-01-09',
-    isShared: true,
-    sharedBy: '이신입',
-  },
-  {
-    id: 'shared-9',
-    title: '할아버지의 미역국',
-    description: '생일날 먹는 특별한 미역국',
-    createdAt: '2024-01-08',
-    isShared: true,
-    sharedBy: '할아버지',
-  },
-  {
-    id: 'shared-10',
-    title: '고모의 잡채',
-    description: '명절 때 먹는 고모표 잡채',
-    createdAt: '2024-01-07',
-    isShared: true,
-    sharedBy: '고모',
-  },
-];
-
-// Mock 사용자-냉장고 관계 데이터
-const MOCK_USER_FRIDGE_RELATIONS: { [userId: number]: UserFridgeRelation[] } = {
+// Mock 냉장고별 식재료 데이터
+const MOCK_FRIDGE_INGREDIENTS: { [fridgeId: number]: FridgeIngredient[] } = {
   1: [
-    // 사용자 ID 1의 냉장고 관계
+    // 우리집 냉장고
     {
-      냉장고_사용자_id: 1,
-      냉장고Id: 1,
-      초대한_사람_id: 1, // 본인이 생성자
-      초대받은_사람_id: 1,
-      생성_시간: '2024-01-01T00:00:00Z',
-      변경_시간: '2024-01-01T00:00:00Z',
+      id: '1',
+      name: '양파',
+      quantity: 3,
+      unit: '개',
+      categoryId: '1',
+      expirationDate: '2025-09-01',
+      fridgeId: 1,
     },
     {
-      냉장고_사용자_id: 2,
-      냉장고Id: 2,
-      초대한_사람_id: 10, // 다른 사람이 초대
-      초대받은_사람_id: 1,
-      생성_시간: '2024-01-15T00:00:00Z',
-      변경_시간: '2024-01-15T00:00:00Z',
+      id: '2',
+      name: '대파',
+      quantity: 2,
+      unit: '단',
+      categoryId: '1',
+      expirationDate: '2025-08-30',
+      fridgeId: 1,
     },
     {
-      냉장고_사용자_id: 3,
-      냉장고Id: 3,
-      초대한_사람_id: 20, // 다른 사람이 초대
-      초대받은_사람_id: 1,
-      생성_시간: '2024-02-01T00:00:00Z',
-      변경_시간: '2024-02-01T00:00:00Z',
+      id: '3',
+      name: '당근',
+      quantity: 5,
+      unit: '개',
+      categoryId: '1',
+      expirationDate: '2025-08-28',
+      fridgeId: 1,
+    },
+    {
+      id: '4',
+      name: '감자',
+      quantity: 8,
+      unit: '개',
+      categoryId: '1',
+      expirationDate: '2025-09-10',
+      fridgeId: 1,
+    },
+    {
+      id: '5',
+      name: '소금',
+      quantity: 500,
+      unit: 'g',
+      categoryId: '2',
+      expirationDate: '2026-08-01',
+      fridgeId: 1,
+    },
+    {
+      id: '6',
+      name: '설탕',
+      quantity: 300,
+      unit: 'g',
+      categoryId: '2',
+      expirationDate: '2026-05-01',
+      fridgeId: 1,
+    },
+    {
+      id: '7',
+      name: '간장',
+      quantity: 200,
+      unit: 'ml',
+      categoryId: '2',
+      expirationDate: '2025-12-01',
+      fridgeId: 1,
+    },
+    {
+      id: '8',
+      name: '식용유',
+      quantity: 800,
+      unit: 'ml',
+      categoryId: '2',
+      expirationDate: '2025-10-01',
+      fridgeId: 1,
+    },
+    {
+      id: '9',
+      name: '우유',
+      quantity: 1000,
+      unit: 'ml',
+      categoryId: '3',
+      expirationDate: '2025-08-30',
+      fridgeId: 1,
+    },
+    {
+      id: '10',
+      name: '계란',
+      quantity: 12,
+      unit: '개',
+      categoryId: '3',
+      expirationDate: '2025-09-05',
+      fridgeId: 1,
     },
   ],
   2: [
-    // 사용자 ID 2의 냉장고 관계
+    // 회사 냉장고
     {
-      냉장고_사용자_id: 4,
-      냉장고Id: 1,
-      초대한_사람_id: 1, // 사용자 1이 초대
-      초대받은_사람_id: 2,
-      생성_시간: '2024-01-02T00:00:00Z',
-      변경_시간: '2024-01-02T00:00:00Z',
+      id: '11',
+      name: '파프리카',
+      quantity: 4,
+      unit: '개',
+      categoryId: '1',
+      expirationDate: '2025-08-29',
+      fridgeId: 2,
     },
     {
-      냉장고_사용자_id: 5,
-      냉장고Id: 4,
-      초대한_사람_id: 2, // 본인이 생성자
-      초대받은_사람_id: 2,
-      생성_시간: '2024-02-15T00:00:00Z',
-      변경_시간: '2024-02-15T00:00:00Z',
+      id: '12',
+      name: '양배추',
+      quantity: 1,
+      unit: '통',
+      categoryId: '1',
+      expirationDate: '2025-09-02',
+      fridgeId: 2,
+    },
+    {
+      id: '13',
+      name: '마요네즈',
+      quantity: 300,
+      unit: 'ml',
+      categoryId: '2',
+      expirationDate: '2025-11-01',
+      fridgeId: 2,
+    },
+    {
+      id: '14',
+      name: '케첩',
+      quantity: 200,
+      unit: 'ml',
+      categoryId: '2',
+      expirationDate: '2025-10-15',
+      fridgeId: 2,
+    },
+  ],
+  3: [
+    // 할머니집 냉장고
+    {
+      id: '15',
+      name: '무',
+      quantity: 2,
+      unit: '개',
+      categoryId: '1',
+      expirationDate: '2025-09-05',
+      fridgeId: 3,
+    },
+    {
+      id: '16',
+      name: '배추',
+      quantity: 1,
+      unit: '포기',
+      categoryId: '1',
+      expirationDate: '2025-08-31',
+      fridgeId: 3,
+    },
+    {
+      id: '17',
+      name: '된장',
+      quantity: 500,
+      unit: 'g',
+      categoryId: '2',
+      expirationDate: '2026-02-01',
+      fridgeId: 3,
+    },
+    {
+      id: '18',
+      name: '고춧가루',
+      quantity: 100,
+      unit: 'g',
+      categoryId: '2',
+      expirationDate: '2025-12-01',
+      fridgeId: 3,
     },
   ],
 };
 
-// Mock 냉장고 정보
-const MOCK_REFRIGERATOR_INFO: { [fridgeId: number]: any } = {
-  1: { id: 1, name: '우리집 냉장고', createdAt: '2024-01-01' },
-  2: { id: 2, name: '회사 냉장고', createdAt: '2024-01-10' },
-  3: { id: 3, name: '할머니집 냉장고', createdAt: '2024-01-20' },
-  4: { id: 4, name: '기숙사 냉장고', createdAt: '2024-02-15' },
+// Mock 대체 재료 관계 데이터
+const MOCK_ALTERNATIVE_RELATIONS: AlternativeRelation[] = [
+  // 채소류 대체재
+  {
+    originalName: '양파',
+    alternativeName: '대파',
+    reason: '매운맛과 단맛을 동시에 낼 수 있어요',
+  },
+  {
+    originalName: '대파',
+    alternativeName: '양파',
+    reason: '향과 맛이 비슷해요',
+  },
+  {
+    originalName: '당근',
+    alternativeName: '파프리카',
+    reason: '단맛과 색감이 비슷해요',
+  },
+  {
+    originalName: '파프리카',
+    alternativeName: '당근',
+    reason: '단맛과 아삭한 식감이 비슷해요',
+  },
+  {
+    originalName: '배추',
+    alternativeName: '양배추',
+    reason: '식감과 용도가 비슷해요',
+  },
+  {
+    originalName: '양배추',
+    alternativeName: '배추',
+    reason: '잎채소로 용도가 비슷해요',
+  },
+
+  // 조미료 대체재
+  {
+    originalName: '설탕',
+    alternativeName: '꿀',
+    reason: '단맛을 낼 수 있어요',
+  },
+  {
+    originalName: '꿀',
+    alternativeName: '설탕',
+    reason: '자연 단맛을 낼 수 있어요',
+  },
+  {
+    originalName: '소금',
+    alternativeName: '간장',
+    reason: '짠맛을 낼 수 있어요 (색이 진해져요)',
+  },
+  {
+    originalName: '간장',
+    alternativeName: '소금',
+    reason: '짠맛을 낼 수 있어요',
+  },
+  {
+    originalName: '마요네즈',
+    alternativeName: '케첩',
+    reason: '소스로 사용할 수 있어요 (맛은 달라져요)',
+  },
+
+  // 기타 대체재
+  {
+    originalName: '감자',
+    alternativeName: '무',
+    reason: '식감이 비슷하고 국물 요리에 좋아요',
+  },
+  {
+    originalName: '무',
+    alternativeName: '감자',
+    reason: '뿌리채소로 식감이 비슷해요',
+  },
+];
+
+// 기존 Mock 데이터들...
+const MOCK_SHARED_RECIPES: Recipe[] = [
+  // ... 기존 데이터 유지
+];
+
+const MOCK_USER_FRIDGE_RELATIONS: { [userId: number]: UserFridgeRelation[] } = {
+  // ... 기존 데이터 유지
 };
 
-// Mock 냉장고 구성원 수
+const MOCK_REFRIGERATOR_INFO: { [fridgeId: number]: any } = {
+  // ... 기존 데이터 유지
+};
+
 const MOCK_MEMBER_COUNTS: { [fridgeId: number]: number } = {
-  1: 4,
-  2: 8,
-  3: 6,
-  4: 3,
+  // ... 기존 데이터 유지
 };
 
 class MockDataService {
-  /**
-   * 사용자가 속한 냉장고 관계 조회
-   */
+  // 기존 메서드들...
   static async getUserFridgeRelations(
     userId: number,
   ): Promise<UserFridgeRelation[]> {
-    // 실제 API 지연 시뮬레이션
     await this.delay(500);
-
     return MOCK_USER_FRIDGE_RELATIONS[userId] || [];
   }
 
-  /**
-   * 냉장고 기본 정보 조회
-   */
   static async getRefrigeratorInfo(fridgeId: number): Promise<any> {
     await this.delay(200);
-
     return MOCK_REFRIGERATOR_INFO[fridgeId] || null;
   }
 
-  /**
-   * 냉장고 구성원 수 조회
-   */
   static async getMemberCount(fridgeId: number): Promise<{ count: number }> {
     await this.delay(200);
-
     return { count: MOCK_MEMBER_COUNTS[fridgeId] || 0 };
   }
 
+  static async getUserFridges(userId: number): Promise<FridgeInfo[]> {
+    // ... 기존 구현 유지
+  }
+
+  // === 새로 추가되는 메서드들 ===
+
   /**
-   * 냉장고별 공유 레시피 조회 (권한 확인)
+   * 특정 냉장고의 식재료 목록 조회
    */
-  static async getSharedRecipes(
+  static async getFridgeIngredients(
     fridgeId: number,
-    userId: number,
-  ): Promise<Recipe[]> {
+  ): Promise<FridgeIngredient[]> {
     await this.delay(300);
 
-    // 권한 확인 - 사용자가 해당 냉장고에 속해있는지 확인
-    const userRelations = await this.getUserFridgeRelations(userId);
-    const hasAccess = userRelations.some(
-      relation => relation.냉장고Id === fridgeId,
-    );
-
-    if (!hasAccess) {
-      throw new Error('해당 냉장고에 접근 권한이 없습니다.');
-    }
-
-    // AsyncStorage에서 저장된 공유 레시피 가져오기
     try {
-      const storedData = await AsyncStorage.getItem('sharedRecipes');
-      const allSharedRecipes = storedData
-        ? JSON.parse(storedData)
-        : MOCK_SHARED_RECIPES;
+      // AsyncStorage에서 사용자가 추가한 식재료 조회 (있다면)
+      const storageKey = `fridge_ingredients_${fridgeId}`;
+      const storedData = await AsyncStorage.getItem(storageKey);
 
-      // 냉장고별로 레시피 분배 (실제로는 DB에서 fridgeId로 필터링)
-      return allSharedRecipes.filter((recipe: Recipe, index: number) => {
-        // 간단한 분배 로직 (실제로는 recipe.fridgeId === fridgeId)
-        return index % 4 === fridgeId - 1;
-      });
+      if (storedData) {
+        const userIngredients = JSON.parse(storedData);
+        // Mock 데이터와 병합
+        return [
+          ...(MOCK_FRIDGE_INGREDIENTS[fridgeId] || []),
+          ...userIngredients,
+        ];
+      }
+
+      return MOCK_FRIDGE_INGREDIENTS[fridgeId] || [];
     } catch (error) {
-      console.error('공유 레시피 조회 실패:', error);
+      console.error('냉장고 식재료 조회 실패:', error);
+      return MOCK_FRIDGE_INGREDIENTS[fridgeId] || [];
+    }
+  }
+
+  /**
+   * 특정 재료의 대체 가능한 재료 조회
+   */
+  static async getAlternativeIngredients(
+    ingredientName: string,
+  ): Promise<AlternativeRelation[]> {
+    await this.delay(200);
+
+    try {
+      // 정확한 이름 매칭 및 유사한 이름 매칭
+      return MOCK_ALTERNATIVE_RELATIONS.filter(
+        relation =>
+          relation.originalName
+            .toLowerCase()
+            .includes(ingredientName.toLowerCase()) ||
+          ingredientName
+            .toLowerCase()
+            .includes(relation.originalName.toLowerCase()),
+      );
+    } catch (error) {
+      console.error('대체 재료 조회 실패:', error);
       return [];
     }
   }
 
   /**
-   * 사용자가 속한 모든 냉장고 정보 조회
+   * 레시피 재료와 냉장고 재료를 비교하여 대체재 포함 정보 반환
    */
-  static async getUserFridges(userId: number): Promise<FridgeInfo[]> {
+  static async checkRecipeIngredients(
+    recipeIngredients: RecipeIngredient[],
+    fridgeId: number,
+  ): Promise<
+    Array<
+      RecipeIngredient & {
+        isAvailable: boolean;
+        alternatives: Array<{
+          name: string;
+          quantity: number;
+          unit: string;
+          reason: string;
+        }>;
+      }
+    >
+  > {
+    await this.delay(400);
+
     try {
-      // 1. 사용자가 속한 냉장고 관계 조회
-      const userFridgeRelations = await this.getUserFridgeRelations(userId);
+      const fridgeIngredients = await this.getFridgeIngredients(fridgeId);
 
-      // 2. 각 냉장고 정보와 레시피 가져오기
-      const fridgePromises = userFridgeRelations.map(async relation => {
-        const [fridgeInfo, memberCount, sharedRecipes] = await Promise.all([
-          this.getRefrigeratorInfo(relation.냉장고Id),
-          this.getMemberCount(relation.냉장고Id),
-          this.getSharedRecipes(relation.냉장고Id, userId),
-        ]);
+      const result = await Promise.all(
+        recipeIngredients.map(async ingredient => {
+          // 1. 냉장고에 정확히 있는지 확인
+          const exactMatch = fridgeIngredients.find(
+            fridgeItem =>
+              fridgeItem.name.toLowerCase() === ingredient.name.toLowerCase(),
+          );
 
-        return {
-          refrigeratorId: relation.냉장고Id,
-          name: fridgeInfo.name,
-          memberCount: memberCount.count,
-          recipes: sharedRecipes,
-          isOwner: relation.초대한_사람_id === userId,
-          joinedAt: relation.생성_시간.split('T')[0], // YYYY-MM-DD 형태로 변환
-        };
-      });
+          // 2. 대체재 조회
+          const alternativeRelations = await this.getAlternativeIngredients(
+            ingredient.name,
+          );
+          const availableAlternatives = [];
 
-      return await Promise.all(fridgePromises);
+          for (const relation of alternativeRelations) {
+            const fridgeAlternative = fridgeIngredients.find(
+              fridgeItem =>
+                fridgeItem.name.toLowerCase() ===
+                relation.alternativeName.toLowerCase(),
+            );
+
+            if (fridgeAlternative) {
+              availableAlternatives.push({
+                name: fridgeAlternative.name,
+                quantity: fridgeAlternative.quantity,
+                unit: fridgeAlternative.unit,
+                reason: relation.reason,
+              });
+            }
+          }
+
+          return {
+            ...ingredient,
+            isAvailable: !!exactMatch,
+            alternatives: availableAlternatives,
+          };
+        }),
+      );
+
+      return result;
     } catch (error) {
-      console.error('사용자 냉장고 목록 조회 실패:', error);
-      throw error;
+      console.error('레시피 재료 확인 실패:', error);
+      return recipeIngredients.map(ingredient => ({
+        ...ingredient,
+        isAvailable: false,
+        alternatives: [],
+      }));
     }
   }
 
   /**
-   * 공유 레시피 삭제 (권한 확인)
+   * 냉장고에 식재료 추가 (사용자가 직접 추가하는 경우)
    */
-  static async deleteSharedRecipe(
-    recipeId: string,
+  static async addFridgeIngredient(
     fridgeId: number,
-    userId: number,
+    ingredient: Omit<FridgeIngredient, 'id' | 'fridgeId'>,
   ): Promise<boolean> {
     await this.delay(300);
 
     try {
-      // 권한 확인
-      const userRelations = await this.getUserFridgeRelations(userId);
-      const relation = userRelations.find(rel => rel.냉장고Id === fridgeId);
+      const storageKey = `fridge_ingredients_${fridgeId}`;
+      const storedData = await AsyncStorage.getItem(storageKey);
+      const currentIngredients = storedData ? JSON.parse(storedData) : [];
 
-      if (!relation) {
-        throw new Error('해당 냉장고에 접근 권한이 없습니다.');
-      }
+      const newIngredient: FridgeIngredient = {
+        ...ingredient,
+        id: Date.now().toString(),
+        fridgeId,
+      };
 
-      // AsyncStorage에서 삭제
-      const storedData = await AsyncStorage.getItem('sharedRecipes');
-      const allSharedRecipes = storedData
-        ? JSON.parse(storedData)
-        : MOCK_SHARED_RECIPES;
-
-      const updatedRecipes = allSharedRecipes.filter(
-        (recipe: Recipe) => recipe.id !== recipeId,
-      );
+      currentIngredients.push(newIngredient);
       await AsyncStorage.setItem(
-        'sharedRecipes',
-        JSON.stringify(updatedRecipes),
+        storageKey,
+        JSON.stringify(currentIngredients),
       );
 
       return true;
     } catch (error) {
-      console.error('공유 레시피 삭제 실패:', error);
-      throw error;
+      console.error('냉장고 식재료 추가 실패:', error);
+      return false;
     }
   }
 
   /**
-   * 초기 공유 레시피 데이터 설정
+   * 냉장고에서 식재료 제거
    */
-  static async initializeSharedRecipes(): Promise<void> {
+  static async removeFridgeIngredient(
+    fridgeId: number,
+    ingredientId: string,
+  ): Promise<boolean> {
+    await this.delay(300);
+
     try {
-      const existingData = await AsyncStorage.getItem('sharedRecipes');
-      if (!existingData) {
-        await AsyncStorage.setItem(
-          'sharedRecipes',
-          JSON.stringify(MOCK_SHARED_RECIPES),
-        );
-      }
+      const storageKey = `fridge_ingredients_${fridgeId}`;
+      const storedData = await AsyncStorage.getItem(storageKey);
+
+      if (!storedData) return false;
+
+      const currentIngredients = JSON.parse(storedData);
+      const updatedIngredients = currentIngredients.filter(
+        (ingredient: FridgeIngredient) => ingredient.id !== ingredientId,
+      );
+
+      await AsyncStorage.setItem(
+        storageKey,
+        JSON.stringify(updatedIngredients),
+      );
+      return true;
     } catch (error) {
-      console.error('초기 공유 레시피 설정 실패:', error);
+      console.error('냉장고 식재료 제거 실패:', error);
+      return false;
     }
   }
 
-  /**
-   * API 지연 시뮬레이션
-   */
+  // 기존 메서드들...
   private static delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  /**
-   * Mock 데이터 초기화 (개발/테스트용)
-   */
   static async resetMockData(): Promise<void> {
     try {
-      await AsyncStorage.setItem(
-        'sharedRecipes',
-        JSON.stringify(MOCK_SHARED_RECIPES),
-      );
+      // 냉장고별 식재료 데이터도 초기화
+      for (const fridgeId of Object.keys(MOCK_FRIDGE_INGREDIENTS)) {
+        await AsyncStorage.removeItem(`fridge_ingredients_${fridgeId}`);
+      }
       console.log('Mock 데이터가 초기화되었습니다.');
     } catch (error) {
       console.error('Mock 데이터 초기화 실패:', error);

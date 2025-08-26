@@ -13,7 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import InfoModal from '../../../components/UseRecipe/InfoModal';
-import IngredientCard from '../../../components/UseRecipe/IngredientCard';
+import EnhancedIngredientCard from '../../../components/UseRecipe/EnhancedIngredientCard';
 import StepsSection from '../../../components/UseRecipe/StepsSection';
 import ConfirmModal from '../../../components/modals/ConfirmModal';
 
@@ -28,12 +28,22 @@ type UseRecipeScreenNavigationProp = NativeStackNavigationProp<
   RecipeStackParamList,
   'UseRecipe'
 >;
-type UseRecipeScreenRouteProp = RouteProp<RecipeStackParamList, 'UseRecipe'>;
+
+type UseRecipeScreenRouteProp = RouteProp<
+  {
+    UseRecipe: {
+      recipe: Recipe;
+      fridgeId: number;
+      enhancedIngredients?: EnhancedIngredient[]; // 새로 추가
+    };
+  },
+  'UseRecipe'
+>;
 
 const UseRecipeScreen: React.FC = () => {
   const navigation = useNavigation<UseRecipeScreenNavigationProp>();
   const route = useRoute<UseRecipeScreenRouteProp>();
-  const { recipe, fridgeId } = route.params;
+  const { recipe, fridgeId, enhancedIngredients } = route.params; // enhancedIngredients 추가
 
   // 모달 상태 관리 (간소화됨)
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -58,16 +68,24 @@ const UseRecipeScreen: React.FC = () => {
     updateUserQuantity,
     updateMaxUserQuantity,
     loadIngredients,
+    loadFromEnhancedIngredients, // 새로운 함수
     setMatchedIngredients,
   } = useIngredientMatching(recipe, fridgeId);
 
   const { completedSteps, toggleStepCompletion, getStepsArray } =
     useRecipeSteps(recipe);
 
-  // 초기 데이터 로드
   useEffect(() => {
-    loadIngredients();
-  }, [loadIngredients]);
+    if (enhancedIngredients && enhancedIngredients.length > 0) {
+      // 향상된 재료 데이터가 있으면 그것을 사용
+      console.log('🔧 향상된 재료 데이터 사용:', enhancedIngredients);
+      loadFromEnhancedIngredients(enhancedIngredients);
+    } else {
+      // 없으면 기존 방식 사용
+      console.log('🔧 기존 재료 매칭 방식 사용');
+      loadIngredients();
+    }
+  }, [enhancedIngredients, loadIngredients, loadFromEnhancedIngredients]);
 
   // 🔧 조리 완료 및 일괄 차감
   const completeRecipe = () => {
@@ -205,18 +223,17 @@ const UseRecipeScreen: React.FC = () => {
         {/* 레시피 제목 */}
         <Text style={styles.recipeTitle}>{recipe.title}</Text>
 
-        {/* 재료 섹션 */}
+        {/* 재료 섹션 - EnhancedIngredientCard 사용 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>재료 준비</Text>
           <FlatList
             data={matchedIngredients}
             renderItem={({ item, index }) => (
-              <IngredientCard
+              <EnhancedIngredientCard // 향상된 카드 사용
                 item={item}
                 index={index}
                 onQuantityChange={updateUserQuantity}
                 onMaxQuantityChange={updateMaxUserQuantity}
-                // 🔧 onDeduct 제거 (개별 차감 버튼 없앰)
               />
             )}
             keyExtractor={(_, index) => index.toString()}

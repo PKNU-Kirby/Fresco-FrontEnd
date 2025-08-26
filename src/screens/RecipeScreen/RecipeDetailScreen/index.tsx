@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   ScrollView,
   KeyboardAvoidingView,
@@ -16,12 +16,15 @@ import { useRecipeDetail } from '../../../components/RecipeDetail/RecipeDetail';
 import { Header } from '../../../components/RecipeDetail/Header';
 import { SharedRecipeIndicator } from '../../../components/RecipeDetail/RecipeDetail';
 import { RecipeTitleSection } from '../../../components/RecipeDetail/RecipeDetail';
-import { IngredientsSection } from '../../../components/RecipeDetail/RecipeDetail';
 import { StepsSection } from '../../../components/RecipeDetail/RecipeDetail';
 import { ReferenceUrlSection } from '../../../components/RecipeDetail/RecipeDetail';
 import { RecipeActionButtons } from '../../../components/RecipeDetail/RecipeDetail';
 import { UseRecipeModal } from '../../../components/RecipeDetail/RecipeDetail';
 import { ShareRecipeModal } from '../../../components/RecipeDetail/RecipeDetail';
+import {
+  EnhancedIngredient,
+  IngredientsSection,
+} from '../../../components/RecipeDetail/IngredientsSection';
 import { styles } from './styles';
 
 interface CheckableIngredient extends RecipeIngredient {
@@ -109,6 +112,27 @@ const RecipeDetailScreen: React.FC = () => {
   const [checkableFridges, setCheckableFridges] = useState<CheckableFridge[]>(
     [],
   );
+  const [enhancedIngredients, setEnhancedIngredients] = useState<
+    EnhancedIngredient[]
+  >([]);
+  const handleEnhancedIngredientsChange = useCallback(
+    (ingredients: EnhancedIngredient[]) => {
+      setEnhancedIngredients(ingredients);
+    },
+    [],
+  );
+  const navigateToUseRecipe = () => {
+    if (!currentRecipe.ingredients || currentRecipe.ingredients.length === 0) {
+      Alert.alert('알림', '이 레시피에는 재료 정보가 없습니다.');
+      return;
+    }
+
+    navigation.navigate('UseRecipe', {
+      recipe: currentRecipe,
+      fridgeId: fridgeId,
+      enhancedIngredients: enhancedIngredients, // 향상된 재료 데이터 전달
+    });
+  };
 
   const isSharedRecipe = currentRecipe.isShared || false;
 
@@ -169,19 +193,6 @@ const RecipeDetailScreen: React.FC = () => {
       ...prev,
       steps: currentSteps.map((step, i) => (i === index ? value : step)),
     }));
-  };
-
-  // UseRecipeScreen으로 네비게이션
-  const navigateToUseRecipe = () => {
-    if (!currentRecipe.ingredients || currentRecipe.ingredients.length === 0) {
-      Alert.alert('알림', '이 레시피에는 재료 정보가 없습니다.');
-      return;
-    }
-    navigation.navigate('UseRecipe', {
-      recipe: currentRecipe,
-      fridgeId: fridgeId,
-      fridgeName: fridgeName,
-    });
   };
 
   // 모달 관련 함수들은 기존과 동일하게 유지...
@@ -339,13 +350,15 @@ const RecipeDetailScreen: React.FC = () => {
             }
           />
 
-          {/* Ingredients */}
+          {/* Ingredients - 향상된 버전 사용 */}
           <IngredientsSection
             ingredients={getIngredientsArray(currentRecipe.ingredients)}
             isEditMode={isEditMode}
+            fridgeId={parseInt(fridgeId, 10)} // 냉장고 ID 전달
             onAddIngredient={addIngredient}
             onRemoveIngredient={removeIngredient}
             onUpdateIngredient={updateIngredient}
+            onEnhancedIngredientsChange={handleEnhancedIngredientsChange} // 콜백 추가
           />
 
           {/* Steps */}
@@ -370,7 +383,7 @@ const RecipeDetailScreen: React.FC = () => {
           {!isEditMode && currentRecipe.id && (
             <RecipeActionButtons
               isSharedRecipe={isSharedRecipe}
-              onUseRecipe={navigateToUseRecipe}
+              onUseRecipe={navigateToUseRecipe} // 수정된 함수 사용
               onShare={openShareModal}
             />
           )}

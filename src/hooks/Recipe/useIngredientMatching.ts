@@ -1,3 +1,4 @@
+// hooks/Recipe/useIngredientMatching.ts 향상된 버전
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import {
@@ -7,13 +8,47 @@ import {
 import { Recipe } from '../../screens/RecipeScreen/RecipeNavigator';
 import { MatchedIngredientSeparate } from '../../types';
 
-export const useIngredientMatching = (recipe: Recipe, fridgeId: number) => {
+// EnhancedIngredient 타입 (IngredientsSection에서 가져옴)
+interface EnhancedIngredient {
+  id: string;
+  name: string;
+  quantity: string;
+  unit: string;
+  isAvailable: boolean;
+  exactMatches: FridgeItem[];
+  alternatives: Array<{
+    fridgeItem: FridgeItem;
+    reason: string;
+  }>;
+  selectedFridgeItem?: FridgeItem;
+  isAlternativeSelected?: boolean;
+}
+
+interface UseIngredientMatchingReturn {
+  matchedIngredients: MatchedIngredientSeparate[];
+  setMatchedIngredients: React.Dispatch<
+    React.SetStateAction<MatchedIngredientSeparate[]>
+  >;
+  isLoading: boolean;
+  updateUserQuantity: (index: number, quantity: string) => void;
+  updateMaxUserQuantity: (index: number, maxQuantity: number) => void;
+  loadIngredients: () => void;
+  // 새로 추가: 향상된 재료 데이터로 매칭하는 함수
+  loadFromEnhancedIngredients: (
+    enhancedIngredients: EnhancedIngredient[],
+  ) => void;
+}
+
+export const useIngredientMatching = (
+  recipe: Recipe,
+  fridgeId: number,
+): UseIngredientMatchingReturn => {
   const [matchedIngredients, setMatchedIngredients] = useState<
     MatchedIngredientSeparate[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 고급 문자열 매칭 함수들
+  // 고급 문자열 매칭 함수들 (기존과 동일)
   const normalizeString = (str: string): string => {
     return str
       .toLowerCase()
@@ -76,6 +111,7 @@ export const useIngredientMatching = (recipe: Recipe, fridgeId: number) => {
     return matches;
   };
 
+  // 기존 로드 함수 (기존 로직 유지)
   const loadIngredients = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -128,6 +164,62 @@ export const useIngredientMatching = (recipe: Recipe, fridgeId: number) => {
     }
   }, [recipe, fridgeId]);
 
+  // 새로운 함수: 향상된 재료 데이터를 기반으로 매칭 데이터 생성
+  const loadFromEnhancedIngredients = useCallback(
+    (enhancedIngredients: EnhancedIngredient[]) => {
+      try {
+        setIsLoading(true);
+        const matched: MatchedIngredientSeparate[] = [];
+
+        enhancedIngredients.forEach(ingredient => {
+          // 선택된 냉장고 재료가 있는 경우 (초록/주황 상태)
+          if (ingredient.selectedFridgeItem) {
+            const availableQuantity =
+              parseFloat(ingredient.selectedFridgeItem.quantity) || 1;
+
+            matched.push({
+              recipeIngredient: {
+                name: ingredient.selectedFridgeItem.name, // 실제 냉장고 재료명 사용
+                quantity: ingredient.quantity, // 레시피에서 필요한 양
+              },
+              fridgeIngredient: ingredient.selectedFridgeItem,
+              isAvailable: true,
+              userInputQuantity: '0',
+              maxUserQuantity: availableQuantity,
+              isDeducted: false,
+              // 대체재로 선택된 경우 표시
+              isAlternativeUsed: ingredient.isAlternativeSelected,
+              originalRecipeName: ingredient.isAlternativeSelected
+                ? ingredient.name
+                : undefined,
+            });
+          } else {
+            // 냉장고에 없는 재료 (빨간색 상태) - 장바구니 담기용
+            matched.push({
+              recipeIngredient: {
+                name: ingredient.name,
+                quantity: ingredient.quantity,
+              },
+              fridgeIngredient: null,
+              isAvailable: false,
+              userInputQuantity: '0',
+              maxUserQuantity: 0,
+              isDeducted: false,
+            });
+          }
+        });
+
+        setMatchedIngredients(matched);
+      } catch (error) {
+        console.error('향상된 재료 데이터 로드 실패:', error);
+        Alert.alert('오류', '재료 정보를 불러올 수 없습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
+
   const updateUserQuantity = useCallback((index: number, quantity: string) => {
     setMatchedIngredients(prev => {
       const updated = [...prev];
@@ -154,5 +246,6 @@ export const useIngredientMatching = (recipe: Recipe, fridgeId: number) => {
     updateUserQuantity,
     updateMaxUserQuantity,
     loadIngredients,
+    loadFromEnhancedIngredients, // 새로운 함수 추가
   };
 };

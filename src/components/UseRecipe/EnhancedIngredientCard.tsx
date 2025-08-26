@@ -12,11 +12,26 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SliderQuantityInput from './SliderQuantityInput';
 import { MainTabParamList } from '../../../App';
-
-import { MatchedIngredientSeparate } from '../../types';
 import { ingredientCardStyles as styles } from './styles';
 
-// 장바구니 interface
+// 확장된 MatchedIngredientSeparate 타입
+interface EnhancedMatchedIngredientSeparate {
+  recipeIngredient: {
+    name: string;
+    quantity: string;
+  };
+  fridgeIngredient: any | null;
+  isAvailable: boolean;
+  userInputQuantity: string;
+  maxUserQuantity: number;
+  isDeducted: boolean;
+  isMultipleOption?: boolean;
+  optionIndex?: number;
+  // 새로 추가된 필드들
+  isAlternativeUsed?: boolean; // 대체재로 사용되는지
+  originalRecipeName?: string; // 원래 레시피 재료명 (대체재인 경우)
+}
+
 interface CartItem {
   id: string;
   groceryListId: string;
@@ -32,58 +47,49 @@ interface CartItem {
 const STORAGE_KEY = '@shopping_cart_items';
 
 interface IngredientCardProps {
-  item: MatchedIngredientSeparate;
+  item: EnhancedMatchedIngredientSeparate;
   index: number;
   onQuantityChange: (index: number, quantity: string) => void;
   onMaxQuantityChange: (index: number, maxQuantity: number) => void;
-  //onDeduct: (index: number) => void;
 }
-const IngredientCard: React.FC<IngredientCardProps> = ({
+
+const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
   item,
   index,
   onQuantityChange,
   onMaxQuantityChange,
-  // onDeduct,
 }) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<MainTabParamList>>();
-
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  // 장바구니 추가 함수
+  // 장바구니 추가 함수 (기존과 동일)
   const addToExistingCart = async (itemData: {
     name: string;
     quantity: string;
     unit?: string;
   }): Promise<void> => {
     try {
-      // 기존 장바구니 데이터 로드
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       const existingItems: CartItem[] = stored ? JSON.parse(stored) : [];
 
-      // 중복 체크 (같은 이름의 재료가 있으면 수량 합계)
       const existingIndex = existingItems.findIndex(
         cartItem => cartItem.name.toLowerCase() === itemData.name.toLowerCase(),
       );
 
       if (existingIndex >= 0) {
-        // 기존 아이템 수량 증가 후 저장 추가
         const existingItem = existingItems[existingIndex];
         existingItems[existingIndex] = {
           ...existingItem,
           quantity: existingItem.quantity + parseFloat(itemData.quantity),
           updatedAt: new Date(),
         };
-
-        // 중복 아이템 저장
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(existingItems));
       } else {
-        // 새 아이템 추가
         const unpurchasedItemsCount = existingItems.filter(
           cartItem => !cartItem.purchased,
         ).length;
 
-        // ID 생성
         const maxId = Math.max(
           ...existingItems.map(cartItem => Number(cartItem.id || '0') || 0),
           0,
@@ -101,7 +107,6 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
           createdAt: new Date(),
         };
 
-        // 기존 아이템들 order 재정렬
         const reorderedItems = existingItems.map(existingItem => {
           if (
             existingItem.purchased &&
@@ -112,7 +117,6 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
           return existingItem;
         });
 
-        // 최종 정렬
         const finalItems = [...reorderedItems, newItem].sort(
           (a: CartItem, b: CartItem) => {
             if (a.purchased !== b.purchased) {
@@ -122,7 +126,6 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
           },
         );
 
-        // 새 아이템 추가 시 저장
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(finalItems));
       }
     } catch (error) {
@@ -134,35 +137,56 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
   const handleAddToShoppingList = async () => {
     setIsAddingToCart(true);
     try {
-      // 수량에서 숫자만 추출 ("100g" -> "100")
+      // 원래 레시피 재료명 사용 (대체재인 경우)
+      const itemName = item.originalRecipeName || item.recipeIngredient.name;
+
       const quantityMatch = item.recipeIngredient.quantity.match(/[\d.]+/);
       const quantity = quantityMatch ? quantityMatch[0] : '1';
 
-      // 단위 추출 ("100g" -> "g")
       const unit = item.recipeIngredient.quantity
         .replace(/[\d.\s]+/g, '')
         .trim();
 
       await addToExistingCart({
-        name: item.recipeIngredient.name,
+        name: itemName,
         quantity: quantity,
         unit: unit || '개',
       });
 
       Alert.alert(
-        '장바구니 추가 완료! 🛒',
-        `${item.recipeIngredient.name} ${item.recipeIngredient.quantity}이(가) 장바구니에 추가되었습니다.`,
-        [{ text: '확인' }, {}],
+        '장바구니 추가 완료!',
+        `${itemName} ${item.recipeIngredient.quantity}이(가) 장바구니에 추가되었습니다.`,
+        [{ text: '확인' }],
       );
     } catch (error) {
-      console.error('🛒 장바구니 추가 실패:', error);
+      console.error('장바구니 추가 실패:', error);
       Alert.alert('오류', '장바구니 추가에 실패했습니다.');
     } finally {
       setIsAddingToCart(false);
     }
   };
+
+  // 대체재 정보 표시 헬퍼
+  const renderAlternativeInfo = () => {
+    if (!item.isAlternativeUsed || !item.originalRecipeName) {
+      return null;
+    }
+
+    return (
+      <View style={styles.alternativeInfoBanner}>
+        <Icon name="swap-horiz" size={16} color="#FF9800" />
+        <Text style={styles.alternativeInfoText}>
+          '{item.originalRecipeName}' 대신 사용
+        </Text>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.ingredientCard}>
+      {/* 대체재 정보 배너 */}
+      {renderAlternativeInfo()}
+
       <View style={styles.ingredientHeader}>
         <View style={styles.ingredientNameContainer}>
           <Text style={styles.ingredientName}>
@@ -183,10 +207,13 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
             <>
               <View style={styles.availableText}>
                 <View style={styles.availableIcon}>
-                  <Icon name="check-circle" size={20} color="limegreen" />
+                  <Icon
+                    name="check-circle"
+                    size={20}
+                    color={item.isAlternativeUsed ? '#FF9800' : 'limegreen'}
+                  />
                 </View>
                 <Text style={styles.haveOne}>
-                  {' '}
                   보유: {item.fridgeIngredient?.quantity}
                   {item.fridgeIngredient?.unit}
                 </Text>
@@ -196,7 +223,7 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
           )}
           <Text style={styles.needtext}>
             필요: {item.recipeIngredient.quantity}
-          </Text>{' '}
+          </Text>
         </View>
       </View>
 
@@ -218,7 +245,7 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
           </View>
         </View>
       ) : (
-        // 🛒 기존 장바구니와 연동된 추가 기능
+        // 냉장고에 없는 재료 - 장바구니 담기
         <View style={unavailableStyles.unavailableSection}>
           <View style={unavailableStyles.unavailableInfo}>
             <Icon name="error" size={22} color="#FF5722" />
@@ -250,7 +277,7 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
   );
 };
 
-// 🛒 스타일 (기존과 동일)
+// 스타일 추가
 const unavailableStyles = {
   unavailableSection: {
     flexDirection: 'row' as const,
@@ -260,20 +287,17 @@ const unavailableStyles = {
     backgroundColor: '#fae1dd',
     borderRadius: 8,
   },
-
   unavailableInfo: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     flex: 1,
     gap: 8,
   },
-
   unavailableText: {
     fontSize: 15,
     color: 'tomato',
     fontWeight: '500' as const,
   },
-
   addToCartButton: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
@@ -283,11 +307,9 @@ const unavailableStyles = {
     borderRadius: 6,
     gap: 4,
   },
-
   addToCartButtonDisabled: {
     opacity: 0.6,
   },
-
   addToCartText: {
     color: 'white',
     fontSize: 14,
@@ -295,4 +317,23 @@ const unavailableStyles = {
   },
 };
 
-export default IngredientCard;
+// ingredientCardStyles에 추가할 스타일들
+const additionalStyles = {
+  alternativeInfoBanner: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    backgroundColor: '#FFF3E0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    marginBottom: 8,
+    gap: 6,
+  },
+  alternativeInfoText: {
+    fontSize: 12,
+    color: '#E65100',
+    fontWeight: '500' as const,
+  },
+};
+
+export default EnhancedIngredientCard;

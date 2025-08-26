@@ -386,4 +386,213 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: 'white',
   },
+
+  ///////////////////////////////////////////////////
+
+  ingredientRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+  },
+
+  ingredientMainInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+
+  statusIcon: {
+    marginRight: 8,
+  },
+
+  availableIngredient: {
+    color: '#4CAF50',
+    fontWeight: '600',
+  },
+
+  alternativesContainer: {
+    marginLeft: 20,
+    marginTop: 8,
+    marginBottom: 12,
+    paddingLeft: 16,
+    paddingRight: 12,
+    paddingVertical: 12,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#FF9800',
+  },
+
+  alternativesTitle: {
+    fontSize: 13,
+    color: '#555',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+
+  alternativeItem: {
+    marginBottom: 6,
+  },
+
+  alternativeInfo: {
+    flex: 1,
+  },
+
+  alternativeName: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+
+  alternativeReason: {
+    fontSize: 11,
+    color: '#666',
+    fontStyle: 'italic',
+    lineHeight: 16,
+  },
+
+  ingredientLegend: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    gap: 8,
+  },
+
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+
+  legendText: {
+    fontSize: 11,
+    color: '#666',
+    marginLeft: 6,
+  },
+  ///
+
+  statusCircle: {
+    fontSize: 16,
+    marginRight: 8,
+  },
+
+  // 범례의 동그라미
+  legendCircle: {
+    fontSize: 12,
+    marginRight: 4,
+  },
+
+  // 선택된 대체재 아이템 스타일
+  selectedAlternativeItem: {
+    backgroundColor: '#E8F5E8',
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 4,
+    borderWidth: 2,
+    borderColor: '#4CAF50',
+  },
+
+  selectedAlternativeText: {
+    color: '#2E7D32',
+    fontWeight: '600',
+  },
+
+  // 기본 대체재 아이템 (선택되지 않은 상태)
+  alternativeItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: 'transparent',
+  },
+
+  alternativeInfo: {
+    flex: 1,
+  },
+
+  alternativeName: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+
+  alternativeReason: {
+    fontSize: 11,
+    color: '#666',
+    fontStyle: 'italic',
+    lineHeight: 16,
+  },
+
+  // 기존 스타일 수정
+  ingredientRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+  },
+
+  ingredientMainInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+
+  ingredientText: {
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20,
+  },
+
+  availableIngredient: {
+    color: '#2E7D32',
+    fontWeight: '600',
+  },
+
+  alternativesContainer: {
+    marginLeft: 20,
+    marginTop: 8,
+    marginBottom: 12,
+    paddingLeft: 16,
+    paddingRight: 12,
+    paddingVertical: 12,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#FF9800',
+  },
+
+  alternativesTitle: {
+    fontSize: 13,
+    color: '#555',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+
+  ingredientLegend: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    gap: 8,
+  },
+
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+
+  legendText: {
+    fontSize: 11,
+    color: '#666',
+    marginLeft: 2,
+  },
 });

@@ -8,6 +8,11 @@ import SearchResultScreen from './SearchResultScreen';
 import SharedFolderScreen from './SharedFolderScreen';
 import UseRecipeScreen from './UseRecipeScreen'; // 🔧 UseRecipeScreen import 추가
 
+// EnhancedIngredient 타입 정의
+export interface EnhancedIngredient extends RecipeIngredient {
+  isAvailable: boolean;
+}
+
 // Recipe 타입 정의 (공통으로 사용)
 export interface Recipe {
   id: string;
@@ -55,7 +60,7 @@ export type RecipeStackParamList = {
   UseRecipe: {
     recipe: Recipe;
     fridgeId: string;
-    fridgeName?: string; // 선택적으로 냉장고 이름도 전달 가능
+    enhancedIngredients?: EnhancedIngredient[];
   };
 };
 
