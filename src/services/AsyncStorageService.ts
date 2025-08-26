@@ -4,6 +4,7 @@ import { User, SocialProvider } from '../types/auth';
 export type Refrigerator = {
   id: string;
   name: string;
+  inviteCode?: string; // 초대 코드 필드 추가
   createdAt: string;
   updatedAt: string;
 };
@@ -218,9 +219,15 @@ export class AsyncStorageService {
   }> {
     try {
       const refrigerators = await this.getRefrigerators();
+      const inviteCode = Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase();
+
       const newRefrigerator: Refrigerator = {
-        id: await this.getNextId('refrigerators'),
+        id: (await this.getNextId('refrigerators')).toString(),
         name,
+        inviteCode, // 초대 코드 포함
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -233,10 +240,10 @@ export class AsyncStorageService {
 
       const refrigeratorUsers = await this.getRefrigeratorUsers();
       const newRefrigeratorUser: RefrigeratorUser = {
-        id: await this.getNextId('refrigeratorUsers'),
+        id: (await this.getNextId('refrigeratorUsers')).toString(),
         refrigeratorId: newRefrigerator.id,
-        inviterId: creatorId,
-        inviteeId: creatorId,
+        inviterId: creatorId.toString(),
+        inviteeId: creatorId.toString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -263,7 +270,9 @@ export class AsyncStorageService {
   ): Promise<Refrigerator | null> {
     try {
       const refrigerators = await this.getRefrigerators();
-      const fridgeIndex = refrigerators.findIndex(fridge => fridge.id === id);
+      const fridgeIndex = refrigerators.findIndex(
+        fridge => parseInt(fridge.id) === id,
+      );
 
       if (fridgeIndex === -1) return null;
 
@@ -288,7 +297,7 @@ export class AsyncStorageService {
     try {
       const refrigerators = await this.getRefrigerators();
       const filteredRefrigerators = refrigerators.filter(
-        fridge => fridge.id !== id,
+        fridge => parseInt(fridge.id) !== id,
       );
       await AsyncStorage.setItem(
         STORAGE_KEYS.REFRIGERATORS,
@@ -297,7 +306,7 @@ export class AsyncStorageService {
 
       const refrigeratorUsers = await this.getRefrigeratorUsers();
       const filteredRefrigeratorUsers = refrigeratorUsers.filter(
-        ru => ru.refrigeratorId !== id,
+        ru => parseInt(ru.refrigeratorId) !== id,
       );
       await AsyncStorage.setItem(
         STORAGE_KEYS.REFRIGERATOR_USERS,
@@ -308,6 +317,194 @@ export class AsyncStorageService {
     } catch (error) {
       console.error('Delete refrigerator error:', error);
       return false;
+    }
+  }
+
+  // === 초대 관련 메서드들 ===
+
+  // 냉장고의 초대 코드 가져오기
+  static async getFridgeInviteCode(fridgeId: number): Promise<string | null> {
+    try {
+      const refrigerators = await this.getRefrigerators();
+      const fridge = refrigerators.find(r => parseInt(r.id) === fridgeId);
+
+      if (!fridge) return null;
+
+      // 초대 코드가 없으면 생성
+      if (!fridge.inviteCode) {
+        const newInviteCode = Math.random()
+          .toString(36)
+          .substring(2, 8)
+          .toUpperCase();
+        await this.updateRefrigerator(fridgeId, { inviteCode: newInviteCode });
+        return newInviteCode;
+      }
+
+      return fridge.inviteCode;
+    } catch (error) {
+      console.error('초대 코드 조회 실패:', error);
+      return null;
+    }
+  }
+
+  // 초대 코드로 냉장고 찾기
+  static async getFridgeByInviteCode(
+    inviteCode: string,
+  ): Promise<Refrigerator | null> {
+    try {
+      const refrigerators = await this.getRefrigerators();
+      return refrigerators.find(r => r.inviteCode === inviteCode) || null;
+    } catch (error) {
+      console.error('초대 코드로 냉장고 조회 실패:', error);
+      return null;
+    }
+  }
+
+  // 냉장고에 사용자 참여
+  static async joinFridgeByCode(
+    inviteCode: string,
+  ): Promise<{ success: boolean; message: string; fridge?: Refrigerator }> {
+    try {
+      const currentUserId = await this.getCurrentUserId();
+      if (!currentUserId) {
+        return {
+          success: false,
+          message: '현재 사용자 정보를 찾을 수 없습니다.',
+        };
+      }
+
+      // 초대 코드로 냉장고 찾기
+      const fridge = await this.getFridgeByInviteCode(inviteCode);
+      if (!fridge) {
+        return { success: false, message: '유효하지 않은 초대 코드입니다.' };
+      }
+
+      const currentUserIdNum = parseInt(currentUserId, 10);
+      const fridgeIdNum = parseInt(fridge.id, 10);
+
+      // 이미 참여 중인지 확인
+      const refrigeratorUsers = await this.getRefrigeratorUsers();
+      const existingRelation = refrigeratorUsers.find(
+        ru =>
+          parseInt(ru.refrigeratorId) === fridgeIdNum &&
+          parseInt(ru.inviteeId) === currentUserIdNum,
+      );
+
+      if (existingRelation) {
+        return { success: false, message: '이미 참여 중인 냉장고입니다.' };
+      }
+
+      // 냉장고 소유자 찾기 (생성자)
+      const ownerRelation = refrigeratorUsers.find(
+        ru =>
+          parseInt(ru.refrigeratorId) === fridgeIdNum &&
+          ru.inviterId === ru.inviteeId,
+      );
+      const ownerId = ownerRelation
+        ? parseInt(ownerRelation.inviterId)
+        : currentUserIdNum;
+
+      // 새로운 관계 추가
+      await this.addUserToRefrigerator(fridgeIdNum, ownerId, currentUserIdNum);
+
+      return {
+        success: true,
+        message: `'${fridge.name}' 냉장고에 참여했습니다.`,
+        fridge,
+      };
+    } catch (error) {
+      console.error('냉장고 참여 실패:', error);
+      return { success: false, message: '냉장고 참여 중 오류가 발생했습니다.' };
+    }
+  }
+
+  // 초대 코드 재생성
+  static async regenerateInviteCode(fridgeId: number): Promise<string | null> {
+    try {
+      const newInviteCode = Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase();
+      await this.updateRefrigerator(fridgeId, { inviteCode: newInviteCode });
+      return newInviteCode;
+    } catch (error) {
+      console.error('초대 코드 재생성 실패:', error);
+      return null;
+    }
+  }
+
+  // === JoinWithCodeScreen용 추가 헬퍼 메소드들 ===
+
+  // getUserFridges 메소드 (JoinWithCodeScreen에서 사용)
+  static async getUserFridges(userId: number): Promise<FridgeWithRole[]> {
+    return await this.getUserRefrigerators(userId);
+  }
+
+  // findFridgeByInviteCode 메소드 (JoinWithCodeScreen에서 사용)
+  static async findFridgeByInviteCode(
+    inviteCode: string,
+  ): Promise<Refrigerator | null> {
+    return await this.getFridgeByInviteCode(inviteCode);
+  }
+
+  // isUserFridgeMember 메소드 (중복 참여 확인용)
+  static async isUserFridgeMember(
+    fridgeId: number,
+    userId: number,
+  ): Promise<boolean> {
+    try {
+      const refrigeratorUsers = await this.getRefrigeratorUsers();
+      return refrigeratorUsers.some(
+        ru =>
+          parseInt(ru.refrigeratorId) === fridgeId &&
+          parseInt(ru.inviteeId) === userId,
+      );
+    } catch (error) {
+      console.error('멤버십 확인 실패:', error);
+      return false;
+    }
+  }
+
+  // joinFridgeWithCode 메소드 (코드로 냉장고 참여)
+  static async joinFridgeWithCode(
+    fridgeId: number,
+    userId: number,
+  ): Promise<boolean> {
+    try {
+      // 이미 멤버인지 확인
+      const isAlreadyMember = await this.isUserFridgeMember(fridgeId, userId);
+      if (isAlreadyMember) {
+        return false; // 이미 멤버임
+      }
+
+      // 냉장고 소유자 찾기
+      const refrigeratorUsers = await this.getRefrigeratorUsers();
+      const ownerRelation = refrigeratorUsers.find(
+        ru =>
+          parseInt(ru.refrigeratorId) === fridgeId &&
+          ru.inviterId === ru.inviteeId,
+      );
+      const ownerId = ownerRelation
+        ? parseInt(ownerRelation.inviterId)
+        : userId;
+
+      // 새로운 관계 추가
+      await this.addUserToRefrigerator(fridgeId, ownerId, userId);
+      return true; // 성공
+    } catch (error) {
+      console.error('냉장고 참여 실패:', error);
+      throw error;
+    }
+  }
+
+  // getFridgeById 메소드 (냉장고 정보 가져오기)
+  static async getFridgeById(fridgeId: number): Promise<Refrigerator | null> {
+    try {
+      const refrigerators = await this.getRefrigerators();
+      return refrigerators.find(r => parseInt(r.id) === fridgeId) || null;
+    } catch (error) {
+      console.error('냉장고 조회 실패:', error);
+      return null;
     }
   }
 
@@ -332,10 +529,10 @@ export class AsyncStorageService {
     try {
       const refrigeratorUsers = await this.getRefrigeratorUsers();
       const newRefrigeratorUser: RefrigeratorUser = {
-        id: await this.getNextId('refrigeratorUsers'),
-        refrigeratorId,
-        inviterId,
-        inviteeId,
+        id: (await this.getNextId('refrigeratorUsers')).toString(),
+        refrigeratorId: refrigeratorId.toString(),
+        inviterId: inviterId.toString(),
+        inviteeId: inviteeId.toString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -361,7 +558,10 @@ export class AsyncStorageService {
       const refrigeratorUsers = await this.getRefrigeratorUsers();
       const filteredRefrigeratorUsers = refrigeratorUsers.filter(
         ru =>
-          !(ru.refrigeratorId === refrigeratorId && ru.inviteeId === userId),
+          !(
+            parseInt(ru.refrigeratorId) === refrigeratorId &&
+            parseInt(ru.inviteeId) === userId
+          ),
       );
 
       await AsyncStorage.setItem(
@@ -386,18 +586,18 @@ export class AsyncStorageService {
         ]);
 
       const userRefrigeratorRelations = refrigeratorUsers.filter(
-        ru => ru.inviteeId === userId,
+        ru => parseInt(ru.inviteeId) === userId,
       );
 
       const fridgesWithRole: FridgeWithRole[] = userRefrigeratorRelations
         .map(relation => {
           const refrigerator = refrigerators.find(
-            r => r.id === relation.refrigeratorId,
+            r => parseInt(r.id) === parseInt(relation.refrigeratorId),
           );
           if (!refrigerator) return null;
 
           const memberCount = refrigeratorUsers.filter(
-            ru => ru.refrigeratorId === refrigerator.id,
+            ru => parseInt(ru.refrigeratorId) === parseInt(refrigerator.id),
           ).length;
           const isOwner = relation.inviterId === relation.inviteeId;
 
@@ -406,7 +606,7 @@ export class AsyncStorageService {
             isOwner,
             role: isOwner ? ('owner' as const) : ('member' as const),
             memberCount,
-            isHidden: hiddenFridges.includes(refrigerator.id),
+            isHidden: hiddenFridges.includes(parseInt(refrigerator.id)),
           };
         })
         .filter(Boolean) as FridgeWithRole[];
@@ -489,10 +689,13 @@ export class AsyncStorageService {
   ): Promise<FridgeItem> {
     try {
       const allItems = await this.getAllFridgeItems();
-      const maxId = allItems.reduce((max, item) => Math.max(max, item.id), 0);
+      const maxId = allItems.reduce(
+        (max, item) => Math.max(max, parseInt(item.id)),
+        0,
+      );
       const itemWithId: FridgeItem = {
         ...newItem,
-        id: maxId + 1,
+        id: (maxId + 1).toString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -531,7 +734,9 @@ export class AsyncStorageService {
   static async deleteFridgeItem(itemId: number): Promise<void> {
     try {
       const allItems = await this.getAllFridgeItems();
-      const filteredItems = allItems.filter(item => item.id !== itemId);
+      const filteredItems = allItems.filter(
+        item => parseInt(item.id) !== itemId,
+      );
       await AsyncStorage.setItem(
         STORAGE_KEYS.FRIDGE_ITEMS,
         JSON.stringify(filteredItems),
@@ -572,25 +777,26 @@ export class AsyncStorageService {
   // 초기 데이터 생성
   static async initializeDefaultFridgeForUser(userId: number): Promise<void> {
     try {
+      // 이미 초기화됐는지 확인하는 플래그 추가
+      const initKey = `initialized_${userId}`;
+      const isInitialized = await AsyncStorage.getItem(initKey);
+
+      if (isInitialized) {
+        console.log('사용자 이미 초기화됨');
+        return;
+      }
+
       // 사용자의 기본 냉장고가 있는지 확인
       const userFridges = await this.getUserRefrigerators(userId);
 
       if (userFridges.length === 0) {
         // 기본 냉장고 생성
-        const defaultFridge = await this.createRefrigerator(
-          '내 냉장고',
-          userId,
-        );
-
-        // 기본 아이템들 추가
-        const defaultItems: Omit<FridgeItem, 'id'>[] = [];
-
-        for (const item of defaultItems) {
-          await this.addFridgeItem(item);
-        }
-
-        console.log('기본 냉장고와 아이템 생성 완료');
+        await this.createRefrigerator('내 냉장고', userId);
+        console.log('기본 냉장고 생성 완료');
       }
+
+      // 초기화 완료 플래그 저장
+      await AsyncStorage.setItem(initKey, 'true');
     } catch (error) {
       console.error('Initialize default fridge error:', error);
     }

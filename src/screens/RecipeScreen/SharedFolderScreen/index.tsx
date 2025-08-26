@@ -347,7 +347,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           name: fridge.name,
           description: '', // FridgeWithRole에는 description이 없음
           ownerId: fridge.isOwner ? parseInt(user.id, 10) : 0, // 임시값
-          inviteCode: '', // FridgeWithRole에는 inviteCode가 없음
+          inviteCode: fridge.inviteCode || '', // 초대 코드 추가
           memberCount: fridge.memberCount,
         },
         role: fridge.role,
@@ -401,15 +401,28 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
     }
   };
 
-  // 냉장고 참여 (FridgeSelectScreen 시스템에는 초대 코드 기능이 없으므로 비활성화)
+  // 냉장고 참여 (AsyncStorageService 사용 - 활성화됨)
   const handleJoinFridge = async (inviteCode: string) => {
-    Alert.alert(
-      '기능 제한',
-      '현재 시스템에서는 초대 코드를 통한 냉장고 참여 기능이 지원되지 않습니다.',
-      [{ text: '확인' }],
-    );
-    setShowJoinModal(false);
-    setIsLoading(false);
+    try {
+      setShowJoinModal(false);
+      setIsLoading(true);
+      console.log('냉장고 참여 요청:', inviteCode);
+
+      // AsyncStorageService를 사용한 냉장고 참여
+      const result = await AsyncStorageService.joinFridgeByCode(inviteCode);
+
+      if (result.success) {
+        Alert.alert('참여 완료!', result.message, [{ text: '확인' }]);
+        await loadUserFridgesWithRecipes();
+      } else {
+        Alert.alert('참여 실패', result.message, [{ text: '확인' }]);
+      }
+    } catch (error) {
+      console.error('냉장고 참여 실패:', error);
+      Alert.alert('오류', '냉장고 참여에 실패했습니다.\n\n' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 초기 데이터 로드

@@ -16,7 +16,7 @@ import {
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import BackButton from '../../components/_common/BackButton';
-import InviteMemberModal from '../../components/modals/InviteMemberModal';
+import InviteMemberModal from '../../components/FridgeSettings/InviteMemberModal';
 import { AsyncStorageService } from '../../services/AsyncStorageService';
 import { RootStackParamList } from '../../../App';
 import { styles } from './styles';

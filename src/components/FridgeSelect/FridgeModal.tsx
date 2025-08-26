@@ -1,5 +1,5 @@
 import React from 'react';
-import FridgeModalForm from '../../components/modals/FridgeModalForm';
+import FridgeModalForm from './FridgeModalForm';
 import { FridgeWithRole } from '../../services/AsyncStorageService';
 
 interface FridgeModalsProps {

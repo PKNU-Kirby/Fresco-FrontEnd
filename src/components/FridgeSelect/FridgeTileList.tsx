@@ -38,7 +38,6 @@ export const FridgeList: React.FC<FridgeListProps> = ({
         tiles.push({ id: -3, name: 'TRANSPARENT', isHidden: false } as any);
       }
     }
-
     return tiles;
   };
 

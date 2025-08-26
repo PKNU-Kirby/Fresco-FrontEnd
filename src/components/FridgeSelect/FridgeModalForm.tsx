@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, View, TextInput, TouchableOpacity, Text } from 'react-native';
-import { styles } from './styles';
+import { fridgeModalFormStyles as styles } from './styles';
 
 type Fridge = {
   id: string;

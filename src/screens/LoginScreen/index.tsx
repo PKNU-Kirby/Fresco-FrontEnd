@@ -3,6 +3,7 @@ import { View, Alert, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AsyncStorageService } from '../../services/AsyncStorageService';
+import { DeepLinkHandler } from '../../utils/deepLinkHandler';
 import type { RootStackParamList, SocialProvider } from '../../types/auth';
 import KakaoLoginButton from '../../components/Login/KakaoLoginButton';
 import NaverLoginButton from '../../components/Login/NaverLoginButton';
@@ -41,15 +42,23 @@ const LoginScreen = (): React.JSX.Element => {
         parseInt(user.id, 10),
       );
 
-      /*
-      console.log('>> ERD 기반 사용자 정보 저장 완료:');
-      console.log(`   - User ID: ${user.id}`);
-      console.log(`   - Provider: ${provider}`);
-      console.log(`   - Provider ID: ${providerId}`);
-      console.log(`   - 이름: ${name}`);
-      console.log(`   - 이메일: ${email || '미제공'}`);
-      */
-      navigation.replace('FridgeSelect');
+      // 대기 중인 초대가 있는지 확인
+      const pendingInvite = await DeepLinkHandler.getPendingInvite();
+
+      if (pendingInvite) {
+        // 초대 확인 화면으로 이동
+        navigation.replace('InviteConfirm', {
+          token: pendingInvite.token,
+          fridgeInfo: {
+            name: pendingInvite.fridgeName || '냉장고',
+            inviterName: pendingInvite.inviterName || '사용자',
+            memberCount: pendingInvite.memberCount || 1,
+          },
+        });
+      } else {
+        // 일반적인 냉장고 선택 화면으로 이동
+        navigation.replace('FridgeSelect');
+      }
     } catch (error) {
       console.error('사용자 정보 저장 실패:', error);
       Alert.alert('오류', '로그인 정보 저장에 실패했습니다.');
@@ -115,7 +124,21 @@ const LoginScreen = (): React.JSX.Element => {
           ['refreshToken', result.result.refreshToken],
         ]);
         
-        navigation.replace('FridgeSelect');
+        // 대기 중인 초대 확인
+        const pendingInvite = await DeepLinkHandler.getPendingInvite();
+        
+        if (pendingInvite) {
+          navigation.replace('InviteConfirm', {
+            token: pendingInvite.token,
+            fridgeInfo: {
+              name: pendingInvite.fridgeName || '냉장고',
+              inviterName: pendingInvite.inviterName || '사용자',
+              memberCount: pendingInvite.memberCount || 1,
+            },
+          });
+        } else {
+          navigation.replace('FridgeSelect');
+        }
       } else {
         showErrorAlert(result.message || '로그인에 실패했습니다.');
       }
