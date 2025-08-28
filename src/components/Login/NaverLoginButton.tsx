@@ -37,7 +37,7 @@ interface NaverConfig {
 const NAVER_CONFIG: NaverConfig = {
   consumerKey: Config.NAVER_CLIENT_ID || '',
   consumerSecret: Config.NAVER_CLIENT_SECRET || '',
-  appName: 'fresco_frontend',
+  appName: 'Fresco',
   serviceUrlSchemeIOS: 'naverlogin',
   disableNaverAppAuthIOS: true,
 };
@@ -49,7 +49,13 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
   showErrorAlert,
 }) => {
   useEffect(() => {
-    NaverLogin.initialize(NAVER_CONFIG);
+    NaverLogin.initialize({
+      appName: NAVER_CONFIG.appName,
+      consumerKey: NAVER_CONFIG.consumerKey,
+      consumerSecret: NAVER_CONFIG.consumerSecret,
+      serviceUrlSchemeIOS: NAVER_CONFIG.serviceUrlSchemeIOS,
+      disableNaverAppAuthIOS: true,
+    });
   }, []);
 
   const handleNaverLogin = async (): Promise<void> => {

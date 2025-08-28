@@ -3,6 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Config from 'react-native-config';
+import NaverLogin from '@react-native-seoul/naver-login';
 // Fonts
 // import CustomText from './src/components/common/CustomText';
 // Icons
@@ -26,6 +28,22 @@ import NotificationSettingsScreen from './src/screens/FridgeSettingsScreen/Notif
 
 // 딥링크 핸들러
 import { DeepLinkHandler } from './src/utils/deepLinkHandler';
+
+interface NaverConfig {
+  consumerKey: string;
+  consumerSecret: string;
+  appName: string;
+  serviceUrlSchemeIOS: string;
+  disableNaverAppAuthIOS: boolean;
+}
+
+const NAVER_CONFIG: NaverConfig = {
+  consumerKey: Config.NAVER_CLIENT_ID || '',
+  consumerSecret: Config.NAVER_CLIENT_SECRET || '',
+  appName: 'Fresco',
+  serviceUrlSchemeIOS: 'naverlogin',
+  disableNaverAppAuthIOS: true,
+};
 
 // Stack Navigator Type
 export type RootStackParamList = {
@@ -154,7 +172,20 @@ function MainTabNavigator({
 }
 
 function App(): React.JSX.Element {
+  console.log('NAVER_CLIENT_ID:', Config.NAVER_CLIENT_ID);
+  console.log('NAVER_CLIENT_SECRET:', Config.NAVER_CLIENT_SECRET);
+
   const navigationRef = useRef(null);
+
+  useEffect(() => {
+    NaverLogin.initialize({
+      appName: NAVER_CONFIG.appName,
+      consumerKey: NAVER_CONFIG.consumerKey,
+      consumerSecret: NAVER_CONFIG.consumerSecret,
+      serviceUrlSchemeIOS: NAVER_CONFIG.serviceUrlSchemeIOS,
+      disableNaverAppAuthIOS: true,
+    });
+  }, []);
 
   useEffect(() => {
     // 딥링크 핸들러 초기화
