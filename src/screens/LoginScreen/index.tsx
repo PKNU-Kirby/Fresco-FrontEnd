@@ -47,14 +47,7 @@ const LoginScreen = (): React.JSX.Element => {
 
       if (pendingInvite) {
         // 초대 확인 화면으로 이동
-        navigation.replace('InviteConfirm', {
-          token: pendingInvite.token,
-          fridgeInfo: {
-            name: pendingInvite.fridgeName || '냉장고',
-            inviterName: pendingInvite.inviterName || '사용자',
-            memberCount: pendingInvite.memberCount || 1,
-          },
-        });
+        navigation.replace();
       } else {
         // 일반적인 냉장고 선택 화면으로 이동
         navigation.replace('FridgeSelect');
