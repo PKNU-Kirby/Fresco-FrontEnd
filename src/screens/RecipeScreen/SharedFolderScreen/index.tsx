@@ -5,9 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Image,
-  TextInput,
-  Modal,
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -67,20 +64,13 @@ const FridgeFolderCard: React.FC<{
   >
     <View style={styles.folderIcon}>
       <Icon name="kitchen" size={36} color="#444" />
-      {userFridge.role === 'owner' && (
-        <View style={styles.ownerBadge}>
-          <Icon name="star" size={12} color="#FFD700" />
-        </View>
-      )}
     </View>
     <View style={styles.folderInfo}>
       <Text style={styles.folderName}>{userFridge.fridge.name}</Text>
       <Text style={styles.folderSubInfo}>
         구성원 {userFridge.fridge.memberCount}명 • 레시피{' '}
         {userFridge.recipes.length}개
-        {userFridge.role === 'owner' ? ' • 소유자' : ' • 멤버'}
       </Text>
-      <Text style={styles.folderDebug}>ID: {userFridge.fridge.id}</Text>
     </View>
     <Icon name="chevron-right" size={32} color="#444" />
   </TouchableOpacity>
@@ -95,7 +85,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   const [selectedFridge, setSelectedFridge] = useState<UserFridge | null>(null);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [_currentUser, setCurrentUser] = useState<User | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
 
   // 공유 레시피를 냉장고별로 분류
@@ -109,7 +99,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
       allSharedRecipes.forEach(recipe => {
         const idParts = recipe.id.split('-');
         if (idParts.length >= 3 && idParts[0] === 'shared') {
-          const fridgeId = idParts[1]; // string 타입으로 유지
+          const fridgeId = idParts[1];
           if (!recipesByFridge[fridgeId]) {
             recipesByFridge[fridgeId] = [];
           }
@@ -158,11 +148,10 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
       // 냉장고 정보와 레시피 결합
       const fridgesWithRecipes: UserFridge[] = userFridges.map(fridge => ({
         fridge: {
-          id: parseInt(fridge.id, 10), // number로 변환
+          id: parseInt(fridge.id, 10),
           name: fridge.name,
-          description: '', // FridgeWithRole에는 description이 없음
-          ownerId: fridge.isOwner ? parseInt(user.id, 10) : 0, // 임시값
-          inviteCode: fridge.inviteCode || '', // 초대 코드 추가
+          ownerId: fridge.isOwner ? parseInt(user.id, 10) : 0,
+          inviteCode: fridge.inviteCode || '',
           memberCount: fridge.memberCount,
         },
         role: fridge.role,
@@ -224,7 +213,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <GestureHandlerRootView style={styles.container}>
-        {/* 헤더 */}
+        {/* header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -305,14 +294,6 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
             </View>
           )}
         </ScrollView>
-
-        {/* 맨 위로 버튼 */}
-        <PaginationButton
-          type="scrollToTop"
-          onPress={scrollToTop}
-          visible={showScrollToTop}
-          style={styles.scrollToTopButton}
-        />
       </GestureHandlerRootView>
     </SafeAreaView>
   );
