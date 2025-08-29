@@ -344,8 +344,8 @@ const UseRecipeScreen: React.FC = () => {
         visible={showCompleteErrorModal}
         title="오류"
         message={errorMessage}
-        iconContainer={{ backgroundColor: '#ffeeee' }}
-        icon={{ name: 'error-outline', color: '#FF5722', size: 48 }}
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
         confirmText="확인"
         onConfirm={() => setShowCompleteErrorModal(false)}
         onCancel={() => setShowCompleteErrorModal(false)}

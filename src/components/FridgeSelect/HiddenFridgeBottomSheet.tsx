@@ -32,7 +32,11 @@ export const HiddenFridgesBottomSheet: React.FC<
     const tiles = [...hiddenFridges];
 
     if (tiles.length % 2 === 1) {
-      tiles.push({ id: -4, name: 'TRANSPARENT_HIDDEN', isHidden: true } as any);
+      tiles.push({
+        id: '-4',
+        name: 'TRANSPARENT_HIDDEN',
+        isHidden: true,
+      } as any);
     }
 
     return tiles;

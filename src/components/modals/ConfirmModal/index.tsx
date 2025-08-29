@@ -71,6 +71,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
       transparent
       visible={visible}
       animationType="fade"
+      statusBarTranslucent={true}
       onRequestClose={onCancel}
     >
       <TouchableWithoutFeedback onPress={onCancel}>

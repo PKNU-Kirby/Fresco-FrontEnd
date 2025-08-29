@@ -187,7 +187,7 @@ const AddItemScreen: React.FC = () => {
           title="등록 취소"
           message="작성 중인 내용이 삭제됩니다."
           iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
           confirmText="확인"
           cancelText="계속 작성"
           confirmButtonStyle="danger"
@@ -204,7 +204,7 @@ const AddItemScreen: React.FC = () => {
             items.length === 1 ? '식재료' : `식재료 ${items.length}개`
           }를 냉장고에 추가합니다.`}
           iconContainer={{ backgroundColor: '#d3f0d3' }}
-          icon={{ name: 'add-circle-outline', color: '#32CD32' }}
+          icon={{ name: 'add-circle-outline', color: 'limegreen', size: 48 }}
           confirmText="확인"
           cancelText="취소"
           confirmButtonStyle="primary"
@@ -219,7 +219,7 @@ const AddItemScreen: React.FC = () => {
           title="추가 완료"
           message={`${savedItemsCount}개의 식재료가 냉장고에 추가되었습니다.`}
           iconContainer={{ backgroundColor: '#d3f0d3' }}
-          icon={{ name: 'check', color: 'limegreen' }}
+          icon={{ name: 'check', color: 'limegreen', size: 48 }}
           confirmText="확인"
           cancelText=""
           confirmButtonStyle="primary"
@@ -234,7 +234,7 @@ const AddItemScreen: React.FC = () => {
           title="저장 실패"
           message="식재료 저장 중 오류가 발생했습니다."
           iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
           confirmText="확인"
           cancelText="확인"
           confirmButtonStyle="danger"

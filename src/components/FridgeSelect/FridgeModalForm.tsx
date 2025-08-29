@@ -60,7 +60,7 @@ const FridgeModalForm = ({
   };
 
   return (
-    <Modal transparent animationType="slide">
+    <Modal transparent animationType="fade" statusBarTranslucent={true}>
       <View style={styles.overlay}>
         <View style={styles.modalBox}>
           <TextInput

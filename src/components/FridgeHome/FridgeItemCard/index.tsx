@@ -221,7 +221,8 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
             삭제합니다.
           </Text>
         }
-        icon={{ name: 'delete-outline', color: '#FF6B6B' }}
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'delete-outline', color: '#FF6B6B', size: 48 }}
         confirmText="삭제"
         cancelText="취소"
         confirmButtonStyle="danger"

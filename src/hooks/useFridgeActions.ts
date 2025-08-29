@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { useState } from 'react';
 import {
   AsyncStorageService,
   FridgeWithRole,
@@ -24,88 +24,104 @@ export const useFridgeActions = ({
   editingFridge,
   navigation,
 }: UseFridgeActionsParams) => {
-  const handleLogout = async () => {
-    Alert.alert('로그아웃', '정말 로그아웃하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '로그아웃',
-        style: 'destructive',
-        onPress: async () => {
-          await AsyncStorageService.clearCurrentUser();
-          navigation.replace('Login');
-        },
-      },
-    ]);
+  // 모달 상태들
+  const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(false);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [leaveConfirmVisible, setLeaveConfirmVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [notOwnerModalVisible, setNotOwnerModalVisible] = useState(false);
+  const [hideToggleModalVisible, setHideToggleModalVisible] = useState(false);
+
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalTitle, setModalTitle] = useState('');
+  const [selectedFridge, setSelectedFridge] = useState<FridgeWithRole | null>(
+    null,
+  );
+
+  const handleLogout = () => {
+    setLogoutConfirmVisible(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    setLogoutConfirmVisible(false);
+    await AsyncStorageService.clearCurrentUser();
+    navigation.replace('Login');
   };
 
   const handleEditFridge = (fridge: FridgeWithRole) => {
     if (!fridge.isOwner) {
-      Alert.alert('알림', '냉장고 소유자만 편집할 수 있습니다.');
+      setNotOwnerModalVisible(true);
       return;
     }
     setEditingFridge(fridge);
     setIsEditModalVisible(true);
   };
 
-  const handleLeaveFridge = async (fridge: FridgeWithRole) => {
+  const handleLeaveFridge = (fridge: FridgeWithRole) => {
     if (!currentUser) return;
 
+    setSelectedFridge(fridge);
     if (fridge.isOwner) {
-      Alert.alert(
-        '냉장고 삭제',
-        `${fridge.name}을(를) 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`,
-        [
-          { text: '취소', style: 'cancel' },
-          {
-            text: '삭제',
-            style: 'destructive',
-            onPress: async () => {
-              try {
-                const success = await AsyncStorageService.deleteRefrigerator(
-                  parseInt(fridge.id, 10),
-                );
-                if (success) {
-                  await loadUserFridges();
-                  Alert.alert('성공', '냉장고가 삭제되었습니다.');
-                } else {
-                  Alert.alert('오류', '냉장고 삭제에 실패했습니다.');
-                }
-              } catch (error) {
-                console.error('Delete fridge error:', error);
-                Alert.alert('오류', '냉장고 삭제에 실패했습니다.');
-              }
-            },
-          },
-        ],
-      );
-      return;
+      setDeleteConfirmVisible(true);
+    } else {
+      setLeaveConfirmVisible(true);
     }
+  };
 
-    Alert.alert('냉장고 나가기', `${fridge.name}에서 나가시겠습니까?`, [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '나가기',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            const success =
-              await AsyncStorageService.removeUserFromRefrigerator(
-                parseInt(fridge.id, 10),
-                parseInt(currentUser.id, 10),
-              );
-            if (success) {
-              await loadUserFridges();
-              Alert.alert('성공', '냉장고에서 나왔습니다.');
-            } else {
-              Alert.alert('오류', '냉장고 나가기에 실패했습니다.');
-            }
-          } catch (error) {
-            console.error('Leave fridge error:', error);
-            Alert.alert('오류', '냉장고 나가기에 실패했습니다.');
-          }
-        },
-      },
-    ]);
+  const handleDeleteConfirm = async () => {
+    if (!selectedFridge) return;
+
+    setDeleteConfirmVisible(false);
+    try {
+      const success = await AsyncStorageService.deleteRefrigerator(
+        parseInt(selectedFridge.id, 10),
+      );
+      if (success) {
+        await loadUserFridges();
+        setModalTitle('성공');
+        setModalMessage('냉장고가 삭제되었습니다.');
+        setSuccessModalVisible(true);
+      } else {
+        setModalTitle('오류');
+        setModalMessage('냉장고 삭제에 실패했습니다.');
+        setErrorModalVisible(true);
+      }
+    } catch (error) {
+      console.error('Delete fridge error:', error);
+      setModalTitle('오류');
+      setModalMessage('냉장고 삭제에 실패했습니다.');
+      setErrorModalVisible(true);
+    }
+    setSelectedFridge(null);
+  };
+
+  const handleLeaveConfirm = async () => {
+    if (!currentUser || !selectedFridge) return;
+
+    setLeaveConfirmVisible(false);
+    try {
+      const success = await AsyncStorageService.removeUserFromRefrigerator(
+        parseInt(selectedFridge.id, 10),
+        parseInt(currentUser.id, 10),
+      );
+      if (success) {
+        await loadUserFridges();
+        setModalTitle('성공');
+        setModalMessage('냉장고에서 나왔습니다.');
+        setSuccessModalVisible(true);
+      } else {
+        setModalTitle('오류');
+        setModalMessage('냉장고 나가기에 실패했습니다.');
+        setErrorModalVisible(true);
+      }
+    } catch (error) {
+      console.error('Leave fridge error:', error);
+      setModalTitle('오류');
+      setModalMessage('냉장고 나가기에 실패했습니다.');
+      setErrorModalVisible(true);
+    }
+    setSelectedFridge(null);
   };
 
   const handleToggleHidden = async (fridge: FridgeWithRole) => {
@@ -122,10 +138,14 @@ export const useFridgeActions = ({
       const message = fridge.isHidden
         ? '냉장고를 표시했습니다.'
         : '냉장고를 숨겼습니다.';
-      Alert.alert('성공', message);
+      setModalTitle('성공');
+      setModalMessage(message);
+      setHideToggleModalVisible(true);
     } catch (error) {
       console.error('Toggle hidden error:', error);
-      Alert.alert('오류', '냉장고 숨김 설정에 실패했습니다.');
+      setModalTitle('오류');
+      setModalMessage('냉장고 숨김 설정에 실패했습니다.');
+      setErrorModalVisible(true);
     }
   };
 
@@ -140,12 +160,16 @@ export const useFridgeActions = ({
 
       if (result) {
         await loadUserFridges();
-        Alert.alert('성공', '새 냉장고가 생성되었습니다.');
+        setModalTitle('성공');
+        setModalMessage('새 냉장고가 생성되었습니다.');
+        setSuccessModalVisible(true);
         setIsAddModalVisible(false);
       }
     } catch (error) {
       console.error('Add fridge error:', error);
-      Alert.alert('오류', '냉장고 생성에 실패했습니다.');
+      setModalTitle('오류');
+      setModalMessage('냉장고 생성에 실패했습니다.');
+      setErrorModalVisible(true);
     }
   };
 
@@ -161,12 +185,16 @@ export const useFridgeActions = ({
       );
 
       await loadUserFridges();
-      Alert.alert('성공', '냉장고 정보가 업데이트되었습니다.');
+      setModalTitle('성공');
+      setModalMessage('냉장고 정보가 업데이트되었습니다.');
+      setSuccessModalVisible(true);
       setIsEditModalVisible(false);
       setEditingFridge(null);
     } catch (error) {
       console.error('Update fridge error:', error);
-      Alert.alert('오류', '냉장고 정보 업데이트에 실패했습니다.');
+      setModalTitle('오류');
+      setModalMessage('냉장고 정보 업데이트에 실패했습니다.');
+      setErrorModalVisible(true);
     }
   };
 
@@ -177,5 +205,30 @@ export const useFridgeActions = ({
     handleToggleHidden,
     handleAddFridge,
     handleUpdateFridge,
+    // 모달 상태와 핸들러들
+    modals: {
+      logoutConfirmVisible,
+      deleteConfirmVisible,
+      leaveConfirmVisible,
+      successModalVisible,
+      errorModalVisible,
+      notOwnerModalVisible,
+      hideToggleModalVisible,
+      modalMessage,
+      modalTitle,
+      selectedFridge,
+    },
+    modalHandlers: {
+      setLogoutConfirmVisible,
+      setDeleteConfirmVisible,
+      setLeaveConfirmVisible,
+      setSuccessModalVisible,
+      setErrorModalVisible,
+      setNotOwnerModalVisible,
+      setHideToggleModalVisible,
+      handleLogoutConfirm,
+      handleDeleteConfirm,
+      handleLeaveConfirm,
+    },
   };
 };

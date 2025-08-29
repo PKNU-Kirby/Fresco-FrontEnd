@@ -101,7 +101,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
 
   // Event handlers
   const handleBackPress = () => {
-    navigation.goBack();
+    navigation.navigate('FridgeSelect');
   };
 
   const handleSettingsPress = () => {
