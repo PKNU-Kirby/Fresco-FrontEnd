@@ -5,6 +5,8 @@ import {
   Alert,
   Text,
   SafeAreaView,
+  PermissionsAndroid,
+  Platform,
 } from 'react-native';
 import {
   useNavigation,
@@ -87,7 +89,31 @@ const CameraScreen: React.FC = () => {
     }
   }, []);
 
-  const openCamera = useCallback(() => {
+  const openCamera = useCallback(async () => {
+    // Android 권한 체크
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: '카메라 권한',
+            message: '식재료 촬영을 위해 카메라 권한이 필요합니다.',
+            buttonNeutral: '나중에',
+            buttonNegative: '취소',
+            buttonPositive: '확인',
+          },
+        );
+
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          Alert.alert('권한 필요', '카메라 권한이 필요합니다.');
+          return;
+        }
+      } catch (err) {
+        console.warn(err);
+        return;
+      }
+    }
+
     setIsLoading(true);
     launchCamera(cameraOptions, handleCameraResponse);
   }, [handleCameraResponse]);

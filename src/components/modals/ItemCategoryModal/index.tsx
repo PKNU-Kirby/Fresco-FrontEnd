@@ -36,6 +36,7 @@ const ItemCategoryModal: React.FC<ItemCategoryModalProps> = ({
       visible={visible}
       transparent
       animationType="fade"
+      statusBarTranslucent={true}
       onRequestClose={handleClose}
     >
       <View style={styles.modalOverlay}>

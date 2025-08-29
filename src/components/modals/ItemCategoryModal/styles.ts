@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet, Platform, StatusBar } from 'react-native';
 
 export const styles = StyleSheet.create({
   // 모달 기본 스타일
@@ -7,6 +7,8 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop:
+      Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 8 : 8,
   },
   modalContent: {
     backgroundColor: '#fff',

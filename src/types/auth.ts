@@ -206,8 +206,47 @@ export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   FridgeSelect: undefined;
-  MainTabs: { fridgeId: number; fridgeName: string };
-  // 기타 스크린들...
+  InviteConfirm: {
+    token: string;
+    fridgeInfo: {
+      name: string;
+      inviterName: string;
+      memberCount?: number;
+    };
+  };
+  MainTabs: { fridgeId: string; fridgeName: string };
+  AddItemScreen: {
+    fridgeId: string;
+    recognizedData?: {
+      name?: string;
+      quantity?: string;
+      unit?: string;
+      expiryDate?: string;
+      itemCategory?: string;
+      photo?: string;
+    };
+  };
+  CameraScreen: {
+    fridgeId: string;
+  };
+  PhotoPreview: {
+    photo: {
+      uri: string;
+      width?: number;
+      height?: number;
+      fileSize?: number;
+      type?: string;
+      fileName?: string;
+    };
+    fridgeId: string;
+  };
+  FridgeSettings: {
+    fridgeId: string;
+    fridgeName: string;
+    userRole: 'owner' | 'member'; // 권한에 따른 UI 분리
+  };
+  UsageHistoryScreen: { fridgeId: number };
+  NotificationSettingsScreen: {};
 };
 
 // ============================================================================

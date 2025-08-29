@@ -21,6 +21,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
       visible={visible}
       transparent
       animationType="fade"
+      statusBarTranslucent={true}
       onRequestClose={onClose}
     >
       {' '}

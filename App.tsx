@@ -82,7 +82,7 @@ export type RootStackParamList = {
       type?: string;
       fileName?: string;
     };
-    fridgeId: number;
+    fridgeId: string;
   };
   FridgeSettings: {
     fridgeId: string;

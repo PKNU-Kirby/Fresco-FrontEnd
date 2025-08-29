@@ -135,7 +135,7 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
             style={styles.searchInput}
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="레시피 제목을 검색해 보세요"
+            placeholder="레시피 이름을 검색해 보세요"
             placeholderTextColor="#999"
             returnKeyType="search"
             onSubmitEditing={handleSearch}

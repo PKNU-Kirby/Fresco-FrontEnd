@@ -1,5 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Platform,
+} from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -33,7 +40,7 @@ const mockSharedRecipes: Recipe[] = [];
 
 // Mock 데이터 생성 함수 (초기 데이터용)
 const generateInitialMockRecipes = (count: number): Recipe[] => {
-  const baseRecipes = [];
+  const baseRecipes = [{ title: '레시피 이름' }];
 
   return Array.from({ length: count }, (_, index) => {
     const baseRecipe = baseRecipes[index % baseRecipes.length];
@@ -42,7 +49,6 @@ const generateInitialMockRecipes = (count: number): Recipe[] => {
       title: `${baseRecipe.title} ${
         Math.floor(index / baseRecipes.length) + 1
       }`,
-      description: baseRecipe.description,
       createdAt: `2024-01-${String(15 - (index % 15)).padStart(2, '0')}`,
     };
   });

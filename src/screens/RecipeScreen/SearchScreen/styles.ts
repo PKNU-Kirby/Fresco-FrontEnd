@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: {
@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 25,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: Platform.OS === 'android' ? 4 : 12,
   },
   searchIcon: {
     marginRight: 8,

@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -84,7 +84,8 @@ export const fridgeHeaderStyles = StyleSheet.create({
     minHeight: scale(60),
     backgroundColor: '#e8f5e8',
     paddingHorizontal: scale(16),
-    paddingTop: scale(8),
+    paddingTop:
+      Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 8 : 8,
     paddingBottom: scale(8),
     shadowColor: '#000',
     shadowOffset: {

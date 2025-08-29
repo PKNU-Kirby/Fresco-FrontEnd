@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -25,12 +25,13 @@ export const styles = StyleSheet.create({
 
   /** Header Style */
   header: {
+    paddingTop:
+      Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 8 : 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#e8f5e8',
     paddingHorizontal: scale(16),
-    paddingTop: scale(8),
     paddingBottom: scale(8),
     shadowColor: '#000',
     shadowOffset: {
@@ -39,7 +40,7 @@ export const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: scale(3.84),
-    elevation: scale(5),
+    elevation: scale(20),
   },
   leftHeader: {
     width: scale(76),
@@ -222,7 +223,7 @@ export const fridgeTileStyles = StyleSheet.create({
     textAlign: 'center',
     marginTop: scale(12),
     maxWidth: scale(100),
-    lineHeight: scale(16),
+    lineHeight: Platform.OS === 'android' ? scale(17) : scale(16),
   },
   smallFridgeName: {
     fontSize: scale(12),
@@ -435,7 +436,7 @@ export const fridgeModalFormStyles = StyleSheet.create({
   buttonRowLeftText: {
     fontSize: 16,
     color: '#333',
-    fontWeight: '900',
+    fontWeight: Platform.OS === 'android' ? '700' : '900',
   },
   buttonRowRight: {
     flex: 1,

@@ -6,22 +6,21 @@ import type {
   GetProfileResponse,
 } from '@react-native-seoul/naver-login';
 import Config from 'react-native-config';
-import {
-  logBackendLoginRequest,
-  logCurrentTokens,
-} from '../../utils/apiAuthLogger';
 import styles from './styles';
 import type { SocialProvider, NaverProfile } from '../../types';
 
 interface NaverLoginButtonProps {
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  saveUserDataAndNavigate: (
+  handleSocialLoginWithAPI: (
     provider: SocialProvider,
-    providerId: string,
-    name: string,
-    email?: string,
-    profileImage?: string,
+    socialAccessToken: string,
+    userProfile: {
+      providerId: string;
+      name: string;
+      email?: string;
+      profileImage?: string;
+    },
   ) => Promise<void>;
   showErrorAlert: (message: string) => void;
 }
@@ -45,7 +44,7 @@ const NAVER_CONFIG: NaverConfig = {
 const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
   isLoading,
   setIsLoading,
-  saveUserDataAndNavigate,
+  handleSocialLoginWithAPI,
   showErrorAlert,
 }) => {
   useEffect(() => {
@@ -60,7 +59,6 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
 
   const handleNaverLogin = async (): Promise<void> => {
     if (isLoading) return;
-
     setIsLoading(true);
 
     try {
@@ -83,8 +81,6 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
         throw new Error('네이버 사용자 정보를 가져올 수 없습니다');
       }
 
-      //console.log('>> 네이버 소셜 로그인 성공!');
-
       const profile = profileResult.response as NaverProfile;
       const providerId = String(profile.id);
       const userName =
@@ -92,24 +88,15 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
       const userEmail = profile.email || undefined;
       const profileImageUrl = profile.profile_image || undefined;
 
-      // [API] 백엔드 로그인 요청 데이터 로깅
-      logBackendLoginRequest('NAVER', successResponse.accessToken, providerId);
-
-      // 사용자 정보 저장 & 화면 이동
-      await saveUserDataAndNavigate(
-        'NAVER',
+      // 이 부분이 바뀝니다
+      await handleSocialLoginWithAPI('NAVER', successResponse.accessToken, {
         providerId,
-        userName,
-        userEmail,
-        profileImageUrl,
-      );
-
-      // 현재 토큰 상태 확인
-      setTimeout(() => {
-        logCurrentTokens();
-      }, 100);
+        name: userName,
+        email: userEmail,
+        profileImage: profileImageUrl,
+      });
     } catch (error) {
-      // console.error('>> 네이버 로그인 실패:', error);
+      console.error('네이버 로그인 실패:', error);
       const message =
         error instanceof Error ? error.message : '네이버 로그인 실패';
       showErrorAlert(message);
