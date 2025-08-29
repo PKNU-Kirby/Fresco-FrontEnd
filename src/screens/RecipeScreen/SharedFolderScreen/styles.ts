@@ -58,7 +58,6 @@ export const styles = StyleSheet.create({
   infoContainer: {
     flex: 1,
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 8,
     paddingVertical: 12,
@@ -66,14 +65,13 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   infoIcon: {
-    flex: 1,
     marginLeft: 8,
+    marginRight: 16,
   },
   infoText: {
     fontSize: 15,
     color: '#666',
     marginRight: 8,
-    flex: 12,
     lineHeight: 18,
   },
 
@@ -328,22 +326,6 @@ export const styles = StyleSheet.create({
     color: '#888',
     marginTop: 2,
     fontStyle: 'italic',
-  },
-
-  // 빈 상태 액션 버튼들
-  emptyActions: {
-    flexDirection: 'row',
-    marginTop: 24,
-    gap: 12,
-  },
-
-  emptyAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    gap: 6,
   },
 
   createAction: {
