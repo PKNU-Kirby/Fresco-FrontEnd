@@ -7,7 +7,7 @@ import { HiddenFridgesBottomSheet } from '../../components/FridgeSelect/HiddenFr
 import { FridgeHeader } from '../../components/FridgeSelect/FridgeHeader';
 import { FridgeList } from '../../components/FridgeSelect/FridgeTileList';
 import { FridgeModals } from '../../components/FridgeSelect/FridgeModal';
-import ConfirmModal from '../../components/modals/ConfirmModal';
+import ConfirmModal from '../../components/Recipe/modals/ConfirmModal';
 //
 import { useFridgeSelect } from '../../hooks/useFridgeSelect';
 import { useFridgeActions } from '../../hooks/useFridgeActions';

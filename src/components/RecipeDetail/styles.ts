@@ -131,33 +131,19 @@ export const styles = StyleSheet.create({
 
   // Recipe Summary ///////////////////////////////////////
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#444',
     margin: 8,
-  },
-  descriptionInput: {
-    fontSize: 16,
-    color: '#666',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  description: {
-    fontSize: 16,
-    color: '#666',
-    backgroundColor: '#edededff',
-    marginTop: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    lineHeight: 24,
   },
 
   // Ingredients //////////////////////////////////////////
+  ingredientInfo: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 44,
+    height: 44,
+  },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -203,9 +189,11 @@ export const styles = StyleSheet.create({
     padding: 4,
   },
   ingredientText: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: 17,
+    color: '#555',
     lineHeight: 24,
+    marginLeft: 8,
+    fontWeight: '600',
   },
 
   // Steps ////////////////////////////////////////////////
@@ -280,17 +268,19 @@ export const styles = StyleSheet.create({
   actionButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 32,
-    gap: 12,
+    marginBottom: 24,
+    marginTop: 8,
+    marginHorizontal: 8,
+    gap: 16,
   },
   useRecipeButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FF6B35',
+    backgroundColor: 'limegreen',
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
     gap: 8,
   },
   shareButton: {
@@ -298,44 +288,60 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'limegreen',
+    backgroundColor: 'lightgray',
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
     gap: 8,
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '900',
     color: '#f8f8f8',
   },
   bottomSpacer: {
     height: 20,
   },
+  shareButtonText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '600',
+  },
 
   // Modal Styles /////////////////////////////////////////
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBody: {
+    gap: 16,
+    padding: 8,
+  },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f8f8f8',
   },
   modalHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingLeft: 8,
+    paddingVertical: 8,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#444',
   },
   modalContent: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    backgroundColor: 'white',
+    margin: 20,
+    borderRadius: 12,
+    padding: 20,
+    maxWidth: 300,
+    width: '80%',
   },
   modalSubtitle: {
     fontSize: 16,
@@ -393,71 +399,82 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
   },
-
   ingredientMainInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-
-  statusIcon: {
-    marginRight: 8,
-  },
-
   availableIngredient: {
-    color: '#4CAF50',
-    fontWeight: '600',
+    color: '#000',
+    fontWeight: '700',
   },
 
   alternativesContainer: {
-    marginLeft: 20,
-    marginTop: 8,
+    marginHorizontal: 8,
+    marginTop: 4,
     marginBottom: 12,
     paddingLeft: 16,
-    paddingRight: 12,
+    paddingRight: 16,
     paddingVertical: 12,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#f8f8f8',
     borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: '#FF9800',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
 
   alternativesTitle: {
-    fontSize: 13,
+    fontSize: 16,
     color: '#555',
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-
-  alternativeItem: {
-    marginBottom: 6,
+    fontWeight: '700',
+    marginBottom: 12,
   },
 
   alternativeInfo: {
+    backgroundColor: '#eaeaead1',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 4,
     flex: 1,
+    alignContent: 'center',
   },
-
+  alternativeTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   alternativeName: {
     fontSize: 13,
     color: '#333',
     fontWeight: '500',
     marginBottom: 2,
+    lineHeight: 16,
+  },
+  selectedIcon: {
+    marginLeft: 4,
+    paddingBottom: 2,
   },
 
   alternativeReason: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#666',
-    fontStyle: 'italic',
-    lineHeight: 16,
+    lineHeight: 20,
+    fontWeight: '600',
   },
-
+  alternativeReasonExpiaryDate: {
+    fontStyle: 'italic',
+  },
   ingredientLegend: {
     marginTop: 16,
     padding: 12,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#f8f8f8',
     borderRadius: 8,
     gap: 8,
   },
@@ -465,11 +482,10 @@ export const styles = StyleSheet.create({
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 2,
   },
 
   legendText: {
-    fontSize: 11,
+    fontSize: 14,
     color: '#666',
     marginLeft: 6,
   },
@@ -487,112 +503,13 @@ export const styles = StyleSheet.create({
   },
 
   // 선택된 대체재 아이템 스타일
-  selectedAlternativeItem: {
-    backgroundColor: '#E8F5E8',
-    borderRadius: 8,
-    padding: 8,
-    marginBottom: 4,
-    borderWidth: 2,
-    borderColor: '#4CAF50',
-  },
+  selectedAlternativeItem: {},
 
   selectedAlternativeText: {
-    color: '#2E7D32',
-    fontWeight: '600',
-  },
-
-  // 기본 대체재 아이템 (선택되지 않은 상태)
-  alternativeItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-    padding: 8,
-    borderRadius: 6,
-    backgroundColor: 'transparent',
-  },
-
-  alternativeInfo: {
-    flex: 1,
-  },
-
-  alternativeName: {
-    fontSize: 13,
-    color: '#333',
-    fontWeight: '500',
-    marginBottom: 2,
-  },
-
-  alternativeReason: {
-    fontSize: 11,
-    color: '#666',
-    fontStyle: 'italic',
-    lineHeight: 16,
-  },
-
-  // 기존 스타일 수정
-  ingredientRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-  },
-
-  ingredientMainInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-
-  ingredientText: {
+    color: '#444',
     fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
+    fontWeight: '800',
   },
 
-  availableIngredient: {
-    color: '#2E7D32',
-    fontWeight: '600',
-  },
-
-  alternativesContainer: {
-    marginLeft: 20,
-    marginTop: 8,
-    marginBottom: 12,
-    paddingLeft: 16,
-    paddingRight: 12,
-    paddingVertical: 12,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: '#FF9800',
-  },
-
-  alternativesTitle: {
-    fontSize: 13,
-    color: '#555',
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-
-  ingredientLegend: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 8,
-    gap: 8,
-  },
-
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 2,
-  },
-
-  legendText: {
-    fontSize: 11,
-    color: '#666',
-    marginLeft: 2,
-  },
+  ///////////////////////////////////////////////
 });

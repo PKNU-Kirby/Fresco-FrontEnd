@@ -86,7 +86,8 @@ export const cardStyles = StyleSheet.create({
   expiaryContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 0.97,
+    flex: 1.05,
+    marginBottom: 4,
   },
   editableExpiry: {
     marginLeft: scale(10),

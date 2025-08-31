@@ -14,7 +14,7 @@ import { AddItemContent } from '../../components/AddItem/AddItemContent';
 import { AddItemActions } from '../../components/AddItem/AddItemActions';
 import { useAddItemLogic } from '../../hooks/AddItem/useAddItemLogic';
 import { useAddItemSave } from '../../hooks/AddItem/useAddItemSave';
-import ConfirmModal from '../../components/modals/ConfirmModal';
+import ConfirmModal from '../../components/Recipe/modals/ConfirmModal';
 import { addItemStyles as styles } from './styles';
 import { RootStackParamList } from '../../../App';
 

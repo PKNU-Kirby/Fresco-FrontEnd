@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
-import DatePicker from '../../../components/modals/DatePicker';
+import DatePicker from '../../Recipe/modals/DatePicker';
 import SliderQuantityEditor from './SliderQuantityEditor';
 import UnitSelector from './UnitSelector';
 import DeleteButton from './DeleteButton';
-import ConfirmModal from '../../../components/modals/ConfirmModal';
+import ConfirmModal from '../../Recipe/modals/ConfirmModal';
 import { cardStyles as styles } from './styles';
 
 type FridgeItem = {

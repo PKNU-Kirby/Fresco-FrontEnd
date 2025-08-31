@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import InfoModal from '../../../components/UseRecipe/InfoModal';
 import StepsSection from '../../../components/UseRecipe/StepsSection';
-import ConfirmModal from '../../../components/modals/ConfirmModal';
+import ConfirmModal from '../../../components/Recipe/modals/ConfirmModal';
 import EnhancedIngredientCard from '../../../components/UseRecipe/EnhancedIngredientCard';
 
 import { updateFridgeItem } from '../../../utils/fridgeStorage';

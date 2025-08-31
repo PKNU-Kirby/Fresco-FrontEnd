@@ -391,6 +391,14 @@ const RecipeDetailScreen: React.FC = () => {
             }
           />
 
+          {/* Action Buttons */}
+          {!isEditMode && currentRecipe.id && (
+            <RecipeActionButtons
+              isSharedRecipe={isSharedRecipe}
+              onUseRecipe={navigateToUseRecipe}
+              onShare={openShareModal}
+            />
+          )}
           {/* Ingredients - fridgeId를 숫자로 변환해서 전달 */}
           <IngredientsSection
             ingredients={getIngredientsArray(currentRecipe.ingredients)}
@@ -419,15 +427,6 @@ const RecipeDetailScreen: React.FC = () => {
               setCurrentRecipe(prev => ({ ...prev, referenceUrl: text }))
             }
           />
-
-          {/* Action Buttons */}
-          {!isEditMode && currentRecipe.id && (
-            <RecipeActionButtons
-              isSharedRecipe={isSharedRecipe}
-              onUseRecipe={navigateToUseRecipe}
-              onShare={openShareModal}
-            />
-          )}
 
           <View style={styles.bottomSpacer} />
         </ScrollView>

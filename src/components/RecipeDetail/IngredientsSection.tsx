@@ -12,6 +12,7 @@ import {
   getFridgeItemsByFridgeId,
   FridgeItem,
 } from '../../utils/fridgeStorage';
+import { IngredientInfoModal } from './IngredientInfoModal'; // 새로운 컴포넌트 import
 import { styles } from './styles';
 
 // 대체재 매핑 데이터
@@ -56,7 +57,6 @@ export interface EnhancedIngredient extends RecipeIngredient {
     fridgeItem: FridgeItem;
     reason: string;
   }>;
-  // UseRecipe에서 사용할 선택된 냉장고 재료 정보
   selectedFridgeItem?: FridgeItem;
   isAlternativeSelected?: boolean;
 }
@@ -72,7 +72,6 @@ interface IngredientsSectionProps {
     field: keyof RecipeIngredient,
     value: string,
   ) => void;
-  // UseRecipe로 전달할 데이터를 위한 콜백
   onEnhancedIngredientsChange?: (ingredients: EnhancedIngredient[]) => void;
 }
 
@@ -92,7 +91,9 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
     new Set(),
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string>('');
+  const [showInfoModal, setShowInfoModal] = useState(false);
+
+  // ... 기존의 모든 함수들 (normalizeString, findMatches, findAlternatives 등)은 그대로 유지
 
   // 문자열 정규화 함수
   const normalizeString = (str: string): string => {
@@ -190,15 +191,11 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
           alternatives: [],
         }));
         setEnhancedIngredients(basicIngredients);
-        setDebugInfo(
-          `냉장고 ID: ${fridgeId || 'none'}, 편집모드: ${isEditMode}`,
-        );
         onEnhancedIngredientsChange?.(basicIngredients);
         return;
       }
 
       setIsLoading(true);
-      setDebugInfo('실제 냉장고 데이터 로딩 중...');
 
       try {
         const fridgeItems = await getFridgeItemsByFridgeId(fridgeId.toString());
@@ -210,7 +207,6 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
               ? findAlternatives(ingredient.name, fridgeItems)
               : [];
 
-          // 기본 선택: 정확한 매칭이 있으면 첫 번째, 없으면 첫 번째 대체재
           let selectedFridgeItem: FridgeItem | undefined;
           let isAlternativeSelected = false;
 
@@ -233,9 +229,6 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
         });
 
         setEnhancedIngredients(enhanced);
-        setDebugInfo(`실제 냉장고 재료 ${fridgeItems.length}개 매칭 완료`);
-
-        // 부모 컴포넌트에 전달
         onEnhancedIngredientsChange?.(enhanced);
       } catch (error) {
         console.error('에러 발생:', error);
@@ -246,7 +239,6 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
           alternatives: [],
         }));
         setEnhancedIngredients(errorIngredients);
-        setDebugInfo(`에러: ${error.message}`);
         onEnhancedIngredientsChange?.(errorIngredients);
       } finally {
         setIsLoading(false);
@@ -267,7 +259,7 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
     setExpandedIngredients(newExpanded);
   };
 
-  // 냉장고 재료 선택 변경 (UseRecipe에서 사용할 재료 선택)
+  // 냉장고 재료 선택 변경
   const handleFridgeItemSelection = (
     ingredientId: string,
     fridgeItem: FridgeItem,
@@ -291,11 +283,11 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
   // 재료 상태 동그라미
   const getStatusCircle = (ingredient: EnhancedIngredient) => {
     if (ingredient.isAvailable) {
-      return '🟢'; // 초록
+      return <Icon name={'check-circle'} size={24} color={'limegreen'} />;
     } else if (ingredient.alternatives.length > 0) {
-      return '🟠'; // 주황
+      return <Icon name={'check-circle'} size={24} color={'#fdaa26'} />;
     }
-    return '🔴'; // 빨강
+    return <Icon name={'cancel'} size={24} color={'tomato'} />;
   };
 
   // 대체재 섹션 렌더링
@@ -315,12 +307,11 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
       <View style={styles.alternativesContainer}>
         {hasExactMatches && (
           <>
-            <Text style={styles.alternativesTitle}>✅ 냉장고에 있는 재료:</Text>
+            <Text style={styles.alternativesTitle}>보유 재료 정보</Text>
             {ingredient.exactMatches.map((item, index) => (
               <TouchableOpacity
                 key={index}
                 style={[
-                  styles.alternativeItem,
                   ingredient.selectedFridgeItem?.id === item.id &&
                     !ingredient.isAlternativeSelected &&
                     styles.selectedAlternativeItem,
@@ -330,25 +321,36 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
                 }
               >
                 <View style={styles.alternativeInfo}>
-                  <Text
-                    style={[
-                      styles.alternativeName,
-                      ingredient.selectedFridgeItem?.id === item.id &&
-                        !ingredient.isAlternativeSelected &&
-                        styles.selectedAlternativeText,
-                    ]}
-                  >
-                    • {item.name} ({item.quantity}
-                    {item.unit || '개'})
-                  </Text>
+                  <View style={styles.alternativeTitleContainer}>
+                    <Text
+                      style={[
+                        styles.alternativeName,
+                        ingredient.selectedFridgeItem?.id === item.id &&
+                          !ingredient.isAlternativeSelected &&
+                          styles.selectedAlternativeText,
+                      ]}
+                    >
+                      {item.name} {item.quantity}
+                      {item.unit || '개'}
+                    </Text>
+                    {ingredient.selectedFridgeItem?.id === item.id &&
+                      !ingredient.isAlternativeSelected && (
+                        <View style={styles.selectedIcon}>
+                          <Icon
+                            name="check-circle"
+                            size={20}
+                            color="limegreen"
+                          />
+                        </View>
+                      )}
+                  </View>
                   <Text style={styles.alternativeReason}>
-                    유통기한: {item.expiryDate}
+                    유통기한:{' '}
+                    <Text style={styles.alternativeReasonExpiaryDate}>
+                      {item.expiryDate}
+                    </Text>
                   </Text>
                 </View>
-                {ingredient.selectedFridgeItem?.id === item.id &&
-                  !ingredient.isAlternativeSelected && (
-                    <Icon name="check-circle" size={20} color="#4CAF50" />
-                  )}
               </TouchableOpacity>
             ))}
           </>
@@ -357,13 +359,12 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
         {hasAlternatives && (
           <>
             <Text style={styles.alternativesTitle}>
-              {hasExactMatches ? '🔄 다른 대체재:' : '💡 냉장고에 있는 대체재:'}
+              {hasExactMatches ? '대체 식재료' : '대체 가능 식재료'}
             </Text>
             {ingredient.alternatives.map((alternative, index) => (
               <TouchableOpacity
                 key={index}
                 style={[
-                  styles.alternativeItem,
                   ingredient.selectedFridgeItem?.id ===
                     alternative.fridgeItem.id &&
                     ingredient.isAlternativeSelected &&
@@ -378,28 +379,32 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
                 }
               >
                 <View style={styles.alternativeInfo}>
-                  <Text
-                    style={[
-                      styles.alternativeName,
-                      ingredient.selectedFridgeItem?.id ===
-                        alternative.fridgeItem.id &&
-                        ingredient.isAlternativeSelected &&
-                        styles.selectedAlternativeText,
-                    ]}
-                  >
-                    • {alternative.fridgeItem.name} (
-                    {alternative.fridgeItem.quantity}
-                    {alternative.fridgeItem.unit || '개'})
-                  </Text>
+                  <View style={styles.alternativeTitleContainer}>
+                    <Text
+                      style={[
+                        styles.alternativeName,
+                        ingredient.selectedFridgeItem?.id ===
+                          alternative.fridgeItem.id &&
+                          ingredient.isAlternativeSelected &&
+                          styles.selectedAlternativeText,
+                      ]}
+                    >
+                      {alternative.fridgeItem.name}{' '}
+                      {alternative.fridgeItem.quantity}
+                      {alternative.fridgeItem.unit || '개'}
+                    </Text>
+                    {ingredient.selectedFridgeItem?.id ===
+                      alternative.fridgeItem.id &&
+                      ingredient.isAlternativeSelected && (
+                        <View style={styles.selectedIcon}>
+                          <Icon name="check-circle" size={20} color="#FF9800" />
+                        </View>
+                      )}
+                  </View>
                   <Text style={styles.alternativeReason}>
                     {alternative.reason}
                   </Text>
                 </View>
-                {ingredient.selectedFridgeItem?.id ===
-                  alternative.fridgeItem.id &&
-                  ingredient.isAlternativeSelected && (
-                    <Icon name="check-circle" size={20} color="#FF9800" />
-                  )}
               </TouchableOpacity>
             ))}
           </>
@@ -412,6 +417,12 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>재료</Text>
+        <TouchableOpacity
+          style={styles.ingredientInfo}
+          onPress={() => setShowInfoModal(true)}
+        >
+          <Icon name={'info-outline'} size={24} color={'#444'} />
+        </TouchableOpacity>
         {isEditMode && (
           <TouchableOpacity style={styles.addButton} onPress={onAddIngredient}>
             <Icon name="add" size={20} color="#29a448ff" />
@@ -427,26 +438,9 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
         )}
       </View>
 
-      {/* 디버깅 정보 표시 */}
-      {__DEV__ && (
-        <View
-          style={{
-            padding: 8,
-            backgroundColor: '#E3F2FD',
-            marginBottom: 8,
-            borderRadius: 4,
-          }}
-        >
-          <Text style={{ fontSize: 10, color: '#1976D2' }}>
-            Debug: {debugInfo}
-          </Text>
-        </View>
-      )}
-
       {enhancedIngredients.map((ingredient, _index) => (
         <View key={ingredient.id} style={styles.ingredientItem}>
           {isEditMode ? (
-            // 편집 모드
             <View style={styles.ingredientEditRow}>
               <TextInput
                 style={[styles.ingredientInput, styles.ingredientName]}
@@ -483,7 +477,6 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
               </TouchableOpacity>
             </View>
           ) : (
-            // 조회 모드
             <>
               <TouchableOpacity
                 style={styles.ingredientRow}
@@ -494,18 +487,14 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
                 }
               >
                 <View style={styles.ingredientMainInfo}>
-                  {fridgeId && !isLoading && (
-                    <Text style={styles.statusCircle}>
-                      {getStatusCircle(ingredient)}
-                    </Text>
-                  )}
+                  {fridgeId && !isLoading && <>{getStatusCircle(ingredient)}</>}
                   <Text
                     style={[
                       styles.ingredientText,
                       ingredient.isAvailable && styles.availableIngredient,
                     ]}
                   >
-                    • {ingredient.name} {ingredient.quantity}
+                    {ingredient.name} {ingredient.quantity}
                     {ingredient.unit}
                   </Text>
                 </View>
@@ -517,7 +506,7 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
                         ? 'expand-less'
                         : 'expand-more'
                     }
-                    size={20}
+                    size={24}
                     color="#666"
                   />
                 )}
@@ -528,23 +517,11 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
         </View>
       ))}
 
-      {/* 범례 */}
-      {!isEditMode && fridgeId && !isLoading && (
-        <View style={styles.ingredientLegend}>
-          <View style={styles.legendItem}>
-            <Text style={styles.legendCircle}>🟢</Text>
-            <Text style={styles.legendText}>냉장고에 있음</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <Text style={styles.legendCircle}>🟠</Text>
-            <Text style={styles.legendText}>대체재 있음 (탭해서 선택)</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <Text style={styles.legendCircle}>🔴</Text>
-            <Text style={styles.legendText}>구매 필요</Text>
-          </View>
-        </View>
-      )}
+      {/* 분리된 컴포넌트 사용 */}
+      <IngredientInfoModal
+        visible={showInfoModal}
+        onClose={() => setShowInfoModal(false)}
+      />
     </View>
   );
 };

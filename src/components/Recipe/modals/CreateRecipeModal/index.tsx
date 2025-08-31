@@ -9,7 +9,7 @@ import {
   Text,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import type { Recipe, RecipeFolder } from '../../../types';
+import type { Recipe, RecipeFolder } from '../../../../types';
 import { createModalStyles } from './styles';
 
 interface CreateRecipeModalProps {

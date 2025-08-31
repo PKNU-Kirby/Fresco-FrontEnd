@@ -2,7 +2,7 @@ export { Header } from './Header';
 export { SharedRecipeIndicator } from './SharedRecipeIndicator';
 export { RecipeTitleSection } from './RecipeTitleSection';
 export { IngredientsSection } from './IngredientsSection';
-export { StepsSection } from './StepsSection';
+export { StepsSection } from '../modals/StepsSection';
 export { ReferenceUrlSection } from './ReferenceURLSection';
 export { RecipeActionButtons } from './RecipeActionButtons';
 export { UseRecipeModal } from './UseRecipeModal';
