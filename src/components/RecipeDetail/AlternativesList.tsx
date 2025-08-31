@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { FridgeItem } from '../../utils/fridgeStorage';
-import { EnhancedIngredient } from './IngredientsSection';
+import { EnhancedIngredient } from '../../hooks/Recipe/useIngredientMatching';
 import { styles } from './styles';
 
 interface AlternativesListProps {
@@ -67,7 +67,7 @@ export const AlternativesList: React.FC<AlternativesListProps> = ({
                     )}
                 </View>
                 <Text style={styles.alternativeReason}>
-                  유통기한:{' '}
+                  소비기한:{' '}
                   <Text style={styles.alternativeReasonExpiaryDate}>
                     {item.expiryDate}
                   </Text>

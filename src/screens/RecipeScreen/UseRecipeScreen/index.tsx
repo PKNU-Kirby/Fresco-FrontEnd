@@ -21,7 +21,7 @@ import { updateFridgeItem } from '../../../utils/fridgeStorage';
 import { useIngredientMatching } from '../../../hooks/Recipe/useIngredientMatching';
 import { useRecipeSteps } from '../../../hooks/Recipe/useRecipeSteps';
 import { RecipeStackParamList, Recipe } from '../../../types';
-import { EnhancedIngredient } from '../../../components/RecipeDetail/IngredientsSection';
+import { EnhancedIngredient } from '../../../hooks/Recipe/useIngredientMatching';
 import { UsageTrackingService } from '../../../utils/UseageTrackingService';
 import { styles } from './styles';
 
@@ -238,17 +238,6 @@ const UseRecipeScreen: React.FC = () => {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* 레시피 제목 */}
         <Text style={styles.recipeTitle}>{recipe.title}</Text>
-
-        {/* 디버그 정보 */}
-        {__DEV__ && (
-          <View style={styles.debugInfo}>
-            <Text style={styles.debugText}>
-              디버그 정보: fridgeId = {fridgeId} (string), enhancedIngredients ={' '}
-              {enhancedIngredients ? 'O' : 'X'}, matchedIngredients ={' '}
-              {matchedIngredients.length}개
-            </Text>
-          </View>
-        )}
 
         {/* 재료 섹션 - EnhancedIngredientCard 사용 */}
         <View style={styles.section}>

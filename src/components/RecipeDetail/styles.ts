@@ -1,5 +1,15 @@
-// RecipeDetailScreen/styles.ts
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+//const baseHeight = 874;
+
+// 반응형 함수
+//const wp = (percentage: number) => (width * percentage) / 100;
+//const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -16,21 +26,21 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#e8f5e8',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
+    paddingHorizontal: scale(16),
+    paddingTop: scale(8),
+    paddingBottom: scale(8),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 5,
+      height: scale(5),
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
-    minHeight: 60,
+    minHeight: scale(60),
   },
   leftHeader: {
-    width: 88,
+    width: scale(88),
     alignItems: 'flex-start',
   },
   centerHeader: {
@@ -39,58 +49,58 @@ export const styles = StyleSheet.create({
   },
   rightHeader: {
     flexDirection: 'row',
-    width: 88,
+    width: scale(88),
     alignItems: 'flex-end',
   },
   leftEditHeader: {
-    width: 96,
+    width: scale(96),
     alignItems: 'flex-start',
   },
   rightEditHeader: {
-    width: 96,
+    width: scale(96),
     alignItems: 'flex-end',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: scale(20),
     fontWeight: '600',
     color: '#333',
   },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: scale(8),
   },
   backButton: {
-    padding: 8,
+    padding: scale(8),
   },
   favoriteButton: {
-    padding: 8,
+    padding: scale(8),
   },
   editButton: {
-    padding: 8,
+    padding: scale(8),
   },
   saveButton: {
-    padding: 8,
+    padding: scale(8),
   },
 
   // contents common style
   content: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: scale(16),
   },
   section: {
-    marginVertical: 16,
+    marginVertical: scale(16),
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: scale(12),
   },
   sectionContour: {
     width: '100%',
-    height: 40,
-    borderTopWidth: 0.5,
+    height: scale(40),
+    borderTopWidth: scale(0.5),
     borderColor: '#999',
   },
 
@@ -99,82 +109,82 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#E8F5E8',
-    padding: 12,
-    marginTop: 16,
-    marginBottom: 16,
-    borderRadius: 8,
+    padding: scale(12),
+    marginTop: scale(16),
+    marginBottom: scale(16),
+    borderRadius: scale(8),
   },
   sharedText: {
-    marginLeft: 8,
-    fontSize: 14,
+    marginLeft: scale(8),
+    fontSize: scale(14),
     color: '#29a448ff',
     fontWeight: '500',
   },
 
   // Recipe Title /////////////////////////////////////////
   titleInput: {
-    fontSize: 24,
+    fontSize: scale(24),
     fontWeight: '700',
     color: '#333',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    paddingVertical: 8,
-    margin: 8,
+    paddingVertical: scale(8),
+    margin: scale(8),
   },
   title: {
-    fontSize: 24,
+    fontSize: scale(24),
     fontWeight: '700',
     color: '#333',
-    margin: 8,
-    marginTop: 24,
+    margin: scale(8),
+    marginTop: scale(24),
   },
 
   // Recipe Summary ///////////////////////////////////////
   sectionTitle: {
-    fontSize: 20,
+    fontSize: scale(20),
     fontWeight: '900',
     color: '#444',
-    margin: 8,
+    margin: scale(8),
   },
 
   // Ingredients //////////////////////////////////////////
   ingredientInfo: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 44,
-    height: 44,
+    width: scale(44),
+    height: scale(44),
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#E8F5E8',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    borderWidth: 1,
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(6),
+    borderRadius: scale(6),
+    borderWidth: scale(1),
     borderColor: '#b9edb9ff',
-    gap: 4,
+    gap: scale(4),
   },
   addButtonText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#29a448ff',
     fontWeight: '500',
   },
   ingredientItem: {
-    marginBottom: 8,
+    marginBottom: scale(8),
   },
   ingredientEditRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: scale(8),
   },
   ingredientInput: {
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: '#ddd',
     backgroundColor: '#f2f2f2ff',
-    borderRadius: 6,
-    padding: 10,
-    fontSize: 14,
+    borderRadius: scale(6),
+    padding: scale(10),
+    fontSize: scale(14),
   },
   ingredientName: {
     flex: 2,
@@ -186,92 +196,92 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   removeButton: {
-    padding: 4,
+    padding: scale(4),
   },
   ingredientText: {
-    fontSize: 17,
+    fontSize: scale(17),
     color: '#555',
-    lineHeight: 24,
-    marginLeft: 8,
+    lineHeight: scale(24),
+    marginLeft: scale(8),
     fontWeight: '600',
   },
 
   // Steps ////////////////////////////////////////////////
   stepItem: {
-    marginBottom: 12,
+    marginBottom: scale(12),
   },
   stepEditRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 8,
+    gap: scale(8),
   },
   stepRow: {
     flexDirection: 'column',
     alignItems: 'flex-start',
-    gap: 8,
-    marginLeft: 8,
-    marginTop: 4,
+    gap: scale(8),
+    marginLeft: scale(8),
+    marginTop: scale(4),
   },
   stepNumber: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '600',
     color: '#29a448ff',
-    minWidth: 24,
-    marginTop: 20,
-    marginLeft: 8,
+    minWidth: scale(24),
+    marginTop: scale(20),
+    marginLeft: scale(8),
   },
   stepInput: {
     flex: 1,
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: '#ddd',
-    borderRadius: 6,
-    padding: 8,
-    fontSize: 14,
-    minHeight: 60,
+    borderRadius: scale(6),
+    padding: scale(8),
+    fontSize: scale(14),
+    minHeight: scale(60),
     textAlignVertical: 'top',
   },
   stepText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#333',
-    lineHeight: 24,
+    lineHeight: scale(24),
   },
   stepsContour: {
     flex: 1,
     width: '97%',
-    height: 10,
-    borderTopWidth: 0.4,
+    height: scale(10),
+    borderTopWidth: scale(0.4),
     borderColor: '#999',
   },
   removeStepsButton: {
-    marginTop: 20,
-    marginLeft: 8,
+    marginTop: scale(20),
+    marginLeft: scale(8),
   },
 
   // URL //////////////////////////////////////////////////
   urlInput: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: 'limegreen',
-    borderBottomWidth: 1,
+    borderBottomWidth: scale(1),
     borderBottomColor: '#ddd',
-    paddingVertical: 8,
-    marginHorizontal: 8,
+    paddingVertical: scale(8),
+    marginHorizontal: scale(8),
   },
   url: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: 'limegreen',
-    paddingVertical: 8,
-    marginHorizontal: 8,
+    paddingVertical: scale(8),
+    marginHorizontal: scale(8),
   },
 
   // Action Buttons ///////////////////////////////////////
   actionButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 24,
-    marginTop: 8,
-    marginHorizontal: 8,
-    gap: 16,
+    marginBottom: scale(24),
+    marginTop: scale(8),
+    marginHorizontal: scale(8),
+    gap: scale(16),
   },
   useRecipeButton: {
     flex: 1,
@@ -279,9 +289,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'limegreen',
-    paddingVertical: 14,
-    borderRadius: 8,
-    gap: 8,
+    paddingVertical: scale(14),
+    borderRadius: scale(8),
+    gap: scale(8),
   },
   shareButton: {
     flex: 1,
@@ -289,20 +299,20 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'lightgray',
-    paddingVertical: 14,
-    borderRadius: 8,
-    gap: 8,
+    paddingVertical: scale(14),
+    borderRadius: scale(8),
+    gap: scale(8),
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '900',
     color: '#f8f8f8',
   },
   bottomSpacer: {
-    height: 20,
+    height: scale(20),
   },
   shareButtonText: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#666',
     fontWeight: '600',
   },
@@ -315,8 +325,8 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalBody: {
-    gap: 16,
-    padding: 8,
+    gap: scale(16),
+    padding: scale(8),
   },
   modalContainer: {
     flex: 1,
@@ -326,54 +336,54 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
-    paddingLeft: 8,
-    paddingVertical: 8,
+    marginBottom: scale(16),
+    paddingLeft: scale(8),
+    paddingVertical: scale(8),
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: scale(20),
     fontWeight: '700',
     color: '#444',
   },
   modalContent: {
     backgroundColor: 'white',
-    margin: 20,
-    borderRadius: 12,
-    padding: 20,
-    maxWidth: 300,
+    margin: scale(20),
+    borderRadius: scale(12),
+    padding: scale(20),
+    maxWidth: scale(300),
     width: '80%',
   },
   modalSubtitle: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#666',
-    marginBottom: 20,
+    marginBottom: scale(20),
     textAlign: 'center',
   },
   checklistContainer: {
     flex: 1,
-    marginBottom: 20,
+    marginBottom: scale(20),
   },
   checklistItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(16),
     backgroundColor: 'white',
-    marginBottom: 8,
-    borderRadius: 8,
+    marginBottom: scale(8),
+    borderRadius: scale(8),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: scale(1),
     },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: scale(2),
     elevation: 2,
   },
   checklistText: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#333',
-    marginLeft: 12,
+    marginLeft: scale(12),
     flex: 1,
   },
   checkedText: {
@@ -382,13 +392,13 @@ export const styles = StyleSheet.create({
   },
   modalActionButton: {
     backgroundColor: 'limegreen',
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: scale(16),
+    borderRadius: scale(12),
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: scale(20),
   },
   modalActionButtonText: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '600',
     color: 'white',
   },
@@ -399,8 +409,8 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 8,
+    paddingVertical: scale(10),
+    paddingHorizontal: scale(8),
   },
   ingredientMainInfo: {
     flexDirection: 'row',
@@ -413,36 +423,34 @@ export const styles = StyleSheet.create({
   },
 
   alternativesContainer: {
-    marginHorizontal: 8,
-    marginTop: 4,
-    marginBottom: 12,
-    paddingLeft: 16,
-    paddingRight: 16,
-    paddingVertical: 12,
+    marginHorizontal: scale(8),
+    marginTop: scale(4),
+    marginBottom: scale(12),
+    paddingLeft: scale(16),
+    paddingRight: scale(16),
+    paddingVertical: scale(12),
     backgroundColor: '#f8f8f8',
-    borderRadius: 8,
+    borderRadius: scale(8),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 5,
+      height: scale(5),
     },
     shadowOpacity: 0.2,
-    shadowRadius: 3.84,
+    shadowRadius: scale(3.84),
     elevation: 5,
   },
-
   alternativesTitle: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#555',
     fontWeight: '700',
-    marginBottom: 12,
+    marginBottom: scale(12),
   },
-
   alternativeInfo: {
     backgroundColor: '#eaeaead1',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 4,
+    borderRadius: scale(8),
+    padding: scale(16),
+    marginBottom: scale(4),
     flex: 1,
     alignContent: 'center',
   },
@@ -451,65 +459,56 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   alternativeName: {
-    fontSize: 13,
+    fontSize: scale(13),
     color: '#333',
     fontWeight: '500',
-    marginBottom: 2,
-    lineHeight: 16,
+    marginBottom: scale(2),
+    lineHeight: scale(16),
   },
   selectedIcon: {
-    marginLeft: 4,
-    paddingBottom: 2,
+    marginLeft: scale(4),
+    paddingBottom: scale(2),
   },
-
   alternativeReason: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#666',
-    lineHeight: 20,
+    lineHeight: scale(20),
     fontWeight: '600',
   },
   alternativeReasonExpiaryDate: {
     fontStyle: 'italic',
   },
   ingredientLegend: {
-    marginTop: 16,
-    padding: 12,
+    marginTop: scale(16),
+    padding: scale(12),
     backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    gap: 8,
+    borderRadius: scale(8),
+    gap: scale(8),
   },
-
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
   },
 
   legendText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#666',
-    marginLeft: 6,
+    marginLeft: scale(6),
   },
-  ///
 
+  // Status Icon
   statusCircle: {
-    fontSize: 16,
-    marginRight: 8,
+    fontSize: scale(16),
+    marginRight: scale(8),
   },
-
-  // 범례의 동그라미
   legendCircle: {
-    fontSize: 12,
-    marginRight: 4,
+    fontSize: scale(12),
+    marginRight: scale(4),
   },
-
-  // 선택된 대체재 아이템 스타일
   selectedAlternativeItem: {},
-
   selectedAlternativeText: {
     color: '#444',
-    fontSize: 14,
+    fontSize: scale(14),
     fontWeight: '800',
   },
-
-  ///////////////////////////////////////////////
 });

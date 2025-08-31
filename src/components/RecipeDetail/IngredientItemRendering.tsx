@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { RecipeIngredient } from '../../screens/RecipeScreen/RecipeNavigator';
 import { FridgeItem } from '../../utils/fridgeStorage';
-import { EnhancedIngredient } from './IngredientsSection';
+import { EnhancedIngredient } from '../../hooks/Recipe/useIngredientMatching';
 import { styles } from './styles';
 
 interface IngredientItemProps {
@@ -47,6 +47,16 @@ export const IngredientItemRendering: React.FC<IngredientItemProps> = ({
     return <Icon name={'cancel'} size={24} color={'tomato'} />;
   };
 
+  // 유통기한으로 정렬하는 함수
+  const sortByExpiryDate = (items: FridgeItem[]) => {
+    return items.sort((a, b) => {
+      // 날짜 문자열을 Date 객체로 변환해서 비교
+      const dateA = new Date(a.expiryDate);
+      const dateB = new Date(b.expiryDate);
+      return dateA.getTime() - dateB.getTime(); // 오름차순 (임박한 순)
+    });
+  };
+
   // 대체재 섹션 렌더링
   const renderAlternatives = () => {
     if (!isExpanded) {
@@ -65,51 +75,53 @@ export const IngredientItemRendering: React.FC<IngredientItemProps> = ({
         {hasExactMatches && (
           <>
             <Text style={styles.alternativesTitle}>보유 재료 정보</Text>
-            {ingredient.exactMatches.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  ingredient.selectedFridgeItem?.id === item.id &&
-                    !ingredient.isAlternativeSelected &&
-                    styles.selectedAlternativeItem,
-                ]}
-                onPress={() =>
-                  onFridgeItemSelection(ingredient.id, item, false)
-                }
-              >
-                <View style={styles.alternativeInfo}>
-                  <View style={styles.alternativeTitleContainer}>
-                    <Text
-                      style={[
-                        styles.alternativeName,
-                        ingredient.selectedFridgeItem?.id === item.id &&
-                          !ingredient.isAlternativeSelected &&
-                          styles.selectedAlternativeText,
-                      ]}
-                    >
-                      {item.name} {item.quantity}
-                      {item.unit || '개'}
+            {sortByExpiryDate([...ingredient.exactMatches]).map(
+              (item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    ingredient.selectedFridgeItem?.id === item.id &&
+                      !ingredient.isAlternativeSelected &&
+                      styles.selectedAlternativeItem,
+                  ]}
+                  onPress={() =>
+                    onFridgeItemSelection(ingredient.id, item, false)
+                  }
+                >
+                  <View style={styles.alternativeInfo}>
+                    <View style={styles.alternativeTitleContainer}>
+                      <Text
+                        style={[
+                          styles.alternativeName,
+                          ingredient.selectedFridgeItem?.id === item.id &&
+                            !ingredient.isAlternativeSelected &&
+                            styles.selectedAlternativeText,
+                        ]}
+                      >
+                        {item.name} {item.quantity}
+                        {item.unit || '개'}
+                      </Text>
+                      {ingredient.selectedFridgeItem?.id === item.id &&
+                        !ingredient.isAlternativeSelected && (
+                          <View style={styles.selectedIcon}>
+                            <Icon
+                              name="check-circle"
+                              size={20}
+                              color="limegreen"
+                            />
+                          </View>
+                        )}
+                    </View>
+                    <Text style={styles.alternativeReason}>
+                      유통기한:{' '}
+                      <Text style={styles.alternativeReasonExpiaryDate}>
+                        {item.expiryDate}
+                      </Text>
                     </Text>
-                    {ingredient.selectedFridgeItem?.id === item.id &&
-                      !ingredient.isAlternativeSelected && (
-                        <View style={styles.selectedIcon}>
-                          <Icon
-                            name="check-circle"
-                            size={20}
-                            color="limegreen"
-                          />
-                        </View>
-                      )}
                   </View>
-                  <Text style={styles.alternativeReason}>
-                    유통기한:{' '}
-                    <Text style={styles.alternativeReasonExpiaryDate}>
-                      {item.expiryDate}
-                    </Text>
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+                </TouchableOpacity>
+              ),
+            )}
           </>
         )}
 
@@ -159,7 +171,10 @@ export const IngredientItemRendering: React.FC<IngredientItemProps> = ({
                       )}
                   </View>
                   <Text style={styles.alternativeReason}>
-                    {alternative.reason}
+                    유통기한:{' '}
+                    <Text style={styles.alternativeReasonExpiaryDate}>
+                      {alternative.fridgeItem.expiryDate}
+                    </Text>
                   </Text>
                 </View>
               </TouchableOpacity>
