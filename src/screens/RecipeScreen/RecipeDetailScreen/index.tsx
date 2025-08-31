@@ -254,12 +254,16 @@ const RecipeDetailScreen: React.FC = () => {
 
     try {
       const currentUserId = await AsyncStorageService.getCurrentUserId();
+      console.log('🔍 Current User ID:', currentUserId); // 디버깅
+
       if (!currentUserId) {
         modalHandlers.setUserNotFoundVisible(true);
         return;
       }
 
       const currentUser = await AsyncStorageService.getUserById(currentUserId);
+      console.log('🔍 Current User:', currentUser); // 디버깅
+
       if (!currentUser) {
         modalHandlers.setUserNotFoundVisible(true);
         return;
@@ -269,6 +273,9 @@ const RecipeDetailScreen: React.FC = () => {
         parseInt(currentUser.id, 10),
       );
 
+      console.log('🔍 User Fridge List:', userFridgeList); // 🎯 중요한 디버깅
+      console.log('🔍 User Fridge List Length:', userFridgeList.length); // 🎯 중요한 디버깅
+
       const fridges: CheckableFridge[] = userFridgeList.map(
         (fridge: FridgeWithRole) => ({
           id: parseInt(fridge.id, 10),
@@ -277,7 +284,10 @@ const RecipeDetailScreen: React.FC = () => {
         }),
       );
 
+      console.log('🔍 Mapped Fridges:', fridges); // 디버깅
+
       if (fridges.length === 0) {
+        console.log('🔍 No fridges found, showing noFridgesVisible modal'); // 디버깅
         modalHandlers.setNoFridgesVisible(true);
         return;
       }
@@ -289,7 +299,6 @@ const RecipeDetailScreen: React.FC = () => {
       modalHandlers.setFridgeLoadErrorVisible(true);
     }
   };
-
   const toggleFridgeCheck = (id: number) => {
     setCheckableFridges(prev =>
       prev.map(fridge =>

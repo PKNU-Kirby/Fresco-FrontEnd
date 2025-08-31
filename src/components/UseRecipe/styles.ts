@@ -12,6 +12,18 @@ const baseWidth = 402;
 const scale = (size: number) => (width / baseWidth) * size;
 
 export const ingredientCardStyles = StyleSheet.create({
+  alternativeInfoBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 24,
+    marginBottom: 4,
+  },
+  alternativeInfoText: {
+    marginLeft: 4,
+    fontSize: 15,
+    color: '#666',
+    fontWeight: '800',
+  },
   ingredientCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -49,13 +61,19 @@ export const ingredientCardStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  availableIngredient: {},
   availableText: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  availableIcon: {},
+  availableIcon: {
+    marginRight: 2,
+  },
+  alternativeOne: {
+    fontSize: 14,
+    color: '#FF9800',
+    fontWeight: '500' as const,
+  },
   haveOne: {
     fontSize: 14,
     color: 'limegreen',
@@ -96,6 +114,44 @@ export const ingredientCardStyles = StyleSheet.create({
   },
 });
 
+export const unavailableStyles = StyleSheet.create({
+  unavailableSection: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'space-between' as const,
+    padding: 8,
+    paddingVertical: 4,
+    backgroundColor: '#fae1dd',
+    borderRadius: 8,
+  },
+  unavailableInfo: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    flex: 1,
+    gap: 8,
+  },
+  unavailableText: {
+    fontSize: 14,
+    color: 'tomato',
+    fontWeight: '500' as const,
+  },
+  addToCartButton: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    backgroundColor: 'tomato',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  addToCartButtonDisabled: {
+    opacity: 0.6,
+  },
+  addToCartText: {
+    color: 'white',
+    fontSize: 13,
+    fontWeight: '600' as const,
+  },
+});
 export const styles = StyleSheet.create({
   container: {
     flex: 1,

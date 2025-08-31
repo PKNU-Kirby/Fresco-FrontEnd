@@ -1,8 +1,7 @@
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, FlatList } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { styles } from './styles';
+import { shareRecipeModalStyles as styles } from './styles';
 
 interface CheckableFridge {
   id: number;
@@ -27,22 +26,25 @@ export const ShareRecipeModal: React.FC<ShareRecipeModalProps> = ({
 }) => {
   return (
     <Modal
+      animationType="fade"
+      transparent={true}
       visible={visible}
-      animationType="slide"
+      statusBarTranslucent={true}
       presentationStyle="pageSheet"
     >
-      <SafeAreaView style={styles.modalContainer}>
-        <View style={styles.modalHeader}>
-          <TouchableOpacity onPress={onClose}>
-            <Icon name="close" size={24} color="#333" />
-          </TouchableOpacity>
-          <Text style={styles.modalTitle}>레시피 공유하기</Text>
-          <View style={{ width: 24 }} />
-        </View>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <View style={styles.modalTitleLeft} />
+            <Text style={styles.modalTitle}>레시피 공유하기</Text>
+            <TouchableOpacity onPress={onClose} style={styles.modalTitleRight}>
+              <Icon name="close" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
 
-        <View style={styles.modalContent}>
-          <Text style={styles.modalSubtitle}>공유할 냉장고를 선택해주세요</Text>
-
+          <Text style={styles.modalSubtitle}>
+            레시피를 공유할 모임을 선택해주세요
+          </Text>
           <FlatList
             data={fridges}
             keyExtractor={item => item.id.toString()}
@@ -52,11 +54,9 @@ export const ShareRecipeModal: React.FC<ShareRecipeModalProps> = ({
                 onPress={() => onToggleFridge(item.id)}
               >
                 <Icon
-                  name={
-                    item.isChecked ? 'check-box' : 'check-box-outline-blank'
-                  }
+                  name={item.isChecked ? 'check-circle' : 'circle'}
                   size={24}
-                  color={item.isChecked ? 'limegreen' : '#999'}
+                  color={item.isChecked ? 'limegreen' : '#d8d8d8'}
                 />
                 <Text style={styles.checklistText}>{item.name}</Text>
               </TouchableOpacity>
@@ -71,7 +71,7 @@ export const ShareRecipeModal: React.FC<ShareRecipeModalProps> = ({
             <Text style={styles.modalActionButtonText}>공유하기</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 };

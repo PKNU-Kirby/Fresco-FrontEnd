@@ -24,7 +24,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
       statusBarTranslucent={true}
       onRequestClose={onClose}
     >
-      {' '}
+      <Text> </Text>
       <TouchableOpacity
         style={styles.fullScreenOverlay}
         activeOpacity={1}

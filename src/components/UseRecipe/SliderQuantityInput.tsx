@@ -26,7 +26,7 @@ const SliderQuantityInput: React.FC<SliderQuantityInputProps> = ({
   onMaxQuantityChange,
   onTextBlur,
 }) => {
-  const [isSliderMode, setIsSliderMode] = useState(true);
+  const [isSliderMode, setIsSliderMode] = useState(false);
   const [localQuantity, setLocalQuantity] = useState(quantity);
 
   // 단위별 step 계산

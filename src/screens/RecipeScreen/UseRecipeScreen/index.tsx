@@ -25,7 +25,6 @@ import { EnhancedIngredient } from '../../../hooks/Recipe/useIngredientMatching'
 import { UsageTrackingService } from '../../../utils/UseageTrackingService';
 import { styles } from './styles';
 
-// route params 타입 수정
 type UseRecipeScreenNavigationProp = NativeStackNavigationProp<
   RecipeStackParamList,
   'UseRecipe'
@@ -35,7 +34,7 @@ type UseRecipeScreenRouteProp = RouteProp<
   {
     UseRecipe: {
       recipe: Recipe;
-      fridgeId: string; // string으로 변경
+      fridgeId: string;
       enhancedIngredients?: EnhancedIngredient[];
     };
   },
@@ -47,7 +46,7 @@ const UseRecipeScreen: React.FC = () => {
   const route = useRoute<UseRecipeScreenRouteProp>();
   const { recipe, fridgeId, enhancedIngredients } = route.params;
 
-  // 모달 상태 관리
+  // Modal State
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showCompleteConfirmModal, setShowCompleteConfirmModal] =
     useState(false);
@@ -55,7 +54,6 @@ const UseRecipeScreen: React.FC = () => {
     useState(false);
   const [showCompleteErrorModal, setShowCompleteErrorModal] = useState(false);
 
-  // 조리 완료 정보
   const [completeInfo, setCompleteInfo] = useState({
     completed: 0,
     total: 0,
@@ -64,7 +62,6 @@ const UseRecipeScreen: React.FC = () => {
   });
   const [errorMessage, setErrorMessage] = useState('');
 
-  // fridgeId를 number로 변환 (기존 로직과의 호환성을 위해)
   const numericFridgeId = parseInt(fridgeId, 10);
 
   const {
@@ -80,7 +77,7 @@ const UseRecipeScreen: React.FC = () => {
   const { completedSteps, toggleStepCompletion, getStepsArray } =
     useRecipeSteps(recipe);
 
-  // 초기 데이터 로드 (수정됨)
+  // Initial data load
   useEffect(() => {
     if (enhancedIngredients && enhancedIngredients.length > 0) {
       // 향상된 재료 데이터가 있으면 그것을 사용
@@ -227,7 +224,7 @@ const UseRecipeScreen: React.FC = () => {
         </View>
         <View style={styles.rightHeader}>
           <TouchableOpacity
-            style={styles.menuButton}
+            style={styles.infoButton}
             onPress={() => setShowInfoModal(true)}
           >
             <Icon name="info-outline" size={24} color="#333" />
@@ -241,7 +238,7 @@ const UseRecipeScreen: React.FC = () => {
 
         {/* 재료 섹션 - EnhancedIngredientCard 사용 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>재료 준비</Text>
+          <Text style={styles.sectionTitle}>재료 준비하기</Text>
 
           {matchedIngredients.length === 0 ? (
             <View style={styles.emptyIngredientsContainer}>
@@ -280,8 +277,9 @@ const UseRecipeScreen: React.FC = () => {
         {/* 조리 완료 버튼 */}
         <TouchableOpacity
           style={[
-            styles.completeButton,
-            matchedIngredients.length === 0 && styles.disabledButton,
+            matchedIngredients.length === 0
+              ? styles.disabledButton
+              : styles.completeButton,
           ]}
           onPress={completeRecipe}
           disabled={matchedIngredients.length === 0}

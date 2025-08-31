@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import FridgeItemCard from './FridgeItemCard';
-import AddButton from './ItemAddButton';
+import ItemAddButton from './ItemAddButton';
 import FilterBar from './FilterBar';
 import { getFridgeItemsByFridgeId } from '../../utils/fridgeStorage';
 import { listStyles as styles } from './styles';
@@ -97,7 +97,7 @@ const FridgeItemList: React.FC<FridgeItemListProps> = ({
           showsVerticalScrollIndicator={false}
         />
 
-        <AddButton onPress={onAddItem} visible={!isEditMode} />
+        <ItemAddButton onPress={onAddItem} visible={!isEditMode} />
       </KeyboardAvoidingView>
     </View>
   );

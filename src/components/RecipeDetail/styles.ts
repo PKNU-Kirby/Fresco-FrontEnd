@@ -346,6 +346,7 @@ export const styles = StyleSheet.create({
     color: '#444',
   },
   modalContent: {
+    flex: 1,
     backgroundColor: 'white',
     margin: scale(20),
     borderRadius: scale(12),
@@ -361,6 +362,8 @@ export const styles = StyleSheet.create({
   },
   checklistContainer: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: scale(20),
   },
   checklistItem: {
@@ -490,12 +493,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  legendText: {
-    fontSize: scale(14),
-    color: '#666',
-    marginLeft: scale(6),
-  },
-
   // Status Icon
   statusCircle: {
     fontSize: scale(16),
@@ -510,5 +507,133 @@ export const styles = StyleSheet.create({
     color: '#444',
     fontSize: scale(14),
     fontWeight: '800',
+  },
+});
+
+export const shareRecipeModalStyles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    borderRadius: scale(8),
+    maxHeight: scale(600),
+    width: '85%',
+  },
+  // Modal Header
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: scale(16),
+    paddingLeft: scale(8),
+    paddingVertical: scale(8),
+  },
+  modalTitleLeft: {
+    width: 56,
+  },
+  modalTitle: {
+    fontSize: scale(20),
+    fontWeight: '700',
+    color: '#444',
+    marginTop: 20,
+  },
+  modalTitleRight: {
+    padding: 16,
+  },
+  // Modal Subtitle
+  modalSubtitle: {
+    fontSize: scale(16),
+    color: '#666',
+    marginBottom: scale(24),
+    textAlign: 'center',
+  },
+  // Check List styles
+  checklistContainer: {
+    marginBottom: scale(20),
+    marginHorizontal: scale(24),
+  },
+  checklistItem: {
+    flexDirection: 'row',
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(16),
+    backgroundColor: '#f8f8f8',
+    marginBottom: scale(8),
+    borderRadius: scale(8),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: scale(4),
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: scale(2),
+    elevation: 2,
+  },
+  checklistText: {
+    fontSize: scale(16),
+    color: '#444',
+    marginLeft: scale(12),
+    flex: 1,
+  },
+  // Buttons
+  modalActionButton: {
+    backgroundColor: 'limegreen',
+    paddingVertical: scale(16),
+    marginHorizontal: scale(24),
+    borderRadius: scale(10),
+    alignItems: 'center',
+    marginBottom: scale(20),
+  },
+  modalActionButtonText: {
+    fontSize: scale(18),
+    fontWeight: '800',
+    color: '#f8f8f8',
+  },
+});
+
+export const ingredientInfoModalStyles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    margin: scale(20),
+    borderRadius: scale(12),
+    padding: scale(20),
+    maxWidth: scale(300),
+    width: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: scale(16),
+    paddingLeft: scale(8),
+    paddingVertical: scale(8),
+  },
+  modalTitle: {
+    fontSize: scale(20),
+    fontWeight: '700',
+    color: '#444',
+  },
+  modalBody: {
+    gap: scale(16),
+    padding: scale(8),
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  legendText: {
+    fontSize: scale(16),
+    color: '#666',
+    marginLeft: scale(12),
+    fontWeight: '600',
   },
 });

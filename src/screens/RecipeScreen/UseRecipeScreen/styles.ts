@@ -106,7 +106,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
   },
-
+  // Header styles
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -145,182 +145,63 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
-  menuButton: {
+  infoButton: {
     padding: 8,
   },
+
   content: {
     flex: 1,
     backgroundColor: '#e8f5e8',
   },
 
+  // Recipe Title
   recipeTitle: {
     fontSize: 24,
     fontWeight: '700' as const,
-    color: '#212529',
-    margin: 32,
-    textAlign: 'center' as const,
-    marginVertical: 16,
-    backgroundColor: 'black',
-  },
-
-  // 안내사항 스타일
-
-  noticeHeader: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    marginBottom: 8,
-  },
-
-  noticeTitle: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: 'limegreen',
-    marginLeft: 8,
-  },
-
-  noticeText: {
-    fontSize: 12,
     color: '#444',
-    lineHeight: 16,
+    marginLeft: 24,
+    textAlign: 'left' as const,
+    marginVertical: 16,
   },
 
+  // Ingredient Section styles
   section: {
     margin: 16,
   },
-
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600' as const,
     color: '#212529',
     marginBottom: 12,
+    marginHorizontal: 8,
   },
 
-  // 재료 카드 스타일
-  recipeQuantity: {
-    fontSize: 14,
-    color: '#666',
-  },
-
-  quantityInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 14,
-  },
-
-  // Steps 스타일 (이전과 동일)
-  stepsContainer: {
-    gap: 12,
-  },
-
-  stepCard: {
-    flexDirection: 'row' as const,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#29a448ff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-
-  stepCardCompleted: {
-    backgroundColor: '#e8f5e8',
-    borderLeftColor: '#4CAF50',
-    opacity: 0.8,
-  },
-
-  stepCheckbox: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#29a448ff',
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-    marginRight: 12,
-    flexShrink: 0,
-  },
-
-  stepCheckboxCompleted: {
-    backgroundColor: '#4CAF50',
-  },
-
-  stepNumber: {
-    fontSize: 16,
-    fontWeight: '700' as const,
-    color: '#fff',
-  },
-
-  stepContent: {
-    flex: 1,
-    justifyContent: 'center' as const,
-  },
-
-  stepText: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
-  },
-
-  stepTextCompleted: {
-    color: '#666',
-    textDecorationLine: 'line-through' as const,
-  },
-
-  progressContainer: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: '#f0f8ff',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e3f2fd',
-  },
-
-  progressText: {
-    fontSize: 12,
-    color: '#1976d2',
-    fontWeight: '600' as const,
-    marginBottom: 8,
-    textAlign: 'center' as const,
-  },
-
-  progressBar: {
-    height: 6,
-    backgroundColor: '#e3f2fd',
-    borderRadius: 3,
-    overflow: 'hidden' as const,
-  },
-
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#1976d2',
-    borderRadius: 3,
-  },
-
-  // 완료 버튼
+  // Complete Button
   completeButton: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-    backgroundColor: '#4CAF50',
-    margin: 16,
+    backgroundColor: 'limegreen',
+    margin: 24,
     padding: 16,
     borderRadius: 12,
     gap: 8,
   },
-
-  completeButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600' as const,
+  disabledButton: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    backgroundColor: 'lightgray',
+    margin: 24,
+    padding: 16,
+    borderRadius: 12,
+    gap: 8,
   },
-
+  completeButtonText: {
+    color: '#f8f8f8',
+    fontSize: 16,
+    fontWeight: '800' as const,
+  },
   bottomSpacer: {
     height: 20,
   },
