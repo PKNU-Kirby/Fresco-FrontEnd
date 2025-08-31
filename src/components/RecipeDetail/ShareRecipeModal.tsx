@@ -30,7 +30,7 @@ export const ShareRecipeModal: React.FC<ShareRecipeModalProps> = ({
       transparent={true}
       visible={visible}
       statusBarTranslucent={true}
-      presentationStyle="pageSheet"
+      presentationStyle="overFullScreen"
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>

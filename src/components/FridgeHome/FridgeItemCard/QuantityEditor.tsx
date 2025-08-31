@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, TouchableOpacity, TextInput, Text } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { quantityStyles as styles } from './styles';
@@ -6,7 +6,7 @@ import { quantityStyles as styles } from './styles';
 interface QuantityEditorProps {
   quantity: string;
   unit: string;
-  onQuantityChange: (quantity: string) => void; // 하나로 통일
+  onQuantityChange: (quantity: string) => void;
   onTextBlur: () => void;
   onUnitPress: () => void;
 }
@@ -18,20 +18,51 @@ const QuantityEditor: React.FC<QuantityEditorProps> = ({
   onTextBlur,
   onUnitPress,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+
+  // 수량 포맷 함수: 정수면 소수점 없이, 소수면 둘째자리까지
+  const formatQuantity = (value: number | string): string => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numValue)) return '0';
+
+    // 정수인지 확인 (소수점이 .00인 경우도 정수로 취급)
+    if (numValue % 1 === 0) {
+      return Math.round(numValue).toString();
+    } else {
+      return numValue.toFixed(2);
+    }
+  };
+
   const handleIncrement = () => {
-    const currentNum = parseInt(quantity, 10) || 0;
-    onQuantityChange((currentNum + 1).toString());
+    const currentNum = parseFloat(quantity) || 0;
+    const newValue = (currentNum + 1).toString();
+    onQuantityChange(newValue);
   };
 
   const handleDecrement = () => {
-    const currentNum = parseInt(quantity, 10) || 0;
-    onQuantityChange(Math.max(0, currentNum - 1).toString());
+    const currentNum = parseFloat(quantity) || 0;
+    const newValue = Math.max(0, currentNum - 1).toString();
+    onQuantityChange(newValue);
   };
 
   const handleTextChange = (text: string) => {
-    const numericText = text.replace(/[^0-9]/g, '');
+    // 숫자와 소수점 허용
+    const numericText = text.replace(/[^0-9.]/g, '');
     onQuantityChange(numericText);
   };
+
+  const handleFocus = () => {
+    setIsEditing(true);
+  };
+
+  const handleBlur = () => {
+    setIsEditing(false);
+    onTextBlur();
+  };
+
+  // 표시용 수량: 편집 중이면 원본값, 아니면 포맷팅된 값
+  const displayValue = isEditing ? quantity : formatQuantity(quantity);
+
   return (
     <View style={styles.quantityEditContainer}>
       <TouchableOpacity
@@ -44,10 +75,11 @@ const QuantityEditor: React.FC<QuantityEditorProps> = ({
 
       <TextInput
         style={styles.quantityInput}
-        value={quantity}
+        value={displayValue}
         onChangeText={handleTextChange}
-        onBlur={onTextBlur}
-        keyboardType="numeric"
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        keyboardType="decimal-pad"
         selectTextOnFocus
       />
 

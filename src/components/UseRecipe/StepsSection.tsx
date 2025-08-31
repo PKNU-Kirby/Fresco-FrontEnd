@@ -1,71 +1,85 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { styles } from '../RecipeDetail/styles';
-
+import { stepsStyles as styles } from './styles';
 interface StepsSectionProps {
   steps: string[];
-  isEditMode: boolean;
-  onAddStep: () => void;
-  onRemoveStep: (index: number) => void;
-  onUpdateStep: (index: number, value: string) => void;
+  completedSteps: boolean[];
+  onToggleStep: (index: number) => void;
 }
 
-export const StepsSection: React.FC<StepsSectionProps> = ({
+const StepsSection: React.FC<StepsSectionProps> = ({
   steps,
-  isEditMode,
-  onAddStep,
-  onRemoveStep,
-  onUpdateStep,
+  completedSteps,
+  onToggleStep,
 }) => {
   return (
     <View style={styles.section}>
-      <View style={styles.sectionContour}>
-        <></>
-      </View>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>조리법</Text>
-        {isEditMode && (
-          <TouchableOpacity style={styles.addButton} onPress={onAddStep}>
-            <Icon name="add" size={20} color="#29a448ff" />
-            <Text style={styles.addButtonText}>단계 추가</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      <View style={styles.stepsContainer}>
+        <Text style={styles.sectionTitle}>조리 과정</Text>
+        {steps.map((step, index) => {
+          const cleanStep = step.replace(/^\d+\.\s*/, '');
+          const isCompleted = completedSteps[index] || false;
 
-      {steps.map((step, index) => (
-        <View key={index} style={styles.stepItem}>
-          {isEditMode ? (
-            <View style={styles.stepEditRow}>
-              <Text style={styles.stepNumber}>{index + 1}.</Text>
-              <TextInput
-                style={styles.stepInput}
-                value={step}
-                onChangeText={text => onUpdateStep(index, text)}
-                placeholder={`${index + 1}번째 조리 과정을 입력하세요`}
-                placeholderTextColor="#999"
-                multiline
-              />
-              <TouchableOpacity
-                style={styles.removeStepsButton}
-                onPress={() => onRemoveStep(index)}
+          return (
+            <TouchableOpacity
+              key={index}
+              style={[styles.stepCard, isCompleted && styles.stepCardCompleted]}
+              onPress={() => onToggleStep(index)}
+              activeOpacity={0.7}
+            >
+              <View
+                style={[
+                  styles.stepCheckbox,
+                  isCompleted && styles.stepCheckboxCompleted,
+                ]}
               >
-                <Icon name="remove" size={20} color="#FF3B30" />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <>
-              <Text style={styles.stepNumber}>{index + 1}.</Text>
-              <View style={styles.stepRow}>
-                <Text style={styles.stepText}>{step}</Text>
-                <View style={styles.stepsContour}>
-                  <></>
-                </View>
+                {isCompleted ? (
+                  <Icon name="check" size={16} color="#fff" />
+                ) : (
+                  <Text style={styles.stepNumber}>{index + 1}</Text>
+                )}
               </View>
-            </>
+              <View style={styles.stepContent}>
+                <Text
+                  style={[
+                    styles.stepText,
+                    isCompleted && styles.stepTextCompleted,
+                  ]}
+                >
+                  {cleanStep}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+
+        {/* 진행률 표시 */}
+        <View style={styles.progressContainer}>
+          {completedSteps.filter(Boolean).length / steps.length === 1 ? (
+            <Text style={styles.progressText}>조리 완료!</Text>
+          ) : (
+            <Text style={styles.progressText}>
+              요리 중 ... {completedSteps.filter(Boolean).length}/{steps.length}{' '}
+              단계 완료
+            </Text>
           )}
+          <View style={styles.progressBar}>
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: `${
+                    (completedSteps.filter(Boolean).length / steps.length) * 100
+                  }%`,
+                },
+              ]}
+            />
+          </View>
         </View>
-      ))}
+      </View>
     </View>
   );
 };
+
+export default StepsSection;

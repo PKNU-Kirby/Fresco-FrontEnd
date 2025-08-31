@@ -211,7 +211,10 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
                       : styles.haveOne
                   }
                 >
-                  보유: {item.fridgeIngredient?.quantity}
+                  보유:{' '}
+                  {Number(item.fridgeIngredient?.quantity) % 1 === 0
+                    ? parseInt(item.fridgeIngredient?.quantity, 10).toString()
+                    : parseFloat(item.fridgeIngredient?.quantity).toFixed(2)}
                   {item.fridgeIngredient?.unit}
                 </Text>
               </View>

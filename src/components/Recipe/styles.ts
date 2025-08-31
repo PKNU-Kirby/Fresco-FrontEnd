@@ -194,6 +194,43 @@ export const recipeCardStyles = StyleSheet.create({
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
   },
+  // recipeCardStyles에 추가할 스타일들
+  ingredientStatus: {
+    marginTop: 4,
+    alignItems: 'flex-start',
+  },
+  statusIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  canMakeIndicator: {
+    backgroundColor: '#E8F5E8',
+    borderWidth: 1,
+    borderColor: 'limegreen',
+  },
+  cannotMakeIndicator: {
+    backgroundColor: '#eee',
+    borderWidth: 1,
+    borderColor: '#aaa',
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  canMakeText: {
+    color: '#2E7D32',
+  },
+  cannotMakeText: {
+    color: '#aaa',
+  },
+  canMakeCard: {
+    borderWidth: 1,
+    borderColor: 'limegreen',
+    backgroundColor: '#fff',
+  },
 });
 
 export const renderRecipeItemStyles = StyleSheet.create({

@@ -89,7 +89,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   return (
     <Modal
       visible={visible}
-      transparent
+      transparent={true}
       animationType="slide"
       onRequestClose={onClose}
     >

@@ -3,8 +3,8 @@ import { View, TouchableOpacity, Text, TextInput } from 'react-native';
 import DeleteButton from '../FridgeHome/FridgeItemCard/DeleteButton';
 import QuantityEditor from '../FridgeHome/FridgeItemCard/QuantityEditor';
 import UnitSelector from '../FridgeHome/FridgeItemCard/UnitSelector';
-import DatePicker from '../Recipe/modals/DatePicker';
-import ItemCategoryModal from '../Recipe/modals/ItemCategoryModal';
+import DatePicker from '../modals/DatePicker';
+import ItemCategoryModal from '../modals/ItemCategoryModal';
 import { ItemFormData } from '../../screens/AddItemScreen';
 import { cardStyles as styles } from './styles';
 

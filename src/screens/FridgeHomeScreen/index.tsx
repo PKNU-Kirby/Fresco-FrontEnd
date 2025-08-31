@@ -8,8 +8,8 @@ import { styles } from './styles';
 // Components
 import FridgeHeader from '../../components/FridgeHome/FridgeHeader';
 import FridgeItemList from '../../components/FridgeHome/FridgeItemList';
-import ItemCategoryModal from '../../components/Recipe/modals/ItemCategoryModal';
-import AddItemModal from '../../components/Recipe/modals/AddItemModal';
+import ItemCategoryModal from '../../components/modals/ItemCategoryModal';
+import AddItemModal from '../../components/modals/AddItemModal';
 
 // Hooks
 import { useFridgeData } from '../../hooks/useFridgeData';

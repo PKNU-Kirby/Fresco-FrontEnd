@@ -90,7 +90,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   return (
     <Modal
       visible={visible}
-      transparent
+      transparent={true}
       animationType="fade"
       onRequestClose={handleClose}
     >

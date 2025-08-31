@@ -30,6 +30,19 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
   const [_hasUserInteracted, setHasUserInteracted] = useState(false);
   const [isSliderMode, setIsSliderMode] = useState(false);
 
+  // 수량 포맷 함수: 정수면 소수점 없이, 소수면 둘째자리까지
+  const formatQuantity = (value: number | string): string => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numValue)) return '0';
+
+    // 정수인지 확인 (소수점이 .00인 경우도 정수로 취급)
+    if (numValue % 1 === 0) {
+      return Math.round(numValue).toString();
+    } else {
+      return numValue.toFixed(2);
+    }
+  };
+
   // 편집 모드가 변경될 때 사용자 조작 상태 리셋
   useEffect(() => {
     if (!isEditMode) {
@@ -285,10 +298,9 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
           <View style={styles.sliderLabels}>
             <Text style={styles.sliderLabel}>0</Text>
             <Text style={styles.sliderLabel}>
-              {/* 🔧 단위에 따른 표시 형식 */}
-              {sliderStep >= 1
-                ? Math.round(maxQuantity).toString()
-                : maxQuantity.toFixed(2)}
+              {/* 포맷된 최대값 표시 */}
+              {formatQuantity(maxQuantity)}
+              {unit}
             </Text>
           </View>
         </View>

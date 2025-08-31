@@ -20,7 +20,7 @@ const UnitSelector: React.FC<UnitSelectorProps> = ({
   return (
     <Modal
       visible={visible}
-      transparent
+      transparent={true}
       animationType="fade"
       onRequestClose={onClose}
     >

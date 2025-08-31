@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
-import DatePicker from '../../Recipe/modals/DatePicker';
+import DatePicker from '../../modals/DatePicker';
 import SliderQuantityEditor from './SliderQuantityEditor';
 import UnitSelector from './UnitSelector';
 import DeleteButton from './DeleteButton';
-import ConfirmModal from '../../Recipe/modals/ConfirmModal';
+import ConfirmModal from '../../modals/ConfirmModal';
 import { cardStyles as styles } from './styles';
 
 type FridgeItem = {
@@ -56,6 +56,19 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     onPress && !isEditMode ? TouchableOpacity : View;
   const unitOptions = ['개', 'ml', 'g', 'kg', 'L'];
 
+  // 수량 포맷 함수: 정수면 소수점 없이, 소수면 둘째자리까지
+  const formatQuantity = (value: number | string): string => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numValue)) return '0';
+
+    // 정수인지 확인 (소수점이 .00인 경우도 정수로 취급)
+    if (numValue % 1 === 0) {
+      return Math.round(numValue).toString();
+    } else {
+      return numValue.toFixed(2);
+    }
+  };
+
   // (!EditMode -> EditMode) : init maxQuantity
   useEffect(() => {
     if (isEditMode) {
@@ -103,7 +116,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     if (newQuantity === '0') {
       setPreviousQuantity(localQuantity);
       setLocalQuantity(newQuantity);
-      setShowDeleteModal(true); // Alert 대신 모달 표시
+      setShowDeleteModal(true);
       return;
     }
 
@@ -119,7 +132,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
   };
 
   const handleDeleteConfirm = (_name: string) => {
-    setShowDeleteModal(true); // Alert 대신 모달 표시
+    setShowDeleteModal(true);
   };
 
   const handleConfirmDelete = () => {
@@ -185,7 +198,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
             <>
               <View style={styles.itemDetails}>
                 <Text style={styles.itemQuantity}>
-                  {item.quantity} {item.unit || '개'}
+                  {formatQuantity(item.quantity)} {item.unit || '개'}
                 </Text>
                 <Text style={styles.itemExpiry}>{item.expiryDate}</Text>
               </View>

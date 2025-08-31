@@ -31,7 +31,7 @@ export const UseRecipeModal: React.FC<UseRecipeModalProps> = ({
     <Modal
       visible={visible}
       animationType="slide"
-      presentationStyle="pageSheet"
+      presentationStyle="overFullScreen"
     >
       <SafeAreaView style={styles.modalContainer}>
         <View style={styles.modalHeader}>

@@ -10,7 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import BackButton from '../../components/_common/BackButton';
-import DateRangePicker from '../../components/Recipe/modals/DateRangePicker';
+import DateRangePicker from '../../components/modals/DateRangePicker';
 import { RootStackParamList } from '../../../App';
 import {
   UsageTrackingService,

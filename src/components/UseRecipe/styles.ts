@@ -32,7 +32,7 @@ export const ingredientCardStyles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 10,
+      height: 5,
     },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -119,16 +119,13 @@ export const unavailableStyles = StyleSheet.create({
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     justifyContent: 'space-between' as const,
-    padding: 8,
-    paddingVertical: 4,
-    backgroundColor: '#fae1dd',
-    borderRadius: 8,
+    paddingTop: 4,
   },
   unavailableInfo: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     flex: 1,
-    gap: 8,
+    gap: 6,
   },
   unavailableText: {
     fontSize: 14,
@@ -763,5 +760,95 @@ export const infoModalStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#f8f8f8', // ConfirmModal successButtonText와 완전히 동일
+  },
+});
+
+export const stepsStyles = StyleSheet.create({
+  section: {
+    margin: scale(16),
+  },
+  stepsContainer: {
+    gap: scale(12),
+  },
+  sectionTitle: {
+    fontSize: scale(18),
+    fontWeight: '600' as const,
+    color: '#212529',
+    marginTop: scale(16),
+    marginBottom: scale(12),
+    marginHorizontal: scale(8),
+  },
+  stepCard: {
+    flexDirection: 'row' as const,
+    backgroundColor: '#f8f9fa',
+    borderRadius: scale(12),
+    padding: scale(16),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: scale(3),
+    elevation: 2,
+  },
+  stepCardCompleted: {
+    backgroundColor: '#e8f5e8',
+    opacity: 0.8,
+  },
+  stepCheckbox: {
+    width: scale(32),
+    height: scale(32),
+    borderRadius: scale(16),
+    backgroundColor: '#bbb',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    marginRight: scale(16),
+    flexShrink: 0,
+  },
+  stepCheckboxCompleted: {
+    backgroundColor: 'limegreen',
+  },
+  stepNumber: {
+    fontSize: scale(16),
+    fontWeight: '700' as const,
+    color: '#fff',
+  },
+  stepContent: {
+    flex: 1,
+    justifyContent: 'center' as const,
+  },
+  stepText: {
+    fontSize: scale(15),
+    color: '#444',
+    fontWeight: '600',
+    lineHeight: scale(20),
+  },
+  stepTextCompleted: {
+    color: '#666',
+    textDecorationLine: 'line-through' as const,
+  },
+  progressContainer: {
+    marginTop: scale(16),
+    padding: scale(12),
+    backgroundColor: '#ffece6ff',
+    borderRadius: scale(8),
+    borderWidth: scale(1),
+    borderColor: '#e3f2fd',
+  },
+  progressText: {
+    fontSize: scale(14),
+    color: '#FF7043',
+    fontWeight: '600' as const,
+    marginBottom: scale(8),
+    textAlign: 'center' as const,
+  },
+  progressBar: {
+    height: scale(6),
+    backgroundColor: '#cfc7c4ff',
+    borderRadius: scale(3),
+    overflow: 'hidden' as const,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: 'orange',
+    borderRadius: scale(3),
   },
 });

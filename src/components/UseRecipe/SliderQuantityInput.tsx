@@ -93,7 +93,12 @@ const SliderQuantityInput: React.FC<SliderQuantityInputProps> = ({
         ? parseFloat(clampedValue.toFixed(2))
         : Math.round(clampedValue);
 
-    const newQuantityStr = finalValue.toString();
+    // 정수면 소수점 없이, 소수면 둘째 자리까지
+    const newQuantityStr =
+      finalValue % 1 === 0
+        ? Math.round(finalValue).toString()
+        : finalValue.toFixed(2);
+
     setLocalQuantity(newQuantityStr);
     onQuantityChange(newQuantityStr);
   };
@@ -114,13 +119,18 @@ const SliderQuantityInput: React.FC<SliderQuantityInputProps> = ({
       ? roundToStep(clampedValue, sliderStep)
       : clampedValue;
 
-    const formattedValue =
-      sliderStep < 1 && finalValue !== Math.round(finalValue)
-        ? finalValue.toFixed(2)
-        : Math.round(finalValue).toString();
+    const formattedValue = isSliderMode
+      ? roundToStep(clampedValue, sliderStep)
+      : clampedValue;
 
-    setLocalQuantity(formattedValue);
-    onQuantityChange(formattedValue);
+    // 정수면 소수점 없이, 소수면 둘째 자리까지
+    const displayValue =
+      finalValue % 1 === 0
+        ? Math.round(finalValue).toString()
+        : parseFloat(finalValue.toFixed(2)).toString();
+
+    setLocalQuantity(displayValue);
+    onQuantityChange(displayValue);
     onTextBlur();
   };
 
@@ -221,10 +231,9 @@ const SliderQuantityInput: React.FC<SliderQuantityInputProps> = ({
             <View style={sliderQuantityStyles.sliderLabels}>
               <Text style={sliderQuantityStyles.sliderLabel}>0</Text>
               <Text style={sliderQuantityStyles.sliderLabel}>
-                {/* 단위에 따른 표시 형식 */}
-                {sliderStep < 1
-                  ? maxQuantity.toFixed(2)
-                  : Math.round(maxQuantity)}
+                {maxQuantity % 1 === 0
+                  ? Math.round(maxQuantity).toString()
+                  : maxQuantity.toFixed(2)}
                 {unit}
               </Text>
             </View>

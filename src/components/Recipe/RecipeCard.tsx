@@ -15,6 +15,9 @@ interface RecipeCardProps {
   isDragEnabled?: boolean;
   isBeingDragged?: boolean;
   isFavorite?: boolean;
+  availableIngredientsCount?: number;
+  totalIngredientsCount?: number;
+  canMakeWithFridge?: boolean;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({
@@ -25,6 +28,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   onLongPress,
   isBeingDragged = false,
   isFavorite,
+  availableIngredientsCount = 0,
+  totalIngredientsCount = 0,
+  canMakeWithFridge = false,
 }) => {
   const [isSwipeOpen, setIsSwipeOpen] = useState(false);
 
@@ -39,6 +45,33 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       </TouchableOpacity>
     </View>
   );
+
+  // 재료 가능 상태 표시 컴포넌트 (대체재료 포함)
+  const renderIngredientStatus = () => {
+    if (totalIngredientsCount === 0) return null;
+
+    return (
+      <View style={styles.ingredientStatus}>
+        <View
+          style={[
+            styles.statusIndicator,
+            canMakeWithFridge
+              ? styles.canMakeIndicator
+              : styles.cannotMakeIndicator,
+          ]}
+        >
+          <Text
+            style={[
+              styles.statusText,
+              canMakeWithFridge ? styles.canMakeText : styles.cannotMakeText,
+            ]}
+          >
+            {availableIngredientsCount} / {totalIngredientsCount}
+          </Text>
+        </View>
+      </View>
+    );
+  };
 
   return (
     <ScaleDecorator>
@@ -55,6 +88,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             styles.recipeCard,
             isBeingDragged && styles.draggingCard,
             isSwipeOpen && styles.swipeOpenCard,
+            canMakeWithFridge && styles.canMakeCard,
           ]}
           onPress={onPress}
           onLongPress={onLongPress}
@@ -67,6 +101,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               style={styles.recipeIcon}
               resizeMode="contain"
             />
+
             <View style={styles.recipeInfo}>
               <Text
                 style={[
@@ -76,7 +111,10 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               >
                 {recipe.title}
               </Text>
+              {/* 대체재료 포함 조리 가능 상태 표시 */}
+              {renderIngredientStatus()}
             </View>
+
             <View style={styles.cardActions}>
               <TouchableOpacity
                 style={styles.favoriteButton}

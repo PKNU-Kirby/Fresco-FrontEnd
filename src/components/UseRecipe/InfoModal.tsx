@@ -24,7 +24,7 @@ const InfoModal: React.FC<InfoModalProps> = ({ visible, onClose }) => {
 
   return (
     <Modal
-      transparent
+      transparent={true}
       visible={visible}
       animationType="fade"
       onRequestClose={onClose}

@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import InfoModal from '../../../components/UseRecipe/InfoModal';
 import StepsSection from '../../../components/UseRecipe/StepsSection';
-import ConfirmModal from '../../../components/Recipe/modals/ConfirmModal';
+import ConfirmModal from '../../../components/modals/ConfirmModal';
 import EnhancedIngredientCard from '../../../components/UseRecipe/EnhancedIngredientCard';
 
 import { updateFridgeItem } from '../../../utils/fridgeStorage';
@@ -208,7 +208,7 @@ const UseRecipeScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       {/* 헤더 */}
       <View style={styles.header}>
         <View style={styles.leftHeader}>
@@ -241,14 +241,10 @@ const UseRecipeScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>재료 준비하기</Text>
 
           {matchedIngredients.length === 0 ? (
-            <View style={styles.emptyIngredientsContainer}>
+            <View>
               <Icon name="info" size={24} color="#666" />
-              <Text style={styles.emptyIngredientsText}>
-                표시할 재료가 없습니다.
-              </Text>
-              <Text style={styles.emptyIngredientsSubText}>
-                레시피 상세 화면에서 재료를 선택해주세요.
-              </Text>
+              <Text>표시할 재료가 없습니다.</Text>
+              <Text>레시피 상세 화면에서 재료를 선택해주세요.</Text>
             </View>
           ) : (
             <FlatList

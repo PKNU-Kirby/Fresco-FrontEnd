@@ -13,6 +13,10 @@ interface RenderRecipeItemProps {
   onToggleFavorite: (id: string) => void;
   onPress: (recipe: Recipe) => void;
   isFavorite: boolean;
+  // 조리 가능성 props 추가
+  availableIngredientsCount?: number;
+  totalIngredientsCount?: number;
+  canMakeWithFridge?: boolean;
 }
 
 const RenderRecipeItem: React.FC<RenderRecipeItemProps> = ({
@@ -24,6 +28,9 @@ const RenderRecipeItem: React.FC<RenderRecipeItemProps> = ({
   onToggleFavorite,
   onPress,
   isFavorite,
+  availableIngredientsCount = 0,
+  totalIngredientsCount = 0,
+  canMakeWithFridge = false,
 }) => (
   <View style={[isActive && styles.draggingItem]}>
     <RecipeCard
@@ -35,6 +42,9 @@ const RenderRecipeItem: React.FC<RenderRecipeItemProps> = ({
       isDragEnabled={isDragEnabled}
       isBeingDragged={isActive}
       isFavorite={isFavorite}
+      availableIngredientsCount={availableIngredientsCount}
+      totalIngredientsCount={totalIngredientsCount}
+      canMakeWithFridge={canMakeWithFridge}
     />
   </View>
 );

@@ -45,7 +45,7 @@ const FlushConfirmModal: React.FC<FlushConfirmModalProps> = ({
 
   return (
     <Modal
-      transparent
+      transparent={true}
       visible={visible}
       animationType="fade"
       onRequestClose={onCancel}

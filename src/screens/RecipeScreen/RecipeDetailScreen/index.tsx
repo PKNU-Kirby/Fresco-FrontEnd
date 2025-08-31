@@ -18,7 +18,7 @@ import { ReferenceUrlSection } from '../../../components/RecipeDetail/RecipeDeta
 import { RecipeActionButtons } from '../../../components/RecipeDetail/RecipeDetail';
 import { UseRecipeModal } from '../../../components/RecipeDetail/RecipeDetail';
 import { ShareRecipeModal } from '../../../components/RecipeDetail/RecipeDetail';
-import ConfirmModal from '../../../components/Recipe/modals/ConfirmModal';
+import ConfirmModal from '../../../components/modals/ConfirmModal';
 import { EnhancedIngredient } from '../../../hooks/Recipe/useIngredientMatching';
 import { IngredientsSection } from '../../../components/RecipeDetail/IngredientsSection';
 import { styles } from './styles';

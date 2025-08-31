@@ -34,7 +34,7 @@ const ItemCategoryModal: React.FC<ItemCategoryModalProps> = ({
   return (
     <Modal
       visible={visible}
-      transparent
+      transparent={true}
       animationType="fade"
       statusBarTranslucent={true}
       onRequestClose={handleClose}

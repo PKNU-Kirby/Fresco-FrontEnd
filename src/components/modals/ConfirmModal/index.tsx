@@ -68,7 +68,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
   return (
     <Modal
-      transparent
+      transparent={true}
       visible={visible}
       animationType="fade"
       statusBarTranslucent={true}

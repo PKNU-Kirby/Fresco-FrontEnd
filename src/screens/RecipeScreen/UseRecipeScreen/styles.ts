@@ -97,9 +97,13 @@ export const ingredientCardStyles = StyleSheet.create({
 });
 
 export const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: '#e8f5e8',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: 'black',
   },
   loadingContainer: {
     flex: 1,
@@ -150,7 +154,6 @@ export const styles = StyleSheet.create({
   },
 
   content: {
-    flex: 1,
     backgroundColor: '#e8f5e8',
   },
 
@@ -182,28 +185,30 @@ export const styles = StyleSheet.create({
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
     backgroundColor: 'limegreen',
-    margin: 24,
-    padding: 16,
-    borderRadius: 12,
-    gap: 8,
+    marginHorizontal: scale(120),
+    marginTop: scale(24),
+    marginBottom: scale(24),
+    padding: scale(16),
+    borderRadius: scale(12),
+    gap: scale(8),
   },
   disabledButton: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
     backgroundColor: 'lightgray',
-    margin: 24,
-    padding: 16,
-    borderRadius: 12,
-    gap: 8,
+    margin: scale(24),
+    padding: scale(16),
+    borderRadius: scale(12),
+    gap: scale(8),
   },
   completeButtonText: {
     color: '#f8f8f8',
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '800' as const,
   },
   bottomSpacer: {
-    height: 20,
+    height: scale(20),
   },
   /////////////////////////////////////////////////////////////////////////////////////
 

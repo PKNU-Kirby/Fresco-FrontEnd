@@ -44,7 +44,7 @@ const ItemDeleteConfirmModal: React.FC<ItemDeleteConfirmModalProps> = ({
 
   return (
     <Modal
-      transparent
+      transparent={true}
       visible={visible}
       animationType="fade"
       onRequestClose={onCancel}

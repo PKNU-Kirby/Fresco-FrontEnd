@@ -1,12 +1,5 @@
 import React, { useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Platform,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,6 +15,12 @@ import {
   FavoriteStorage,
   SharedRecipeStorage,
 } from '../../utils/AsyncStorageUtils';
+
+// 조리 가능성 계산 유틸리티 import
+import {
+  calculateMultipleRecipeAvailability,
+  RecipeAvailabilityInfo,
+} from '../../utils/recipeAvailabilityUtils';
 
 // 컴포넌트 imports
 import RecipeHeader from '../../components/Recipe/RecipeHeader';
@@ -68,7 +67,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   const navigation = useNavigation<RecipeHomeNavigationProp>();
   const { fridgeId, fridgeName } = route.params;
 
-  // State 관리 (검색 관련 state 모두 제거)
+  // State 관리
   const [personalRecipes, setPersonalRecipes] = useState<Recipe[]>([]);
   const [sharedRecipes, setSharedRecipes] = useState<Recipe[]>([]);
   const [favoriteRecipeIds, setFavoriteRecipeIds] = useState<string[]>([]);
@@ -78,18 +77,38 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   const [showFloatingMenu, setShowFloatingMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  // 새로 추가: 조리 가능성 정보
+  const [recipeAvailabilities, setRecipeAvailabilities] = useState<
+    Map<string, RecipeAvailabilityInfo>
+  >(new Map());
 
   // Refs
   const scrollViewRef = useRef<ScrollView>(null);
   const flatListRef = useRef<any>(null);
   const ITEMS_PER_PAGE = 15;
 
-  // 🔧 초기 데이터 로드
+  // 조리 가능성 계산 함수
+  const calculateRecipeAvailabilities = async () => {
+    try {
+      if (personalRecipes.length > 0 && fridgeId) {
+        const availabilities = await calculateMultipleRecipeAvailability(
+          personalRecipes,
+          fridgeId,
+        );
+        setRecipeAvailabilities(availabilities);
+      }
+    } catch (error) {
+      console.error('레시피 가용성 계산 실패:', error);
+      setRecipeAvailabilities(new Map());
+    }
+  };
+
+  // 초기 데이터 로드
   const loadInitialData = async () => {
     try {
       setIsLoading(true);
 
-      // 병렬로 모든 데이터 로드 (검색 히스토리 제거)
+      // 병렬로 모든 데이터 로드
       const [storedPersonalRecipes, storedFavoriteIds, storedSharedRecipes] =
         await Promise.all([
           RecipeStorage.getPersonalRecipes(),
@@ -117,6 +136,11 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
 
       // 즐겨찾기 설정
       setFavoriteRecipeIds(storedFavoriteIds);
+
+      // 조리 가능성 계산 (데이터 로드 후 잠시 대기)
+      setTimeout(() => {
+        calculateRecipeAvailabilities();
+      }, 100);
     } catch (error) {
       console.error('초기 데이터 로드 실패:', error);
       // 에러 시 기본값 설정
@@ -132,10 +156,17 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     loadInitialData();
   }, []);
 
-  // 🔧 화면 포커스 시 데이터 동기화
+  // personalRecipes가 변경될 때마다 조리 가능성 재계산
+  React.useEffect(() => {
+    if (personalRecipes.length > 0 && !isLoading) {
+      calculateRecipeAvailabilities();
+    }
+  }, [personalRecipes, fridgeId]);
+
+  // 화면 포커스 시 데이터 동기화
   useFocusEffect(
     React.useCallback(() => {
-      // 검색에서 돌아올 때 상태 초기화 (검색 관련 제거)
+      // 검색에서 돌아올 때 상태 초기화
       setCurrentPage(1);
 
       // 데이터 다시 로드 (다른 화면에서 변경될 수 있으므로)
@@ -152,7 +183,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     return personalRecipes.filter(recipe => isFavorite(recipe.id));
   };
 
-  // 현재 표시할 레시피들 필터링 (검색 쿼리 제거)
+  // 현재 표시할 레시피들 필터링
   const getFilteredRecipes = () => {
     let recipes = personalRecipes;
     if (currentTab === 'favorites') {
@@ -237,7 +268,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     }
   };
 
-  // 🔧 스크롤 방향 기반 버튼 표시 로직
+  // 스크롤 방향 기반 버튼 표시 로직
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
 
@@ -332,6 +363,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
             </Text>
           </TouchableOpacity>
         </View>
+
         {/* 레시피 리스트 */}
         {filteredRecipes.length === 0 ? (
           <ScrollView
@@ -374,6 +406,8 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
               keyExtractor={item => item.id}
               renderItem={({ item, drag, isActive }) => {
                 const isDragEnabled = currentTab === 'all';
+                const availability = recipeAvailabilities.get(item.id); // 조리 가능성 정보 가져오기
+
                 return (
                   <RenderRecipeItem
                     item={item}
@@ -391,6 +425,14 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                       });
                     }}
                     isFavorite={isFavorite(item.id)}
+                    // 조리 가능성 정보 전달
+                    availableIngredientsCount={
+                      availability?.availableIngredientsCount || 0
+                    }
+                    totalIngredientsCount={
+                      availability?.totalIngredientsCount || 0
+                    }
+                    canMakeWithFridge={availability?.canMakeWithFridge || false}
                   />
                 );
               }}
