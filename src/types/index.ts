@@ -139,6 +139,7 @@ export interface MatchedIngredientSeparate {
   userInputQuantity: string;
   maxUserQuantity: number;
   isDeducted: boolean;
+  isCompletelyConsumed?: boolean;
   isMultipleOption?: boolean;
   optionIndex?: number;
 }

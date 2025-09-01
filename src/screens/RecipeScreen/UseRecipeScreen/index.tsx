@@ -11,19 +11,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
 import InfoModal from '../../../components/UseRecipe/InfoModal';
 import StepsSection from '../../../components/UseRecipe/StepsSection';
 import ConfirmModal from '../../../components/modals/ConfirmModal';
 import EnhancedIngredientCard from '../../../components/UseRecipe/EnhancedIngredientCard';
-
-import { updateFridgeItem } from '../../../utils/fridgeStorage';
+import {
+  updateFridgeItem,
+  deleteItemFromFridge,
+} from '../../../utils/fridgeStorage';
 import { useIngredientMatching } from '../../../hooks/Recipe/useIngredientMatching';
 import { useRecipeSteps } from '../../../hooks/Recipe/useRecipeSteps';
 import { RecipeStackParamList, Recipe } from '../../../types';
 import { EnhancedIngredient } from '../../../hooks/Recipe/useIngredientMatching';
-import { UsageTrackingService } from '../../../utils/UseageTrackingService';
-import { styles } from './styles';
+import { UsageTrackingService } from '../../../services/UseageTrackingService';
 
 type UseRecipeScreenNavigationProp = NativeStackNavigationProp<
   RecipeStackParamList,
@@ -53,12 +53,13 @@ const UseRecipeScreen: React.FC = () => {
   const [showCompleteSuccessModal, setShowCompleteSuccessModal] =
     useState(false);
   const [showCompleteErrorModal, setShowCompleteErrorModal] = useState(false);
-
   const [completeInfo, setCompleteInfo] = useState({
     completed: 0,
     total: 0,
     ingredientsToDeduct: [] as any[],
     totalDeductCount: 0,
+    ingredientsToDelete: [] as any[], // 완전 소진될 재료들
+    deleteCount: 0,
   });
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -103,10 +104,18 @@ const UseRecipeScreen: React.FC = () => {
         parseFloat(item.userInputQuantity) > 0,
     );
 
-    // 유효성 검사 - 수량 초과 여부 확인
+    // 유효성 검사 - 수량 초과 여부 확인 (최대값 고려)
     const invalidIngredients = ingredientsToDeduct.filter(item => {
-      const inputQuantity = parseFloat(item.userInputQuantity);
+      let inputQuantity = parseFloat(item.userInputQuantity);
       const availableQuantity = parseFloat(item.fridgeIngredient!.quantity);
+      const maxQuantity = parseFloat(item.maxUserQuantity.toString());
+
+      // 최대값으로 설정된 경우 정확한 총량으로 처리
+      const isMaxQuantity = Math.abs(inputQuantity - maxQuantity) < 0.0001;
+      if (isMaxQuantity) {
+        inputQuantity = availableQuantity; // 실제 냉장고 수량 사용
+      }
+
       return inputQuantity > availableQuantity;
     });
 
@@ -125,41 +134,107 @@ const UseRecipeScreen: React.FC = () => {
       return;
     }
 
+    // 완전 소진될 재료들 찾기 (정확한 차감량 고려)
+    const ingredientsToDelete = ingredientsToDeduct.filter(item => {
+      let inputQuantity = parseFloat(item.userInputQuantity);
+      const currentQuantity = parseFloat(item.fridgeIngredient!.quantity);
+      const maxQuantity = parseFloat(item.maxUserQuantity.toString());
+
+      // 최대값으로 설정된 경우 정확한 총량으로 처리
+      const isMaxQuantity = Math.abs(inputQuantity - maxQuantity) < 0.0001;
+      if (isMaxQuantity) {
+        inputQuantity = currentQuantity;
+      }
+
+      const remainingQuantity = currentQuantity - inputQuantity;
+      return remainingQuantity <= 0; // 수량이 0 이하가 되는 경우
+    });
+
+    console.log(
+      `🗑️ 완전 소진될 재료 ${ingredientsToDelete.length}개:`,
+      ingredientsToDelete.map(item => {
+        let inputQuantity = parseFloat(item.userInputQuantity);
+        const currentQuantity = parseFloat(item.fridgeIngredient!.quantity);
+        const maxQuantity = parseFloat(item.maxUserQuantity.toString());
+        const isMaxQuantity = Math.abs(inputQuantity - maxQuantity) < 0.0001;
+        if (isMaxQuantity) {
+          inputQuantity = currentQuantity;
+        }
+        return `${item.fridgeIngredient!.name} (${
+          item.fridgeIngredient!.quantity
+        } -> 0, 차감: ${inputQuantity})`;
+      }),
+    );
+
     setCompleteInfo({
       completed: completedStepsCount,
       total: totalSteps,
       ingredientsToDeduct,
       totalDeductCount: ingredientsToDeduct.length,
+      ingredientsToDelete,
+      deleteCount: ingredientsToDelete.length,
     });
     setShowCompleteConfirmModal(true);
   };
 
-  // 일괄 차감 실행 (사용 기록 추가)
+  // 일괄 차감 실행 (사용 기록 추가 및 완전 소진 재료 삭제)
   const handleCompleteConfirm = async () => {
     setShowCompleteConfirmModal(false);
-
     try {
-      // 모든 재료를 순차적으로 차감
+      console.log(
+        `🔄 ${completeInfo.ingredientsToDeduct.length}개 재료 처리 시작`,
+      );
+
+      // 모든 재료를 순차적으로 처리
       for (const ingredient of completeInfo.ingredientsToDeduct) {
-        const inputQuantity = parseFloat(ingredient.userInputQuantity);
+        let inputQuantity = parseFloat(ingredient.userInputQuantity);
         const currentQuantity = parseFloat(
           ingredient.fridgeIngredient!.quantity,
         );
+
+        // 슬라이더 최대값 또는 스테퍼로 최대값 설정된 경우 정확한 총량으로 처리
+        const maxQuantity = parseFloat(ingredient.maxUserQuantity);
+        const isMaxQuantity = Math.abs(inputQuantity - maxQuantity) < 0.0001; // 부동소수점 오차 고려
+
+        if (isMaxQuantity) {
+          // 최대값으로 설정된 경우 정확한 냉장고 수량을 사용
+          inputQuantity = currentQuantity;
+          console.log(
+            `🎯 최대값 사용: ${ingredient.fridgeIngredient!.name} - ${
+              ingredient.userInputQuantity
+            } -> ${inputQuantity} (정확한 총량)`,
+          );
+        }
+
         const newQuantity = currentQuantity - inputQuantity;
 
-        await updateFridgeItem(ingredient.fridgeIngredient!.id, {
-          quantity: newQuantity.toString(),
-        });
+        console.log(
+          `📦 ${
+            ingredient.fridgeIngredient!.name
+          }: ${currentQuantity} -> ${newQuantity} (차감: ${inputQuantity})`,
+        );
 
-        // 레시피 사용 기록 추가
+        // 레시피 사용 기록 추가 (삭제 전에 먼저 기록)
+        const isCompletelyConsumed = newQuantity <= 0;
         await UsageTrackingService.trackRecipeUsage(
           ingredient.fridgeIngredient!.id,
           ingredient.fridgeIngredient!.name,
           inputQuantity.toString(),
           ingredient.fridgeIngredient!.unit || '개',
           fridgeId,
-          recipe.title,
+          recipe.title, // 완전 소진 여부 기록
+          isCompletelyConsumed ? '완전소진' : undefined,
         );
+
+        if (isCompletelyConsumed) {
+          await deleteItemFromFridge(ingredient.fridgeIngredient!.id);
+        } else {
+          // 수량만 업데이트
+          const finalQuantity = Math.max(0, newQuantity);
+          await updateFridgeItem(ingredient.fridgeIngredient!.id, {
+            quantity: finalQuantity.toString(),
+          });
+        }
       }
 
       // UI 상태 업데이트
@@ -176,9 +251,16 @@ const UseRecipeScreen: React.FC = () => {
             const currentQuantity = parseFloat(
               updated[index].fridgeIngredient!.quantity,
             );
-            updated[index].fridgeIngredient!.quantity = (
-              currentQuantity - inputQuantity
-            ).toString();
+            const newQuantity = currentQuantity - inputQuantity;
+
+            if (newQuantity <= 0) {
+              // 완전 소진된 경우 UI에서 표시 변경
+              updated[index].fridgeIngredient!.quantity = '0';
+              updated[index].isCompletelyConsumed = true;
+            } else {
+              updated[index].fridgeIngredient!.quantity =
+                newQuantity.toString();
+            }
           }
         });
         return updated;
@@ -186,8 +268,8 @@ const UseRecipeScreen: React.FC = () => {
 
       setShowCompleteSuccessModal(true);
     } catch (error) {
-      console.error('재료 차감 실패:', error);
-      setErrorMessage('재료 차감 중 오류가 발생했습니다.');
+      console.error('재료 차감/삭제 실패:', error);
+      setErrorMessage('재료 처리 중 오류가 발생했습니다.');
       setShowCompleteErrorModal(true);
     }
   };
@@ -236,10 +318,9 @@ const UseRecipeScreen: React.FC = () => {
         {/* 레시피 제목 */}
         <Text style={styles.recipeTitle}>{recipe.title}</Text>
 
-        {/* 재료 섹션 - EnhancedIngredientCard 사용 */}
+        {/* 재료 섹션 - EnhancedIngredientCard */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>재료 준비하기</Text>
-
           {matchedIngredients.length === 0 ? (
             <View>
               <Icon name="info" size={24} color="#666" />
@@ -280,7 +361,7 @@ const UseRecipeScreen: React.FC = () => {
           onPress={completeRecipe}
           disabled={matchedIngredients.length === 0}
         >
-          <Icon name="restaurant" size={20} color="#fff" />
+          <Icon name="restaurant" size={20} color="#f8f8f8" />
           <Text style={styles.completeButtonText}>조리 완료하기</Text>
         </TouchableOpacity>
 
@@ -293,12 +374,18 @@ const UseRecipeScreen: React.FC = () => {
         onClose={() => setShowInfoModal(false)}
       />
 
-      {/* 조리 완료 확인 (재료 차감 포함) */}
+      {/* 조리 완료 확인 (재료 차감 및 삭제 포함) */}
       <ConfirmModal
         isAlert={true}
         visible={showCompleteConfirmModal}
         title="조리 완료"
-        message={`${completeInfo.completed}/${completeInfo.total} 단계 완료\n${completeInfo.totalDeductCount}개 재료 차감 예정\n\n조리를 완료하시겠습니까?`}
+        message={`${completeInfo.completed}/${completeInfo.total} 단계 완료\n${
+          completeInfo.totalDeductCount
+        }개 재료 차감 예정${
+          completeInfo.deleteCount > 0
+            ? `\n${completeInfo.deleteCount}개 재료 삭제 예정`
+            : ''
+        }\n\n조리를 완료하시겠습니까?`}
         iconContainer={{ backgroundColor: '#d3f0d3' }}
         icon={{ name: 'restaurant', color: 'limegreen', size: 48 }}
         confirmText="완료"
@@ -313,7 +400,11 @@ const UseRecipeScreen: React.FC = () => {
         isAlert={false}
         visible={showCompleteSuccessModal}
         title="맛있게 드세요!"
-        message={`${recipe.title} 조리가 완료되었습니다.`}
+        message={`${recipe.title} 조리가 완료되었습니다.${
+          completeInfo.deleteCount > 0
+            ? `\n${completeInfo.deleteCount}개의 재료가 완전 소진되었습니다.`
+            : ''
+        }`}
         iconContainer={{ backgroundColor: '#d3f0d3' }}
         icon={{ name: 'restaurant', color: 'limegreen', size: 48 }}
         confirmText="확인"

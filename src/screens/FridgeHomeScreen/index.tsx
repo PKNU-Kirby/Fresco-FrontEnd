@@ -24,7 +24,7 @@ import {
 } from '../../utils/fridgeStorage';
 
 // Usage tracking
-import { UsageTrackingService } from '../../utils/UseageTrackingService';
+import { UsageTrackingService } from '../../services/UseageTrackingService';
 
 type Props = {
   route: {

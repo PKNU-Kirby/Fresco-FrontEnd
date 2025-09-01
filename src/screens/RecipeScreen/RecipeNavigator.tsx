@@ -56,7 +56,6 @@ export type RecipeStackParamList = {
     query: string;
   };
   SharedFolder: undefined;
-  // 🔧 UseRecipe 스크린 파라미터 타입 추가
   UseRecipe: {
     recipe: Recipe;
     fridgeId: string;

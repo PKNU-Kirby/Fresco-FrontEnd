@@ -21,6 +21,7 @@ interface EnhancedMatchedIngredientSeparate {
   userInputQuantity: string;
   maxUserQuantity: number;
   isDeducted: boolean;
+  isCompletelyConsumed?: boolean;
   isMultipleOption?: boolean;
   optionIndex?: number;
   isAlternativeUsed?: boolean;

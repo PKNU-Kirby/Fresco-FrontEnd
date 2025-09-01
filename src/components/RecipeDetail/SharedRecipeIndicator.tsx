@@ -13,7 +13,7 @@ export const SharedRecipeIndicator: React.FC<SharedRecipeIndicatorProps> = ({
   return (
     <View style={styles.sharedIndicator}>
       <Icon name="group" size={20} color="limegreen" />
-      <Text style={styles.sharedText}>{sharedBy}님이 공유한 레시피입니다</Text>
+      <Text style={styles.sharedText}>{sharedBy} 님이 공유한 레시피입니다</Text>
     </View>
   );
 };

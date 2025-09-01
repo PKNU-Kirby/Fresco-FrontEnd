@@ -111,7 +111,6 @@ export const styles = StyleSheet.create({
     backgroundColor: '#E8F5E8',
     padding: scale(12),
     marginTop: scale(16),
-    marginBottom: scale(16),
     borderRadius: scale(8),
   },
   sharedText: {
