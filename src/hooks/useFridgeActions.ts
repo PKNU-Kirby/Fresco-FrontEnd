@@ -23,8 +23,8 @@ export const useFridgeActions = ({
   setIsEditModalVisible,
   setIsAddModalVisible,
   editingFridge,
-  navigation,
-}: UseFridgeActionsParams) => {
+}: // navigation,
+UseFridgeActionsParams) => {
   // 모달 상태들
   const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(false);
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);

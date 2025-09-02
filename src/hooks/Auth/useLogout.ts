@@ -22,7 +22,7 @@ export const useLogout = (): UseLogoutReturn => {
       // 로그아웃 요청
       const accessToken = await getAccessToken();
       if (accessToken) {
-        await logoutAPI(accessToken);
+        await logoutAPI();
       }
     } catch (error) {
       // 서버 로그아웃 실패해도 로컬 데이터는 삭제
