@@ -6,7 +6,7 @@ import type {
   GetProfileResponse,
 } from '@react-native-seoul/naver-login';
 import Config from 'react-native-config';
-import styles from './styles';
+import { socialLoginButtonStyles as styles } from './styles';
 import type { SocialProvider, NaverProfile } from '../../types';
 
 interface NaverLoginButtonProps {

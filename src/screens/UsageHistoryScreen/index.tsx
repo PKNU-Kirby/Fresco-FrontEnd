@@ -15,7 +15,7 @@ import { RootStackParamList } from '../../../App';
 import {
   UsageTrackingService,
   UsageRecord,
-} from '../../utils/UseageTrackingService';
+} from '../../services/UseageTrackingService';
 import { styles } from './styles';
 
 type Props = {

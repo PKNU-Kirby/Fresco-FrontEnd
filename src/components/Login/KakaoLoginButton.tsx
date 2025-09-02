@@ -4,7 +4,7 @@ import {
   loginWithKakaoAccount,
   getProfile as getKakaoProfile,
 } from '@react-native-seoul/kakao-login';
-import styles from './styles';
+import { socialLoginButtonStyles as styles } from './styles';
 import type { SocialProvider, KakaoProfile, KakaoToken } from '../../types';
 
 interface KakaoLoginButtonProps {

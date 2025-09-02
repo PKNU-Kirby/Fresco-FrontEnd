@@ -7,6 +7,7 @@ import {
   Platform,
   Text,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { styles } from './styles';
 
@@ -125,7 +126,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     <Text style={styles.dateInputText}>
                       {formatDate(startDate)}
                     </Text>
-                    <Text style={styles.dateInputArrow}>(달력아이콘)</Text>
+                    <Text style={styles.dateInputArrow}>
+                      <Icon name={'calendar-month'} size={24} color={'#444'} />
+                    </Text>
                   </TouchableOpacity>
                 </View>
                 <View style={styles.dateSection}>
@@ -137,7 +140,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     <Text style={styles.dateInputText}>
                       {formatDate(endDate)}
                     </Text>
-                    <Text style={styles.dateInputArrow}>(달력아이콘)</Text>
+                    <Text style={styles.dateInputArrow}>
+                      <Icon name={'calendar-month'} size={24} color={'#444'} />
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>

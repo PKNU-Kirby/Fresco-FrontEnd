@@ -3,6 +3,7 @@ import {
   AsyncStorageService,
   FridgeWithRole,
 } from '../services/AsyncStorageService';
+import { useLogout } from './Auth/useLogout';
 import { User } from '../types/auth';
 
 interface UseFridgeActionsParams {
@@ -39,14 +40,17 @@ export const useFridgeActions = ({
     null,
   );
 
+  // useLogout 훅 사용
+  const { isLoggingOut, handleLogout: performLogout } = useLogout();
+
   const handleLogout = () => {
     setLogoutConfirmVisible(true);
   };
 
+  // useLogout 훅 활용한 로그아웃 (API 호출 포함)
   const handleLogoutConfirm = async () => {
     setLogoutConfirmVisible(false);
-    await AsyncStorageService.clearCurrentUser();
-    navigation.replace('Login');
+    await performLogout(); // API 호출 + 로컬 삭제 + 네비게이션 모두 처리됨
   };
 
   const handleEditFridge = (fridge: FridgeWithRole) => {
@@ -205,7 +209,8 @@ export const useFridgeActions = ({
     handleToggleHidden,
     handleAddFridge,
     handleUpdateFridge,
-    // 모달 상태와 핸들러들
+    isLoggingOut,
+    // 모달 상태, 핸들러
     modals: {
       logoutConfirmVisible,
       deleteConfirmVisible,

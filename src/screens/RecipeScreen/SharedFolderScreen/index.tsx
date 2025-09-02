@@ -306,6 +306,7 @@ const sharedRecipeStyles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: 16,
     marginBottom: 12,
+    marginHorizontal: 16,
     shadowColor: '#333',
     shadowOffset: {
       width: 0,
@@ -383,11 +384,11 @@ const sharedRecipeStyles = StyleSheet.create({
   },
   canMakeIndicator: {
     backgroundColor: '#E8F5E8',
-    borderColor: '#4CAF50',
+    borderColor: 'limegreen',
   },
   cannotMakeIndicator: {
-    backgroundColor: '#FFF3E0',
-    borderColor: '#FF9800',
+    backgroundColor: '#eee',
+    borderColor: '#aaa',
   },
   statusText: {
     fontSize: 12,
@@ -397,7 +398,7 @@ const sharedRecipeStyles = StyleSheet.create({
     color: '#2E7D32',
   },
   cannotMakeText: {
-    color: '#F57C00',
+    color: '#aaa',
   },
 });
 
@@ -746,17 +747,6 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
                 </View>
               ) : (
                 <>
-                  {/* 레시피 목록 안내 */}
-                  <View style={styles.infoContainer}>
-                    <View style={styles.infoIcon}>
-                      <Icon name="restaurant" size={20} color="#4CAF50" />
-                    </View>
-                    <Text style={styles.infoText}>
-                      {selectedFridge.fridge.name}에 공유된 레시피입니다.
-                      {'\n'}초록색 테두리는 모든 재료가 준비된 레시피입니다.
-                    </Text>
-                  </View>
-
                   {/* 레시피 목록 - 실제 냉장고 식재료와 비교하여 상태 계산 */}
                   {selectedFridge.recipes.map(recipe => {
                     const ingredientStatus = calculateIngredientStatus(

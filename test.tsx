@@ -1,240 +1,216 @@
-import { useEffect, useState } from 'react';
-import { RecipeIngredient } from '../../screens/RecipeScreen/RecipeNavigator';
-import {
-  getFridgeItemsByFridgeId,
-  FridgeItem,
-} from '../../utils/fridgeStorage';
-import { EnhancedIngredient } from './IngredientsSection';
+import Config from 'react-native-config';
+import type { SocialProvider } from '../types/auth';
 
-// 대체재 매핑 데이터
-const ALTERNATIVE_MAPPING: {
-  [key: string]: Array<{ name: string; reason: string }>;
-} = {
-  소시지: [
-    { name: '부어스트 소시지', reason: '같은 소시지류로 대체 가능해요' },
-    { name: '다짐육', reason: '육류 단백질로 대체할 수 있어요' },
-  ],
-  양파: [
-    { name: '적양파', reason: '같은 양파류로 대체 가능해요' },
-    { name: '대파', reason: '매운맛과 단맛을 동시에 낼 수 있어요' },
-  ],
-  적양파: [{ name: '양파', reason: '같은 양파류로 대체 가능해요' }],
-  당근: [
-    { name: '미니 당근', reason: '같은 당근이에요' },
-    { name: '노랑 파프리카', reason: '단맛과 색감이 비슷해요' },
-  ],
-  '미니 당근': [
-    { name: '당근', reason: '같은 당근이에요' },
-    { name: '노랑 파프리카', reason: '단맛과 아삭한 식감이 비슷해요' },
-  ],
-  파프리카: [
-    { name: '노랑 파프리카', reason: '같은 파프리카예요' },
-    { name: '미니 당근', reason: '단맛과 아삭한 식감이 비슷해요' },
-  ],
-  '노랑 파프리카': [
-    { name: '파프리카', reason: '같은 파프리카예요' },
-    { name: '미니 당근', reason: '단맛과 아삭한 식감이 비슷해요' },
-  ],
-  양배추: [{ name: '배추', reason: '잎채소로 용도가 비슷해요' }],
-  배추: [{ name: '양배추', reason: '잎채소로 용도가 비슷해요' }],
-  양상추: [{ name: '양배추', reason: '잎채소로 식감이 비슷해요' }],
-};
+// HTTP types
+// ============================================================================
 
-interface UseIngredientMatchingProps {
-  ingredients: RecipeIngredient[];
-  fridgeId?: number;
-  isEditMode: boolean;
-  onEnhancedIngredientsChange?: (ingredients: EnhancedIngredient[]) => void;
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
+export interface ApiRequestConfig {
+  method: HttpMethod;
+  url: string;
+  headers?: Record<string, string>;
+  body?: any;
+  timeout?: number;
 }
 
-export const useIngredientMatching = ({
-  ingredients,
-  fridgeId,
-  isEditMode,
-  onEnhancedIngredientsChange,
-}: UseIngredientMatchingProps) => {
-  const [enhancedIngredients, setEnhancedIngredients] = useState<
-    EnhancedIngredient[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(false);
+export interface ApiResponse<T = any> {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
+}
 
-  // 문자열 정규화 함수
-  const normalizeString = (str: string): string => {
-    return str
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, '')
-      .replace(/[^\w가-힣]/g, '');
+// API Endpoints
+// ============================================================================
+
+export const API_ENDPOINTS = {
+  AUTH: {
+    LOGIN: '/api/v1/auth/login',
+    REFRESH: '/api/v1/auth/refresh',
+    LOGOUT: '/api/v1/auth/logout',
+  },
+  REFRIGERATOR: {
+    LIST: '/api/v1/refrigerator',
+    CREATE: '/api/v1/refrigerator',
+    DETAIL: (id: string) => `/api/v1/refrigerator/${id}`,
+    UPDATE: (id: string) => `/api/v1/refrigerator/${id}`,
+    DELETE: (id: string) => `/api/v1/refrigerator/${id}`,
+    ADD_USER: (id: string) => `/api/v1/refrigerator/${id}/user`,
+    REMOVE_USER: (id: string) => `/api/v1/refrigerator/${id}/user`,
+    INVITATION: {
+      CREATE: '/api/v1/refrigerator/invitation',
+      GET: '/api/v1/refrigerator/invitation',
+    },
+  },
+  INGREDIENT: {
+    LIST: (refrigeratorId: string) => `/api/v1/ingredient/${refrigeratorId}`,
+    BY_CATEGORY: (refrigeratorId: string) =>
+      `/api/v1/ingredient/${refrigeratorId}/category`,
+    UPDATE: (refrigeratorId: string, ingredientId: string) =>
+      `/api/v1/ingredient/${refrigeratorId}/${ingredientId}`,
+    USAGE_HISTORY: (refrigeratorId: string) =>
+      `/api/v1/ingredient/${refrigeratorId}/history`,
+  },
+} as const;
+
+// API Response Types
+// ============================================================================
+
+export type SuccessCode =
+  | 'AUTH_OK_001' // 로그인 성공
+  | 'AUTH_OK_002' // 토큰 재발급 성공
+  | 'AUTH_OK_003' // 로그아웃 성공
+  | 'USER_OK_001' // 사용자 정보 조회 성공
+  | 'USER_OK_002' // 사용자 정보 업데이트 성공
+  | 'FRIDGE_OK_001' // 냉장고 조회 성공
+  | 'FRIDGE_OK_002'; // 냉장고 생성 성공
+
+export type ErrorCode =
+  | 'AUTH_ERR_001' // 유효하지 않은 토큰
+  | 'AUTH_ERR_002' // 토큰 만료
+  | 'AUTH_ERR_003' // 인증 실패
+  | 'AUTH_ERR_004' // 권한 없음
+  | 'USER_ERR_001' // 사용자 없음
+  | 'USER_ERR_002' // 잘못된 사용자 정보
+  | 'FRIDGE_ERR_001' // 냉장고 없음
+  | 'FRIDGE_ERR_002' // 냉장고 접근 권한 없음
+  | 'COMMON_ERR_001' // 서버 내부 오류
+  | 'COMMON_ERR_002' // 잘못된 요청
+  | 'COMMON_ERR_003'; // 네트워크 오류
+
+export interface BaseApiResponse {
+  code: SuccessCode | ErrorCode;
+  message: string;
+  timestamp?: string;
+}
+
+export interface SuccessApiResponse<T = any> extends BaseApiResponse {
+  code: SuccessCode;
+  result: T;
+}
+
+export interface ErrorApiResponse extends BaseApiResponse {
+  code: ErrorCode;
+  error?: {
+    details?: any;
+    stack?: string;
   };
+}
 
-  // 재료 매칭 함수
-  const findMatches = (
-    recipeName: string,
-    fridgeItems: FridgeItem[],
-  ): FridgeItem[] => {
-    const normalizedRecipeName = normalizeString(recipeName);
-    const matches: FridgeItem[] = [];
+// Auth API Request Types
+// ============================================================================
 
-    // 1차: 정확 매칭
-    for (const item of fridgeItems) {
-      const normalizedFridgeName = normalizeString(item.name);
-      if (normalizedFridgeName === normalizedRecipeName) {
-        matches.push(item);
-      }
-    }
+export interface LoginRequest {
+  provider: SocialProvider;
+  accessToken: string;
+}
 
-    // 2차: 부분 매칭
-    if (matches.length === 0) {
-      for (const item of fridgeItems) {
-        const normalizedFridgeName = normalizeString(item.name);
-        if (
-          normalizedFridgeName.includes(normalizedRecipeName) ||
-          normalizedRecipeName.includes(normalizedFridgeName)
-        ) {
-          matches.push(item);
-        }
-      }
-    }
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
 
-    // 3차: 키워드 매칭
-    if (matches.length === 0) {
-      const recipeKeywords = recipeName.toLowerCase().split(/[\s,]+/);
-      for (const item of fridgeItems) {
-        const fridgeKeywords = item.name.toLowerCase().split(/[\s,]+/);
+// Auth API Response Types
+// ============================================================================
 
-        for (const recipeKeyword of recipeKeywords) {
-          for (const fridgeKeyword of fridgeKeywords) {
-            if (
-              recipeKeyword.length > 1 &&
-              fridgeKeyword.length > 1 &&
-              (recipeKeyword.includes(fridgeKeyword) ||
-                fridgeKeyword.includes(recipeKeyword))
-            ) {
-              if (!matches.find(m => m.id === item.id)) {
-                matches.push(item);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return matches;
-  };
-
-  // 대체재 찾기 함수
-  const findAlternatives = (
-    recipeName: string,
-    fridgeItems: FridgeItem[],
-  ): Array<{ fridgeItem: FridgeItem; reason: string }> => {
-    const alternatives = [];
-    const alternativeOptions = ALTERNATIVE_MAPPING[recipeName] || [];
-
-    for (const alt of alternativeOptions) {
-      const matches = findMatches(alt.name, fridgeItems);
-      for (const match of matches) {
-        alternatives.push({
-          fridgeItem: match,
-          reason: alt.reason,
-        });
-      }
-    }
-
-    return alternatives;
-  };
-
-  // 냉장고 재료 선택 변경
-  const handleFridgeItemSelection = (
-    ingredientId: string,
-    fridgeItem: FridgeItem,
-    isAlternative: boolean,
-  ) => {
-    const updatedIngredients = enhancedIngredients.map(ingredient => {
-      if (ingredient.id === ingredientId) {
-        return {
-          ...ingredient,
-          selectedFridgeItem: fridgeItem,
-          isAlternativeSelected: isAlternative,
-        };
-      }
-      return ingredient;
-    });
-
-    setEnhancedIngredients(updatedIngredients);
-    onEnhancedIngredientsChange?.(updatedIngredients);
-  };
-
-  // 냉장고 재료와 매칭
-  useEffect(() => {
-    const loadIngredientInfo = async () => {
-      if (!fridgeId || ingredients.length === 0 || isEditMode) {
-        const basicIngredients = ingredients.map(ing => ({
-          ...ing,
-          isAvailable: false,
-          exactMatches: [],
-          alternatives: [],
-        }));
-        setEnhancedIngredients(basicIngredients);
-        onEnhancedIngredientsChange?.(basicIngredients);
-        return;
-      }
-
-      setIsLoading(true);
-
-      try {
-        const fridgeItems = await getFridgeItemsByFridgeId(fridgeId.toString());
-
-        const enhanced = ingredients.map(ingredient => {
-          const exactMatches = findMatches(ingredient.name, fridgeItems);
-          const alternatives =
-            exactMatches.length === 0
-              ? findAlternatives(ingredient.name, fridgeItems)
-              : [];
-
-          let selectedFridgeItem: FridgeItem | undefined;
-          let isAlternativeSelected = false;
-
-          if (exactMatches.length > 0) {
-            selectedFridgeItem = exactMatches[0];
-            isAlternativeSelected = false;
-          } else if (alternatives.length > 0) {
-            selectedFridgeItem = alternatives[0].fridgeItem;
-            isAlternativeSelected = true;
-          }
-
-          return {
-            ...ingredient,
-            isAvailable: exactMatches.length > 0,
-            exactMatches,
-            alternatives,
-            selectedFridgeItem,
-            isAlternativeSelected,
-          };
-        });
-
-        setEnhancedIngredients(enhanced);
-        onEnhancedIngredientsChange?.(enhanced);
-      } catch (error) {
-        console.error('에러 발생:', error);
-        const errorIngredients = ingredients.map(ing => ({
-          ...ing,
-          isAvailable: false,
-          exactMatches: [],
-          alternatives: [],
-        }));
-        setEnhancedIngredients(errorIngredients);
-        onEnhancedIngredientsChange?.(errorIngredients);
-      } finally {
-        setIsLoading(false);
-      }
+export interface LoginResponse extends SuccessApiResponse {
+  code: 'AUTH_OK_001';
+  result: {
+    userId: string;
+    accessToken: string;
+    refreshToken: string;
+    user?: {
+      id: string;
+      name: string;
+      email?: string;
+      profileImage?: string;
+      provider: SocialProvider;
+      providerId: string;
+      createdAt?: string;
+      updatedAt?: string;
     };
-
-    loadIngredientInfo();
-  }, [ingredients, fridgeId, isEditMode, onEnhancedIngredientsChange]);
-
-  return {
-    enhancedIngredients,
-    isLoading,
-    handleFridgeItemSelection,
   };
+}
+
+export interface RefreshTokenResponse extends SuccessApiResponse {
+  code: 'AUTH_OK_002';
+  result: {
+    accessToken: string;
+    refreshToken: string;
+  };
+}
+
+export interface LogoutResponse extends SuccessApiResponse {
+  code: 'AUTH_OK_003';
+  result: {
+    message: string;
+  };
+}
+
+// API Functions
+// ============================================================================
+
+export const loginAPI = async (
+  provider: SocialProvider,
+  accessToken: string,
+): Promise<LoginResponse> => {
+  const response = await fetch(
+    `${Config.API_BASE_URL}${API_ENDPOINTS.AUTH.LOGIN}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        provider,
+        accessToken,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export const refreshTokenAPI = async (
+  refreshToken: string,
+): Promise<RefreshTokenResponse> => {
+  const response = await fetch(
+    `${Config.API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        refreshToken,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export const logoutAPI = async (accessToken: string): Promise<void> => {
+  const response = await fetch(
+    `${Config.API_BASE_URL}${API_ENDPOINTS.AUTH.LOGOUT}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
 };
