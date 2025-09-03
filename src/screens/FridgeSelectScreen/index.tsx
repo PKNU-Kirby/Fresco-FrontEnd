@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, SafeAreaView, Text, Animated } from 'react-native';
+import {
+  ActivityIndicator,
+  SafeAreaView,
+  Text,
+  Animated,
+  Alert,
+} from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 //
@@ -7,22 +13,45 @@ import { HiddenFridgesBottomSheet } from '../../components/FridgeSelect/HiddenFr
 import { FridgeHeader } from '../../components/FridgeSelect/FridgeHeader';
 import { FridgeList } from '../../components/FridgeSelect/FridgeTileList';
 import { FridgeModals } from '../../components/FridgeSelect/FridgeModal';
-import ConfirmModal from '../../components/modals/ConfirmModal';
+import { FridgeModalManager } from '../../components/FridgeSelect/FridgeModalManager';
 //
 import { useFridgeSelect } from '../../hooks/useFridgeSelect';
 import { useFridgeActions } from '../../hooks/useFridgeActions';
+import { useOptimisticEdit } from '../../hooks/useOptimisticEdit';
 import { FridgeWithRole } from '../../services/AsyncStorageService';
+import { deleteRefrigerator, updateRefrigerator } from '../../types/api';
 import { styles } from './styles';
 
 const FridgeSelectScreen = () => {
   const navigation = useNavigation<any>();
 
-  // 데이터 관리
-  const { currentUser, fridges, loading, initializeData, loadUserFridges } =
-    useFridgeSelect(navigation);
+  // 서버 데이터 관리
+  const {
+    currentUser,
+    fridges: serverFridges,
+    loading,
+    initializeData,
+    loadUserFridges,
+  } = useFridgeSelect(navigation);
+
+  // 낙관적 편집 관리
+  const {
+    isEditMode,
+    editableFridges,
+    hasChanges,
+    startEdit,
+    cancelEdit,
+    commitChanges,
+    addFridgeLocally,
+    editFridgeLocally,
+    deleteFridgeLocally,
+    toggleHiddenLocally,
+  } = useOptimisticEdit();
+
+  // 화면에 실제로 표시할 냉장고 목록 (편집 모드에 따라 다름)
+  const displayFridges = isEditMode ? editableFridges : serverFridges;
 
   // UI 상태
-  const [isEditMode, setIsEditMode] = useState(false);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editingFridge, setEditingFridge] = useState<FridgeWithRole | null>(
@@ -31,14 +60,11 @@ const FridgeSelectScreen = () => {
   const [bottomSheetHeight] = useState(new Animated.Value(80));
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
 
-  // 액션 핸들러들
+  // 서버 액션들 (실제 API 호출용)
   const {
     handleLogout,
-    handleEditFridge,
-    handleLeaveFridge,
-    handleToggleHidden,
-    handleAddFridge,
-    handleUpdateFridge,
+    handleAddFridge: serverAddFridge,
+    handleUpdateFridge: serverUpdateFridge,
     modals,
     modalHandlers,
   } = useFridgeActions({
@@ -53,17 +79,144 @@ const FridgeSelectScreen = () => {
 
   // 편집 모드 토글 핸들러
   const handleEditToggle = () => {
-    setIsEditMode(prev => {
-      const newEditMode = !prev;
-      if (!newEditMode) {
+    if (isEditMode) {
+      // 편집 모드 종료 - 변경사항이 있으면 확인
+      if (hasChanges) {
+        Alert.alert(
+          '편집 취소',
+          '변경사항이 저장되지 않습니다. 정말 취소하시겠습니까?',
+          [
+            { text: '계속 편집', style: 'cancel' },
+            {
+              text: '취소',
+              style: 'destructive',
+              onPress: () => {
+                cancelEdit(serverFridges);
+                setIsBottomSheetExpanded(false);
+                bottomSheetHeight.setValue(80);
+              },
+            },
+          ],
+        );
+      } else {
+        cancelEdit(serverFridges);
         setIsBottomSheetExpanded(false);
         bottomSheetHeight.setValue(80);
       }
-      return newEditMode;
-    });
+    } else {
+      // 편집 모드 시작
+      startEdit(serverFridges);
+    }
   };
 
-  // 바텀시트 토글 핸들러
+  // 편집 완료 핸들러
+  const handleSaveChanges = async () => {
+    try {
+      await commitChanges(
+        // Create
+        async (name: string) => {
+          const fridgeData = { name };
+          await serverAddFridge(fridgeData);
+        },
+        // Update
+        async (id: string, name: string) => {
+          await updateRefrigerator(id, { name });
+        },
+        // Delete
+        async (id: string) => {
+          await deleteRefrigerator(id);
+        },
+      );
+
+      // 성공 시 서버 데이터 새로고침
+      await loadUserFridges();
+
+      Alert.alert('성공', '모든 변경사항이 저장되었습니다.');
+    } catch (error) {
+      console.error('변경사항 저장 실패:', error);
+      Alert.alert('오류', '변경사항 저장에 실패했습니다.');
+    }
+  };
+
+  // 로컬 냉장고 편집 핸들러
+  const handleEditFridge = (fridge: FridgeWithRole) => {
+    if (!isEditMode) {
+      // 일반 모드에서는 상세 화면으로 이동
+      return;
+    }
+
+    if (!fridge.isOwner) {
+      Alert.alert('알림', '냉장고 소유자만 편집할 수 있습니다.');
+      return;
+    }
+
+    // 편집 모드에서는 이름 변경 프롬프트
+    Alert.prompt(
+      '냉장고 이름 변경',
+      '새 이름을 입력하세요',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '확인',
+          onPress: newName => {
+            if (newName && newName.trim()) {
+              editFridgeLocally(fridge.id, newName.trim());
+            }
+          },
+        },
+      ],
+      'plain-text',
+      fridge.name,
+    );
+  };
+
+  // 로컬 냉장고 삭제 핸들러
+  const handleLeaveFridge = (fridge: FridgeWithRole) => {
+    if (!isEditMode) return;
+
+    const actionText = fridge.isOwner ? '삭제' : '나가기';
+    Alert.alert(
+      `냉장고 ${actionText}`,
+      `${fridge.name}을(를) ${actionText}하시겠습니까?`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: actionText,
+          style: 'destructive',
+          onPress: () => deleteFridgeLocally(fridge.id),
+        },
+      ],
+    );
+  };
+
+  // 로컬 냉장고 추가 핸들러
+  const handleAddFridge = () => {
+    if (!isEditMode) {
+      setIsAddModalVisible(true);
+      return;
+    }
+
+    // 편집 모드에서는 즉시 추가
+    Alert.prompt(
+      '새 냉장고',
+      '냉장고 이름을 입력하세요',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '추가',
+          onPress: name => {
+            if (name && name.trim()) {
+              addFridgeLocally(name.trim());
+            }
+          },
+        },
+      ],
+      'plain-text',
+      '',
+    );
+  };
+
+  // Bottom Sheet Toggle Handler
   const toggleBottomSheet = () => {
     const newExpanded = !isBottomSheetExpanded;
     setIsBottomSheetExpanded(newExpanded);
@@ -104,30 +257,33 @@ const FridgeSelectScreen = () => {
         <FridgeHeader
           currentUser={currentUser}
           isEditMode={isEditMode}
+          hasChanges={hasChanges}
           onLogout={handleLogout}
           onEditToggle={handleEditToggle}
+          onSaveChanges={handleSaveChanges}
         />
 
         <FridgeList
-          fridges={fridges}
+          fridges={displayFridges}
           isEditMode={isEditMode}
-          onAddFridge={() => setIsAddModalVisible(true)}
+          onAddFridge={handleAddFridge}
           onEditFridge={handleEditFridge}
           onLeaveFridge={handleLeaveFridge}
-          onToggleHidden={handleToggleHidden}
+          onToggleHidden={toggleHiddenLocally}
         />
 
         <HiddenFridgesBottomSheet
-          fridges={fridges}
+          fridges={displayFridges}
           isEditMode={isEditMode}
           isExpanded={isBottomSheetExpanded}
           bottomSheetHeight={bottomSheetHeight}
           onToggleSheet={toggleBottomSheet}
           onEditFridge={handleEditFridge}
           onLeaveFridge={handleLeaveFridge}
-          onToggleHidden={handleToggleHidden}
+          onToggleHidden={toggleHiddenLocally}
         />
 
+        {/* 일반 모드에서의 냉장고 추가/편집 모달 */}
         <FridgeModals
           isAddModalVisible={isAddModalVisible}
           isEditModalVisible={isEditModalVisible}
@@ -137,122 +293,12 @@ const FridgeSelectScreen = () => {
             setIsEditModalVisible(false);
             setEditingFridge(null);
           }}
-          onAddFridge={handleAddFridge}
-          onUpdateFridge={handleUpdateFridge}
+          onAddFridge={serverAddFridge}
+          onUpdateFridge={serverUpdateFridge}
         />
 
-        {/* 로그아웃 확인 모달 */}
-        <ConfirmModal
-          isAlert={true}
-          visible={modals.logoutConfirmVisible}
-          title="로그아웃"
-          message="정말 로그아웃하시겠습니까?"
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
-          confirmText="로그아웃"
-          cancelText="취소"
-          confirmButtonStyle="danger"
-          onConfirm={modalHandlers.handleLogoutConfirm}
-          onCancel={() => modalHandlers.setLogoutConfirmVisible(false)}
-        />
-
-        {/* 냉장고 삭제 확인 모달 */}
-        <ConfirmModal
-          isAlert={true}
-          visible={modals.deleteConfirmVisible}
-          title="냉장고 삭제"
-          message={`${modals.selectedFridge?.name}을(를) 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`}
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
-          confirmText="삭제"
-          cancelText="취소"
-          confirmButtonStyle="danger"
-          onConfirm={modalHandlers.handleDeleteConfirm}
-          onCancel={() => modalHandlers.setDeleteConfirmVisible(false)}
-        />
-
-        {/* 냉장고 나가기 확인 모달 */}
-        <ConfirmModal
-          isAlert={true}
-          visible={modals.leaveConfirmVisible}
-          title="냉장고 나가기"
-          message={`${modals.selectedFridge?.name}에서 나가시겠습니까?`}
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
-          confirmText="나가기"
-          cancelText="취소"
-          confirmButtonStyle="danger"
-          onConfirm={modalHandlers.handleLeaveConfirm}
-          onCancel={() => modalHandlers.setLeaveConfirmVisible(false)}
-        />
-
-        {/* 소유자 권한 알림 모달 */}
-        <ConfirmModal
-          isAlert={false}
-          visible={modals.notOwnerModalVisible}
-          title="알림"
-          message="냉장고 소유자만 편집할 수 있습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{
-            name: 'error-outline',
-            color: 'tomato',
-            size: 48,
-          }}
-          confirmText="확인"
-          cancelText=""
-          confirmButtonStyle="primary"
-          onConfirm={() => modalHandlers.setNotOwnerModalVisible(false)}
-          onCancel={() => modalHandlers.setNotOwnerModalVisible(false)}
-        />
-
-        {/* 성공 알림 모달 */}
-        <ConfirmModal
-          isAlert={false}
-          visible={modals.successModalVisible}
-          title={modals.modalTitle}
-          message={modals.modalMessage}
-          iconContainer={{ backgroundColor: '#d3f0d3' }}
-          icon={{
-            name: 'check',
-            color: 'limegreen',
-            size: 48,
-          }}
-          confirmText="확인"
-          cancelText=""
-          confirmButtonStyle="primary"
-          onConfirm={() => modalHandlers.setSuccessModalVisible(false)}
-          onCancel={() => modalHandlers.setSuccessModalVisible(false)}
-        />
-
-        {/* 에러 알림 모달 */}
-        <ConfirmModal
-          isAlert={false}
-          visible={modals.errorModalVisible}
-          title={modals.modalTitle}
-          message={modals.modalMessage}
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
-          confirmText="확인"
-          cancelText=""
-          confirmButtonStyle="primary"
-          onConfirm={() => modalHandlers.setErrorModalVisible(false)}
-          onCancel={() => modalHandlers.setErrorModalVisible(false)}
-        />
-
-        {/* 숨김 토글 성공 모달 */}
-        <ConfirmModal
-          isAlert={false}
-          visible={modals.hideToggleModalVisible}
-          title={modals.modalTitle}
-          message={modals.modalMessage}
-          iconContainer={{ backgroundColor: '#d3f0d3' }}
-          icon={{ name: 'check', color: 'limegreen', size: 48 }}
-          confirmText="확인"
-          cancelText=""
-          confirmButtonStyle="primary"
-          onConfirm={() => modalHandlers.setHideToggleModalVisible(false)}
-          onCancel={() => modalHandlers.setHideToggleModalVisible(false)}
-        />
+        {/* 확인/알림 모달들 */}
+        <FridgeModalManager modals={modals} modalHandlers={modalHandlers} />
       </SafeAreaView>
     </GestureHandlerRootView>
   );

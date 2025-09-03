@@ -172,9 +172,6 @@ function MainTabNavigator({
 }
 
 function App(): React.JSX.Element {
-  console.log('NAVER_CLIENT_ID:', Config.NAVER_CLIENT_ID);
-  console.log('NAVER_CLIENT_SECRET:', Config.NAVER_CLIENT_SECRET);
-
   const navigationRef = useRef(null);
 
   useEffect(() => {

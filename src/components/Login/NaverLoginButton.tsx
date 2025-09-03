@@ -76,12 +76,6 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
   showErrorAlert,
 }) => {
   useEffect(() => {
-    console.log('🔍 네이버 설정:', {
-      clientId: NAVER_CONFIG.consumerKey,
-      hasSecret: !!NAVER_CONFIG.consumerSecret,
-      appName: NAVER_CONFIG.appName,
-    });
-
     NaverLogin.initialize({
       appName: NAVER_CONFIG.appName,
       consumerKey: NAVER_CONFIG.consumerKey,
@@ -96,29 +90,17 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
     setIsLoading(true);
 
     try {
-      console.log('🔍 네이버 로그인 시작...');
       const { failureResponse, successResponse }: NaverLoginResponse =
         await NaverLogin.login();
 
       if (failureResponse) {
-        console.log('❌ 네이버 로그인 실패 응답:', failureResponse);
         throw new Error(failureResponse.message || '네이버 로그인 실패');
       }
-
       if (!successResponse?.accessToken) {
-        console.log('❌ 네이버 토큰 없음');
         throw new Error('네이버 토큰을 가져올 수 없습니다');
       }
 
-      console.log('🔍 받은 네이버 토큰 정보:', {
-        tokenLength: successResponse.accessToken.length,
-        tokenStart: successResponse.accessToken.substring(0, 10),
-        hasSpecialChars: /[+/=]/.test(successResponse.accessToken),
-        tokenType: successResponse.tokenType,
-      });
-
       // 토큰 직접 검증
-      console.log('🔍 네이버 토큰 검증 중...');
       const verification = await verifyNaverToken(successResponse.accessToken);
 
       if (!verification.valid) {
@@ -128,8 +110,6 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
       const profileResult: GetProfileResponse = await NaverLogin.getProfile(
         successResponse.accessToken,
       );
-
-      console.log('🔍 네이버 프로필 결과:', profileResult);
 
       if (!profileResult?.response?.id) {
         throw new Error('네이버 사용자 정보를 가져올 수 없습니다');
@@ -142,17 +122,6 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
       const userEmail = profile.email || undefined;
       const profileImageUrl = profile.profile_image || undefined;
 
-      console.log('🔍 서버로 전송할 네이버 데이터:', {
-        provider: 'NAVER',
-        tokenLength: successResponse.accessToken.length,
-        userInfo: {
-          providerId,
-          name: userName,
-          email: userEmail,
-          hasProfileImage: !!profileImageUrl,
-        },
-      });
-
       await handleSocialLoginWithAPI('NAVER', successResponse.accessToken, {
         providerId,
         name: userName,
@@ -160,7 +129,6 @@ const NaverLoginButton: React.FC<NaverLoginButtonProps> = ({
         profileImage: profileImageUrl,
       });
     } catch (error) {
-      console.error('네이버 로그인 실패:', error);
       const message =
         error instanceof Error ? error.message : '네이버 로그인 실패';
       showErrorAlert(message);
