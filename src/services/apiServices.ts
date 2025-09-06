@@ -23,6 +23,37 @@ type FridgeMember = {
   role: 'owner' | 'member';
 };
 
+// 냉장고 아이템 관련 타입 추가
+export type ApiFridgeItem = {
+  id: string;
+  ingredientId: string;
+  categoryId: string;
+  ingredientName: string;
+  expirationDate: string;
+  quantity: number;
+  unit: string;
+  fridgeId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type ApiItemResponse<T> = {
+  content: T[];
+  pageInfo: {
+    currentPage: number;
+    pageSize: number;
+    totalElements: number;
+    totalPages: number;
+  };
+};
+
+export type FilterRequest = {
+  categoryIds: number[];
+  sort: string;
+  page: number;
+  size: number;
+};
+
 export class ApiService {
   // 서버 URL - 실제 서버 주소로 변경해야 합니다
   private static readonly BASE_URL = `${Config.API_BASE_URL}`;
@@ -242,6 +273,112 @@ export class ApiService {
       body: JSON.stringify(updateData),
     });
   }
+
+  // ========== 냉장고 아이템 관리 기능 추가 ==========
+
+  // 냉장고 아이템 조회 (필터링 포함) - 기존 엔드포인트 패턴 사용
+  static async getFridgeItems(
+    fridgeId: string,
+    filter: Partial<FilterRequest> = {},
+  ): Promise<ApiItemResponse<ApiFridgeItem>> {
+    const defaultFilter: FilterRequest = {
+      categoryIds: [],
+      sort: 'createdAt',
+      page: 0,
+      size: 50,
+      ...filter,
+    };
+
+    // filterRequest를 쿼리 파라미터로 변환
+    const queryParams = new URLSearchParams();
+    queryParams.append(
+      'categoryIds',
+      JSON.stringify(defaultFilter.categoryIds),
+    );
+    queryParams.append('sort', defaultFilter.sort);
+    queryParams.append('page', defaultFilter.page.toString());
+    queryParams.append('size', defaultFilter.size.toString());
+
+    const endpoint = `/ap1/v1/ingredient/${fridgeId}?${queryParams.toString()}`;
+
+    return this.apiCall<ApiItemResponse<ApiFridgeItem>>(endpoint);
+  }
+
+  // 냉장고 아이템 업데이트 - 기존 엔드포인트 패턴 사용
+  static async updateFridgeItem(
+    itemId: string,
+    updates: {
+      unit?: string;
+      expirationDate?: string;
+      quantity?: number;
+    },
+  ): Promise<ApiFridgeItem> {
+    return this.apiCall<ApiFridgeItem>(`/ap1/v1/ingredient/${itemId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+  }
+
+  // 냉장고 아이템 삭제 - 기존 엔드포인트 패턴 사용
+  static async deleteFridgeItem(itemId: string): Promise<void> {
+    return this.apiCall<void>(`/ap1/v1/ingredient/${itemId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // 냉장고 아이템 추가 - 기존 엔드포인트 패턴 사용
+  static async addFridgeItem(
+    fridgeId: string,
+    item: {
+      ingredientName: string;
+      categoryId: number;
+      quantity: number;
+      unit: string;
+      expirationDate: string;
+    },
+  ): Promise<ApiFridgeItem> {
+    return this.apiCall<ApiFridgeItem>(`/ap1/v1/ingredient/${fridgeId}`, {
+      method: 'POST',
+      body: JSON.stringify(item),
+    });
+  }
+
+  // 여러 아이템 일괄 추가
+  static async addMultipleFridgeItems(
+    fridgeId: string,
+    items: Array<{
+      ingredientName: string;
+      categoryId: number;
+      quantity: number;
+      unit: string;
+      expirationDate: string;
+    }>,
+  ): Promise<ApiFridgeItem[]> {
+    return this.apiCall<ApiFridgeItem[]>(
+      `/ap1/v1/ingredient/${fridgeId}/batch`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ items }),
+      },
+    );
+  }
+
+  // 카테고리 목록 조회 (필요시 추가)
+  static async getCategories(): Promise<
+    Array<{
+      id: number;
+      name: string;
+    }>
+  > {
+    return this.apiCall<
+      Array<{
+        id: number;
+        name: string;
+      }>
+    >('/api/v1/categories');
+  }
+
+  // ========== 기존 코드 계속 ==========
 
   // 사용 기록 조회
   static async getUsageHistory(
