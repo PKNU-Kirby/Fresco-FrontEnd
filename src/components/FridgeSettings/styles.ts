@@ -1,265 +1,376 @@
+// styles.ts - iOS 스타일로 완전히 수정된 전체 코드
 import { StyleSheet, Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
-// iPhone 16 Pro
-const baseWidth = 402;
-//const baseHeight = 874;
+export const styles = StyleSheet.create({
+  // 기본 컨테이너
+  container: {
+    flex: 1,
+    backgroundColor: '#F2F2F7', // iOS 설정 앱의 기본 배경색
+  },
 
-// 반응형 함수
-//const wp = (percentage: number) => (width * percentage) / 100;
-//const hp = (percentage: number) => (height * percentage) / 100;
-const scale = (size: number) => (width / baseWidth) * size;
+  // 헤더 스타일
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#F2F2F7', // 배경과 동일하게
+    borderBottomWidth: 0,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#444',
+  },
+  headerRight: {
+    width: 40,
+  },
 
-export const inviteMemberModalStyles = StyleSheet.create({
-  // 모달 기본
+  // 콘텐츠 영역
+  content: {
+    flex: 1,
+    paddingTop: 8,
+  },
+
+  // 로딩 상태
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F2F2F7',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#6B7280',
+  },
+
+  // iOS 스타일 설정 컨테이너
+  settingsContainer: {
+    flex: 1,
+    marginHorizontal: 16,
+  },
+
+  // 그룹 스타일
+  settingsGroup: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 16, // 좌우 여백 추가
+    marginBottom: 32, // 그룹 간 간격 증가
+    borderRadius: 12, // 둥근 모서리 추가
+    overflow: 'hidden', // 내부 요소들이 둥근 모서리를 넘지 않도록
+    // iOS 스타일 그림자 효과
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+
+  groupHeader: {
+    paddingHorizontal: 32, // 그룹의 패딩과 맞춤
+    paddingBottom: 8,
+    paddingTop: 24, // 상단 여백 증가
+    backgroundColor: '#F2F2F7', // 배경과 동일하게
+  },
+
+  groupTitle: {
+    fontSize: 13, // iOS처럼 조금 더 작게
+    fontWeight: '400', // iOS처럼 조금 더 가볍게
+    color: '#6D6D72', // iOS 스타일 회색
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+
+  // 개별 설정 아이템
+  settingsItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#C6C6C8', // iOS 스타일 구분선 색상
+    minHeight: 44, // iOS 최소 터치 영역
+  },
+
+  settingsItemLast: {
+    borderBottomWidth: 0, // 마지막 아이템은 하단 보더 제거
+  },
+
+  settingsItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+
+  settingsItemIcon: {
+    marginRight: 12,
+    width: 28, // 아이콘 크기 조정
+    alignItems: 'center',
+  },
+
+  settingsItemContent: {
+    flex: 1,
+  },
+
+  settingsItemTitle: {
+    fontSize: 17, // iOS 스타일 크기
+    fontWeight: '400',
+    color: '#000000', // iOS 스타일 검은색
+    marginBottom: 2,
+  },
+
+  settingsItemSubtitle: {
+    fontSize: 15, // iOS 스타일 크기
+    color: '#6D6D72', // iOS 스타일 회색
+    lineHeight: 18,
+  },
+
+  settingsItemRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  settingsItemValue: {
+    fontSize: 17,
+    color: '#6D6D72', // iOS 스타일 회색
+    marginRight: 8,
+  },
+
+  settingsItemArrow: {
+    marginLeft: 4,
+  },
+
+  // 위험한 액션용 스타일
+  dangerItem: {
+    color: '#FF3B30', // iOS 스타일 빨간색
+  },
+
+  // 스위치가 있는 아이템
+  switchItem: {
+    paddingRight: 16,
+  },
+
+  // 섹션 스타일 (설명문 등)
+  section: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2D2D2D',
+    marginBottom: 8,
+  },
+
+  sectionDescription: {
+    fontSize: 14,
+    color: '#6B7280',
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+
+  // 일수 선택 옵션 (태그 스타일)
+  dayOptionsContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    flexWrap: 'wrap',
+    paddingTop: 12,
+  },
+  dayOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+  },
+  dayOptionSelected: {
+    backgroundColor: '#60A5FA',
+    borderColor: '#60A5FA',
+  },
+  dayOptionText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  dayOptionTextSelected: {
+    color: '#FFFFFF',
+  },
+
+  // 시간 선택기
+  timeSelector: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  timeSelectorContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  timeText: {
+    fontSize: 16,
+    color: '#2D2D2D',
+    flex: 1,
+    marginLeft: 12,
+    fontWeight: '500',
+  },
+
+  // 멤버 카드 (기존 스타일 개선)
+  membersSection: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  memberCard: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  memberCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  memberAvatar: {
+    marginRight: 12,
+  },
+  memberMainInfo: {
+    flex: 1,
+  },
+  memberNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  memberName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2D2D2D',
+  },
+  ownerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  ownerBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#92400E',
+  },
+  memberCardFooter: {
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingTop: 8,
+  },
+  memberJoinDateText: {
+    fontSize: 13,
+    color: '#6B7280',
+  },
+  emptyMembers: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+
+  // 모달 스타일
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  inviteModalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
     width: '100%',
     maxWidth: 400,
+    maxHeight: '80%',
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 8,
   },
-
-  // 헤더
-  inviteModalHeader: {
+  modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f3f4',
+    borderBottomColor: '#E5E7EB',
   },
-  inviteModalTitle: {
+  modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#212529',
-  },
-  invisiblebox: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#f8f9fa',
-    justifyContent: 'center',
-    alignItems: 'center',
-    opacity: 0,
+    color: '#2D2D2D',
   },
   closeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
   },
   closeButtonText: {
     fontSize: 16,
-    color: '#6c757d',
+    color: '#6B7280',
     fontWeight: '600',
   },
-
-  // 냉장고 정보
-  fridgeInfoSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-  },
-  fridgeNameText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 16,
-  },
-  fridgeSubText: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-  },
-
-  // 링크 섹션
-  linkSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  linkLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 8,
-  },
-  linkContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#dee2e6',
-    overflow: 'hidden',
-  },
-  linkTextContainer: {
-    flex: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    justifyContent: 'center',
-  },
-  linkText: {
-    fontSize: 13,
-    color: '#495057',
-    fontFamily: 'monospace',
-  },
-  copyLinkButton: {
-    backgroundColor: '#333',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  copyLinkButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
-  },
-
-  // 공유 섹션
-  shareSection: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  shareSectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#495057',
-    marginBottom: 12,
-  },
-  shareButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  shareButton: {
-    alignItems: 'center',
-    flex: 1,
-    paddingVertical: 8,
-  },
-  shareButtonIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#f8f9fa',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#dee2e6',
-  },
-  shareButtonEmoji: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
-  shareButtonText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#333',
-    textAlign: 'center',
-  },
-
-  // 비활성화 상태 스타일 추가
-  shareButtonDisabled: {
-    opacity: 0.7,
-  },
-  shareButtonTextDisabled: {
-    color: '#999',
-  },
-});
-export const dateRangePickerStyles = StyleSheet.create({
-  // 메인 모달 스타일
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    width: width * 0.85,
-    overflow: 'hidden',
-  },
-  modalHeader: {
-    paddingVertical: 20,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#e0e0e0',
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#000',
-  },
-
-  // 날짜 선택 영역
-  dateContainer: {
-    paddingTop: 24,
-    paddingHorizontal: 20,
-  },
-  dateSection: {
-    marginBottom: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dateLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginRight: 24,
-    marginLeft: 8,
-  },
-  dateInput: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: '#fff',
-    width: 230,
-  },
-  dateInputText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  dateInputArrow: {
-    fontSize: 12,
-    color: '#666',
-  },
-
-  // 하단 버튼들
   modalButtons: {
-    borderTopWidth: 0.5,
-    borderTopColor: '#e0e0e0',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
     flexDirection: 'row',
   },
   cancelButton: {
     flex: 1,
     paddingVertical: 16,
     alignItems: 'center',
-    borderRightWidth: 0.5,
-    borderRightColor: '#e0e0e0',
+    borderRightWidth: 1,
+    borderRightColor: '#E5E7EB',
   },
   cancelButtonText: {
     fontSize: 16,
-    color: '#333',
-    fontWeight: '400',
+    color: '#6B7280',
+    fontWeight: '500',
   },
   confirmButton: {
     flex: 1,
@@ -268,54 +379,116 @@ export const dateRangePickerStyles = StyleSheet.create({
   },
   confirmButtonText: {
     fontSize: 16,
-    color: 'limegreen',
+    color: '#60A5FA',
     fontWeight: '600',
   },
 
-  // DateTimePicker 모달 스타일 (수정된 버전)
-  datePickerOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-    alignItems: 'stretch', // 추가: 전체 너비 사용
-  },
-  datePickerContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: 34, // Safe area
-    minHeight: 300, // 추가: 최소 높이 보장
-  },
-  datePickerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  // 초대 모달 전용 스타일
+  inviteSection: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#fff', // 추가: 명시적 배경색
+    paddingVertical: 20,
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
   },
-  datePickerTitle: {
+  fridgeNameText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
+    fontWeight: '700',
+    color: '#2D2D2D',
+    marginBottom: 8,
   },
-  datePickerCancel: {
-    fontSize: 17,
-    color: '#007AFF',
-    fontWeight: '400',
-  },
-  datePickerConfirm: {
-    fontSize: 17,
-    color: '#007AFF',
-    fontWeight: '600',
+  fridgeSubText: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 20,
   },
 
-  // 추가: DateTimePicker 컨테이너 스타일
+  codeContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    overflow: 'hidden',
+    marginHorizontal: 20,
+    marginBottom: 12,
+  },
+  codeTextContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    justifyContent: 'center',
+  },
+  codeText: {
+    fontSize: 14,
+    color: '#374151',
+    fontFamily: 'monospace',
+    fontWeight: '500',
+  },
+  copyButton: {
+    backgroundColor: '#60A5FA',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  copyButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+
+  regenerateButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    marginBottom: 8,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  regenerateButtonText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+
+  disabledButton: {
+    opacity: 0.5,
+  },
+  disabledShareButton: {
+    opacity: 0.4,
+  },
+
+  // DateTimePicker 스타일
   datePickerContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 8,
     paddingTop: 10,
+  },
+
+  // 테스트 버튼
+  testButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    backgroundColor: '#F0F9FF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#60A5FA',
+    marginBottom: 8,
+  },
+  testButtonText: {
+    fontSize: 14,
+    color: '#60A5FA',
+    fontWeight: '600',
+  },
+  testDescription: {
+    fontSize: 12,
+    color: '#6B7280',
+    lineHeight: 16,
   },
 });

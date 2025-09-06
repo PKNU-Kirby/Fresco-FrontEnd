@@ -15,7 +15,6 @@ import SplashScreen from './src/screens/SplashScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import FridgeSelectScreen from './src/screens/FridgeSelectScreen';
 import FridgeHomeScreen from './src/screens/FridgeHomeScreen';
-import InviteConfirmScreen from './src/screens/InviteConfirmScreen';
 
 import RecipeNavigator from './src/screens/RecipeScreen/RecipeNavigator';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
@@ -24,6 +23,8 @@ import UsageHistoryScreen from './src/screens/UsageHistoryScreen';
 import AddItemScreen from './src/screens/AddItemScreen';
 import CameraScreen from './src/screens/CameraScreen';
 import PhotoPreview from './src/screens/CameraScreen/PhotoPreview';
+import InviteConfirmScreen from './src/screens/InviteConfirmScreen';
+import MembersScreen from './src/screens/FridgeSettingsScreen/MembersScreen';
 import NotificationSettingsScreen from './src/screens/FridgeSettingsScreen/NotificationSettingsScreen';
 
 // 딥링크 핸들러
@@ -88,6 +89,11 @@ export type RootStackParamList = {
     fridgeId: string;
     fridgeName: string;
     userRole: 'owner' | 'member'; // 권한에 따른 UI 분리
+  };
+  MembersScreen: {
+    fridgeId: string;
+    fridgeName: string;
+    userRole: 'owner' | 'member';
   };
   UsageHistoryScreen: { fridgeId: number };
   NotificationSettingsScreen: {};
@@ -218,11 +224,8 @@ function App(): React.JSX.Element {
           <Stack.Screen
             name="FridgeSettings"
             component={FridgeSettingsScreen}
-            options={{
-              presentation: 'modal',
-              animation: 'slide_from_right',
-            }}
           />
+          <Stack.Screen name="MembersScreen" component={MembersScreen} />
           <Stack.Screen
             name="UsageHistoryScreen"
             component={UsageHistoryScreen}

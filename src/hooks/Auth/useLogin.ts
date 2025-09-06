@@ -65,11 +65,8 @@ export const useLogin = (): UseLoginReturn => {
       });
 
       const result = await loginAPI(provider, socialAccessToken);
-      console.log('[Server response] : ', result);
 
       if (result.code === 'AUTH_OK_001') {
-        console.log('>>>> 로그인 성공!');
-
         if (!result.result?.accessToken || !result.result?.refreshToken) {
           throw new Error('서버에서 토큰을 받지 못했습니다.');
         }
@@ -113,7 +110,6 @@ export const useLogin = (): UseLoginReturn => {
           navigation.replace('FridgeSelect');
         }
       } else {
-        console.log('>>>>> 로그인 실패', result);
         showErrorAlert(result.message || '로그인에 실패했습니다.');
       }
     } catch (error) {

@@ -44,9 +44,19 @@ export const API_ENDPOINTS = {
     DELETE: (id: string) => `/api/v1/refrigerator/${id}`,
     ADD_USER: (id: string) => `/api/v1/refrigerator/${id}/user`,
     REMOVE_USER: (id: string) => `/api/v1/refrigerator/${id}/user`,
+    // 수정된 엔드포인트들 (API 명세에 맞춤)
+    USERS: {
+      LIST: (refrigeratorId: string) =>
+        `/api/v1/refrigerator/users/${refrigeratorId}`,
+      ADD: (refrigeratorId: string) =>
+        `/api/v1/refrigerator/users/${refrigeratorId}`,
+      REMOVE: (refrigeratorId: string, deleteUserId: string) =>
+        `/api/v1/refrigerator/users/${refrigeratorId}/${deleteUserId}`,
+    },
     INVITATION: {
       CREATE: '/api/v1/refrigerator/invitation',
-      GET: '/api/v1/refrigerator/invitation',
+      GET: (refrigeratorInvitationId: string) =>
+        `/api/v1/refrigerator/invitation/${refrigeratorInvitationId}`,
     },
   },
   INGREDIENT: {
@@ -344,9 +354,9 @@ export const updateRefrigerator = async (id: string, data: any) => {
   return response.json();
 };
 
-export const deleteRefrigerator = async (id: string) => {
-  const response = await apiCall(API_ENDPOINTS.REFRIGERATOR.DELETE(id), {
-    method: 'DELETE',
+export const getRefrigeratorDetail = async (id: string) => {
+  const response = await apiCall(API_ENDPOINTS.REFRIGERATOR.DETAIL(id), {
+    method: 'GET',
   });
 
   if (!response.ok) {
@@ -356,10 +366,114 @@ export const deleteRefrigerator = async (id: string) => {
   return response.json();
 };
 
-export const getRefrigeratorDetail = async (id: string) => {
-  const response = await apiCall(API_ENDPOINTS.REFRIGERATOR.DETAIL(id), {
-    method: 'GET',
+// 새로 추가된 API 함수들 (API 명세에 맞춤)
+// ============================================================================
+
+// 냉장고 사용자 목록 조회
+export const getRefrigeratorUsers = async (refrigeratorId: string) => {
+  const response = await apiCall(
+    API_ENDPOINTS.REFRIGERATOR.USERS.LIST(refrigeratorId),
+    {
+      method: 'GET',
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+// 냉장고에 사용자 추가
+export const addUserToRefrigerator = async (
+  refrigeratorId: string,
+  inviterName: string,
+) => {
+  const response = await apiCall(
+    API_ENDPOINTS.REFRIGERATOR.USERS.ADD(refrigeratorId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ inviterName }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+// 특정 사용자를 냉장고에서 제거
+export const removeUserFromRefrigerator = async (
+  refrigeratorId: string,
+  deleteUserId: string,
+) => {
+  const response = await apiCall(
+    API_ENDPOINTS.REFRIGERATOR.USERS.REMOVE(refrigeratorId, deleteUserId),
+    {
+      method: 'DELETE',
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+// 냉장고 삭제
+export const deleteRefrigerator = async (refrigeratorId: string) => {
+  const response = await apiCall(
+    API_ENDPOINTS.REFRIGERATOR.DELETE(refrigeratorId),
+    {
+      method: 'DELETE',
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+// 냉장고 초대장 생성
+export const createRefrigeratorInvitation = async (
+  refrigeratorId: number,
+  refrigeratorName: string,
+  inviterId: number,
+  inviterName: string,
+) => {
+  const response = await apiCall(API_ENDPOINTS.REFRIGERATOR.INVITATION.CREATE, {
+    method: 'POST',
+    body: JSON.stringify({
+      refrigeratorId,
+      refrigeratorName,
+      inviterId,
+      inviterName,
+    }),
   });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+// 냉장고 초대장 조회
+export const getRefrigeratorInvitation = async (
+  refrigeratorInvitationId: string,
+) => {
+  const response = await apiCall(
+    API_ENDPOINTS.REFRIGERATOR.INVITATION.GET(refrigeratorInvitationId),
+    {
+      method: 'GET',
+    },
+  );
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);

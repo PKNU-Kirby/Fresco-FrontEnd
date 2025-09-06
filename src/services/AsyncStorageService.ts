@@ -4,7 +4,7 @@ import { User, SocialProvider } from '../types/auth';
 export type Refrigerator = {
   id: string;
   name: string;
-  inviteCode?: string; // 초대 코드 필드 추가
+  inviteCode?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -65,6 +65,96 @@ const STORAGE_KEYS = {
 
 // 자동 증가 ID 관리
 export class AsyncStorageService {
+  // 기존 키들
+  private static readonly KEYS = {
+    CURRENT_USER_ID: 'currentUserId',
+    USERS: 'users',
+    REFRIGERATORS: 'refrigerators',
+    REFRIGERATOR_USERS: 'refrigeratorUsers',
+    // 새로 추가된 키들
+    AUTH_TOKEN: 'authToken',
+    REFRESH_TOKEN: 'refreshToken',
+  };
+  // ===== 토큰 관리 메서드들 (새로 추가) =====
+
+  // 인증 토큰 저장
+  // 인증 토큰 저장 (기존에 있다면 수정 필요 없음)
+  static async setAuthToken(token: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem('authToken', token);
+    } catch (error) {
+      console.error('setAuthToken error:', error);
+      throw error;
+    }
+  }
+
+  // 인증 토큰 조회 (기존에 있다면 수정 필요 없음)
+  static async getAuthToken(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem('authToken');
+    } catch (error) {
+      console.error('getAuthToken error:', error);
+      return null;
+    }
+  }
+
+  // 인증 토큰 삭제 (기존에 있다면 수정 필요 없음)
+  static async clearAuthToken(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem('authToken');
+    } catch (error) {
+      console.error('clearAuthToken error:', error);
+      throw error;
+    }
+  }
+  // 리프레시 토큰 저장 (선택사항)
+  static async setRefreshToken(token: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem(this.KEYS.REFRESH_TOKEN, token);
+      console.log('리프레시 토큰 저장됨');
+    } catch (error) {
+      console.error('리프레시 토큰 저장 실패:', error);
+      throw error;
+    }
+  }
+
+  // 리프레시 토큰 조회
+  static async getRefreshToken(): Promise<string | null> {
+    try {
+      const token = await AsyncStorage.getItem(this.KEYS.REFRESH_TOKEN);
+      return token;
+    } catch (error) {
+      console.error('리프레시 토큰 조회 실패:', error);
+      return null;
+    }
+  }
+
+  // 리프레시 토큰 삭제
+  static async clearRefreshToken(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(this.KEYS.REFRESH_TOKEN);
+      console.log('리프레시 토큰 삭제됨');
+    } catch (error) {
+      console.error('리프레시 토큰 삭제 실패:', error);
+      throw error;
+    }
+  }
+
+  // 모든 인증 관련 데이터 삭제 (로그아웃 시 사용)
+  static async clearAllAuthData(): Promise<void> {
+    try {
+      await Promise.all([
+        this.clearAuthToken(),
+        this.clearRefreshToken(),
+        this.clearCurrentUser(),
+        AsyncStorage.removeItem(this.KEYS.CURRENT_USER_ID),
+      ]);
+      console.log('모든 인증 데이터 삭제됨');
+    } catch (error) {
+      console.error('인증 데이터 삭제 실패:', error);
+      throw error;
+    }
+  }
   // 자동 증가 ID 생성
   private static async getNextId(table: string): Promise<number> {
     try {
@@ -90,31 +180,54 @@ export class AsyncStorageService {
       return Date.now();
     }
   }
-
-  // 현재 사용자 관리
-  static async getCurrentUserId(): Promise<string | null> {
+  // 현재 사용자 정보 저장
+  static async setCurrentUser(user: User): Promise<void> {
     try {
-      const userId = await AsyncStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID);
-      return userId;
+      await AsyncStorage.setItem('currentUser', JSON.stringify(user));
     } catch (error) {
-      console.error('Get current user ID error:', error);
+      console.error('setCurrentUser error:', error);
+      throw error;
+    }
+  }
+
+  // 현재 사용자 정보 조회
+  static async getCurrentUser(): Promise<User | null> {
+    try {
+      const userJson = await AsyncStorage.getItem('currentUser');
+      return userJson ? JSON.parse(userJson) : null;
+    } catch (error) {
+      console.error('getCurrentUser error:', error);
       return null;
     }
   }
 
-  static async setCurrentUserId(userId: string): Promise<void> {
+  // 현재 사용자 정보 삭제
+  static async clearCurrentUser(): Promise<void> {
     try {
-      await AsyncStorage.setItem(STORAGE_KEYS.CURRENT_USER_ID, userId);
+      await AsyncStorage.removeItem('currentUser');
     } catch (error) {
-      console.error('Set current user ID error:', error);
+      console.error('clearCurrentUser error:', error);
+      throw error;
     }
   }
 
-  static async clearCurrentUser(): Promise<void> {
+  // 사용자 ID 저장 (기존에 있다면 수정 필요 없음)
+  static async setCurrentUserId(userId: string): Promise<void> {
     try {
-      await AsyncStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
+      await AsyncStorage.setItem('currentUserId', userId);
     } catch (error) {
-      console.error('Clear current user error:', error);
+      console.error('setCurrentUserId error:', error);
+      throw error;
+    }
+  }
+
+  // 사용자 ID 조회 (기존에 있다면 수정 필요 없음)
+  static async getCurrentUserId(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem('currentUserId');
+    } catch (error) {
+      console.error('getCurrentUserId error:', error);
+      return null;
     }
   }
 
@@ -148,7 +261,7 @@ export class AsyncStorageService {
           u.id === existingUser!.id ? existingUser! : u,
         );
         await AsyncStorage.setItem(
-          STORAGE_KEYS.USERS,
+          this.KEYS.USERS,
           JSON.stringify(updatedUsers),
         );
 
@@ -166,7 +279,7 @@ export class AsyncStorageService {
         };
 
         users.push(newUser);
-        await AsyncStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+        await AsyncStorage.setItem(this.KEYS.USERS, JSON.stringify(users));
 
         return newUser;
       }
@@ -179,7 +292,7 @@ export class AsyncStorageService {
   // 사용자 CRUD
   static async getUsers(): Promise<User[]> {
     try {
-      const usersData = await AsyncStorage.getItem(STORAGE_KEYS.USERS);
+      const usersData = await AsyncStorage.getItem(this.KEYS.USERS);
       return usersData ? JSON.parse(usersData) : [];
     } catch (error) {
       console.error('Get users error:', error);
@@ -200,9 +313,7 @@ export class AsyncStorageService {
   // 냉장고 관련 메서드들
   static async getRefrigerators(): Promise<Refrigerator[]> {
     try {
-      const fridgesData = await AsyncStorage.getItem(
-        STORAGE_KEYS.REFRIGERATORS,
-      );
+      const fridgesData = await AsyncStorage.getItem(this.KEYS.REFRIGERATORS);
       return fridgesData ? JSON.parse(fridgesData) : [];
     } catch (error) {
       console.error('Get refrigerators error:', error);
@@ -234,7 +345,7 @@ export class AsyncStorageService {
 
       refrigerators.push(newRefrigerator);
       await AsyncStorage.setItem(
-        STORAGE_KEYS.REFRIGERATORS,
+        this.KEYS.REFRIGERATORS,
         JSON.stringify(refrigerators),
       );
 
@@ -250,7 +361,7 @@ export class AsyncStorageService {
 
       refrigeratorUsers.push(newRefrigeratorUser);
       await AsyncStorage.setItem(
-        STORAGE_KEYS.REFRIGERATOR_USERS,
+        this.KEYS.REFRIGERATOR_USERS,
         JSON.stringify(refrigeratorUsers),
       );
 
@@ -283,7 +394,7 @@ export class AsyncStorageService {
       };
 
       await AsyncStorage.setItem(
-        STORAGE_KEYS.REFRIGERATORS,
+        this.KEYS.REFRIGERATORS,
         JSON.stringify(refrigerators),
       );
       return refrigerators[fridgeIndex];
@@ -300,7 +411,7 @@ export class AsyncStorageService {
         fridge => parseInt(fridge.id) !== id,
       );
       await AsyncStorage.setItem(
-        STORAGE_KEYS.REFRIGERATORS,
+        this.KEYS.REFRIGERATORS,
         JSON.stringify(filteredRefrigerators),
       );
 
@@ -309,7 +420,7 @@ export class AsyncStorageService {
         ru => parseInt(ru.refrigeratorId) !== id,
       );
       await AsyncStorage.setItem(
-        STORAGE_KEYS.REFRIGERATOR_USERS,
+        this.KEYS.REFRIGERATOR_USERS,
         JSON.stringify(filteredRefrigeratorUsers),
       );
 
@@ -512,7 +623,7 @@ export class AsyncStorageService {
   static async getRefrigeratorUsers(): Promise<RefrigeratorUser[]> {
     try {
       const refrigeratorUsersData = await AsyncStorage.getItem(
-        STORAGE_KEYS.REFRIGERATOR_USERS,
+        this.KEYS.REFRIGERATOR_USERS,
       );
       return refrigeratorUsersData ? JSON.parse(refrigeratorUsersData) : [];
     } catch (error) {
@@ -539,7 +650,7 @@ export class AsyncStorageService {
 
       refrigeratorUsers.push(newRefrigeratorUser);
       await AsyncStorage.setItem(
-        STORAGE_KEYS.REFRIGERATOR_USERS,
+        this.KEYS.REFRIGERATOR_USERS,
         JSON.stringify(refrigeratorUsers),
       );
 
@@ -565,7 +676,7 @@ export class AsyncStorageService {
       );
 
       await AsyncStorage.setItem(
-        STORAGE_KEYS.REFRIGERATOR_USERS,
+        this.KEYS.REFRIGERATOR_USERS,
         JSON.stringify(filteredRefrigeratorUsers),
       );
       return true;
@@ -622,7 +733,7 @@ export class AsyncStorageService {
   static async getHiddenFridges(userId: number): Promise<number[]> {
     try {
       const hiddenFridgesData = await AsyncStorage.getItem(
-        `${STORAGE_KEYS.HIDDEN_FRIDGES}_${userId}`,
+        `${this.KEYS.HIDDEN_FRIDGES}_${userId}`,
       );
       return hiddenFridgesData ? JSON.parse(hiddenFridgesData) : [];
     } catch (error) {
@@ -651,7 +762,7 @@ export class AsyncStorageService {
       }
 
       await AsyncStorage.setItem(
-        `${STORAGE_KEYS.HIDDEN_FRIDGES}_${userId}`,
+        `${this.KEYS.HIDDEN_FRIDGES}_${userId}`,
         JSON.stringify(hiddenFridges),
       );
     } catch (error) {
@@ -662,7 +773,7 @@ export class AsyncStorageService {
   // FridgeItem 관련 메서드
   static async getAllFridgeItems(): Promise<FridgeItem[]> {
     try {
-      const itemsJson = await AsyncStorage.getItem(STORAGE_KEYS.FRIDGE_ITEMS);
+      const itemsJson = await AsyncStorage.getItem(this.KEYS.FRIDGE_ITEMS);
       return itemsJson ? JSON.parse(itemsJson) : [];
     } catch (error) {
       console.error('Get all fridge items error:', error);
@@ -702,7 +813,7 @@ export class AsyncStorageService {
 
       const updatedItems = [...allItems, itemWithId];
       await AsyncStorage.setItem(
-        STORAGE_KEYS.FRIDGE_ITEMS,
+        this.KEYS.FRIDGE_ITEMS,
         JSON.stringify(updatedItems),
       );
 
@@ -722,7 +833,7 @@ export class AsyncStorageService {
           : item,
       );
       await AsyncStorage.setItem(
-        STORAGE_KEYS.FRIDGE_ITEMS,
+        this.KEYS.FRIDGE_ITEMS,
         JSON.stringify(updatedItems),
       );
     } catch (error) {
@@ -738,7 +849,7 @@ export class AsyncStorageService {
         item => parseInt(item.id) !== itemId,
       );
       await AsyncStorage.setItem(
-        STORAGE_KEYS.FRIDGE_ITEMS,
+        this.KEYS.FRIDGE_ITEMS,
         JSON.stringify(filteredItems),
       );
     } catch (error) {
@@ -751,7 +862,7 @@ export class AsyncStorageService {
   static async getItemCategories(): Promise<string[]> {
     try {
       const categoriesJson = await AsyncStorage.getItem(
-        STORAGE_KEYS.ITEM_CATEGORIES,
+        this.KEYS.ITEM_CATEGORIES,
       );
       return categoriesJson
         ? JSON.parse(categoriesJson)

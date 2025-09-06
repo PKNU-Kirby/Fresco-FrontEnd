@@ -1,3 +1,4 @@
+// components/FridgeSettings/InviteMemberModal.tsx - iOS 스타일로 완전히 변경된 버전
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -9,10 +10,11 @@ import {
   Linking,
   Text,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { AsyncStorageService } from '../../services/AsyncStorageService';
-import { inviteMemberModalStyles as styles } from './styles';
+import { styles } from './styles';
 
 type InviteMemberModalProps = {
   visible: boolean;
@@ -151,6 +153,51 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
     });
   };
 
+  // 설정 아이템 컴포넌트 (모달 내부용)
+  const ModalSettingsItem = ({
+    title,
+    subtitle,
+    icon,
+    iconColor = '#6B7280',
+    onPress,
+    isLast = false,
+    rightComponent,
+  }: {
+    title: string;
+    subtitle?: string;
+    icon: string;
+    iconColor?: string;
+    onPress?: () => void;
+    isLast?: boolean;
+    rightComponent?: React.ReactNode;
+  }) => (
+    <TouchableOpacity
+      style={[styles.settingsItem, isLast && styles.settingsItemLast]}
+      onPress={onPress}
+      disabled={!onPress}
+    >
+      <View style={styles.settingsItemLeft}>
+        <View style={styles.settingsItemIcon}>
+          <Ionicons name={icon} size={20} color={iconColor} />
+        </View>
+        <View style={styles.settingsItemContent}>
+          <Text style={styles.settingsItemTitle}>{title}</Text>
+          {subtitle && (
+            <Text style={styles.settingsItemSubtitle}>{subtitle}</Text>
+          )}
+        </View>
+      </View>
+      <View style={styles.settingsItemRight}>
+        {rightComponent}
+        {onPress && (
+          <View style={styles.settingsItemArrow}>
+            <Ionicons name="chevron-forward" size={16} color="#C4C4C4" />
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
     <Modal
       visible={visible}
@@ -159,121 +206,115 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <View style={styles.inviteModalContent}>
+        <View style={styles.modalContent}>
           {/* 헤더 */}
-          <View style={styles.inviteModalHeader}>
-            <Text style={styles.invisiblebox}>x</Text>
-            <Text style={styles.inviteModalTitle}>구성원 초대</Text>
+          <View style={styles.modalHeader}>
+            <View style={{ width: 32 }} />
+            <Text style={styles.modalTitle}>구성원 초대</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>✕</Text>
+              <Ionicons name="close" size={20} color="#6B7280" />
             </TouchableOpacity>
           </View>
 
-          {/* 냉장고 정보 */}
-          <View style={styles.fridgeInfoSection}>
-            <Text style={styles.fridgeNameText}>{fridgeName}</Text>
-            <Text style={styles.fridgeSubText}>
-              아래 초대 코드를 공유해서 구성원을 초대하세요
-            </Text>
-          </View>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* 냉장고 정보 */}
+            <View style={styles.inviteSection}>
+              <Text style={styles.fridgeNameText}>{fridgeName}</Text>
+              <Text style={styles.fridgeSubText}>
+                아래 초대 코드를 공유해서 구성원을 초대하세요
+              </Text>
+            </View>
 
-          {/* 초대 코드 */}
-          <View style={styles.linkSection}>
-            <View style={styles.linkContainer}>
-              <View style={styles.linkTextContainer}>
-                <Text style={styles.linkText}>
-                  초대 코드: {isLoading ? '생성 중...' : inviteCode}
+            {/* 초대 코드 */}
+            <View style={styles.settingsGroup}>
+              <View style={styles.codeContainer}>
+                <View style={styles.codeTextContainer}>
+                  <Text style={styles.codeText}>
+                    {isLoading ? '생성 중...' : inviteCode}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={[
+                    styles.copyButton,
+                    (!inviteCode || isLoading) && styles.disabledButton,
+                  ]}
+                  onPress={copyToClipboard}
+                  disabled={isLoading || !inviteCode}
+                >
+                  <Text style={styles.copyButtonText}>복사</Text>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity
+                style={[
+                  styles.regenerateButton,
+                  isLoading && styles.disabledButton,
+                ]}
+                onPress={regenerateCode}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#6B7280" />
+                ) : (
+                  <Text style={styles.regenerateButtonText}>새 코드 생성</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* 공유 방법 */}
+            <View style={styles.settingsGroup}>
+              <View style={styles.groupHeader}>
+                <Text style={styles.groupTitle}>공유 방법</Text>
+              </View>
+
+              <ModalSettingsItem
+                title="카카오톡으로 공유"
+                subtitle="카카오톡 메시지로 초대 코드를 전송합니다"
+                icon="chatbubble-outline"
+                iconColor="#FEE500"
+                onPress={shareToKakaoTalk}
+              />
+
+              <ModalSettingsItem
+                title="문자로 공유"
+                subtitle="SMS로 초대 코드를 전송합니다"
+                icon="mail-outline"
+                iconColor="#34D399"
+                onPress={shareToSMS}
+              />
+
+              <ModalSettingsItem
+                title="더 많은 공유 방법"
+                subtitle="다른 앱으로 초대 코드를 공유합니다"
+                icon="share-outline"
+                iconColor="#60A5FA"
+                onPress={shareGeneral}
+              />
+
+              <ModalSettingsItem
+                title="클립보드에 복사"
+                subtitle="초대 코드를 클립보드에 복사합니다"
+                icon="clipboard-outline"
+                iconColor="#8B5CF6"
+                onPress={copyToClipboard}
+                isLast
+              />
+            </View>
+
+            {/* 사용 방법 안내 */}
+            <View style={styles.settingsGroup}>
+              <View style={styles.groupHeader}>
+                <Text style={styles.groupTitle}>초대 방법</Text>
+              </View>
+              <View style={styles.section}>
+                <Text style={styles.sectionDescription}>
+                  1. 위의 초대 코드를 복사하거나 공유합니다{'\n'}
+                  2. 상대방이 앱에서 '냉장고 참여하기'를 선택합니다{'\n'}
+                  3. 초대 코드를 입력하면 냉장고에 참여됩니다
                 </Text>
               </View>
-              <TouchableOpacity
-                style={[
-                  styles.copyLinkButton,
-                  (!inviteCode || isLoading) && styles.disabledButton,
-                ]}
-                onPress={copyToClipboard}
-                disabled={isLoading || !inviteCode}
-              >
-                <Text style={styles.copyLinkButtonText}>복사</Text>
-              </TouchableOpacity>
             </View>
-
-            {/* 코드 재생성 버튼 */}
-            <TouchableOpacity
-              style={[
-                styles.regenerateButton,
-                isLoading && styles.disabledButton,
-              ]}
-              onPress={regenerateCode}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator size="small" color="#666" />
-              ) : (
-                <Text style={styles.regenerateButtonText}>새 코드 생성</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-
-          {/* 공유 버튼들 */}
-          <View style={styles.shareSection}>
-            <View style={styles.shareButtons}>
-              <TouchableOpacity
-                style={[
-                  styles.shareButton,
-                  !inviteCode && styles.disabledShareButton,
-                ]}
-                onPress={shareToKakaoTalk}
-                disabled={!inviteCode}
-              >
-                <View style={styles.shareButtonIcon}>
-                  <FontAwesome6 name="comment" size={24} color="#FEE500" />
-                </View>
-                <Text style={styles.shareButtonText}>카카오톡</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.shareButton,
-                  !inviteCode && styles.disabledShareButton,
-                ]}
-                onPress={shareToSMS}
-                disabled={!inviteCode}
-              >
-                <View style={styles.shareButtonIcon}>
-                  <FontAwesome6 name="message" size={24} color="#333" />
-                </View>
-                <Text style={styles.shareButtonText}>문자</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.shareButton,
-                  !inviteCode && styles.disabledShareButton,
-                ]}
-                onPress={shareGeneral}
-                disabled={!inviteCode}
-              >
-                <View style={styles.shareButtonIcon}>
-                  <FontAwesome6 name="share" size={24} color="#333" />
-                </View>
-                <Text style={styles.shareButtonText}>더보기</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.shareButton,
-                  !inviteCode && styles.disabledShareButton,
-                ]}
-                onPress={copyToClipboard}
-                disabled={!inviteCode}
-              >
-                <View style={styles.shareButtonIcon}>
-                  <FontAwesome6 name="clipboard" size={24} color="#333" />
-                </View>
-                <Text style={styles.shareButtonText}>복사하기</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          </ScrollView>
         </View>
       </View>
     </Modal>

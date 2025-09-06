@@ -2,18 +2,20 @@ import React, { useState } from 'react';
 import {
   SafeAreaView,
   View,
+  TouchableOpacity,
   ScrollView,
   Text,
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import BackButton from '../../components/_common/BackButton';
-import InviteMemberModal from '../../components/FridgeSettings/InviteMemberModal';
-import SettingsGroups from '../../components/FridgeSettings/SettingsGroups';
-import { useFridgeSettings } from '../../hooks/useFridgeSettings';
-import { RootStackParamList } from '../../../App';
-import { styles } from './styles';
+import BackButton from '../../../components/_common/BackButton';
+import InviteMemberModal from '../../../components/FridgeSettings/InviteMemberModal';
+import MemberGroups from '../../../components/FridgeSettings/MemberGroups';
+import { useMembers } from '../../../hooks/useMembers';
+import { RootStackParamList } from '../../../../App';
+import { styles } from '../styles';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 type Props = {
   route: {
@@ -25,27 +27,24 @@ type Props = {
   };
 };
 
-const FridgeSettingsScreen = ({ route }: Props) => {
+const MembersScreen = ({ route }: Props) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { fridgeId, fridgeName, userRole } = route.params;
 
   const [showInviteModal, setShowInviteModal] = useState(false);
 
-  const {
-    members,
-    isLoading,
-    loadMembers,
-    handleUsageHistory,
-    handleNotificationSettings,
-    handleMembersList,
-    handleLogout,
-    handleFridgeDelete,
-    handleLeaveFridge,
-  } = useFridgeSettings(fridgeId, fridgeName, userRole);
+  const { members, isLoading, loadMembers, handleMemberPress } = useMembers(
+    fridgeId,
+    fridgeName,
+  );
 
   const handleBack = () => {
     navigation.goBack();
+  };
+
+  const handleMemberInvite = () => {
+    setShowInviteModal(true);
   };
 
   if (isLoading) {
@@ -53,12 +52,12 @@ const FridgeSettingsScreen = ({ route }: Props) => {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <BackButton onPress={handleBack} />
-          <Text style={styles.headerTitle}>냉장고 설정</Text>
+          <Text style={styles.headerTitle}>구성원</Text>
           <View style={styles.headerRight} />
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="limegreen" />
-          <Text style={styles.loadingText}>설정을 불러오는 중...</Text>
+          <Text style={styles.loadingText}>구성원을 불러오는 중...</Text>
         </View>
       </SafeAreaView>
     );
@@ -69,28 +68,28 @@ const FridgeSettingsScreen = ({ route }: Props) => {
       {/* Header */}
       <View style={styles.header}>
         <BackButton onPress={handleBack} />
-        <Text style={styles.headerTitle}>냉장고 설정</Text>
-        <View style={styles.headerRight} />
+        <Text style={styles.headerTitle}>구성원</Text>
+        <TouchableOpacity
+          onPress={handleMemberInvite}
+          style={styles.headerRight}
+        >
+          <Ionicons name="add" size={24} color="limegreen" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView
         style={styles.settingsContainer}
         showsVerticalScrollIndicator={false}
       >
-        <SettingsGroups
+        <MemberGroups
           members={members}
-          userRole={userRole}
           fridgeName={fridgeName}
-          onMembersList={handleMembersList}
-          onUsageHistory={handleUsageHistory}
-          onNotificationSettings={handleNotificationSettings}
-          onLogout={handleLogout}
-          onFridgeDelete={handleFridgeDelete}
-          onLeaveFridge={handleLeaveFridge}
+          onMemberInvite={handleMemberInvite}
+          onMemberPress={handleMemberPress}
         />
       </ScrollView>
 
-      {/* Invite Member Modal */}
+      {/* 구성원 초대 모달 */}
       <InviteMemberModal
         visible={showInviteModal}
         onClose={() => setShowInviteModal(false)}
@@ -102,4 +101,4 @@ const FridgeSettingsScreen = ({ route }: Props) => {
   );
 };
 
-export default FridgeSettingsScreen;
+export default MembersScreen;
