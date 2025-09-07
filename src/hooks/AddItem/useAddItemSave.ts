@@ -3,6 +3,19 @@ import { ApiService } from '../../services/apiServices';
 import { getDefaultExpiryDate } from '../../utils/fridgeStorage';
 import { ItemFormData } from '../../screens/AddItemScreen';
 
+// 확인화면에서 사용할 타입
+export type ConfirmedItem = {
+  originalName: string;
+  correctedName: string;
+  ingredientId: number;
+  categoryId: number;
+  quantity: string;
+  unit: string;
+  expirationDate: string;
+  itemCategory: string;
+  isModified: boolean;
+};
+
 export const useAddItemSave = (
   items: ItemFormData[],
   fridgeId: string,
@@ -14,148 +27,9 @@ export const useAddItemSave = (
   const [savedItemsCount, setSavedItemsCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // 식재료 이름으로 ingredientId 찾기
-  const findIngredientId = async (
-    ingredientName: string,
-  ): Promise<number | null> => {
-    try {
-      console.log(`식재료 "${ingredientName}" 검색 중...`);
-
-      // auto-complete API 호출
-      const response = await ApiService.apiCall<
-        Array<{
-          ingredientId: number;
-          ingredientName: string;
-          categoryId: number;
-          categoryName: string;
-        }>
-      >(
-        `/ap1/v1/ingredient/auto-complete?keyword=${encodeURIComponent(
-          ingredientName,
-        )}`,
-      );
-
-      console.log('자동완성 결과:', response);
-
-      if (response && response.length > 0) {
-        // 첫 번째 결과 사용 (가장 유사한 항목)
-        return response[0].ingredientId;
-      }
-
-      return null;
-    } catch (error) {
-      console.error(`식재료 "${ingredientName}" 검색 실패:`, error);
-      return null;
-    }
-  };
-
-  const handleSaveItems = useCallback(async () => {
-    setIsLoading(true);
-    setErrorMessage('');
-
-    try {
-      console.log('식재료 ID 확인 및 저장 시작...');
-      console.log('저장할 아이템들:', items);
-
-      // 1단계: 모든 식재료의 ingredientId 찾기
-      const ingredientsInfo = [];
-      const failedItems = [];
-
-      for (const item of items) {
-        const ingredientId = await findIngredientId(item.name);
-
-        if (ingredientId) {
-          ingredientsInfo.push({
-            ingredientId: ingredientId,
-            categoryId: getCategoryId(item.itemCategory),
-            expirationDate:
-              item.expirationDate || getDefaultExpiryDate(item.itemCategory),
-          });
-          console.log(`✅ "${item.name}" → ingredientId: ${ingredientId}`);
-        } else {
-          failedItems.push(item.name);
-          console.log(`❌ "${item.name}" → 찾을 수 없음`);
-        }
-      }
-
-      // 찾을 수 없는 식재료가 있으면 알림
-      if (failedItems.length > 0) {
-        const errorMsg = `다음 식재료를 찾을 수 없습니다:\n${failedItems.join(
-          ', ',
-        )}\n\n등록된 식재료만 저장하시겠습니까?`;
-
-        if (ingredientsInfo.length === 0) {
-          throw new Error('등록할 수 있는 식재료가 없습니다.');
-        }
-
-        // 여기서 사용자에게 확인받는 로직 추가 가능
-        console.warn(errorMsg);
-      }
-
-      if (ingredientsInfo.length === 0) {
-        throw new Error('저장할 식재료가 없습니다.');
-      }
-
-      // 2단계: 백엔드 API 스펙에 맞춰 저장
-      const saveRequest = {
-        ingredientsInfo: ingredientsInfo,
-      };
-
-      console.log('백엔드 저장 요청:', saveRequest);
-
-      const response = await ApiService.apiCall<
-        Array<{
-          ingredientId: number;
-          ingredientName: string;
-          categoryId: number;
-          categoryName: string;
-          expirationDate: string;
-        }>
-      >(`/ap1/v1/ingredient/${fridgeId}`, {
-        method: 'POST',
-        body: JSON.stringify(saveRequest),
-      });
-
-      console.log('저장 완료:', response);
-
-      // 성공 처리
-      setSavedItemsCount(response.length);
-      setShowSuccessModal(true);
-    } catch (error) {
-      console.error('저장 실패:', error);
-
-      // 실패 시 AsyncStorage fallback
-      if (
-        error.message.includes('찾을 수 없습니다') ||
-        error.message.includes('500')
-      ) {
-        console.log('API 실패로 인한 AsyncStorage 자동 저장 시작...');
-        await handleSaveItemsFallback();
-        return;
-      }
-
-      let errorMsg = '아이템 저장에 실패했습니다.';
-
-      if (error instanceof Error) {
-        if (error.message.includes('네트워크')) {
-          errorMsg = '네트워크 연결을 확인해주세요.';
-        } else if (error.message.includes('401')) {
-          errorMsg = '로그인이 필요합니다.';
-        } else if (error.message.includes('403')) {
-          errorMsg = '이 냉장고에 아이템을 추가할 권한이 없습니다.';
-        } else if (error.message.includes('404')) {
-          errorMsg = '냉장고를 찾을 수 없습니다.';
-        } else {
-          errorMsg = error.message;
-        }
-      }
-
-      setErrorMessage(errorMsg);
-      setShowErrorModal(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [items, fridgeId, setIsLoading]);
+  // 확인 화면용 상태
+  const [confirmedItems, setConfirmedItems] = useState<ConfirmedItem[]>([]);
+  const [isProcessingItems, setIsProcessingItems] = useState(false);
 
   // 카테고리 이름을 ID로 매핑
   const getCategoryId = useCallback((categoryName: string): number => {
@@ -173,6 +47,157 @@ export const useAddItemSave = (
     };
     return categoryMap[categoryName] || 10;
   }, []);
+
+  // 식재료 이름으로 ingredientId 찾기 (확인 화면에서 사용)
+  const processItemsForConfirmation = useCallback(async (): Promise<
+    ConfirmedItem[]
+  > => {
+    setIsProcessingItems(true);
+    const processedItems: ConfirmedItem[] = [];
+
+    try {
+      for (const item of items) {
+        let correctedName = item.name;
+        let ingredientId = 0;
+        let isModified = false;
+
+        try {
+          console.log(`식재료 "${item.name}" 자동완성 검색 중...`);
+
+          const response = await ApiService.apiCall<
+            Array<{
+              ingredientId: number;
+              ingredientName: string;
+              categoryId: number;
+              categoryName: string;
+            }>
+          >(
+            `/ap1/v1/ingredient/auto-complete?keyword=${encodeURIComponent(
+              item.name,
+            )}`,
+          );
+
+          if (response && response.length > 0) {
+            const firstResult = response[0];
+            correctedName = firstResult.ingredientName;
+            ingredientId = firstResult.ingredientId;
+            isModified = item.name !== correctedName;
+
+            console.log(
+              `✅ "${item.name}" → "${correctedName}" (ID: ${ingredientId})`,
+            );
+          } else {
+            console.log(`❌ "${item.name}" → 검색 결과 없음`);
+          }
+        } catch (error) {
+          console.error(`식재료 "${item.name}" 검색 실패:`, error);
+        }
+
+        processedItems.push({
+          originalName: item.name,
+          correctedName: correctedName,
+          ingredientId: ingredientId,
+          categoryId: getCategoryId(item.itemCategory),
+          quantity: item.quantity,
+          unit: item.unit || '개',
+          expirationDate:
+            item.expirationDate || getDefaultExpiryDate(item.itemCategory),
+          itemCategory: item.itemCategory,
+          isModified: isModified,
+        });
+      }
+
+      setConfirmedItems(processedItems);
+      return processedItems;
+    } finally {
+      setIsProcessingItems(false);
+    }
+  }, [items, getCategoryId]);
+
+  // 확인된 아이템들을 실제로 저장
+  const handleSaveConfirmedItems = useCallback(
+    async (itemsToSave: ConfirmedItem[]) => {
+      setIsLoading(true);
+      setErrorMessage('');
+
+      try {
+        console.log('확인된 아이템들 저장 시작...');
+        console.log('저장할 아이템들:', itemsToSave);
+
+        // ingredientId가 있는 아이템들만 필터링
+        const validItems = itemsToSave.filter(item => item.ingredientId > 0);
+        const invalidItems = itemsToSave.filter(
+          item => item.ingredientId === 0,
+        );
+
+        if (invalidItems.length > 0) {
+          console.warn(
+            'ingredientId가 없는 아이템들:',
+            invalidItems.map(item => item.originalName),
+          );
+        }
+
+        if (validItems.length === 0) {
+          throw new Error('저장할 수 있는 식재료가 없습니다.');
+        }
+
+        // 백엔드 API 스펙에 맞춰 데이터 구성
+        const ingredientsInfo = validItems.map(item => ({
+          ingredientId: item.ingredientId,
+          categoryId: item.categoryId,
+          expirationDate: item.expirationDate,
+        }));
+
+        const saveRequest = {
+          ingredientsInfo: ingredientsInfo,
+        };
+
+        console.log('백엔드 저장 요청:', saveRequest);
+
+        const response = await ApiService.apiCall<
+          Array<{
+            ingredientId: number;
+            ingredientName: string;
+            categoryId: number;
+            categoryName: string;
+            expirationDate: string;
+          }>
+        >(`/ap1/v1/ingredient/${fridgeId}`, {
+          method: 'POST',
+          body: JSON.stringify(saveRequest),
+        });
+
+        console.log('저장 완료:', response);
+
+        // 성공 처리
+        setSavedItemsCount(response.length);
+        setShowSuccessModal(true);
+      } catch (error) {
+        console.error('저장 실패:', error);
+
+        // 실패 시 AsyncStorage fallback
+        if (
+          error.message.includes('500') ||
+          error.message.includes('네트워크')
+        ) {
+          console.log('API 실패로 인한 AsyncStorage 자동 저장 시작...');
+          await handleSaveItemsFallback();
+          return;
+        }
+
+        let errorMsg = '아이템 저장에 실패했습니다.';
+        if (error instanceof Error) {
+          errorMsg = error.message;
+        }
+
+        setErrorMessage(errorMsg);
+        setShowErrorModal(true);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [fridgeId, setIsLoading],
+  );
 
   // AsyncStorage fallback 저장
   const handleSaveItemsFallback = useCallback(async () => {
@@ -228,8 +253,10 @@ export const useAddItemSave = (
 
   const handleRetry = useCallback(() => {
     setShowErrorModal(false);
-    handleSaveItems();
-  }, [handleSaveItems]);
+    if (confirmedItems.length > 0) {
+      handleSaveConfirmedItems(confirmedItems);
+    }
+  }, [confirmedItems, handleSaveConfirmedItems]);
 
   const handleSaveOffline = useCallback(() => {
     setShowErrorModal(false);
@@ -237,7 +264,7 @@ export const useAddItemSave = (
   }, [handleSaveItemsFallback]);
 
   return {
-    handleSaveItems,
+    // 기존 메서드들
     showSuccessModal,
     showErrorModal,
     savedItemsCount,
@@ -246,5 +273,11 @@ export const useAddItemSave = (
     handleErrorConfirm,
     handleRetry,
     handleSaveOffline,
+
+    // 확인 화면용 새로운 메서드들
+    confirmedItems,
+    isProcessingItems,
+    processItemsForConfirmation,
+    handleSaveConfirmedItems,
   };
 };

@@ -30,6 +30,85 @@ const shadows = {
 
 // AddItemScreen styles
 export const addItemStyles = StyleSheet.create({
+  // addItemStyles에 추가
+  confirmationCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+
+  confirmationHeader: {
+    marginBottom: 12,
+  },
+
+  confirmationTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+
+  confirmationContent: {
+    gap: 8,
+  },
+
+  confirmationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+
+  confirmationLabel: {
+    fontSize: 14,
+    color: '#666',
+    width: 100,
+    fontWeight: '500',
+  },
+
+  confirmationUserInput: {
+    fontSize: 14,
+    color: '#2196F3',
+    fontWeight: '600',
+    flex: 1,
+  },
+
+  confirmationApiResult: {
+    fontSize: 14,
+    color: '#4CAF50',
+    fontWeight: '600',
+    flex: 1,
+  },
+
+  confirmationDetail: {
+    fontSize: 14,
+    color: '#333',
+    flex: 1,
+  },
+
+  confirmationArrow: {
+    alignItems: 'center',
+    marginVertical: 4,
+  },
+
+  arrowText: {
+    fontSize: 18,
+    color: '#4CAF50',
+    fontWeight: 'bold',
+  },
+
+  confirmationDivider: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginVertical: 8,
+  },
+  /////////////////////////////////////////////////
   container: {
     flex: 1,
     backgroundColor: '#f2f7f2ff',

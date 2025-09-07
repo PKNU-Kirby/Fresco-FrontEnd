@@ -70,7 +70,7 @@ export class ApiService {
   }
 
   // 공통 API 호출 메서드
-  private static async apiCall<T>(
+  public static async apiCall<T>(
     endpoint: string,
     options: RequestInit = {},
   ): Promise<T> {
@@ -295,6 +295,7 @@ export class ApiService {
       'categoryIds',
       JSON.stringify(defaultFilter.categoryIds),
     );
+
     queryParams.append('sort', defaultFilter.sort);
     queryParams.append('page', defaultFilter.page.toString());
     queryParams.append('size', defaultFilter.size.toString());
@@ -473,6 +474,7 @@ export class ApiService {
   }
 
   // 액세스 토큰 갱신
+  // refreshAccessToken 메서드 수정
   static async refreshAccessToken(): Promise<boolean> {
     try {
       const refreshToken = await AsyncStorageService.getRefreshToken();
@@ -482,8 +484,6 @@ export class ApiService {
         return false;
       }
 
-      console.log('리프레시 토큰으로 액세스 토큰 갱신 중...');
-
       const response = await fetch(
         `${Config.API_BASE_URL}/api/v1/auth/refresh`,
         {
@@ -492,6 +492,7 @@ export class ApiService {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${refreshToken}`,
           },
+          body: JSON.stringify({ refreshToken }), // 요청 바디에 토큰 포함
         },
       );
 
@@ -501,40 +502,28 @@ export class ApiService {
       }
 
       const responseData: ApiResponse<{
-        token: string;
+        accessToken: string; // API 문서와 일치
         refreshToken?: string;
       }> = await response.json();
 
-      if (!responseData.success || !responseData.data) {
+      // API 문서 구조에 맞게 수정
+      if (!responseData.code.includes('OK') || !responseData.result) {
         console.log('토큰 갱신 응답 실패');
         return false;
       }
 
-      // 새 액세스 토큰 저장
-      await AsyncStorageService.setAuthToken(responseData.data.token);
+      // 새 토큰 저장 (필드명 수정)
+      await AsyncStorageService.setAuthToken(responseData.result.accessToken);
 
-      // 새 리프레시 토큰이 있으면 저장
-      if (responseData.data.refreshToken) {
+      if (responseData.result.refreshToken) {
         await AsyncStorageService.setRefreshToken(
-          responseData.data.refreshToken,
+          responseData.result.refreshToken,
         );
       }
 
-      console.log('토큰 갱신 성공');
       return true;
     } catch (error) {
-      console.error('토큰 갱신 중 오류 발생:', error);
-      return false;
-    }
-  }
-
-  // 토큰 유효성 검증
-  static async validateToken(): Promise<boolean> {
-    try {
-      await this.getCurrentUser();
-      return true;
-    } catch (error) {
-      console.log('토큰 유효성 검증 실패:', error);
+      console.error('토큰 갱신 중 오류:', error);
       return false;
     }
   }

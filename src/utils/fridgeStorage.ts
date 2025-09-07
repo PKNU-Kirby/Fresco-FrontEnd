@@ -105,31 +105,31 @@ const getFridgeItemsByFridgeIdFromStorage = async (
 };
 
 // 냉장고 아이템 조회 (API 우선, AsyncStorage fallback)
-export const getFridgeItemsByFridgeId = async (
-  fridgeId: string,
-  categoryIds: number[] = [],
-): Promise<FridgeItem[]> => {
-  console.log(`냉장고 ${fridgeId} 아이템 조회 시작...`);
+// fridgeStorage.ts에서 임시로
+export const getFridgeItemsByFridgeId = async (fridgeId: string) => {
+  try {
+    console.log(`냉장고 ${fridgeId} 아이템 조회 중...`);
 
-  // API 사용 가능한지 확인
-  if (isApiAvailable()) {
-    try {
-      console.log('API를 통한 냉장고 아이템 조회 시도...');
-      const response = await ApiService.getFridgeItems(fridgeId, {
-        categoryIds,
-        page: 0,
-        size: 100,
-      });
+    // 쿼리 파라미터가 있는 방식만 사용 (이게 성공하는 방식)
+    const response = await ApiService.getFridgeItems(fridgeId, {
+      categoryIds: [],
+      page: 0,
+      size: 100,
+    });
 
-      const mappedItems = response.content.map(mapApiItemToFridgeItem);
-      console.log(`API를 통해 ${mappedItems.length}개 아이템 조회 완료`);
-      return mappedItems;
-    } catch (error) {
-      console.error('API 조회 실패, AsyncStorage 사용:', error);
-      return await getFridgeItemsByFridgeIdFromStorage(fridgeId);
+    console.log('조회 응답:', response);
+
+    if (response.content && Array.isArray(response.content)) {
+      return response.content.map(mapApiItemToFridgeItem);
+    } else {
+      console.warn('빈 배열 응답:', response);
+      return [];
     }
-  } else {
-    console.log('API를 사용할 수 없어 AsyncStorage 사용');
+  } catch (error) {
+    console.error('API 조회 실패:', error);
+
+    // fallback으로 AsyncStorage 사용
+    console.log('AsyncStorage fallback 시도...');
     return await getFridgeItemsByFridgeIdFromStorage(fridgeId);
   }
 };
