@@ -54,13 +54,19 @@ export type FilterRequest = {
   size: number;
 };
 
+// 토큰 갱신 상태 관리
+let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
+
 export class ApiService {
   // 서버 URL - 실제 서버 주소로 변경해야 합니다
   private static readonly BASE_URL = `${Config.API_BASE_URL}`;
 
   // 공통 헤더 생성
   private static async getHeaders(): Promise<HeadersInit_> {
-    const token = await AsyncStorageService.getAuthToken(); // 인증 토큰 가져오기
+    const token = await AsyncStorageService.getAuthToken();
+
+    console.log('현재 토큰:', token);
 
     return {
       'Content-Type': 'application/json',
@@ -69,14 +75,94 @@ export class ApiService {
     };
   }
 
-  // 공통 API 호출 메서드
+  // 토큰 갱신 메서드 (동시성 제어 추가)
+  static async refreshAccessToken(): Promise<boolean> {
+    // 이미 갱신 중이라면 기존 프로미스를 반환
+    if (isRefreshing && refreshPromise) {
+      console.log(
+        '토큰 갱신이 이미 진행 중입니다. 기존 프로미스를 반환합니다.',
+      );
+      return await refreshPromise;
+    }
+
+    // 갱신 시작 플래그 설정
+    isRefreshing = true;
+
+    refreshPromise = (async () => {
+      try {
+        console.log('토큰 갱신 시작...');
+
+        const refreshToken = await AsyncStorageService.getRefreshToken();
+
+        if (!refreshToken) {
+          console.log('리프레시 토큰이 없습니다');
+          return false;
+        }
+
+        // fetch를 직접 사용하여 토큰 갱신 (무한 재귀 방지)
+        const response = await fetch(
+          `${Config.API_BASE_URL}/api/v1/auth/refresh`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ refreshToken }),
+          },
+        );
+
+        if (!response.ok) {
+          console.log('토큰 갱신 HTTP 실패:', response.status);
+          return false;
+        }
+
+        const responseData: ApiResponse<{
+          accessToken: string;
+          refreshToken?: string;
+        }> = await response.json();
+
+        console.log('토큰 갱신 응답:', responseData);
+
+        // API 응답 구조에 맞게 수정
+        if (!responseData.code.includes('OK') || !responseData.result) {
+          console.log('토큰 갱신 응답 실패:', responseData.message);
+          return false;
+        }
+
+        // 새 토큰 저장
+        await AsyncStorageService.setAuthToken(responseData.result.accessToken);
+
+        if (responseData.result.refreshToken) {
+          await AsyncStorageService.setRefreshToken(
+            responseData.result.refreshToken,
+          );
+        }
+
+        console.log('토큰 갱신 성공');
+        return true;
+      } catch (error) {
+        console.error('토큰 갱신 중 오류:', error);
+        return false;
+      } finally {
+        // 갱신 완료 후 플래그 리셋
+        isRefreshing = false;
+        refreshPromise = null;
+      }
+    })();
+
+    return await refreshPromise;
+  }
+
+  // 공통 API 호출 메서드 (토큰 갱신 로직 추가)
   public static async apiCall<T>(
     endpoint: string,
     options: RequestInit = {},
+    retryCount: number = 0,
   ): Promise<T> {
     try {
       const url = `${Config.API_BASE_URL}${endpoint}`;
       const headers = await this.getHeaders();
+
       console.log(`API 호출: ${options.method || 'GET'} ${url}`);
 
       const response = await fetch(url, {
@@ -86,6 +172,23 @@ export class ApiService {
           ...options.headers,
         },
       });
+
+      // 401 에러이고 아직 재시도하지 않았다면 토큰 갱신 시도
+      if (response.status === 401 && retryCount === 0) {
+        console.log('401 에러 감지, 토큰 갱신 시도...');
+
+        const refreshSuccess = await this.refreshAccessToken();
+
+        if (refreshSuccess) {
+          console.log('토큰 갱신 성공, API 재시도...');
+          // 토큰 갱신 성공시 재시도 (retryCount 증가로 무한 재귀 방지)
+          return this.apiCall<T>(endpoint, options, retryCount + 1);
+        } else {
+          console.log('토큰 갱신 실패, 로그아웃 처리');
+          await this.logout();
+          throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
+        }
+      }
 
       const responseData: ApiResponse<T> = await response.json();
       console.log(`API 응답 (${response.status}):`, responseData);
@@ -236,7 +339,7 @@ export class ApiService {
         addedBy: string;
         addedAt: string;
       }>
-    >(`/ap1/v1/ingredient/${fridgeId}`);
+    >(`/api/v1/ingredient/${fridgeId}`);
   }
 
   // 식재료 추가
@@ -250,7 +353,7 @@ export class ApiService {
       expiryDate?: string;
     },
   ): Promise<{ id: string }> {
-    return this.apiCall<{ id: string }>(`/ap1/v1/ingredient/${fridgeId}`, {
+    return this.apiCall<{ id: string }>(`/api/v1/ingredient/${fridgeId}`, {
       method: 'POST',
       body: JSON.stringify(ingredientData),
     });
@@ -268,7 +371,7 @@ export class ApiService {
       expiryDate?: string;
     }>,
   ): Promise<void> {
-    await this.apiCall<void>(`/ap1/v1/ingredient/${fridgeIngredientId}`, {
+    await this.apiCall<void>(`/api/v1/ingredient/${fridgeIngredientId}`, {
       method: 'PUT',
       body: JSON.stringify(updateData),
     });
@@ -300,7 +403,7 @@ export class ApiService {
     queryParams.append('page', defaultFilter.page.toString());
     queryParams.append('size', defaultFilter.size.toString());
 
-    const endpoint = `/ap1/v1/ingredient/${fridgeId}?${queryParams.toString()}`;
+    const endpoint = `/api/v1/ingredient/${fridgeId}?${queryParams.toString()}`;
 
     return this.apiCall<ApiItemResponse<ApiFridgeItem>>(endpoint);
   }
@@ -314,7 +417,7 @@ export class ApiService {
       quantity?: number;
     },
   ): Promise<ApiFridgeItem> {
-    return this.apiCall<ApiFridgeItem>(`/ap1/v1/ingredient/${itemId}`, {
+    return this.apiCall<ApiFridgeItem>(`/api/v1/ingredient/${itemId}`, {
       method: 'PUT',
       body: JSON.stringify(updates),
     });
@@ -322,7 +425,7 @@ export class ApiService {
 
   // 냉장고 아이템 삭제 - 기존 엔드포인트 패턴 사용
   static async deleteFridgeItem(itemId: string): Promise<void> {
-    return this.apiCall<void>(`/ap1/v1/ingredient/${itemId}`, {
+    return this.apiCall<void>(`/api/v1/ingredient/${itemId}`, {
       method: 'DELETE',
     });
   }
@@ -338,7 +441,7 @@ export class ApiService {
       expirationDate: string;
     },
   ): Promise<ApiFridgeItem> {
-    return this.apiCall<ApiFridgeItem>(`/ap1/v1/ingredient/${fridgeId}`, {
+    return this.apiCall<ApiFridgeItem>(`/api/v1/ingredient/${fridgeId}`, {
       method: 'POST',
       body: JSON.stringify(item),
     });
@@ -356,7 +459,7 @@ export class ApiService {
     }>,
   ): Promise<ApiFridgeItem[]> {
     return this.apiCall<ApiFridgeItem[]>(
-      `/ap1/v1/ingredient/${fridgeId}/batch`,
+      `/api/v1/ingredient/${fridgeId}/batch`,
       {
         method: 'POST',
         body: JSON.stringify({ items }),
@@ -439,6 +542,7 @@ export class ApiService {
       body: JSON.stringify({}),
     });
 
+    console.log('로그인 성공, 토큰 저장 시도:', response.token);
     // 토큰과 사용자 정보를 AsyncStorage에 저장
     await AsyncStorageService.setAuthToken(response.token);
     await AsyncStorageService.setCurrentUserId(response.user.id);
@@ -458,6 +562,10 @@ export class ApiService {
       // 서버 로그아웃 실패해도 로컬 데이터는 클리어
       console.warn('서버 로그아웃 실패:', error);
     } finally {
+      // 토큰 갱신 상태 리셋
+      isRefreshing = false;
+      refreshPromise = null;
+
       // 모든 인증 관련 데이터 삭제
       await AsyncStorageService.clearAllAuthData();
 
@@ -470,61 +578,6 @@ export class ApiService {
           }),
         );
       }
-    }
-  }
-
-  // 액세스 토큰 갱신
-  // refreshAccessToken 메서드 수정
-  static async refreshAccessToken(): Promise<boolean> {
-    try {
-      const refreshToken = await AsyncStorageService.getRefreshToken();
-
-      if (!refreshToken) {
-        console.log('리프레시 토큰이 없습니다');
-        return false;
-      }
-
-      const response = await fetch(
-        `${Config.API_BASE_URL}/api/v1/auth/refresh`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${refreshToken}`,
-          },
-          body: JSON.stringify({ refreshToken }), // 요청 바디에 토큰 포함
-        },
-      );
-
-      if (!response.ok) {
-        console.log('토큰 갱신 실패:', response.status);
-        return false;
-      }
-
-      const responseData: ApiResponse<{
-        accessToken: string; // API 문서와 일치
-        refreshToken?: string;
-      }> = await response.json();
-
-      // API 문서 구조에 맞게 수정
-      if (!responseData.code.includes('OK') || !responseData.result) {
-        console.log('토큰 갱신 응답 실패');
-        return false;
-      }
-
-      // 새 토큰 저장 (필드명 수정)
-      await AsyncStorageService.setAuthToken(responseData.result.accessToken);
-
-      if (responseData.result.refreshToken) {
-        await AsyncStorageService.setRefreshToken(
-          responseData.result.refreshToken,
-        );
-      }
-
-      return true;
-    } catch (error) {
-      console.error('토큰 갱신 중 오류:', error);
-      return false;
     }
   }
 }

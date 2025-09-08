@@ -57,7 +57,6 @@ export const useLogin = (): UseLoginReturn => {
     userProfile: UserProfile,
   ): Promise<void> => {
     setIsLoading(true);
-
     try {
       console.log('[Login request] : ', {
         provider,
@@ -80,7 +79,14 @@ export const useLogin = (): UseLoginReturn => {
           ['lastLoginTime', new Date().toISOString()],
         ]);
 
-        // 사용자 정보 저장
+        // 사용자 정보 저장 - 개별 파라미터로 전달
+        console.log('사용자 정보 저장 시작:', userProfile);
+
+        if (!userProfile || typeof userProfile !== 'object') {
+          throw new Error('사용자 프로필 정보가 없습니다.');
+        }
+
+        // 개별 파라미터로 전달 (TypeScript 에러 해결)
         const user = await AsyncStorageService.createUserFromLogin(
           provider,
           userProfile.providerId,
@@ -89,14 +95,27 @@ export const useLogin = (): UseLoginReturn => {
           userProfile.profileImage,
         );
 
+        console.log('createUserFromLogin 반환값:', user);
+
+        // user가 정상적으로 반환되었는지 확인
+        if (!user || typeof user !== 'object' || !user.id) {
+          console.error('사용자 생성 실패: user 객체가 없거나 id가 없음');
+          throw new Error('사용자 정보 저장에 실패했습니다.');
+        }
+
         await AsyncStorageService.setCurrentUserId(user.id);
-        await AsyncStorageService.initializeDefaultFridgeForUser(
-          parseInt(user.id, 10),
-        );
+
+        // 기본 냉장고 설정 (단순화)
+        try {
+          await AsyncStorage.setItem('hasDefaultFridge', 'true');
+          await AsyncStorage.setItem('defaultFridgeUserId', user.id);
+          console.log('기본 냉장고 설정 완료');
+        } catch (fridgeError) {
+          console.warn('기본 냉장고 초기화 실패:', fridgeError);
+        }
 
         // 대기 중인 초대 확인
         const pendingInvite = await DeepLinkHandler.getPendingInvite();
-
         if (pendingInvite) {
           navigation.replace('InviteConfirm', {
             token: pendingInvite.token,

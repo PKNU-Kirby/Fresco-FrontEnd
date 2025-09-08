@@ -21,7 +21,7 @@ import { useOptimisticEdit } from '../../hooks/useOptimisticEdit';
 import { FridgeWithRole } from '../../services/AsyncStorageService';
 import { deleteRefrigerator, updateRefrigerator } from '../../types/api';
 import { styles } from './styles';
-
+import { AsyncStorageService } from '../../services/AsyncStorageService';
 const FridgeSelectScreen = () => {
   const navigation = useNavigation<any>();
 
@@ -231,6 +231,16 @@ const FridgeSelectScreen = () => {
   };
 
   useEffect(() => {
+    const checkTokenStatus = async () => {
+      const token = await AsyncStorageService.getAuthToken();
+      console.log('FridgeSelectScreen 로드 시 토큰:', token);
+
+      if (!token) {
+        console.warn('토큰이 없습니다. 로그인 상태를 확인하세요.');
+      }
+    };
+
+    checkTokenStatus();
     initializeData();
   }, []);
 

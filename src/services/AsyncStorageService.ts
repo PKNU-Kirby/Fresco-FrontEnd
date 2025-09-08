@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User, SocialProvider } from '../types/auth';
+import Config from 'react-native-config';
+import { User, SocialProvider, UserId } from '../types/auth';
 
+// 타입 정의들
 export type Refrigerator = {
   id: string;
   name: string;
@@ -38,6 +40,18 @@ export type FridgeItem = {
   updatedAt?: string;
 };
 
+export interface StoredUserInfo {
+  userId: string;
+  provider: SocialProvider;
+  providerId: string;
+  name: string;
+  email?: string;
+  profileImage?: string;
+  fcmToken?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // AsyncStorage 키 상수
 const STORAGE_KEYS = {
   // 사용자 관련
@@ -63,7 +77,10 @@ const STORAGE_KEYS = {
   AUTO_INCREMENT: 'autoIncrement',
 } as const;
 
-// 자동 증가 ID 관리
+// 토큰 갱신 상태 관리
+let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
+
 export class AsyncStorageService {
   // 기존 키들
   private static readonly KEYS = {
@@ -71,46 +88,44 @@ export class AsyncStorageService {
     USERS: 'users',
     REFRIGERATORS: 'refrigerators',
     REFRIGERATOR_USERS: 'refrigeratorUsers',
-    // 새로 추가된 키들
     AUTH_TOKEN: 'authToken',
     REFRESH_TOKEN: 'refreshToken',
   };
-  // ===== 토큰 관리 메서드들 (새로 추가) =====
 
-  // 인증 토큰 저장
-  // 인증 토큰 저장 (기존에 있다면 수정 필요 없음)
-  static async setAuthToken(token: string): Promise<void> {
-    try {
-      await AsyncStorage.setItem('authToken', token);
-    } catch (error) {
-      console.error('setAuthToken error:', error);
-      throw error;
-    }
-  }
+  // ============================================================================
+  // 토큰 관리 메서드들
+  // ============================================================================
 
-  // 인증 토큰 조회 (기존에 있다면 수정 필요 없음)
   static async getAuthToken(): Promise<string | null> {
     try {
-      return await AsyncStorage.getItem('authToken');
+      return await AsyncStorage.getItem('accessToken');
     } catch (error) {
       console.error('getAuthToken error:', error);
       return null;
     }
   }
 
-  // 인증 토큰 삭제 (기존에 있다면 수정 필요 없음)
+  static async setAuthToken(token: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem('accessToken', token);
+    } catch (error) {
+      console.error('setAuthToken error:', error);
+      throw error;
+    }
+  }
+
   static async clearAuthToken(): Promise<void> {
     try {
-      await AsyncStorage.removeItem('authToken');
+      await AsyncStorage.removeItem('accessToken');
     } catch (error) {
       console.error('clearAuthToken error:', error);
       throw error;
     }
   }
-  // 리프레시 토큰 저장 (선택사항)
+
   static async setRefreshToken(token: string): Promise<void> {
     try {
-      await AsyncStorage.setItem(this.KEYS.REFRESH_TOKEN, token);
+      await AsyncStorage.setItem('refreshToken', token);
       console.log('리프레시 토큰 저장됨');
     } catch (error) {
       console.error('리프레시 토큰 저장 실패:', error);
@@ -118,21 +133,18 @@ export class AsyncStorageService {
     }
   }
 
-  // 리프레시 토큰 조회
   static async getRefreshToken(): Promise<string | null> {
     try {
-      const token = await AsyncStorage.getItem(this.KEYS.REFRESH_TOKEN);
-      return token;
+      return await AsyncStorage.getItem('refreshToken');
     } catch (error) {
       console.error('리프레시 토큰 조회 실패:', error);
       return null;
     }
   }
 
-  // 리프레시 토큰 삭제
   static async clearRefreshToken(): Promise<void> {
     try {
-      await AsyncStorage.removeItem(this.KEYS.REFRESH_TOKEN);
+      await AsyncStorage.removeItem('refreshToken');
       console.log('리프레시 토큰 삭제됨');
     } catch (error) {
       console.error('리프레시 토큰 삭제 실패:', error);
@@ -140,7 +152,17 @@ export class AsyncStorageService {
     }
   }
 
-  // 모든 인증 관련 데이터 삭제 (로그아웃 시 사용)
+  static async setTokens(
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<void> {
+    const tokenArray: [string, string][] = [
+      ['accessToken', accessToken],
+      ['refreshToken', refreshToken],
+    ];
+    await AsyncStorage.multiSet(tokenArray);
+  }
+
   static async clearAllAuthData(): Promise<void> {
     try {
       await Promise.all([
@@ -155,7 +177,61 @@ export class AsyncStorageService {
       throw error;
     }
   }
+
+  // ============================================================================
+  // 사용자 정보 관리 메서드들
+  // ============================================================================
+
+  static async setCurrentUser(user: User): Promise<void> {
+    try {
+      await AsyncStorage.setItem('currentUser', JSON.stringify(user));
+    } catch (error) {
+      console.error('setCurrentUser error:', error);
+      throw error;
+    }
+  }
+
+  static async getCurrentUser(): Promise<User | null> {
+    try {
+      const userJson = await AsyncStorage.getItem('currentUser');
+      return userJson ? JSON.parse(userJson) : null;
+    } catch (error) {
+      console.error('getCurrentUser error:', error);
+      return null;
+    }
+  }
+
+  static async clearCurrentUser(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem('currentUser');
+    } catch (error) {
+      console.error('clearCurrentUser error:', error);
+      throw error;
+    }
+  }
+
+  static async setCurrentUserId(userId: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem('currentUserId', userId);
+    } catch (error) {
+      console.error('setCurrentUserId error:', error);
+      throw error;
+    }
+  }
+
+  static async getCurrentUserId(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem('currentUserId');
+    } catch (error) {
+      console.error('getCurrentUserId error:', error);
+      return null;
+    }
+  }
+
+  // ============================================================================
   // 자동 증가 ID 생성
+  // ============================================================================
+
   private static async getNextId(table: string): Promise<number> {
     try {
       const autoIncrementData = await AsyncStorage.getItem(
@@ -180,58 +256,11 @@ export class AsyncStorageService {
       return Date.now();
     }
   }
-  // 현재 사용자 정보 저장
-  static async setCurrentUser(user: User): Promise<void> {
-    try {
-      await AsyncStorage.setItem('currentUser', JSON.stringify(user));
-    } catch (error) {
-      console.error('setCurrentUser error:', error);
-      throw error;
-    }
-  }
 
-  // 현재 사용자 정보 조회
-  static async getCurrentUser(): Promise<User | null> {
-    try {
-      const userJson = await AsyncStorage.getItem('currentUser');
-      return userJson ? JSON.parse(userJson) : null;
-    } catch (error) {
-      console.error('getCurrentUser error:', error);
-      return null;
-    }
-  }
+  // ============================================================================
+  // 로그인 사용자 생성 함수 (원래 시그니처 유지)
+  // ============================================================================
 
-  // 현재 사용자 정보 삭제
-  static async clearCurrentUser(): Promise<void> {
-    try {
-      await AsyncStorage.removeItem('currentUser');
-    } catch (error) {
-      console.error('clearCurrentUser error:', error);
-      throw error;
-    }
-  }
-
-  // 사용자 ID 저장 (기존에 있다면 수정 필요 없음)
-  static async setCurrentUserId(userId: string): Promise<void> {
-    try {
-      await AsyncStorage.setItem('currentUserId', userId);
-    } catch (error) {
-      console.error('setCurrentUserId error:', error);
-      throw error;
-    }
-  }
-
-  // 사용자 ID 조회 (기존에 있다면 수정 필요 없음)
-  static async getCurrentUserId(): Promise<string | null> {
-    try {
-      return await AsyncStorage.getItem('currentUserId');
-    } catch (error) {
-      console.error('getCurrentUserId error:', error);
-      return null;
-    }
-  }
-
-  // 로그인 정보와 통합된 사용자 생성
   static async createUserFromLogin(
     provider: SocialProvider,
     providerId: string,
@@ -240,6 +269,16 @@ export class AsyncStorageService {
     profileImage?: string,
     fcmToken?: string,
   ): Promise<User> {
+    console.log('=== createUserFromLogin 함수 시작 ===');
+    console.log('전달받은 파라미터들:', {
+      provider,
+      providerId,
+      name,
+      email,
+      profileImage,
+      fcmToken,
+    });
+
     try {
       const users = await this.getUsers();
 
@@ -265,6 +304,7 @@ export class AsyncStorageService {
           JSON.stringify(updatedUsers),
         );
 
+        console.log('기존 사용자 업데이트 완료:', existingUser);
         return existingUser;
       } else {
         // 새 사용자 생성
@@ -281,6 +321,7 @@ export class AsyncStorageService {
         users.push(newUser);
         await AsyncStorage.setItem(this.KEYS.USERS, JSON.stringify(users));
 
+        console.log('새 사용자 생성 완료:', newUser);
         return newUser;
       }
     } catch (error) {
@@ -289,7 +330,10 @@ export class AsyncStorageService {
     }
   }
 
+  // ============================================================================
   // 사용자 CRUD
+  // ============================================================================
+
   static async getUsers(): Promise<User[]> {
     try {
       const usersData = await AsyncStorage.getItem(this.KEYS.USERS);
@@ -310,7 +354,10 @@ export class AsyncStorageService {
     }
   }
 
+  // ============================================================================
   // 냉장고 관련 메서드들
+  // ============================================================================
+
   static async getRefrigerators(): Promise<Refrigerator[]> {
     try {
       const fridgesData = await AsyncStorage.getItem(this.KEYS.REFRIGERATORS);
@@ -338,7 +385,7 @@ export class AsyncStorageService {
       const newRefrigerator: Refrigerator = {
         id: (await this.getNextId('refrigerators')).toString(),
         name,
-        inviteCode, // 초대 코드 포함
+        inviteCode,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -375,251 +422,6 @@ export class AsyncStorageService {
     }
   }
 
-  static async updateRefrigerator(
-    id: number,
-    updates: Partial<Refrigerator>,
-  ): Promise<Refrigerator | null> {
-    try {
-      const refrigerators = await this.getRefrigerators();
-      const fridgeIndex = refrigerators.findIndex(
-        fridge => parseInt(fridge.id) === id,
-      );
-
-      if (fridgeIndex === -1) return null;
-
-      refrigerators[fridgeIndex] = {
-        ...refrigerators[fridgeIndex],
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      };
-
-      await AsyncStorage.setItem(
-        this.KEYS.REFRIGERATORS,
-        JSON.stringify(refrigerators),
-      );
-      return refrigerators[fridgeIndex];
-    } catch (error) {
-      console.error('Update refrigerator error:', error);
-      return null;
-    }
-  }
-
-  static async deleteRefrigerator(id: number): Promise<boolean> {
-    try {
-      const refrigerators = await this.getRefrigerators();
-      const filteredRefrigerators = refrigerators.filter(
-        fridge => parseInt(fridge.id) !== id,
-      );
-      await AsyncStorage.setItem(
-        this.KEYS.REFRIGERATORS,
-        JSON.stringify(filteredRefrigerators),
-      );
-
-      const refrigeratorUsers = await this.getRefrigeratorUsers();
-      const filteredRefrigeratorUsers = refrigeratorUsers.filter(
-        ru => parseInt(ru.refrigeratorId) !== id,
-      );
-      await AsyncStorage.setItem(
-        this.KEYS.REFRIGERATOR_USERS,
-        JSON.stringify(filteredRefrigeratorUsers),
-      );
-
-      return true;
-    } catch (error) {
-      console.error('Delete refrigerator error:', error);
-      return false;
-    }
-  }
-
-  // === 초대 관련 메서드들 ===
-
-  // 냉장고의 초대 코드 가져오기
-  static async getFridgeInviteCode(fridgeId: number): Promise<string | null> {
-    try {
-      const refrigerators = await this.getRefrigerators();
-      const fridge = refrigerators.find(r => parseInt(r.id) === fridgeId);
-
-      if (!fridge) return null;
-
-      // 초대 코드가 없으면 생성
-      if (!fridge.inviteCode) {
-        const newInviteCode = Math.random()
-          .toString(36)
-          .substring(2, 8)
-          .toUpperCase();
-        await this.updateRefrigerator(fridgeId, { inviteCode: newInviteCode });
-        return newInviteCode;
-      }
-
-      return fridge.inviteCode;
-    } catch (error) {
-      console.error('초대 코드 조회 실패:', error);
-      return null;
-    }
-  }
-
-  // 초대 코드로 냉장고 찾기
-  static async getFridgeByInviteCode(
-    inviteCode: string,
-  ): Promise<Refrigerator | null> {
-    try {
-      const refrigerators = await this.getRefrigerators();
-      return refrigerators.find(r => r.inviteCode === inviteCode) || null;
-    } catch (error) {
-      console.error('초대 코드로 냉장고 조회 실패:', error);
-      return null;
-    }
-  }
-
-  // 냉장고에 사용자 참여
-  static async joinFridgeByCode(
-    inviteCode: string,
-  ): Promise<{ success: boolean; message: string; fridge?: Refrigerator }> {
-    try {
-      const currentUserId = await this.getCurrentUserId();
-      if (!currentUserId) {
-        return {
-          success: false,
-          message: '현재 사용자 정보를 찾을 수 없습니다.',
-        };
-      }
-
-      // 초대 코드로 냉장고 찾기
-      const fridge = await this.getFridgeByInviteCode(inviteCode);
-      if (!fridge) {
-        return { success: false, message: '유효하지 않은 초대 코드입니다.' };
-      }
-
-      const currentUserIdNum = parseInt(currentUserId, 10);
-      const fridgeIdNum = parseInt(fridge.id, 10);
-
-      // 이미 참여 중인지 확인
-      const refrigeratorUsers = await this.getRefrigeratorUsers();
-      const existingRelation = refrigeratorUsers.find(
-        ru =>
-          parseInt(ru.refrigeratorId) === fridgeIdNum &&
-          parseInt(ru.inviteeId) === currentUserIdNum,
-      );
-
-      if (existingRelation) {
-        return { success: false, message: '이미 참여 중인 냉장고입니다.' };
-      }
-
-      // 냉장고 소유자 찾기 (생성자)
-      const ownerRelation = refrigeratorUsers.find(
-        ru =>
-          parseInt(ru.refrigeratorId) === fridgeIdNum &&
-          ru.inviterId === ru.inviteeId,
-      );
-      const ownerId = ownerRelation
-        ? parseInt(ownerRelation.inviterId)
-        : currentUserIdNum;
-
-      // 새로운 관계 추가
-      await this.addUserToRefrigerator(fridgeIdNum, ownerId, currentUserIdNum);
-
-      return {
-        success: true,
-        message: `'${fridge.name}' 냉장고에 참여했습니다.`,
-        fridge,
-      };
-    } catch (error) {
-      console.error('냉장고 참여 실패:', error);
-      return { success: false, message: '냉장고 참여 중 오류가 발생했습니다.' };
-    }
-  }
-
-  // 초대 코드 재생성
-  static async regenerateInviteCode(fridgeId: number): Promise<string | null> {
-    try {
-      const newInviteCode = Math.random()
-        .toString(36)
-        .substring(2, 8)
-        .toUpperCase();
-      await this.updateRefrigerator(fridgeId, { inviteCode: newInviteCode });
-      return newInviteCode;
-    } catch (error) {
-      console.error('초대 코드 재생성 실패:', error);
-      return null;
-    }
-  }
-
-  // === JoinWithCodeScreen용 추가 헬퍼 메소드들 ===
-
-  // getUserFridges 메소드 (JoinWithCodeScreen에서 사용)
-  static async getUserFridges(userId: number): Promise<FridgeWithRole[]> {
-    return await this.getUserRefrigerators(userId);
-  }
-
-  // findFridgeByInviteCode 메소드 (JoinWithCodeScreen에서 사용)
-  static async findFridgeByInviteCode(
-    inviteCode: string,
-  ): Promise<Refrigerator | null> {
-    return await this.getFridgeByInviteCode(inviteCode);
-  }
-
-  // isUserFridgeMember 메소드 (중복 참여 확인용)
-  static async isUserFridgeMember(
-    fridgeId: number,
-    userId: number,
-  ): Promise<boolean> {
-    try {
-      const refrigeratorUsers = await this.getRefrigeratorUsers();
-      return refrigeratorUsers.some(
-        ru =>
-          parseInt(ru.refrigeratorId) === fridgeId &&
-          parseInt(ru.inviteeId) === userId,
-      );
-    } catch (error) {
-      console.error('멤버십 확인 실패:', error);
-      return false;
-    }
-  }
-
-  // joinFridgeWithCode 메소드 (코드로 냉장고 참여)
-  static async joinFridgeWithCode(
-    fridgeId: number,
-    userId: number,
-  ): Promise<boolean> {
-    try {
-      // 이미 멤버인지 확인
-      const isAlreadyMember = await this.isUserFridgeMember(fridgeId, userId);
-      if (isAlreadyMember) {
-        return false; // 이미 멤버임
-      }
-
-      // 냉장고 소유자 찾기
-      const refrigeratorUsers = await this.getRefrigeratorUsers();
-      const ownerRelation = refrigeratorUsers.find(
-        ru =>
-          parseInt(ru.refrigeratorId) === fridgeId &&
-          ru.inviterId === ru.inviteeId,
-      );
-      const ownerId = ownerRelation
-        ? parseInt(ownerRelation.inviterId)
-        : userId;
-
-      // 새로운 관계 추가
-      await this.addUserToRefrigerator(fridgeId, ownerId, userId);
-      return true; // 성공
-    } catch (error) {
-      console.error('냉장고 참여 실패:', error);
-      throw error;
-    }
-  }
-
-  // getFridgeById 메소드 (냉장고 정보 가져오기)
-  static async getFridgeById(fridgeId: number): Promise<Refrigerator | null> {
-    try {
-      const refrigerators = await this.getRefrigerators();
-      return refrigerators.find(r => parseInt(r.id) === fridgeId) || null;
-    } catch (error) {
-      console.error('냉장고 조회 실패:', error);
-      return null;
-    }
-  }
-
-  // 냉장고-사용자 관계 관리
   static async getRefrigeratorUsers(): Promise<RefrigeratorUser[]> {
     try {
       const refrigeratorUsersData = await AsyncStorage.getItem(
@@ -658,31 +460,6 @@ export class AsyncStorageService {
     } catch (error) {
       console.error('Add user to refrigerator error:', error);
       throw error;
-    }
-  }
-
-  static async removeUserFromRefrigerator(
-    refrigeratorId: number,
-    userId: number,
-  ): Promise<boolean> {
-    try {
-      const refrigeratorUsers = await this.getRefrigeratorUsers();
-      const filteredRefrigeratorUsers = refrigeratorUsers.filter(
-        ru =>
-          !(
-            parseInt(ru.refrigeratorId) === refrigeratorId &&
-            parseInt(ru.inviteeId) === userId
-          ),
-      );
-
-      await AsyncStorage.setItem(
-        this.KEYS.REFRIGERATOR_USERS,
-        JSON.stringify(filteredRefrigeratorUsers),
-      );
-      return true;
-    } catch (error) {
-      console.error('Remove user from refrigerator error:', error);
-      return false;
     }
   }
 
@@ -733,12 +510,25 @@ export class AsyncStorageService {
   static async getHiddenFridges(userId: number): Promise<number[]> {
     try {
       const hiddenFridgesData = await AsyncStorage.getItem(
-        `${this.KEYS.HIDDEN_FRIDGES}_${userId}`,
+        `${STORAGE_KEYS.HIDDEN_FRIDGES}_${userId}`,
       );
       return hiddenFridgesData ? JSON.parse(hiddenFridgesData) : [];
     } catch (error) {
       console.error('Get hidden fridges error:', error);
       return [];
+    }
+  }
+
+  static async getFridgeHidden(
+    userId: number,
+    fridgeId: number,
+  ): Promise<boolean> {
+    try {
+      const hiddenFridges = await this.getHiddenFridges(userId);
+      return hiddenFridges.includes(fridgeId);
+    } catch (error) {
+      console.error('getFridgeHidden 실패:', error);
+      return false;
     }
   }
 
@@ -762,126 +552,11 @@ export class AsyncStorageService {
       }
 
       await AsyncStorage.setItem(
-        `${this.KEYS.HIDDEN_FRIDGES}_${userId}`,
+        `${STORAGE_KEYS.HIDDEN_FRIDGES}_${userId}`,
         JSON.stringify(hiddenFridges),
       );
     } catch (error) {
       console.error('Set fridge hidden error:', error);
-    }
-  }
-
-  // FridgeItem 관련 메서드
-  static async getAllFridgeItems(): Promise<FridgeItem[]> {
-    try {
-      const itemsJson = await AsyncStorage.getItem(this.KEYS.FRIDGE_ITEMS);
-      return itemsJson ? JSON.parse(itemsJson) : [];
-    } catch (error) {
-      console.error('Get all fridge items error:', error);
-      return [];
-    }
-  }
-
-  static async getFridgeItemsByFridgeId(
-    fridgeId: string,
-  ): Promise<FridgeItem[]> {
-    try {
-      const allItems = await this.getAllFridgeItems();
-      return allItems.filter(
-        item => parseInt(item.fridgeId, 10) === parseInt(fridgeId, 10),
-      );
-    } catch (error) {
-      console.error('Get fridge items by fridge ID error:', error);
-      return [];
-    }
-  }
-
-  static async addFridgeItem(
-    newItem: Omit<FridgeItem, 'id'>,
-  ): Promise<FridgeItem> {
-    try {
-      const allItems = await this.getAllFridgeItems();
-      const maxId = allItems.reduce(
-        (max, item) => Math.max(max, parseInt(item.id)),
-        0,
-      );
-      const itemWithId: FridgeItem = {
-        ...newItem,
-        id: (maxId + 1).toString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      const updatedItems = [...allItems, itemWithId];
-      await AsyncStorage.setItem(
-        this.KEYS.FRIDGE_ITEMS,
-        JSON.stringify(updatedItems),
-      );
-
-      return itemWithId;
-    } catch (error) {
-      console.error('Add fridge item error:', error);
-      throw error;
-    }
-  }
-
-  static async updateFridgeItem(updatedItem: FridgeItem): Promise<void> {
-    try {
-      const allItems = await this.getAllFridgeItems();
-      const updatedItems = allItems.map(item =>
-        item.id === updatedItem.id
-          ? { ...updatedItem, updatedAt: new Date().toISOString() }
-          : item,
-      );
-      await AsyncStorage.setItem(
-        this.KEYS.FRIDGE_ITEMS,
-        JSON.stringify(updatedItems),
-      );
-    } catch (error) {
-      console.error('Update fridge item error:', error);
-      throw error;
-    }
-  }
-
-  static async deleteFridgeItem(itemId: number): Promise<void> {
-    try {
-      const allItems = await this.getAllFridgeItems();
-      const filteredItems = allItems.filter(
-        item => parseInt(item.id) !== itemId,
-      );
-      await AsyncStorage.setItem(
-        this.KEYS.FRIDGE_ITEMS,
-        JSON.stringify(filteredItems),
-      );
-    } catch (error) {
-      console.error('Delete fridge item error:', error);
-      throw error;
-    }
-  }
-
-  // 아이템 카테고리 관련
-  static async getItemCategories(): Promise<string[]> {
-    try {
-      const categoriesJson = await AsyncStorage.getItem(
-        this.KEYS.ITEM_CATEGORIES,
-      );
-      return categoriesJson
-        ? JSON.parse(categoriesJson)
-        : [
-            '전체',
-            '베이커리',
-            '채소 / 과일',
-            '정육 / 계란',
-            '가공식품',
-            '수산 / 건어물',
-            '쌀 / 잡곡',
-            '우유 / 유제품',
-            '건강식품',
-            '장 / 양념 / 소스',
-            '기타',
-          ];
-    } catch (error) {
-      console.error('Get item categories error:', error);
-      return [];
     }
   }
 
@@ -912,4 +587,214 @@ export class AsyncStorageService {
       console.error('Initialize default fridge error:', error);
     }
   }
+
+  // ============================================================================
+  // 인증 상태 관리
+  // ============================================================================
+
+  static async isLoggedIn(): Promise<boolean> {
+    const userId = await this.getCurrentUserId();
+    const accessToken = await this.getAuthToken();
+    return !!(userId && accessToken);
+  }
+
+  // ============================================================================
+  // 사용자 정보 저장 (호환성을 위해)
+  // ============================================================================
+
+  static async saveUserInfo(userInfo: StoredUserInfo): Promise<void> {
+    const userDataArray: [string, string][] = [
+      ['userId', userInfo.userId],
+      ['userProvider', userInfo.provider],
+      ['userProviderId', userInfo.providerId],
+      ['userName', userInfo.name],
+      ['userProfile', JSON.stringify(userInfo)],
+    ];
+
+    if (userInfo.email) {
+      userDataArray.push(['userEmail', userInfo.email]);
+    }
+    if (userInfo.profileImage) {
+      userDataArray.push(['userProfileImage', userInfo.profileImage]);
+    }
+    if (userInfo.fcmToken) {
+      userDataArray.push(['userFcmToken', userInfo.fcmToken]);
+    }
+
+    await AsyncStorage.multiSet(userDataArray);
+  }
 }
+
+// ============================================================================
+// 토큰 자동 갱신 (동시성 제어)
+// ============================================================================
+
+export const saveTokens = async (
+  accessToken: string,
+  refreshToken: string,
+): Promise<void> => {
+  const tokenArray: [string, string][] = [
+    ['accessToken', accessToken],
+    ['refreshToken', refreshToken],
+  ];
+  await AsyncStorage.multiSet(tokenArray);
+};
+
+export const getAccessToken = async (): Promise<string | null> => {
+  return await AsyncStorage.getItem('accessToken');
+};
+
+export const getRefreshToken = async (): Promise<string | null> => {
+  return await AsyncStorage.getItem('refreshToken');
+};
+
+export const isTokenExpired = async (): Promise<boolean> => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) return true;
+
+    const tokenParts = accessToken.split('.');
+    if (tokenParts.length !== 3) return true;
+
+    const payload = JSON.parse(atob(tokenParts[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    return payload.exp <= currentTime + 30;
+  } catch (error) {
+    console.error('토큰 만료 확인 중 오류:', error);
+    return true;
+  }
+};
+
+export const refreshAccessToken = async (): Promise<boolean> => {
+  if (isRefreshing && refreshPromise) {
+    console.log('토큰 갱신이 이미 진행 중입니다.');
+    return await refreshPromise;
+  }
+
+  isRefreshing = true;
+
+  refreshPromise = (async () => {
+    try {
+      console.log('토큰 갱신 시작...');
+
+      const refreshToken = await getRefreshToken();
+      if (!refreshToken) {
+        console.log('Refresh Token이 없습니다.');
+        return false;
+      }
+
+      const response = await fetch(
+        `${Config.API_BASE_URL}/api/v1/auth/refresh`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            refreshToken: refreshToken,
+          }),
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('토큰 갱신 응답:', data);
+
+        if (data.code && data.code.includes('OK') && data.result) {
+          await saveTokens(
+            data.result.accessToken,
+            data.result.refreshToken || refreshToken,
+          );
+          console.log('토큰 갱신 성공');
+          return true;
+        } else {
+          console.log('토큰 갱신 응답 형식이 올바르지 않음:', data);
+          return false;
+        }
+      } else {
+        console.log('토큰 갱신 API 실패:', response.status);
+        return false;
+      }
+    } catch (error) {
+      console.error('토큰 갱신 중 오류:', error);
+      return false;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return await refreshPromise;
+};
+
+// ============================================================================
+// 기존 호환성을 위한 함수들
+// ============================================================================
+
+export const getUserInfo = async (): Promise<StoredUserInfo | null> => {
+  try {
+    const userProfileString = await AsyncStorage.getItem('userProfile');
+    return userProfileString ? JSON.parse(userProfileString) : null;
+  } catch (error) {
+    console.error('사용자 정보 읽기 실패:', error);
+    return null;
+  }
+};
+
+export const getUserId = async (): Promise<UserId | null> => {
+  return await AsyncStorage.getItem('userId');
+};
+
+export const getUserName = async (): Promise<string | null> => {
+  return await AsyncStorage.getItem('userName');
+};
+
+export const getUserEmail = async (): Promise<string | null> => {
+  return await AsyncStorage.getItem('userEmail');
+};
+
+export const getUserProvider = async (): Promise<SocialProvider | null> => {
+  return (await AsyncStorage.getItem('userProvider')) as SocialProvider | null;
+};
+
+export const getUserProviderId = async (): Promise<string | null> => {
+  return await AsyncStorage.getItem('userProviderId');
+};
+
+export const isLoggedIn = async (): Promise<boolean> => {
+  return AsyncStorageService.isLoggedIn();
+};
+
+export const logout = async (): Promise<boolean> => {
+  try {
+    await AsyncStorageService.clearAllAuthData();
+    isRefreshing = false;
+    refreshPromise = null;
+    return true;
+  } catch (error) {
+    console.error('로그아웃 실패:', error);
+    return false;
+  }
+};
+
+export const debugAuthInfo = async (): Promise<void> => {
+  const userInfo = await getUserInfo();
+  const accessToken = await getAccessToken();
+  const refreshToken = await getRefreshToken();
+  const tokenExpired = await isTokenExpired();
+
+  console.log('=== Auth Debug Info ===');
+  console.log('User Info:', userInfo);
+  console.log(
+    'Access Token:',
+    accessToken ? `${accessToken.substring(0, 20)}...` : 'null',
+  );
+  console.log(
+    'Refresh Token:',
+    refreshToken ? `${refreshToken.substring(0, 20)}...` : 'null',
+  );
+  console.log('Token Expired:', tokenExpired);
+  console.log('Is Logged In:', await isLoggedIn());
+  console.log('=====================');
+};
