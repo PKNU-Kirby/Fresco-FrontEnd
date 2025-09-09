@@ -2,9 +2,6 @@ import { AsyncStorageService } from './AsyncStorageService';
 import Config from 'react-native-config';
 import { CommonActions } from '@react-navigation/native';
 
-// 타입 정의 추가
-type SocialProvider = 'KAKAO' | 'NAVER';
-
 // API 응답 타입 정의
 type ApiResponse<T> = {
   code: string;

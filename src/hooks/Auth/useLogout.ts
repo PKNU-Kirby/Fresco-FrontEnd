@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { logoutAPI } from '../../types/api';
-import {
-  getAccessToken,
-  logout as clearLocalAuth,
-} from '../../utils/authUtils';
+import { getAccessToken, clearTokens } from '../../utils/authUtils';
 
 interface UseLogoutReturn {
   isLoggingOut: boolean;
@@ -29,7 +26,7 @@ export const useLogout = (): UseLogoutReturn => {
     } finally {
       try {
         // 로컬 인증 데이터 삭제
-        await clearLocalAuth();
+        await clearTokens();
 
         navigation.reset({
           index: 0,

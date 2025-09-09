@@ -70,23 +70,56 @@ export const useLogin = (): UseLoginReturn => {
           throw new Error('서버에서 토큰을 받지 못했습니다.');
         }
 
-        // 서버 토큰, 로그인 상태 저장
-        await AsyncStorage.multiSet([
-          ['accessToken', result.result.accessToken],
-          ['refreshToken', result.result.refreshToken],
-          ['isLoggedIn', 'true'],
-          ['loginProvider', provider],
-          ['lastLoginTime', new Date().toISOString()],
-        ]);
+        console.log('서버에서 받은 토큰들:', {
+          accessToken: result.result.accessToken.substring(0, 20) + '...',
+          refreshToken: result.result.refreshToken.substring(0, 20) + '...',
+        });
 
-        // 사용자 정보 저장 - 개별 파라미터로 전달
+        // 🔥 토큰 저장 순서 및 방식 개선
+        try {
+          // 1. AsyncStorage에 직접 저장 (기본)
+          await AsyncStorage.multiSet([
+            ['accessToken', result.result.accessToken],
+            ['refreshToken', result.result.refreshToken],
+            ['isLoggedIn', 'true'],
+            ['loginProvider', provider],
+            ['lastLoginTime', new Date().toISOString()],
+          ]);
+
+          // 2. AsyncStorageService를 통한 저장 (백업)
+          await AsyncStorageService.setAuthToken(result.result.accessToken);
+          await AsyncStorageService.setRefreshToken(result.result.refreshToken);
+
+          console.log('토큰 저장 완료');
+
+          // 3. 저장 확인
+          const savedAccessToken = await AsyncStorage.getItem('accessToken');
+          const savedRefreshToken = await AsyncStorage.getItem('refreshToken');
+
+          console.log('저장 확인:', {
+            accessToken: savedAccessToken
+              ? savedAccessToken.substring(0, 20) + '...'
+              : 'null',
+            refreshToken: savedRefreshToken
+              ? savedRefreshToken.substring(0, 20) + '...'
+              : 'null',
+          });
+
+          if (!savedAccessToken || !savedRefreshToken) {
+            throw new Error('토큰 저장 검증 실패');
+          }
+        } catch (tokenError) {
+          console.error('토큰 저장 실패:', tokenError);
+          throw new Error('토큰 저장에 실패했습니다.');
+        }
+
+        // 사용자 정보 저장
         console.log('사용자 정보 저장 시작:', userProfile);
 
         if (!userProfile || typeof userProfile !== 'object') {
           throw new Error('사용자 프로필 정보가 없습니다.');
         }
 
-        // 개별 파라미터로 전달 (TypeScript 에러 해결)
         const user = await AsyncStorageService.createUserFromLogin(
           provider,
           userProfile.providerId,
@@ -97,7 +130,6 @@ export const useLogin = (): UseLoginReturn => {
 
         console.log('createUserFromLogin 반환값:', user);
 
-        // user가 정상적으로 반환되었는지 확인
         if (!user || typeof user !== 'object' || !user.id) {
           console.error('사용자 생성 실패: user 객체가 없거나 id가 없음');
           throw new Error('사용자 정보 저장에 실패했습니다.');
@@ -105,7 +137,7 @@ export const useLogin = (): UseLoginReturn => {
 
         await AsyncStorageService.setCurrentUserId(user.id);
 
-        // 기본 냉장고 설정 (단순화)
+        // 기본 냉장고 설정
         try {
           await AsyncStorage.setItem('hasDefaultFridge', 'true');
           await AsyncStorage.setItem('defaultFridgeUserId', user.id);

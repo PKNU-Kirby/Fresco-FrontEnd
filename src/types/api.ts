@@ -1,15 +1,8 @@
 import Config from 'react-native-config';
+import { AsyncStorageService } from '../services/AsyncStorageService';
 import type { SocialProvider } from '../types/auth';
-import {
-  getAccessToken,
-  getRefreshToken,
-  saveTokens,
-  logout as clearAuth,
-} from '../utils/authUtils';
-
-// HTTP types
-// ============================================================================
-
+import { clearTokens } from '../utils/authUtils';
+import { refreshAccessToken } from '../services/AsyncStorageService';
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 export interface ApiRequestConfig {
@@ -44,7 +37,6 @@ export const API_ENDPOINTS = {
     DELETE: (id: string) => `/api/v1/refrigerator/${id}`,
     ADD_USER: (id: string) => `/api/v1/refrigerator/${id}/user`,
     REMOVE_USER: (id: string) => `/api/v1/refrigerator/${id}/user`,
-    // 수정된 엔드포인트들 (API 명세에 맞춤)
     USERS: {
       LIST: (refrigeratorId: string) =>
         `/api/v1/refrigerator/users/${refrigeratorId}`,
@@ -166,102 +158,61 @@ export interface LogoutResponse extends SuccessApiResponse {
   };
 }
 
-// API Call Helper
-// ============================================================================
-
-// 토큰 갱신 함수
-const refreshAccessToken = async (): Promise<boolean> => {
-  try {
-    const refreshToken = await getRefreshToken();
-    if (!refreshToken) {
-      console.log('리프레시 토큰이 없습니다');
-      return false;
-    }
-
-    console.log('토큰 갱신 시도...');
-    const response = await fetch(
-      `${Config.API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
-      },
-    );
-
-    if (!response.ok) {
-      console.log('토큰 갱신 HTTP 에러:', response.status);
-      return false;
-    }
-
-    const result = await response.json();
-
-    if (result.code === 'AUTH_OK_002') {
-      await saveTokens(result.result.accessToken, result.result.refreshToken);
-      console.log('토큰 갱신 성공');
-      return true;
-    } else {
-      console.log('토큰 갱신 응답 실패:', result.message);
-      return false;
-    }
-  } catch (error) {
-    console.error('토큰 갱신 에러:', error);
-    return false;
-  }
-};
-
-// 자동 토큰 갱신 포함 API 호출 헬퍼
 const apiCall = async (
   endpoint: string,
   options: RequestInit = {},
+  retryCount: number = 0,
 ): Promise<Response> => {
-  // 1st : 액세스 토큰 헤더에 추가
-  const accessToken = await getAccessToken();
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-    ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-  };
+  try {
+    const accessToken = await AsyncStorageService.getAuthToken();
 
-  let response = await fetch(`${Config.API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+    };
 
-  // re (401 error) -> 토큰 갱신, 재시도
-  if (response.status === 401) {
-    console.log('401 에러 감지, 토큰 갱신 후 재시도...');
+    console.log(`API 호출: ${options.method || 'GET'} ${endpoint}`);
+    console.log(
+      '토큰 사용:',
+      accessToken ? `${accessToken.substring(0, 20)}...` : 'none',
+    );
 
-    const refreshSuccess = await refreshAccessToken();
+    let response = await fetch(`${Config.API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
 
-    if (refreshSuccess) {
-      // 새 토큰
-      const newAccessToken = await getAccessToken();
-      const retryHeaders = {
-        ...headers,
-        Authorization: `Bearer ${newAccessToken}`,
-      };
+    console.log(`API 응답: ${response.status} ${response.statusText}`);
 
-      response = await fetch(`${Config.API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers: retryHeaders,
-      });
+    // 401 에러이고 재시도가 1회 미만인 경우
+    if (response.status === 401 && retryCount < 1) {
+      console.log('401 에러 감지, 토큰 갱신 후 재시도...');
 
-      console.log('토큰 갱신 후 재요청 완료, 상태:', response.status);
-    } else {
-      // 토큰 갱신 실패 -> 로그아웃
-      console.log('토큰 갱신 실패, 인증 데이터 삭제');
-      await clearAuth();
-      throw new Error('AUTHENTICATION_FAILED');
+      const refreshSuccess = await refreshAccessToken();
+
+      if (refreshSuccess) {
+        console.log('토큰 갱신 성공, API 재시도...');
+        // 재귀 호출로 재시도 (retryCount 증가로 무한 루프 방지)
+        return apiCall(endpoint, options, retryCount + 1);
+      } else {
+        console.log('토큰 갱신 실패, 인증 데이터 삭제 후 로그아웃');
+        await clearTokens();
+        throw new Error('AUTHENTICATION_FAILED');
+      }
     }
-  }
 
-  return response;
+    return response;
+  } catch (error) {
+    console.error('API 호출 실패:', error);
+    throw error;
+  }
 };
 
 // API Functions
 // ============================================================================
 
-// 로그인 (토큰 필요x)
+// 로그인
 export const loginAPI = async (
   provider: SocialProvider,
   accessToken: string,
@@ -282,7 +233,7 @@ export const loginAPI = async (
   return response.json();
 };
 
-// 로그아웃 (토큰 자동 갱신)
+// 로그아웃
 export const logoutAPI = async (): Promise<void> => {
   const response = await apiCall(API_ENDPOINTS.AUTH.LOGOUT, {
     method: 'POST',
@@ -365,9 +316,6 @@ export const getRefrigeratorDetail = async (id: string) => {
 
   return response.json();
 };
-
-// 새로 추가된 API 함수들 (API 명세에 맞춤)
-// ============================================================================
 
 // 냉장고 사용자 목록 조회
 export const getRefrigeratorUsers = async (refrigeratorId: string) => {
