@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, FlatList, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
-import { FridgeWithRole } from '../../services/AsyncStorageService';
-import FridgeTile from './FridgeTile';
+import { FridgeWithRole, FridgePermission } from '../../types/permission';
+import { FridgeTile } from './FridgeTile';
 import { styles, fridgeTileStyles } from './styles';
 
 interface FridgeListProps {
@@ -12,6 +12,7 @@ interface FridgeListProps {
   onEditFridge: (fridge: FridgeWithRole) => void;
   onLeaveFridge: (fridge: FridgeWithRole) => void;
   onToggleHidden: (fridge: FridgeWithRole) => void;
+  permissions: FridgePermission[];
 }
 
 export const FridgeList: React.FC<FridgeListProps> = ({
@@ -21,6 +22,7 @@ export const FridgeList: React.FC<FridgeListProps> = ({
   onEditFridge,
   onLeaveFridge,
   onToggleHidden,
+  // permissions,
 }) => {
   const getFridgeTiles = () => {
     const visibleFridges = fridges.filter(f => !f.isHidden);

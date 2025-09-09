@@ -1,6 +1,6 @@
 import React from 'react';
 import ConfirmModal from '../modals/ConfirmModal';
-import { FridgeWithRole } from '../../services/AsyncStorageService';
+import { FridgeWithRole } from '../../types/permission';
 
 interface ModalState {
   logoutConfirmVisible: boolean;

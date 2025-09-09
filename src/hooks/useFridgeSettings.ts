@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import {
   CommonActions,
@@ -9,6 +9,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AsyncStorageService } from '../services/AsyncStorageService';
 import { ApiService } from '../services/apiServices';
 import { RootStackParamList } from '../../App';
+import { PermissionAPIService } from '../services/permissionAPI';
 
 type Member = {
   id: string;
@@ -46,7 +47,7 @@ export const useFridgeSettings = (
 
       const [fridgeMembers, userPermissions] = await Promise.all([
         ApiService.getFridgeMembers(fridgeId),
-        ApiService.getUserPermissions(),
+        PermissionAPIService.getUserPermissions(),
       ]);
 
       console.log('서버에서 가져온 멤버 목록:', fridgeMembers);

@@ -246,20 +246,6 @@ export class ApiService {
     );
   }
 
-  // apiServices.ts에 추가
-  static async getUserPermissions(): Promise<{ [key: string]: boolean }> {
-    return this.apiCall<{ [key: string]: boolean }>(
-      '/api/v1/refrigerator/permissions',
-    );
-  }
-
-  // 냉장고 삭제 (소유자만 가능)
-  static async deleteRefrigerator(fridgeId: string): Promise<void> {
-    await this.apiCall<void>(`/api/v1/refrigerator/${fridgeId}`, {
-      method: 'DELETE',
-    });
-  }
-
   // 냉장고 나가기
   static async leaveFridge(fridgeId: string, userId: string): Promise<void> {
     await this.apiCall<void>(
@@ -509,7 +495,6 @@ export class ApiService {
     if (options?.startDate) queryParams.append('startDate', options.startDate);
     if (options?.endDate) queryParams.append('endDate', options.endDate);
 
-    const queryString = queryParams.toString();
     const endpoint = `/api/v1/history`;
 
     return this.apiCall<{
@@ -543,7 +528,6 @@ export class ApiService {
     // 토큰과 사용자 정보를 AsyncStorage에 저장
     await AsyncStorageService.setAuthToken(response.token);
     await AsyncStorageService.setCurrentUserId(response.user.id);
-    await AsyncStorageService.setCurrentUser(response.user);
 
     return response;
   }

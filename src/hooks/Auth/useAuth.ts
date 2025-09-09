@@ -197,24 +197,3 @@ export class ApiClient {
     return this.authenticatedRequest<T>(endpoint, { method: 'DELETE' });
   }
 }
-
-// 기존 API 함수들을 ApiClient로 리팩토링
-// types/api.ts에 추가
-export const createRefrigerator = async (name: string) => {
-  return ApiClient.post('/api/v1/refrigerator', { name });
-};
-
-export const updateRefrigerator = async (
-  id: string,
-  data: { name: string },
-) => {
-  return ApiClient.put(`/api/v1/refrigerator/${id}`, data);
-};
-
-export const deleteRefrigerator = async (id: string) => {
-  return ApiClient.delete(`/api/v1/refrigerator/${id}`);
-};
-
-export const getUserPermissions = async () => {
-  return ApiClient.get('/api/v1/refrigerator/permissions');
-};

@@ -19,10 +19,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import PaginationButton from '../../../components/Recipe/PaginationButton';
 import { Recipe, RecipeStackParamList } from '../RecipeNavigator';
 import { SharedRecipeStorage } from '../../../utils/AsyncStorageUtils';
-import {
-  AsyncStorageService,
-  FridgeWithRole,
-} from '../../../services/AsyncStorageService';
+import { AsyncStorageService } from '../../../services/AsyncStorageService';
+import { FridgeWithRole } from '../../../types/permission';
 import { User } from '../../../types/auth';
 import { styles } from './styles';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, FlatList, Animated } from 'react-native';
-import FridgeTile from './FridgeTile';
-import { FridgeWithRole } from '../../services/AsyncStorageService';
+import { FridgeTile } from './FridgeTile';
+import { FridgeWithRole, FridgePermission } from '../../types/permission';
 import { styles, fridgeTileStyles } from './styles';
 
 interface HiddenFridgesBottomSheetProps {
@@ -13,6 +13,7 @@ interface HiddenFridgesBottomSheetProps {
   onEditFridge: (fridge: FridgeWithRole) => void;
   onLeaveFridge: (fridge: FridgeWithRole) => void;
   onToggleHidden: (fridge: FridgeWithRole) => void;
+  permissions: FridgePermission[];
 }
 
 export const HiddenFridgesBottomSheet: React.FC<
@@ -26,6 +27,7 @@ export const HiddenFridgesBottomSheet: React.FC<
   onEditFridge,
   onLeaveFridge,
   onToggleHidden,
+  // permissions,
 }) => {
   const getHiddenFridgeTiles = () => {
     const hiddenFridges = fridges.filter(f => f.isHidden);

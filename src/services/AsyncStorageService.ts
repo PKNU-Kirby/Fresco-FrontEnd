@@ -269,16 +269,6 @@ export class AsyncStorageService {
     profileImage?: string,
     fcmToken?: string,
   ): Promise<User> {
-    console.log('=== createUserFromLogin 함수 시작 ===');
-    console.log('전달받은 파라미터들:', {
-      provider,
-      providerId,
-      name,
-      email,
-      profileImage,
-      fcmToken,
-    });
-
     try {
       const users = await this.getUsers();
 

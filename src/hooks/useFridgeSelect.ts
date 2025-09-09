@@ -1,16 +1,15 @@
-// hooks/useFridgeSelect.ts - 권한 기반으로 개선된 버전
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import Config from 'react-native-config';
-import {
-  AsyncStorageService,
-  FridgeWithRole,
-} from '../services/AsyncStorageService';
+import { AsyncStorageService } from '../services/AsyncStorageService';
+import { FridgeWithRole } from '../types/permission';
 import { User } from '../types/auth';
 import { getValidAccessToken } from '../utils/authUtils';
 import { PermissionAPIService } from '../services/permissionAPI';
 import { PermissionUtils } from '../utils/permissionUtils';
 import { ApiErrorHandler } from '../utils/errorHandler';
+import { ApiUtils } from '../utils/apiUtils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // API 호출 상태 관리
 let isLoadingFridges = false;
@@ -184,7 +183,51 @@ export const useFridgeSelect = (navigation: any) => {
     }
   };
 
-  // 서버 데이터를 로컬에 동기화 (백그라운드 작업)
+  // 로컬 동기화에서 deleteRefrigerator 대신 사용할 함수
+  const removeDeletedFridgesFromLocal = async (
+    removedFridges: any[],
+    targetUser: any,
+  ) => {
+    try {
+      console.log('로컬에서 삭제된 냉장고들 제거 중:', removedFridges);
+
+      for (const removedFridge of removedFridges) {
+        try {
+          // AsyncStorageService.deleteRefrigerator가 없으므로 다른 방법 사용
+          // 사용자의 냉장고 목록에서만 제거
+          if (AsyncStorageService.removeUserFromRefrigerator) {
+            await AsyncStorageService.removeUserFromRefrigerator(
+              parseInt(removedFridge.id, 10),
+              parseInt(targetUser.id, 10),
+            );
+          } else {
+            // 그것도 없다면 직접 AsyncStorage 조작
+            const userKey = `user_${targetUser.id}_refrigerators`;
+            const userFridges = await AsyncStorage.getItem(userKey);
+
+            if (userFridges) {
+              const fridgeList = JSON.parse(userFridges);
+              const updatedFridges = fridgeList.filter(
+                (fridge: any) => fridge.id !== removedFridge.id,
+              );
+              await AsyncStorage.setItem(
+                userKey,
+                JSON.stringify(updatedFridges),
+              );
+            }
+          }
+
+          console.log(`냉장고 ${removedFridge.id} 로컬 제거 완료`);
+        } catch (error) {
+          console.error(`냉장고 ${removedFridge.id} 로컬 제거 실패:`, error);
+        }
+      }
+    } catch (error) {
+      console.error('로컬 냉장고 제거 전체 실패:', error);
+    }
+  };
+
+  // useFridgeSelect.ts의 syncWithLocalStorage 함수 수정
   const syncWithLocalStorage = async (
     serverFridges: FridgeWithRole[],
     user: User,
@@ -205,12 +248,9 @@ export const useFridgeSelect = (navigation: any) => {
 
       if (removedFridges.length > 0) {
         console.log('서버에서 삭제된 냉장고들:', removedFridges);
-        // 로컬에서도 삭제
-        for (const removedFridge of removedFridges) {
-          await AsyncStorageService.deleteRefrigerator(
-            parseInt(removedFridge.id, 10),
-          );
-        }
+
+        // AsyncStorageService.deleteRefrigerator 대신 안전한 방법 사용
+        await removeDeletedFridgesFromLocal(removedFridges, user);
       }
 
       // 새로운/업데이트된 서버 냉장고들을 로컬에 동기화
@@ -220,9 +260,8 @@ export const useFridgeSelect = (navigation: any) => {
             lf => lf.id === serverFridge.id,
           );
           if (!localFridge || localFridge.name !== serverFridge.name) {
-            // 새로운 냉장고이거나 이름이 변경된 경우 업데이트
             console.log(`냉장고 ${serverFridge.name} 로컬 동기화 중...`);
-            // AsyncStorageService에 업데이트 로직 추가 필요
+            // 필요하면 여기서 로컬 업데이트 로직 구현
           }
         } catch (syncError) {
           console.error(`냉장고 ${serverFridge.id} 동기화 실패:`, syncError);

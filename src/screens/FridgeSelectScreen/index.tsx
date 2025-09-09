@@ -6,17 +6,16 @@ import {
   Text,
   Animated,
   Alert,
-  TouchableOpacity,
-  View,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-// 개선된 훅들 import
+// hooks utils import
 import { useFridgeSelect } from '../../hooks/useFridgeSelect';
 import { useFridgeActions } from '../../hooks/useFridgeActions';
 import { useOptimisticEdit } from '../../hooks/useOptimisticEdit';
 import { usePermissions } from '../../hooks/usePermissions';
+import { FridgeControllerAPI } from '../../services/fridgeControllerAPI';
 
 // 기존 컴포넌트들
 import { HiddenFridgesBottomSheet } from '../../components/FridgeSelect/HiddenFridgeBottomSheet';
@@ -25,28 +24,28 @@ import { FridgeList } from '../../components/FridgeSelect/FridgeTileList';
 import { FridgeModals } from '../../components/FridgeSelect/FridgeModal';
 import { FridgeModalManager } from '../../components/FridgeSelect/FridgeModalManager';
 
-import { FridgeWithRole } from '../../services/AsyncStorageService';
+import { FridgeWithRole } from '../../types/permission';
 import { styles } from './styles';
 
 const FridgeSelectScreen = () => {
   const navigation = useNavigation<any>();
 
-  // 서버 데이터 관리 (개선된 훅)
+  // 서버 데이터 관리
   const {
     currentUser,
     fridges: serverFridges,
     loading,
-    error,
+    // error,
     initializeData,
     loadUserFridges,
-    retryLoad,
+    // retryLoad,
   } = useFridgeSelect(navigation);
 
   // 권한 관리
   const {
     permissions,
     permissionLoading,
-    permissionError,
+    // permissionError,
     hasPermission,
     getPermission,
   } = usePermissions(currentUser);
@@ -77,7 +76,7 @@ const FridgeSelectScreen = () => {
   const [bottomSheetHeight] = useState(new Animated.Value(80));
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
 
-  // 서버 액션들 (개선된 훅)
+  // 서버 액션들
   const {
     handleLogout,
     handleAddFridge: serverAddFridge,
@@ -221,27 +220,23 @@ const FridgeSelectScreen = () => {
   const handleSaveChanges = async () => {
     try {
       await commitChanges(
-        // Create
+        // Create - 수정 필요
         async (name: string) => {
-          await serverAddFridge({ name });
+          await FridgeControllerAPI.create({ name }); // 새로운 API 사용
         },
-        // Update
+        // Update - 수정 필요
         async (id: string, name: string) => {
-          await serverUpdateFridge({ name });
+          await FridgeControllerAPI.update(id, { name }); // 새로운 API 사용
         },
-        // Delete
+        // Delete - 수정 필요
         async (id: string) => {
-          // 권한 확인 후 삭제
-          if (hasPermission(id, 'delete')) {
-            // useFridgeActions의 삭제 로직 사용
-            await modalHandlers.handleDeleteConfirm();
-          } else {
-            throw new Error('삭제 권한이 없습니다.');
-          }
+          await FridgeControllerAPI.delete(id); // 새로운 API 사용
         },
       );
 
+      // 성공 시 서버 데이터 새로고침
       await loadUserFridges();
+
       Alert.alert('성공', '모든 변경사항이 저장되었습니다.');
     } catch (error) {
       console.error('변경사항 저장 실패:', error);
@@ -288,34 +283,9 @@ const FridgeSelectScreen = () => {
     );
   }
 
-  // 에러 상태 (재시도 옵션 포함)
-  if (error && serverFridges.length === 0) {
-    return (
-      <SafeAreaView style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
-        {permissionError && (
-          <Text style={styles.errorText}>권한 오류: {permissionError}</Text>
-        )}
-        <TouchableOpacity onPress={retryLoad} style={styles.retryButton}>
-          <Text style={styles.retryButtonText}>다시 시도</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <GestureHandlerRootView>
       <SafeAreaView style={styles.container}>
-        {/* 에러가 있지만 데이터는 있는 경우 상단에 경고 표시 */}
-        {error && serverFridges.length > 0 && (
-          <View style={styles.warningBanner}>
-            <Text style={styles.warningText}>{error}</Text>
-            <TouchableOpacity onPress={retryLoad}>
-              <Text style={styles.retryText}>재시도</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
         <FridgeHeader
           currentUser={currentUser}
           isEditMode={isEditMode}
@@ -332,7 +302,7 @@ const FridgeSelectScreen = () => {
           onEditFridge={handleEditFridge}
           onLeaveFridge={handleLeaveFridge}
           onToggleHidden={toggleHiddenLocally}
-          permissions={permissions} // 권한 정보 전달
+          permissions={permissions}
         />
 
         <HiddenFridgesBottomSheet
@@ -344,7 +314,7 @@ const FridgeSelectScreen = () => {
           onEditFridge={handleEditFridge}
           onLeaveFridge={handleLeaveFridge}
           onToggleHidden={toggleHiddenLocally}
-          permissions={permissions} // 권한 정보 전달
+          permissions={permissions}
         />
 
         <FridgeModals

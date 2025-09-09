@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { FridgeWithRole } from '../services/AsyncStorageService';
+import { FridgeWithRole } from '../types/permission';
 
 interface PendingChange {
   id: string;
@@ -9,7 +9,6 @@ interface PendingChange {
 }
 
 export const useOptimisticEdit = () => {
-  // 편집 모드 상태
   const [isEditMode, setIsEditMode] = useState(false);
 
   // 로컬 편집용 냉장고 목록 (실제 화면에 표시되는 데이터)
@@ -32,16 +31,20 @@ export const useOptimisticEdit = () => {
     setPendingChanges([]);
   }, []);
 
-  // 로컬에서 냉장고 추가 (즉시 UI 반영)
+  // 로컬에서 냉장고 추가 (즉시 UI 반영) - 타입 수정
   const addFridgeLocally = useCallback((name: string) => {
     const tempId = `temp_${Date.now()}`;
     const newFridge: FridgeWithRole = {
       id: tempId,
       name,
-      isOwner: true,
-      isHidden: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      isOwner: true,
+      role: 'owner',
+      memberCount: 1,
+      isHidden: false,
+      canEdit: true,
+      canDelete: true,
     };
 
     // UI에 즉시 반영
@@ -129,13 +132,9 @@ export const useOptimisticEdit = () => {
   );
 
   // 로컬에서 냉장고 숨김 토글 (즉시 UI 반영)
-  const toggleHiddenLocally = useCallback((fridgeId: string) => {
+  const toggleHiddenLocally = useCallback((fridge: FridgeWithRole) => {
     setEditableFridges(prev =>
-      prev.map(fridge =>
-        fridge.id === fridgeId
-          ? { ...fridge, isHidden: !fridge.isHidden }
-          : fridge,
-      ),
+      prev.map(f => (f.id === fridge.id ? { ...f, isHidden: !f.isHidden } : f)),
     );
 
     // 숨김은 로컬 설정이므로 pendingChanges에 추가하지 않음

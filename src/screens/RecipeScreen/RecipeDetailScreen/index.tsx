@@ -5,10 +5,8 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RecipeStackParamList, RecipeIngredient } from '../RecipeNavigator';
 import { SharedRecipeStorage } from '../../../utils/AsyncStorageUtils';
-import {
-  AsyncStorageService,
-  FridgeWithRole,
-} from '../../../services/AsyncStorageService';
+import { AsyncStorageService } from '../../../services/AsyncStorageService';
+import { FridgeWithRole } from '../../../types/permission';
 import { useRecipeDetail } from '../../../components/RecipeDetail/RecipeDetail';
 import { Header } from '../../../components/RecipeDetail/Header';
 import { SharedRecipeIndicator } from '../../../components/RecipeDetail/RecipeDetail';

@@ -4,7 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { FridgeWithRole } from '../../services/AsyncStorageService';
+import { FridgeWithRole } from '../../types/permission';
 import { fridgeTileStyles as styles } from './styles';
 
 type RootStackParamList = {
@@ -21,7 +21,7 @@ interface FridgeTileProps {
   isSmall?: boolean;
 }
 
-const FridgeTile: React.FC<FridgeTileProps> = ({
+export const FridgeTile: React.FC<FridgeTileProps> = ({
   fridge,
   isEditMode,
   onEdit,
@@ -35,6 +35,9 @@ const FridgeTile: React.FC<FridgeTileProps> = ({
 
   const handlePress = () => {
     if (isEditMode && onEdit) {
+      console.log(
+        `냉장고 ${fridge.name} 편집 시도 - isOwner: ${fridge.isOwner}, canEdit: ${fridge.canEdit}`,
+      );
       onEdit(fridge);
     } else if (!isEditMode) {
       navigation.navigate('MainTabs', {
@@ -47,14 +50,37 @@ const FridgeTile: React.FC<FridgeTileProps> = ({
   const handleLongPress = () => {
     if (!isEditMode) return;
 
+    console.log(`냉장고 ${fridge.name} 롱프레스 - 권한 체크 시작`);
+    console.log(
+      'isOwner:',
+      fridge.isOwner,
+      'canEdit:',
+      fridge.canEdit,
+      'canDelete:',
+      fridge.canDelete,
+    );
+
     const options = [];
 
-    // 편집 옵션 (소유자만)
-    if (fridge.isOwner && onEdit) {
+    // 편집 옵션 (canEdit 권한도 함께 체크)
+    if ((fridge.isOwner || fridge.canEdit) && onEdit) {
+      console.log('편집 옵션 추가됨');
       options.push({
         text: '편집',
-        onPress: () => onEdit(fridge),
+        onPress: () => {
+          console.log('편집 버튼 클릭');
+          onEdit(fridge);
+        },
       });
+    } else {
+      console.log(
+        '편집 옵션 추가 안됨 - isOwner:',
+        fridge.isOwner,
+        'canEdit:',
+        fridge.canEdit,
+        'onEdit:',
+        !!onEdit,
+      );
     }
 
     // 숨김/표시 옵션
@@ -65,14 +91,17 @@ const FridgeTile: React.FC<FridgeTileProps> = ({
       });
     }
 
-    // 나가기/삭제 옵션
+    // 나가기/삭제 옵션 (canDelete 권한도 함께 체크)
     if (onLeave) {
+      const canDelete = fridge.isOwner || fridge.canDelete;
       options.push({
-        text: fridge.isOwner ? '삭제하기' : '나가기',
+        text: canDelete ? '삭제하기' : '나가기',
         style: 'destructive' as const,
         onPress: () => onLeave(fridge),
       });
     }
+
+    console.log('최종 옵션 개수:', options.length);
 
     if (options.length > 0) {
       Alert.alert(fridge.name, '어떤 작업을 하시겠습니까?', [
@@ -82,7 +111,10 @@ const FridgeTile: React.FC<FridgeTileProps> = ({
     }
   };
 
-  // 스타일 로직
+  // 편집 버튼 조건 (canEdit 권한 포함)
+  const canEditFridge = fridge.isOwner || fridge.canEdit;
+  const canDeleteFridge = fridge.isOwner || fridge.canDelete;
+
   const containerStyle = [
     styles.tileContainer,
     isHidden && styles.hiddenContainer,
@@ -95,7 +127,6 @@ const FridgeTile: React.FC<FridgeTileProps> = ({
     isEditMode && styles.editModeTile,
   ].filter(Boolean);
 
-  // 아이콘 색상 (숨김 상태에 따라)
   const getIconColor = () => {
     if (isHidden) return '#666';
     else if (isEditMode) return '#777';
@@ -133,6 +164,7 @@ const FridgeTile: React.FC<FridgeTileProps> = ({
             color={getIconColor()}
           />
         </View>
+
         {/* Edit mode : quick action buttons */}
         {isEditMode && (
           <View style={styles.quickActionsContainer}>
@@ -157,14 +189,17 @@ const FridgeTile: React.FC<FridgeTileProps> = ({
               </TouchableOpacity>
             )}
 
-            {/* 편집 버튼 (소유자만) */}
-            {fridge.isOwner && onEdit && (
+            {/* 편집 버튼 - 권한 조건 수정 */}
+            {canEditFridge && onEdit && (
               <TouchableOpacity
                 style={[
                   styles.quickActionButton,
                   { backgroundColor: 'limegreen' },
                 ]}
-                onPress={() => onEdit(fridge)}
+                onPress={() => {
+                  console.log('퀵 편집 버튼 클릭');
+                  onEdit(fridge);
+                }}
                 accessible={true}
                 accessibilityLabel="냉장고 편집하기"
               >
@@ -182,11 +217,11 @@ const FridgeTile: React.FC<FridgeTileProps> = ({
                 onPress={() => onLeave(fridge)}
                 accessible={true}
                 accessibilityLabel={
-                  fridge.isOwner ? '냉장고 삭제하기' : '냉장고 나가기'
+                  canDeleteFridge ? '냉장고 삭제하기' : '냉장고 나가기'
                 }
               >
                 <FontAwesome5
-                  name={fridge.isOwner ? 'trash' : 'sign-out-alt'}
+                  name={canDeleteFridge ? 'trash' : 'sign-out-alt'}
                   size={16}
                   color="#f8f8f8"
                 />
@@ -211,5 +246,3 @@ const FridgeTile: React.FC<FridgeTileProps> = ({
     </View>
   );
 };
-
-export default FridgeTile;

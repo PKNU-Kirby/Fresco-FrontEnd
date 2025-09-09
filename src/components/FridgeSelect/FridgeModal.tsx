@@ -1,6 +1,6 @@
 import React from 'react';
 import FridgeModalForm from './FridgeModalForm';
-import { FridgeWithRole } from '../../services/AsyncStorageService';
+import { FridgeWithRole } from '../../types/permission';
 
 interface FridgeModalsProps {
   isAddModalVisible: boolean;
