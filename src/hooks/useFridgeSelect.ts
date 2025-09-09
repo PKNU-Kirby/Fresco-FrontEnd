@@ -1,3 +1,4 @@
+// hooks/useFridgeSelect.ts - 권한 기반으로 개선된 버전
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import Config from 'react-native-config';
@@ -6,20 +7,25 @@ import {
   FridgeWithRole,
 } from '../services/AsyncStorageService';
 import { User } from '../types/auth';
-import { getAccessToken } from '../utils/authUtils';
-import { AuthAPIService } from '../services/authAPI';
+import { getValidAccessToken } from '../utils/authUtils';
+import { PermissionAPIService } from '../services/permissionAPI';
+import { PermissionUtils } from '../utils/permissionUtils';
+import { ApiErrorHandler } from '../utils/errorHandler';
 
-// API 호출 상태 관리: 중복 호출 방지
+// API 호출 상태 관리
 let isLoadingFridges = false;
 
 export const useFridgeSelect = (navigation: any) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [fridges, setFridges] = useState<FridgeWithRole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const initializeData = async () => {
     try {
       setLoading(true);
+      setError(null);
+
       const userId = await AsyncStorageService.getCurrentUserId();
       if (!userId) {
         navigation.replace('Login');
@@ -33,11 +39,12 @@ export const useFridgeSelect = (navigation: any) => {
       }
 
       setCurrentUser(user);
-      // 서버에서 냉장고 목록 가져오기
       await loadUserFridges(user);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Initialize data error:', error);
-      Alert.alert('오류', '데이터를 불러올 수 없습니다.');
+      const errorMessage = ApiErrorHandler.getErrorMessage(error);
+      setError(errorMessage);
+      Alert.alert('오류', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -47,7 +54,7 @@ export const useFridgeSelect = (navigation: any) => {
     const targetUser = user || currentUser;
     if (!targetUser) return;
 
-    // 이미 로딩 중이면 중복 호출 방지
+    // 중복 호출 방지
     if (isLoadingFridges) {
       console.log('냉장고 목록 로딩이 이미 진행 중입니다.');
       return;
@@ -55,137 +62,45 @@ export const useFridgeSelect = (navigation: any) => {
 
     try {
       isLoadingFridges = true;
-      console.log('서버에서 냉장고 목록 로딩...');
+      console.log('서버에서 냉장고 목록 및 권한 로딩...');
 
-      // 현재 액세스 토큰 확인
-      let accessToken = await getAccessToken();
+      // 병렬로 냉장고 목록과 권한 정보 가져오기
+      const [fridgeData, permissions] = await Promise.all([
+        loadFridgeListFromServer(),
+        PermissionAPIService.getUserPermissions(),
+      ]);
 
-      if (!accessToken) {
-        console.log('토큰이 없어서 로그인으로 이동');
-        navigation.replace('Login');
-        return;
-      }
+      if (fridgeData && permissions) {
+        // 권한이 있는 냉장고만 필터링하고 병합
+        const fridgesWithPermissions =
+          PermissionUtils.mergeFridgeWithPermissions(fridgeData, permissions);
 
-      // API 호출 함수
-      const makeApiCall = async (token: string) => {
-        return await fetch(`${Config.API_BASE_URL}/api/v1/refrigerator`, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-        });
-      };
+        // 로컬 숨김 설정 적용
+        const fridgesWithHiddenStatus = await applyLocalHiddenSettings(
+          fridgesWithPermissions,
+          targetUser,
+        );
 
-      // 첫 번째 API 호출 시도
-      let response = await makeApiCall(accessToken);
+        setFridges(fridgesWithHiddenStatus);
+        console.log('냉장고 목록 로딩 완료:', fridgesWithHiddenStatus);
 
-      // 401 에러시 토큰 갱신 후 재시도
-      if (response.status === 401) {
-        console.log('401 에러 감지, 토큰 갱신 시도...');
-
-        const refreshSuccess = await AuthAPIService.refreshToken();
-
-        if (refreshSuccess) {
-          console.log('토큰 갱신 성공, API 재시도...');
-          accessToken = await getAccessToken();
-
-          if (accessToken) {
-            response = await makeApiCall(accessToken);
-          } else {
-            throw new Error('토큰 갱신 후 토큰을 찾을 수 없음');
-          }
-        } else {
-          console.log('토큰 갱신 실패, 로그인 필요');
-          Alert.alert('세션 만료', '다시 로그인해주세요.', [
-            { text: '확인', onPress: () => navigation.replace('Login') },
-          ]);
-          return;
-        }
-      }
-
-      // 응답 처리
-      if (response.ok) {
-        const serverResponse = await response.json();
-        console.log('서버 응답:', serverResponse);
-
-        if (
-          serverResponse.code === 'REFRIGERATOR_OK_004' &&
-          serverResponse.result
-        ) {
-          // 서버 데이터를 로컬 형식으로 변환
-          const serverFridges: FridgeWithRole[] = serverResponse.result.map(
-            (fridge: any) => ({
-              id: fridge.id.toString(),
-              name: fridge.name,
-              createdAt: fridge.createdAt || new Date().toISOString(),
-              updatedAt: fridge.updatedAt || new Date().toISOString(),
-              // 역할 구분 로직 (백엔드 수정 전까지 임시 처리)
-              isOwner: (() => {
-                // 1. 백엔드에서 isOwner나 userRole을 제공하는 경우
-                if (fridge.isOwner !== undefined) {
-                  return fridge.isOwner;
-                }
-                if (fridge.userRole !== undefined) {
-                  return fridge.userRole === 'OWNER';
-                }
-                // 2. 임시 테스트: 특정 냉장고 ID를 소유자로 설정
-                if (fridge.id === 1 || fridge.id === 3) {
-                  return true;
-                }
-                // 3. 기본값: 모든 사용자를 소유자로 설정 (테스트용)
-                return true;
-              })(),
-              isHidden: false, // 기본값 (숨김은 로컬 설정)
-            }),
-          );
-
-          // 로컬 숨김 설정 적용
-          const fridgesWithHiddenStatus = await Promise.all(
-            serverFridges.map(async fridge => {
-              try {
-                const hiddenStatus = await AsyncStorageService.getFridgeHidden(
-                  parseInt(targetUser.id, 10),
-                  parseInt(fridge.id, 10),
-                );
-                return { ...fridge, isHidden: hiddenStatus };
-              } catch {
-                return { ...fridge, isHidden: false };
-              }
-            }),
-          );
-
-          setFridges(fridgesWithHiddenStatus);
-          console.log('냉장고 목록 로딩 완료:', fridgesWithHiddenStatus);
-
-          // 로컬 데이터와 동기화
-          await syncWithLocalStorage(fridgesWithHiddenStatus, targetUser);
-        } else {
-          console.log(
-            '서버에서 냉장고 목록을 가져올 수 없음, 응답:',
-            serverResponse,
-          );
-          // 서버 실패 시 로컬 데이터 사용
-          await loadLocalFridges(targetUser);
-        }
+        // 로컬 데이터와 동기화 (백그라운드)
+        syncWithLocalStorage(fridgesWithHiddenStatus, targetUser);
       } else {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        throw new Error('서버에서 데이터를 가져올 수 없습니다');
       }
     } catch (error: any) {
       console.error('서버에서 냉장고 목록 로딩 실패:', error);
 
-      // 특정 에러 메시지에 따른 처리
-      if (
-        error.message?.includes('토큰 갱신 실패') ||
-        error.message?.includes('유효한 토큰이 없습니다')
-      ) {
+      // 인증 관련 에러는 로그인으로 이동
+      if (ApiErrorHandler.getErrorAction(error) === 'login') {
         Alert.alert('세션 만료', '다시 로그인해주세요.', [
           { text: '확인', onPress: () => navigation.replace('Login') },
         ]);
         return;
       }
 
+      // 기타 에러는 로컬 데이터로 폴백
       console.log('로컬 데이터로 폴백...');
       await loadLocalFridges(targetUser);
     } finally {
@@ -193,7 +108,65 @@ export const useFridgeSelect = (navigation: any) => {
     }
   };
 
-  // 로컬 데이터 로딩 헬퍼 함수
+  // 서버에서 냉장고 목록 가져오기
+  const loadFridgeListFromServer = async (): Promise<any[] | null> => {
+    try {
+      const token = await getValidAccessToken();
+      if (!token) {
+        throw new Error('인증 토큰이 없습니다');
+      }
+
+      const response = await ApiUtils.callWithRetry(async () => {
+        const res = await fetch(`${Config.API_BASE_URL}/api/v1/refrigerator`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        });
+
+        if (!res.ok) {
+          throw { status: res.status, message: res.statusText };
+        }
+
+        return await res.json();
+      });
+
+      // 응답 검증
+      if (ApiUtils.validateApiResponse(response, ['REFRIGERATOR_OK_004'])) {
+        return response.result || [];
+      } else {
+        console.log('서버 응답 형식이 예상과 다름:', response);
+        return null;
+      }
+    } catch (error) {
+      console.error('냉장고 목록 API 호출 실패:', error);
+      throw error;
+    }
+  };
+
+  // 로컬 숨김 설정 적용
+  const applyLocalHiddenSettings = async (
+    fridges: FridgeWithRole[],
+    user: User,
+  ): Promise<FridgeWithRole[]> => {
+    return await Promise.all(
+      fridges.map(async fridge => {
+        try {
+          const hiddenStatus = await AsyncStorageService.getFridgeHidden(
+            parseInt(user.id, 10),
+            parseInt(fridge.id, 10),
+          );
+          return { ...fridge, isHidden: hiddenStatus };
+        } catch {
+          return { ...fridge, isHidden: false };
+        }
+      }),
+    );
+  };
+
+  // 로컬 데이터 로딩 (폴백용)
   const loadLocalFridges = async (targetUser: User) => {
     try {
       const localFridges = await AsyncStorageService.getUserRefrigerators(
@@ -201,13 +174,17 @@ export const useFridgeSelect = (navigation: any) => {
       );
       setFridges(localFridges);
       console.log('로컬 데이터 로딩 완료:', localFridges);
+
+      // 로컬 데이터 사용 시 경고
+      setError('네트워크 연결을 확인해주세요. 로컬 데이터를 표시합니다.');
     } catch (localError) {
       console.error('로컬 데이터 로딩도 실패:', localError);
+      setError('냉장고 목록을 불러올 수 없습니다.');
       Alert.alert('오류', '냉장고 목록을 불러올 수 없습니다.');
     }
   };
 
-  // 서버 데이터를 로컬에 동기화하는 헬퍼 함수
+  // 서버 데이터를 로컬에 동기화 (백그라운드 작업)
   const syncWithLocalStorage = async (
     serverFridges: FridgeWithRole[],
     user: User,
@@ -228,14 +205,25 @@ export const useFridgeSelect = (navigation: any) => {
 
       if (removedFridges.length > 0) {
         console.log('서버에서 삭제된 냉장고들:', removedFridges);
-        // 필요하다면 로컬에서도 삭제 로직 구현
+        // 로컬에서도 삭제
+        for (const removedFridge of removedFridges) {
+          await AsyncStorageService.deleteRefrigerator(
+            parseInt(removedFridge.id, 10),
+          );
+        }
       }
 
-      // 새로운 서버 냉장고들을 로컬에 추가/업데이트
+      // 새로운/업데이트된 서버 냉장고들을 로컬에 동기화
       for (const serverFridge of serverFridges) {
         try {
-          // 로컬 AsyncStorage에 냉장고 정보 저장/업데이트
-          console.log(`냉장고 ${serverFridge.name} 로컬 동기화 완료`);
+          const localFridge = localFridges.find(
+            lf => lf.id === serverFridge.id,
+          );
+          if (!localFridge || localFridge.name !== serverFridge.name) {
+            // 새로운 냉장고이거나 이름이 변경된 경우 업데이트
+            console.log(`냉장고 ${serverFridge.name} 로컬 동기화 중...`);
+            // AsyncStorageService에 업데이트 로직 추가 필요
+          }
         } catch (syncError) {
           console.error(`냉장고 ${serverFridge.id} 동기화 실패:`, syncError);
         }
@@ -244,13 +232,25 @@ export const useFridgeSelect = (navigation: any) => {
       console.log('로컬 동기화 완료');
     } catch (error) {
       console.error('로컬 동기화 실패:', error);
+      // 동기화 실패는 조용히 처리 (메인 기능에 영향 안줌)
     }
   };
 
   // 새로고침 함수
   const refreshFridgeList = async () => {
     if (currentUser) {
+      setError(null);
       await loadUserFridges(currentUser);
+    }
+  };
+
+  // 에러 재시도 함수
+  const retryLoad = async () => {
+    if (currentUser) {
+      setError(null);
+      setLoading(true);
+      await loadUserFridges(currentUser);
+      setLoading(false);
     }
   };
 
@@ -258,8 +258,10 @@ export const useFridgeSelect = (navigation: any) => {
     currentUser,
     fridges,
     loading,
+    error,
     initializeData,
     loadUserFridges,
     refreshFridgeList,
+    retryLoad,
   };
 };

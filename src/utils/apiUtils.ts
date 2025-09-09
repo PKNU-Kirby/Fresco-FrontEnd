@@ -1,7 +1,3 @@
-// ===================================================================
-// utils/apiUtils.ts - 공통 API 호출 유틸리티
-// ===================================================================
-
 import Config from 'react-native-config';
 import { getAccessToken, isTokenExpired } from './authUtils';
 import { AuthAPIService } from '../services/authApi';
