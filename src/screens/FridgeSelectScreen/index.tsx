@@ -15,7 +15,7 @@ import { useFridgeSelect } from '../../hooks/useFridgeSelect';
 import { useFridgeActions } from '../../hooks/useFridgeActions';
 import { useOptimisticEdit } from '../../hooks/useOptimisticEdit';
 import { usePermissions } from '../../hooks/usePermissions';
-import { FridgeControllerAPI } from '../../services/fridgeControllerAPI';
+import { FridgeControllerAPI } from '../../services/API/fridgeControllerAPI';
 
 // 기존 컴포넌트들
 import { HiddenFridgesBottomSheet } from '../../components/FridgeSelect/HiddenFridgeBottomSheet';

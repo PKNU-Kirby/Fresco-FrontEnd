@@ -1,6 +1,6 @@
 import Config from 'react-native-config';
 import { getAccessToken, isTokenExpired } from './authUtils';
-import { AuthAPIService } from '../services/authAPI';
+import { AuthAPIService } from '../services/API/authAPI';
 import { ApiErrorHandler } from './errorHandler';
 
 // 인증이 필요한 API 호출 헬퍼

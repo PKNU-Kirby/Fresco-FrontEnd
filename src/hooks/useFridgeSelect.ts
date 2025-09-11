@@ -5,7 +5,7 @@ import { AsyncStorageService } from '../services/AsyncStorageService';
 import { FridgeWithRole } from '../types/permission';
 import { User } from '../types/auth';
 import { getValidAccessToken } from '../utils/authUtils';
-import { PermissionAPIService } from '../services/permissionAPI';
+import { PermissionAPIService } from '../services/API/permissionAPI';
 import { PermissionUtils } from '../utils/permissionUtils';
 import { ApiErrorHandler } from '../utils/errorHandler';
 import { ApiUtils } from '../utils/apiUtils';

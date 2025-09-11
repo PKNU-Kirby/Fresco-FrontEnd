@@ -215,20 +215,10 @@ export type RootStackParamList = {
     };
   };
   MainTabs: { fridgeId: string; fridgeName: string };
-  AddItemScreen: {
-    fridgeId: string;
-    recognizedData?: {
-      name?: string;
-      quantity?: string;
-      unit?: string;
-      expiryDate?: string;
-      itemCategory?: string;
-      photo?: string;
-    };
-  };
   CameraScreen: {
     fridgeId: string;
   };
+
   PhotoPreview: {
     photo: {
       uri: string;
@@ -239,6 +229,23 @@ export type RootStackParamList = {
       fileName?: string;
     };
     fridgeId: string;
+  };
+
+  AddItemScreen: {
+    fridgeId: string;
+    // 1. 직접 추가 - 파라미터 없음
+    // 2. 카메라 → 수동 입력
+    recognizedData?: {
+      photo?: string;
+      name?: string;
+      quantity?: string;
+      unit?: string;
+      expiryDate?: string;
+      itemCategory?: string;
+    };
+    // 3. 카메라 → 스캔 결과
+    scanResults?: ConfirmedIngredient[];
+    scanMode?: 'ingredient' | 'receipt';
   };
   FridgeSettings: {
     fridgeId: string;

@@ -44,14 +44,31 @@ export interface ConfirmedIngredient {
 }
 
 // Navigation types
-type AddItemScreenRouteProp = RouteProp<RootStackParamList, 'AddItemScreen'>;
+type AddItemScreenRouteProp = RouteProp<RootStackParamList, 'AddItemScreen'> & {
+  params: {
+    fridgeId: string;
+    // 1. 직접 추가 - 아무 파라미터 없음
+    // 2. 카메라 → 수동 입력
+    recognizedData?: {
+      photo?: string;
+      name?: string;
+      quantity?: string;
+      unit?: string;
+      expiryDate?: string;
+      itemCategory?: string;
+    };
+    // 3. 카메라 → 스캔 결과
+    scanResults?: ConfirmedIngredient[];
+    scanMode?: 'ingredient' | 'receipt';
+  };
+};
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const AddItemScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<AddItemScreenRouteProp>();
   const insets = useSafeAreaInsets();
-  const { fridgeId, recognizedData } = route.params;
+  const { fridgeId, recognizedData, scanResults, scanMode } = route.params;
 
   // 모달 상태들
   const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
@@ -64,28 +81,48 @@ const AddItemScreen: React.FC = () => {
   // 확인된 식재료 정보 상태
   const [confirmedIngredients, setConfirmedIngredients] = useState<
     ConfirmedIngredient[]
-  >([]);
+  >(scanResults || []);
 
   // init item
-  const initialItems = useMemo(
-    () => [
+  const initialItems = useMemo(() => {
+    // 1. 스캔 결과가 있는 경우 (카메라 → 스캔)
+    if (scanResults && scanResults.length > 0) {
+      return scanResults.map(result => result.userInput);
+    }
+
+    // 2. 카메라에서 수동 입력 선택한 경우
+    if (recognizedData) {
+      return [
+        {
+          id: '1',
+          name: recognizedData.name || '',
+          quantity: recognizedData.quantity || '1',
+          unit: recognizedData.unit || '개',
+          expirationDate: recognizedData.expiryDate || '',
+          itemCategory: recognizedData.itemCategory || '기타',
+          photo: recognizedData.photo,
+        },
+      ];
+    }
+
+    // 3. 직접 추가 (빈 폼)
+    return [
       {
         id: '1',
-        name: recognizedData?.name || '',
-        quantity: recognizedData?.quantity || '1',
-        unit: recognizedData?.unit || '개',
-        expirationDate: recognizedData?.expiryDate || '',
-        itemCategory: recognizedData?.itemCategory || '채소 / 과일',
-        photo: recognizedData?.photo,
+        name: '',
+        quantity: '1',
+        unit: '개',
+        expirationDate: '',
+        itemCategory: '채소 / 과일',
       },
-    ],
-    [recognizedData],
-  );
+    ];
+  }, [recognizedData, scanResults]);
+
+  const [isEditMode, setIsEditMode] = useState(!scanResults);
 
   const {
     items,
-    isEditMode,
-    setIsEditMode,
+    setItems,
     isLoading,
     setIsLoading,
     focusedItemId,
@@ -98,6 +135,12 @@ const AddItemScreen: React.FC = () => {
 
   // 자동완성 API로 식재료 정보 확인
   const confirmIngredients = useCallback(async () => {
+    if (scanResults && scanResults.length > 0) {
+      setConfirmedIngredients(scanResults);
+      setIsEditMode(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       console.log('식재료 확인 시작:', items);
@@ -150,7 +193,67 @@ const AddItemScreen: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [items, setIsEditMode, setIsLoading]);
+  }, [items, scanResults, setIsEditMode, setIsLoading]);
+
+  // 편집 모드로 돌아가기
+  const handleBackToEdit = useCallback(() => {
+    setIsEditMode(true);
+
+    // 스캔 결과가 있었다면 items를 스캔 결과로 복원
+    if (scanResults && scanResults.length > 0) {
+      const itemsFromScan = scanResults.map(result => result.userInput);
+      setItems(itemsFromScan);
+    }
+
+    setConfirmedIngredients([]);
+  }, [setIsEditMode, scanResults, setItems]);
+
+  // 뒤로가기 처리
+  const handleGoBack = useCallback(() => {
+    if (isEditMode) {
+      // 편집 중이면 취소 확인
+      setShowGoBackConfirmModal(true);
+    } else {
+      // 확인 모드에서는 편집으로 돌아가기
+      handleBackToEdit();
+    }
+  }, [isEditMode, handleBackToEdit]);
+
+  // 확인 화면용 메시지 생성
+  const confirmationMessage = useMemo(() => {
+    if (confirmedIngredients.length === 0) return '';
+
+    let source = '입력된';
+    if (scanMode === 'ingredient') source = '식재료 인식으로 확인된';
+    else if (scanMode === 'receipt') source = '영수증 스캔으로 확인된';
+
+    const messages = confirmedIngredients.map(confirmed => {
+      const userInput = confirmed.userInput.name;
+      const apiResult = confirmed.apiResult.ingredientName;
+
+      // 이름이 같으면 단순 표시, 다르면 변환 표시
+      return userInput === apiResult
+        ? `• ${apiResult}`
+        : `• "${userInput}" → "${apiResult}"`;
+    });
+
+    return `${source} 식재료:\n\n${messages.join(
+      '\n',
+    )}\n\n냉장고에 추가하시겠습니까?`;
+  }, [confirmedIngredients, scanMode]);
+
+  // header button text
+  const headerButtonText = useMemo(() => {
+    if (isLoading) return '처리 중...';
+    if (isEditMode) return '완료';
+    return '저장';
+  }, [isLoading, isEditMode]);
+
+  const isHeaderButtonDisabled = useMemo(() => {
+    if (isLoading) return true;
+    if (isEditMode) return items.some(item => !item.name.trim());
+    return confirmedIngredients.length === 0;
+  }, [isLoading, isEditMode, items, confirmedIngredients]);
 
   // 실제 저장 로직
   // AddItemScreen에서 handleSaveItems 함수 수정
@@ -243,11 +346,6 @@ const AddItemScreen: React.FC = () => {
     confirmIngredients();
   }, [validateAllItems, confirmIngredients]);
 
-  const handleBackToEdit = useCallback(() => {
-    setIsEditMode(true);
-    setConfirmedIngredients([]); // 확인된 정보 초기화
-  }, [setIsEditMode]);
-
   const handleFinalConfirm = useCallback(() => {
     setShowFinalConfirmModal(true);
   }, []);
@@ -262,14 +360,6 @@ const AddItemScreen: React.FC = () => {
     setShowFinalConfirmModal(false);
   }, []);
 
-  const handleGoBack = useCallback(() => {
-    if (isEditMode) {
-      setShowGoBackConfirmModal(true);
-    } else {
-      handleBackToEdit();
-    }
-  }, [isEditMode, handleBackToEdit]);
-
   // 뒤로가기 확인 모달 핸들러들
   const handleGoBackConfirmModalConfirm = useCallback(() => {
     setShowGoBackConfirmModal(false);
@@ -280,18 +370,8 @@ const AddItemScreen: React.FC = () => {
     setShowGoBackConfirmModal(false);
   }, []);
 
-  // header button text
-  const headerButtonText = useMemo(() => {
-    if (isLoading) return '확인 중...';
-    if (isEditMode) return '완료';
-    return '확인';
-  }, [isLoading, isEditMode]);
-
-  const isHeaderButtonDisabled = useMemo(() => {
-    return isLoading || items.some(item => !item.name.trim());
-  }, [isLoading, items]);
-
   // 확인 화면용 메시지 생성
+  /*
   const confirmationMessage = useMemo(() => {
     if (confirmedIngredients.length === 0) return '';
 
@@ -302,6 +382,7 @@ const AddItemScreen: React.FC = () => {
 
     return `다음 식재료로 추가됩니다:\n${messages.join('\n')}`;
   }, [confirmedIngredients]);
+*/
 
   return (
     <SafeAreaView style={styles.container}>

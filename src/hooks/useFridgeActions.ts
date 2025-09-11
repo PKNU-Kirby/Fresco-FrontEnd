@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import { FridgeWithRole } from '../types/permission';
 import { User } from '../types/auth';
 import { useLogout } from './Auth/useLogout';
-import { FridgeControllerAPI } from '../services/fridgeControllerAPI';
+import { FridgeControllerAPI } from '../services/API/fridgeControllerAPI';
 import { FridgeUtils } from '../utils/fridgeUtils';
 
 interface UseFridgeActionsParams {

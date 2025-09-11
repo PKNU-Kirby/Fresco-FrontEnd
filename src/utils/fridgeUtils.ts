@@ -1,7 +1,7 @@
 import { AsyncStorageService } from '../services/AsyncStorageService';
 import { User } from '../types/auth';
 import { FridgeWithRole } from '../types/permission';
-import { FridgeApiResponse } from '../services/fridgeControllerAPI';
+import { FridgeApiResponse } from '../services/API/fridgeControllerAPI';
 
 export interface FridgeValidationResult {
   isValid: boolean;

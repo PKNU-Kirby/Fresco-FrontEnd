@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FridgePermission, FridgeRole } from '../types/permission';
 import { PermissionUtils } from '../utils/permissionUtils';
-import { PermissionAPIService } from '../services/permissionAPI';
+import { PermissionAPIService } from '../services/API/permissionAPI';
 import { ApiErrorHandler } from '../utils/errorHandler';
 import { User } from '../types/auth';
 

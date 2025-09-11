@@ -60,20 +60,11 @@ export type RootStackParamList = {
     };
   };
   MainTabs: { fridgeId: string; fridgeName: string };
-  AddItemScreen: {
-    fridgeId: string;
-    recognizedData?: {
-      name?: string;
-      quantity?: string;
-      unit?: string;
-      expiryDate?: string;
-      itemCategory?: string;
-      photo?: string;
-    };
-  };
+
   CameraScreen: {
     fridgeId: string;
   };
+
   PhotoPreview: {
     photo: {
       uri: string;
@@ -85,10 +76,25 @@ export type RootStackParamList = {
     };
     fridgeId: string;
   };
+
+  AddItemScreen: {
+    fridgeId: string;
+    recognizedData?: {
+      photo?: string;
+      name?: string;
+      quantity?: string;
+      unit?: string;
+      expiryDate?: string;
+      itemCategory?: string;
+    };
+    // 3. 카메라 → 스캔 결과
+    scanResults?: ConfirmedIngredient[];
+    scanMode?: 'ingredient' | 'receipt';
+  };
   FridgeSettings: {
     fridgeId: string;
     fridgeName: string;
-    userRole: 'owner' | 'member'; // 권한에 따른 UI 분리
+    userRole: 'owner' | 'member';
   };
   MembersScreen: {
     fridgeId: string;
@@ -242,14 +248,7 @@ function App(): React.JSX.Element {
               animation: 'slide_from_right',
             }}
           />
-          <Stack.Screen
-            name="CameraScreen"
-            component={CameraScreen}
-            options={{
-              presentation: 'fullScreenModal',
-              animation: 'slide_from_bottom',
-            }}
-          />
+          <Stack.Screen name="CameraScreen" component={CameraScreen} />
           <Stack.Screen
             name="PhotoPreview"
             component={PhotoPreview}
@@ -259,14 +258,7 @@ function App(): React.JSX.Element {
               animation: 'slide_from_right',
             }}
           />
-          <Stack.Screen
-            name="AddItemScreen"
-            component={AddItemScreen}
-            options={{
-              presentation: 'modal',
-              animation: 'slide_from_bottom',
-            }}
-          />
+          <Stack.Screen name="AddItemScreen" component={AddItemScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

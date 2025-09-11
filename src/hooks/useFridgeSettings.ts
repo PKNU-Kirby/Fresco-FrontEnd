@@ -9,7 +9,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AsyncStorageService } from '../services/AsyncStorageService';
 import { ApiService } from '../services/apiServices';
 import { RootStackParamList } from '../../App';
-import { PermissionAPIService } from '../services/permissionAPI';
+import { PermissionAPIService } from '../services/API/permissionAPI';
 
 type Member = {
   id: string;

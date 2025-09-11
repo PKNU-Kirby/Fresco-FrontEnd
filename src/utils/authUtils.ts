@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AsyncStorageService } from '../services/AsyncStorageService';
-import { AuthAPIService } from '../services/authAPI';
+import { AuthAPIService } from '../services/API/authAPI';
 
 // 토큰 갱신 상태 관리 (race condition 방지)
 let isRefreshing = false;

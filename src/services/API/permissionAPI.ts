@@ -1,8 +1,8 @@
 import Config from 'react-native-config';
-import { FridgePermission, PermissionResponse } from '../types/permission';
-import { getValidAccessToken } from '../utils/authUtils';
-import { ApiErrorHandler } from '../utils/errorHandler';
-import { PermissionUtils } from '../utils/permissionUtils';
+import { FridgePermission, PermissionResponse } from '../../types/permission';
+import { getValidAccessToken } from '../../utils/authUtils';
+import { ApiErrorHandler } from '../../utils/errorHandler';
+import { PermissionUtils } from '../../utils/permissionUtils';
 
 export class PermissionAPIService {
   /**

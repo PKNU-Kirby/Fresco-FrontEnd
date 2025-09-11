@@ -4,12 +4,12 @@ import {
   saveTokens,
   clearTokens,
   getAccessToken,
-} from '../utils/authUtils';
+} from '../../utils/authUtils';
 import type {
   SocialProvider,
   LoginResponse,
   RefreshTokenResponse,
-} from '../types/auth';
+} from '../../types/auth';
 
 // token refresh state
 let isRefreshing = false;

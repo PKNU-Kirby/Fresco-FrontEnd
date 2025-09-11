@@ -60,6 +60,9 @@ const CameraScreen: React.FC = () => {
     null,
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [scanMode, setScanMode] = useState<'ingredient' | 'receipt' | null>(
+    null,
+  );
 
   const handleCameraResponse = useCallback((response: ImagePickerResponse) => {
     setIsLoading(false);
@@ -148,22 +151,81 @@ const CameraScreen: React.FC = () => {
     });
   }, [capturedPhoto, fridgeId, navigation]);
 
-  useEffect(() => {
-    if (capturedPhoto) {
-      navigateToPreview();
-    }
-  }, [capturedPhoto, navigateToPreview]);
-
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        if (isLoading) {
-          setIsLoading(false);
-        }
-      };
-    }, [isLoading]),
+  const handleModeSelect = useCallback(
+    (mode: 'ingredient' | 'receipt') => {
+      setScanMode(mode);
+      openCamera();
+    },
+    [openCamera],
   );
 
+  useEffect(() => {
+    if (capturedPhoto && scanMode) {
+      navigateToPreview();
+    }
+  }, [capturedPhoto, scanMode, navigateToPreview]);
+
+  // 모드 선택 화면
+  if (!scanMode) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.modeSelectionContainer}>
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => navigation.goBack()}
+            >
+              <MaterialIcons
+                name="arrow-back-ios-new"
+                size={24}
+                color="#f8f8f8"
+              />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>촬영 방식 선택</Text>
+            <View style={styles.rightHeader} />
+          </View>
+
+          <View style={styles.modeOptions}>
+            <TouchableOpacity
+              style={styles.modeButton}
+              onPress={() => handleModeSelect('ingredient')}
+            >
+              <View
+                style={[
+                  styles.modeIconContainer,
+                  { backgroundColor: '#f8f8f8' },
+                ]}
+              >
+                <MaterialIcons name="eco" size={48} color="#444" />
+              </View>
+              <Text style={styles.modeTitle}>식재료 촬영</Text>
+              <Text style={styles.modeDescription}>
+                식재료 사진을 촬영하여{'\n'}정보를 자동 인식합니다
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modeButton}
+              onPress={() => handleModeSelect('receipt')}
+            >
+              <View
+                style={[
+                  styles.modeIconContainer,
+                  { backgroundColor: '#f8f8f8' },
+                ]}
+              >
+                <MaterialIcons name="receipt" size={48} color="#444" />
+              </View>
+              <Text style={styles.modeTitle}>영수증 스캔</Text>
+              <Text style={styles.modeDescription}>
+                영수증을 촬영하여 여러 식재료를{'\n'}한 번에 등록합니다
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.cameraLaunchContainer}>
@@ -198,8 +260,7 @@ const CameraScreen: React.FC = () => {
         </View>
 
         <View style={styles.bottomGuide}>
-          <Text style={styles.guideText}>식재료를 카메라로 촬영해주세요</Text>
-          <Text style={styles.subGuideText}>
+          <Text style={styles.guideText}>
             명확한 사진일수록 정확한 인식이 가능합니다
           </Text>
         </View>

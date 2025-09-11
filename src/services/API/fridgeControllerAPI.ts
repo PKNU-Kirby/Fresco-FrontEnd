@@ -1,5 +1,5 @@
 import Config from 'react-native-config';
-import { getValidAccessToken } from '../utils/authUtils';
+import { getValidAccessToken } from '../../utils/authUtils';
 
 export interface FridgeCreateRequest {
   name: string;
