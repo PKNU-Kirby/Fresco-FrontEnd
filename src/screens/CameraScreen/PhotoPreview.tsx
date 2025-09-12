@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Image,
@@ -15,6 +15,10 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { previewStyles as styles } from './styles';
 import { RootStackParamList } from '../../../App';
+import {
+  IngredientControllerAPI,
+  ConfirmedIngredient,
+} from '../../services/API/ingredientControllerAPI';
 
 type PhotoPreviewScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -32,95 +36,104 @@ const PhotoPreviewScreen: React.FC = () => {
   const navigation = useNavigation<PhotoPreviewScreenNavigationProp>();
   const route = useRoute<PhotoPreviewScreenRouteProp>();
 
-  const { photo, fridgeId } = route.params;
+  const { photo, fridgeId, scanMode } = route.params; // scanMode가 route params에 있다고 가정
+
   const [imageLoading, setImageLoading] = useState(true);
+  const [isScanning, setIsScanning] = useState(false);
 
-  const handleIngredientScan = useCallback(async () => {
+  // 컴포넌트 마운트 시 자동 스캔 시작
+  useEffect(() => {
+    if (!imageLoading) {
+      handleAutoScan();
+    }
+  }, [imageLoading]);
+
+  /**
+   * 통합 자동 스캔 처리
+   */
+  const handleAutoScan = useCallback(async () => {
+    if (!scanMode) {
+      console.error('스캔 모드가 지정되지 않았습니다.');
+      return;
+    }
+
+    // photo.uri 유효성 검사 추가
+    if (!photo?.uri) {
+      console.error('사진 URI가 없습니다.');
+      handleScanError(new Error('사진을 먼저 촬영해주세요.'));
+      return;
+    }
+
     try {
       setIsScanning(true);
-      setScanningMode('ingredient');
+      console.log(`${scanMode} 자동 스캔 시작, URI:`, photo.uri);
 
-      const {
-        ingredientControllerAPI,
-      } = require('../../services/API/ingredientControllerAPI');
-      const scanResults = await ingredientControllerAPI.scanPhoto(photo.uri);
+      // IngredientControllerAPI의 통합 스캔 메소드 사용
+      const confirmedIngredients =
+        await IngredientControllerAPI.performScanSafe(photo.uri, scanMode);
 
-      if (scanResults && scanResults.length > 0) {
-        const confirmedIngredients =
-          ingredientControllerAPI.convertScanToConfirmed(
-            scanResults,
-            'ingredient',
-          );
-
+      if (confirmedIngredients && confirmedIngredients.length > 0) {
+        console.log('스캔 성공:', confirmedIngredients);
+        // AddItemScreen으로 이동 (확인된 식재료와 함께)
         navigation.navigate('AddItemScreen', {
           fridgeId,
           scanResults: confirmedIngredients,
-          scanMode: 'ingredient',
+          scanMode,
         });
       } else {
-        Alert.alert('인식 실패', '식재료 인식 실패, 수동 인식 ㄱㄱ', [
+        // 스캔 실패 시 사용자 옵션 제공
+        handleScanFailure();
+      }
+    } catch (error) {
+      console.error(`${scanMode} 스캔 오류:`, error);
+      handleScanError(error);
+    } finally {
+      setIsScanning(false);
+    }
+  }, [photo?.uri, scanMode, fridgeId, navigation]); // photo?.uri로 변경
+
+  /**
+   * 스캔 실패 처리
+   */
+  const handleScanFailure = useCallback(() => {
+    const modeText = scanMode === 'ingredient' ? '식재료' : '영수증';
+
+    Alert.alert(
+      '인식 실패',
+      `${modeText}에서 항목을 인식할 수 없습니다.\n어떻게 진행하시겠습니까?`,
+      [
+        { text: '수동 입력', onPress: handleManualInput },
+        { text: '다시 촬영', onPress: handleRetake },
+        { text: '취소', style: 'cancel', onPress: handleCancel },
+      ],
+    );
+  }, [scanMode]);
+
+  /**
+   * 스캔 오류 처리
+   */
+  const handleScanError = useCallback(
+    (error: any) => {
+      const modeText =
+        scanMode === 'ingredient' ? '식재료 인식' : '영수증 스캔';
+      const errorMessage = error?.message || '알 수 없는 오류가 발생했습니다.';
+
+      Alert.alert(
+        '스캔 오류',
+        `${modeText} 중 오류가 발생했습니다.\n${errorMessage}`,
+        [
           { text: '수동 입력', onPress: handleManualInput },
-          { text: 'cancel', style: 'cancel' },
-        ]);
-      }
-    } catch (error) {
-      console.error('식재료 스캔 오류:', error);
-      Alert.alert('스캔 오류', '식재료 인식 오류... 수동 입력 ㄱㄱ', [
-        {
-          text: 'Manual Input',
-          onPress: handleManualInput,
-        },
-        { text: 'cancel', style: 'cancel' },
-      ]);
-    } finally {
-      setIsScanning(false);
-      setScanningMode(null);
-    }
-  }, [photo.uri, fridgeId, navigation]);
+          { text: '다시 촬영', onPress: handleRetake },
+          { text: '취소', style: 'cancel', onPress: handleCancel },
+        ],
+      );
+    },
+    [scanMode],
+  );
 
-  const handleReceiptScan = useCallback(async () => {
-    try {
-      setIsScanning(true);
-      setScanningMode('receipt');
-
-      const {
-        ingredientControllerAPI,
-      } = require('../../services/API/ingredientControllerAPI');
-      const scanResults = await ingredientControllerAPI.scanReceipt(photo.uri);
-
-      if (scanResults && scanResults.length > 0) {
-        const confirmedIngredients =
-          ingredientControllerAPI.convertScanToConfirmed(
-            scanResults,
-            'receipt',
-          );
-        navigation.navigate('AddItemScreen', {
-          fridgeId,
-          scanResults: confirmedIngredients,
-          scanMode: 'receipt',
-        });
-      } else {
-        Alert.alert(
-          '인식 실패',
-          '영수증에서 식재료 인식 실패... 수동 입력 ㄱㄱ',
-          [
-            { text: 'Manual Input', onPress: handleManualInput },
-            { text: 'cancel', style: 'cancel' },
-          ],
-        );
-      }
-    } catch (error) {
-      console.error('error : failed scanning receipt : ', error);
-      Alert.alert('scanning error', '스캔 중 오류 발생, 수동 입력 ㄱㄱ', [
-        { text: 'Manual Input', onPress: handleManualInput },
-        { text: 'cancel', style: 'cancel' },
-      ]);
-    } finally {
-      setIsScanning(false);
-      setScanningMode(null);
-    }
-  }, [photo.uri, fridgeId, navigation]);
-
+  /**
+   * 수동 입력으로 전환
+   */
   const handleManualInput = useCallback(() => {
     navigation.navigate('AddItemScreen', {
       fridgeId,
@@ -135,6 +148,32 @@ const PhotoPreviewScreen: React.FC = () => {
     });
   }, [navigation, photo.uri, fridgeId]);
 
+  /**
+   * 다시 촬영
+   */
+  const handleRetake = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  /**
+   * 취소 (뒤로가기)
+   */
+  const handleCancel = useCallback(() => {
+    Alert.alert('취소하시겠습니까?', '촬영한 사진이 삭제됩니다.', [
+      { text: '계속 처리', style: 'cancel' },
+      {
+        text: '나가기',
+        style: 'destructive',
+        onPress: () => {
+          navigation.goBack();
+        },
+      },
+    ]);
+  }, [navigation]);
+
+  /**
+   * 이미지 스타일 계산
+   */
   const getImageStyle = useCallback(() => {
     if (photo.width && photo.height) {
       const aspectRatio = photo.width / photo.height;
@@ -170,108 +209,34 @@ const PhotoPreviewScreen: React.FC = () => {
     Alert.alert('오류', '이미지를 불러올 수 없습니다.');
   }, []);
 
-  const formatFileSize = useCallback((bytes?: number): string => {
-    if (!bytes) return '';
-    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-  }, []);
+  // 스캔 모드에 따른 표시 텍스트
+  const scanningText =
+    scanMode === 'ingredient'
+      ? '식재료를 인식하고 있습니다...'
+      : '영수증을 분석하고 있습니다...';
 
-  const handleRetake = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
+  const headerTitle =
+    scanMode === 'ingredient' ? '식재료 인식 중' : '영수증 분석 중';
 
-  const handleCancel = useCallback(() => {
-    Alert.alert('취소하시겠습니까?', '촬영한 사진이 삭제됩니다.', [
-      { text: '계속 편집', style: 'cancel' },
-      {
-        text: '나가기',
-        style: 'destructive',
-        onPress: () => {
-          navigation.goBack();
-        },
-      },
-    ]);
-  }, [navigation]);
-
-  const handleUse = useCallback(() => {
-    navigation.navigate('AddItemScreen', {
-      fridgeId,
-      recognizedData: {
-        photo: photo.uri,
-        name: '인식된 식재료',
-        quantity: '1',
-        unit: '개',
-        expiryDate: '',
-        itemCategory: '야채',
-      },
-    });
-  }, [navigation, photo.uri, fridgeId]);
-
-  const handleAutoScan = useCallback(async () => {
-    try {
-      console.log(`${scanMode} 자동 스캔 시작`);
-
-      const {
-        IngredientControllerAPI,
-      } = require('../../services/API/ingredientControllerAPI');
-      let scanResults;
-
-      if (scanMode === 'ingredient') {
-        scanResults = await IngredientControllerAPI.scanPhoto(photo.uri);
-      } else {
-        scanResults = await IngredientControllerAPI.scanReceipt(photo.uri);
-      }
-
-      if (scanResults && scanResults.length > 0) {
-        const confirmedIngredients =
-          IngredientControllerAPI.convertScanToConfirmed(scanResults, scanMode);
-
-        navigation.navigate('AddItemScreen', {
-          fridgeId,
-          scanResults: confirmedIngredients,
-          scanMode,
-        });
-      } else {
-        // 스캔 실패 시 수동 입력 옵션 제공
-        Alert.alert(
-          '인식 실패',
-          `${
-            scanMode === 'ingredient' ? '식재료' : '영수증'
-          }에서 항목을 인식할 수 없습니다.\n수동으로 입력하시겠습니까?`,
-          [
-            { text: '수동 입력', onPress: handleManualInput },
-            { text: '다시 촬영', onPress: handleRetake },
-          ],
-        );
-      }
-    } catch (error) {
-      console.error(`${scanMode} 스캔 오류:`, error);
-      Alert.alert(
-        '스캔 오류',
-        `${
-          scanMode === 'ingredient' ? '식재료 인식' : '영수증 스캔'
-        } 중 오류가 발생했습니다.`,
-        [
-          { text: '수동 입력', onPress: handleManualInput },
-          { text: '다시 촬영', onPress: handleRetake },
-        ],
-      );
-    }
-  }, [photo.uri, scanMode, fridgeId, navigation]);
+  const infoText =
+    scanMode === 'ingredient'
+      ? '촬영한 식재료를 자동으로 인식하고 있습니다'
+      : '촬영한 영수증에서 식재료를 찾고 있습니다';
 
   return (
     <SafeAreaView style={styles.previewContainer}>
       <StatusBar barStyle="light-content" backgroundColor="#222222" />
 
+      {/* 헤더 */}
       <View style={styles.previewHeader}>
         <TouchableOpacity style={styles.closeButton} onPress={handleCancel}>
           <MaterialIcons name="arrow-back-ios-new" size={24} color="#f8f8f8" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          {scanMode === 'ingredient' ? '식재료 인식 중' : '영수증 분석 중'}
-        </Text>
+        <Text style={styles.headerTitle}>{headerTitle}</Text>
         <View style={styles.rightSection} />
       </View>
 
+      {/* 이미지 컨테이너 */}
       <View style={styles.imageContainer}>
         <View style={styles.imagePlace}>
           <Image
@@ -282,6 +247,7 @@ const PhotoPreviewScreen: React.FC = () => {
             onError={handleImageError}
           />
 
+          {/* 이미지 로딩 오버레이 */}
           {imageLoading && (
             <View style={styles.loadingOverlay}>
               <ActivityIndicator size="large" color="#f8f8f8" />
@@ -289,26 +255,33 @@ const PhotoPreviewScreen: React.FC = () => {
             </View>
           )}
 
-          {!imageLoading && (
+          {/* 스캔 진행 오버레이 */}
+          {!imageLoading && isScanning && (
             <View style={styles.scanningOverlay}>
               <ActivityIndicator size="large" color="#f8f8f8" />
-              <Text style={styles.scanningText}>
-                {scanMode === 'ingredient'
-                  ? '식재료를 인식하고 있습니다...'
-                  : '영수증을 분석하고 있습니다...'}
-              </Text>
+              <Text style={styles.scanningText}>{scanningText}</Text>
             </View>
           )}
         </View>
       </View>
 
+      {/* 하단 정보 */}
       <View style={styles.bottomInfo}>
-        <Text style={styles.infoText}>
-          {scanMode === 'ingredient'
-            ? '촬영한 식재료를 자동으로 인식하고 있습니다'
-            : '촬영한 영수증에서 식재료를 찾고 있습니다'}
-        </Text>
+        <Text style={styles.infoText}>{infoText}</Text>
         <Text style={styles.subInfoText}>잠시만 기다려주세요</Text>
+
+        {/* 수동 처리 버튼 (스캔 중일 때만 표시) */}
+        {isScanning && (
+          <TouchableOpacity
+            style={styles.manualButton}
+            onPress={() => {
+              setIsScanning(false);
+              handleScanFailure();
+            }}
+          >
+            <Text style={styles.manualButtonText}>수동 입력으로 진행</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );

@@ -19,65 +19,55 @@ const shadows = {
 };
 
 // Main CameraScreen styles
+
 export const cameraStyles = StyleSheet.create({
-  // styles.ts - CameraScreen 모드 선택 스타일
-  modeSelectionContainer: {
+  // 기본 컨테이너
+  container: {
     flex: 1,
     backgroundColor: '#222222',
   },
 
-  modeOptions: {
-    flex: 1,
+  // 헤더
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#222222',
+  },
+  closeButton: {
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 30,
-    gap: 40,
+    borderRadius: 22,
   },
-  modeButton: {
-    backgroundColor: '#333333',
-    borderRadius: 20,
-    padding: 30,
-    alignItems: 'center',
-    width: '100%',
-    maxWidth: 300,
-    borderWidth: 2,
-    borderColor: '#444444',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-
-  modeIconContainer: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-
-  modeTitle: {
-    fontSize: 24,
-    fontWeight: '700',
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
     color: '#f8f8f8',
-    marginBottom: 12,
     textAlign: 'center',
+  },
+  rightHeader: {
+    width: 44,
+    height: 44,
   },
 
-  modeDescription: {
-    fontSize: 14,
-    color: '#cccccc',
-    textAlign: 'center',
-    lineHeight: 22,
-  },
+  // 모드 선택 화면
   modeSelectionContainer: {
     flex: 1,
     backgroundColor: '#222222',
+  },
+
+  // 스크롤 관련 (추가)
+  scrollContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 40,
   },
 
   modeOptions: {
@@ -85,236 +75,139 @@ export const cameraStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    gap: 30,
+    paddingTop: 20,
   },
 
   modeButton: {
+    width: '100%',
+    maxWidth: 320,
     backgroundColor: '#333333',
     borderRadius: 16,
     padding: 24,
+    marginVertical: 12,
     alignItems: 'center',
-    width: '100%',
-    maxWidth: 280,
-    borderWidth: 1,
-    borderColor: '#444444',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
 
   modeIconContainer: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#f8f8f8',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
   },
 
   modeTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '700',
     color: '#f8f8f8',
-    marginVertical: 16,
+    marginBottom: 8,
     textAlign: 'center',
   },
 
   modeDescription: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#cccccc',
     textAlign: 'center',
     lineHeight: 20,
   },
 
-  // PhotoPreviewScreen 버튼 스타일 (3개 버튼)
-  bottomButtons: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-
-  retakeButton: {
-    flex: 1,
-    flexDirection: 'row',
+  // 개발자 도구 구분선 (추가)
+  divider: {
+    width: '100%',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f8f8f8',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    gap: 6,
-    minHeight: 48,
+    marginVertical: 20,
+    paddingVertical: 10,
   },
-
-  scanButton: {
-    flex: 1.2, // 중앙 버튼이 조금 더 크게
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#4CAF50',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    gap: 6,
-    minHeight: 48,
-  },
-
-  scanButtonDisabled: {
-    backgroundColor: '#666666',
-    opacity: 0.6,
-  },
-
-  manualButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#2196F3',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    gap: 6,
-    minHeight: 48,
-  },
-
-  retakeButtonText: {
-    color: '#333',
-    fontSize: 12,
+  dividerText: {
+    fontSize: 16,
     fontWeight: '600',
-    textAlign: 'center',
-  },
-
-  scanButtonText: {
-    color: '#f8f8f8',
-    fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-
-  manualButtonText: {
-    color: '#f8f8f8',
-    fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-
-  scanningText: {
-    color: '#f8f8f8',
-    fontSize: 14,
-    marginTop: 12,
-    textAlign: 'center',
-  },
-
-  // 기존 스타일 수정사항
-  previewHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#222222',
-  },
-
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#f8f8f8',
-    flex: 1,
-    textAlign: 'center',
-  },
-  closeButton: {
-    padding: 8,
+    color: '#666',
+    backgroundColor: '#444',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
 
-  rightSection: {
-    width: 40, // closeButton과 같은 크기로 균형 맞춤
-  },
-
-  /////////////////////////////////////////
-
-  container: {
-    flex: 1,
-    backgroundColor: '#222222',
-  },
-
+  // 카메라 실행 화면
   cameraLaunchContainer: {
     flex: 1,
     backgroundColor: '#222222',
   },
 
-  // header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    backgroundColor: '#222222',
-    borderBottomWidth: 1,
-    borderBottomColor: '#333333',
-    ...shadows.small,
-  },
-  closeButton: {
-    width: 56,
-    padding: 8,
-    paddingLeft: 0,
-    marginLeft: 10,
-  },
-  rightHeader: {
-    width: 66,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-
-  // Center Content Styles : Camera Button
   centerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  cameraButton: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderWidth: 3,
-    borderColor: '#f8f8f8',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
-    ...shadows.medium,
-  },
-  cameraButtonDisabled: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderColor: '#999999',
-    opacity: 0.6,
-  },
-  cameraButtonText: {
-    fontSize: 20,
-    color: '#f8f8f8',
-    textAlign: 'center',
-    marginTop: 8,
   },
 
-  // Guide
-  bottomGuide: {
-    paddingHorizontal: 32,
-    paddingBottom: 48,
+  cameraButton: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#555555',
+    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  guideText: {
+
+  cameraButtonText: {
     fontSize: 16,
     color: '#f8f8f8',
-    textAlign: 'center',
-    marginBottom: 16,
+    fontWeight: '500',
   },
-  subGuideText: {
-    fontSize: 16,
-    color: '#CCCCCC',
+
+  bottomGuide: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    alignItems: 'center',
+  },
+
+  guideText: {
+    fontSize: 14,
+    color: '#cccccc',
     textAlign: 'center',
     lineHeight: 20,
+  },
+
+  // 로딩 오버레이 (추가)
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+    marginTop: 12,
+  },
+
+  // 비활성화된 버튼 (추가)
+  disabledButton: {
+    opacity: 0.5,
   },
 });
 
