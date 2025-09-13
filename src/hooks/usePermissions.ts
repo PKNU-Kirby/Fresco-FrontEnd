@@ -22,7 +22,7 @@ export const usePermissions = (currentUser: User | null) => {
     try {
       const userPermissions = await PermissionAPIService.getUserPermissions();
       setPermissions(userPermissions);
-      console.log('사용자 권한 로드 완료:', userPermissions);
+      //console.log('사용자 권한 로드 완료:', userPermissions);
     } catch (error: any) {
       console.error('권한 로드 실패:', error);
       const errorMessage = ApiErrorHandler.getErrorMessage(error);

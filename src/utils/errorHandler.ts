@@ -391,19 +391,3 @@ export class AlertHelper {
       });
   }
 }
-
-// 사용 예시
-/*
-try {
-  const result = await apiCall();
-} catch (error) {
-  // 에러 로깅
-  ApiErrorHandler.logError(error, 'FridgeAPI.deleteFridge');
-  
-  // 사용자에게 알림 표시
-  AlertHelper.showErrorAlert(error, 'FridgeAPI.deleteFridge', () => {
-    // 재시도 로직
-    retryApiCall();
-  });
-}
-*/

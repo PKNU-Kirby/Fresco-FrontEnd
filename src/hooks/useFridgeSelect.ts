@@ -55,13 +55,13 @@ export const useFridgeSelect = (navigation: any) => {
 
     // 중복 호출 방지
     if (isLoadingFridges) {
-      console.log('냉장고 목록 로딩이 이미 진행 중입니다.');
+      // console.log('냉장고 목록 로딩이 이미 진행 중입니다.');
       return;
     }
 
     try {
       isLoadingFridges = true;
-      console.log('서버에서 냉장고 목록 및 권한 로딩...');
+      //      console.log('서버에서 냉장고 목록 및 권한 로딩...');
 
       // 병렬로 냉장고 목록과 권한 정보 가져오기
       const [fridgeData, permissions] = await Promise.all([
@@ -81,7 +81,7 @@ export const useFridgeSelect = (navigation: any) => {
         );
 
         setFridges(fridgesWithHiddenStatus);
-        console.log('냉장고 목록 로딩 완료:', fridgesWithHiddenStatus);
+        // console.log('냉장고 목록 로딩 완료:', fridgesWithHiddenStatus);
 
         // 로컬 데이터와 동기화 (백그라운드)
         syncWithLocalStorage(fridgesWithHiddenStatus, targetUser);

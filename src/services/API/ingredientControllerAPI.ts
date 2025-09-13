@@ -1,13 +1,14 @@
 import { ApiService } from '../apiServices';
 import { Platform } from 'react-native';
 import { launchImageLibrary, MediaType } from 'react-native-image-picker';
+import Config from 'react-native-config';
 
 // 식재료 관련 타입 정의
 export type AutoCompleteSearchResponse = {
-  ingredientId: number;
-  ingredientName: string;
-  categoryId: number;
-  categoryName: string;
+  ingredientId: number; // Long ingredientId
+  ingredientName: string; // String ingredientName
+  categoryId: number; // Long categoryId
+  categoryName: string; // String categoryName
 };
 
 export type SaveIngredientInfo = {
@@ -60,25 +61,23 @@ export type UpdateIngredientRequest = {
   quantity?: number;
 };
 
-// 스캔 결과 타입들
+// 영수증 스캔 응답 (ReceiptOcrMappingResponse)
 export type ScanResultItem = {
   ingredientId: number;
   ingredientName: string;
   categoryId: number;
   categoryName: string;
   expirationDate: string;
-  input_name: string;
+  inputName: string; // 백엔드: input_name (@JsonProperty)
 };
-
+// 식재료 스캔 응답 (IngredientResponse)
 export type PhotoScanResult = {
-  id: number;
-  ingredientId: number;
-  categoryId: number;
-  ingredientName: string;
-  expirationDate: string;
-  quantity: number;
+  ingredientId: number; // 백엔드: ingredientId
+  ingredientName: string; // 백엔드: ingredientName
+  categoryId: number; // 백엔드: categoryId
+  categoryName: string; // 백엔드: categoryName
+  expirationDate: string; // 백엔드: expirationDate
 };
-
 // ConfirmedIngredient 타입 정의
 export type ConfirmedIngredient = {
   userInput: {
@@ -103,8 +102,6 @@ export type ConfirmedIngredient = {
  * 엔드포인트: /ap1/v1/ingredient/*
  */
 export class IngredientControllerAPI {
-  private static readonly BASE_PATH = '/ap1/v1/ingredient';
-
   // ========== 실제 API 테스트를 위한 메소드들 ==========
 
   /**
@@ -310,7 +307,10 @@ export class IngredientControllerAPI {
     try {
       console.log('식재료 사진 스캔 시작:', imageUri);
 
-      // FormData 생성 (multipart/form-data)
+      // 파일 검증
+      this.validateImageFile({ uri: imageUri });
+
+      // FormData 생성 - 백엔드 파라미터명과 정확히 맞춤
       const formData = new FormData();
       formData.append('ingredientImage', {
         uri: imageUri,
@@ -321,11 +321,11 @@ export class IngredientControllerAPI {
       console.log('FormData 준비 완료, API 호출 시작...');
 
       const response = await fetch(
-        `${ApiService.BASE_URL}${this.BASE_PATH}/scan-photo`,
+        `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-photo`,
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'multipart/form-data',
+            // Content-Type 자동 설정되도록 헤더에서 제외
             ...(await this.getAuthHeaders()),
           },
           body: formData,
@@ -333,28 +333,22 @@ export class IngredientControllerAPI {
       );
 
       console.log('API 응답 상태:', response.status);
-      console.log(
-        'API 응답 헤더:',
-        Object.fromEntries(response.headers.entries()),
-      );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('API 에러 응답 본문:', errorText);
+        console.error('API 에러 응답:', errorText);
         throw new Error(`스캔 API 실패: ${response.status} - ${errorText}`);
       }
 
       const result = await response.json();
       console.log('사진 스캔 API 성공 응답:', result);
 
-      return Array.isArray(result) ? result : [];
+      // SuccessResponse 구조 처리
+      const data = result.data || result;
+      return Array.isArray(data) ? data : [];
     } catch (error) {
-      console.error('사진 스캔 실패:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      });
-      throw error;
+      console.error('사진 스캔 실패:', error);
+      throw new Error(`식재료 사진 스캔에 실패했습니다: ${error.message}`);
     }
   }
 
@@ -366,7 +360,10 @@ export class IngredientControllerAPI {
     try {
       console.log('영수증 스캔 시작:', imageUri);
 
-      // FormData 생성
+      // 파일 검증
+      this.validateImageFile({ uri: imageUri });
+
+      // FormData 생성 - 백엔드 파라미터명과 정확히 맞춤
       const formData = new FormData();
       formData.append('receipt', {
         uri: imageUri,
@@ -377,11 +374,10 @@ export class IngredientControllerAPI {
       console.log('FormData 준비 완료, API 호출 시작...');
 
       const response = await fetch(
-        `${ApiService.BASE_URL}${this.BASE_PATH}/scan-receipt`,
+        `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-receipt`,
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'multipart/form-data',
             ...(await this.getAuthHeaders()),
           },
           body: formData,
@@ -389,37 +385,60 @@ export class IngredientControllerAPI {
       );
 
       console.log('API 응답 상태:', response.status);
-      console.log(
-        'API 응답 헤더:',
-        Object.fromEntries(response.headers.entries()),
-      );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('API 에러 응답 본문:', errorText);
+        console.error('API 에러 응답:', errorText);
         throw new Error(`스캔 API 실패: ${response.status} - ${errorText}`);
       }
 
       const result = await response.json();
       console.log('영수증 스캔 API 성공 응답:', result);
 
-      return Array.isArray(result) ? result : [];
+      // SuccessResponse 구조 처리
+      const data = result.data || result;
+      return Array.isArray(data) ? data : [];
     } catch (error) {
-      console.error('영수증 스캔 실패:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      });
-      throw error;
+      console.error('영수증 스캔 실패:', error);
+      throw new Error(`영수증 스캔에 실패했습니다: ${error.message}`);
     }
   }
 
-  // 인증 헤더 가져오기
+  /**
+   * 파일 검증 (백엔드 ImageUtils와 동일)
+   */
+  private static validateImageFile(file: {
+    uri: string;
+    fileSize?: number;
+    type?: string;
+  }): void {
+    if (!file.uri) {
+      throw new Error('이미지 파일이 없습니다');
+    }
+
+    // 파일 크기 체크 (10MB)
+    if (file.fileSize && file.fileSize > 10 * 1024 * 1024) {
+      throw new Error('이미지 파일 크기가 너무 큽니다 (최대 10MB)');
+    }
+
+    // 파일 형식 체크
+    if (file.type) {
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        throw new Error(`지원하지 않는 이미지 형식입니다: ${file.type}`);
+      }
+    }
+  }
+
+  /**
+   * 인증 헤더 생성
+   */
   private static async getAuthHeaders(): Promise<HeadersInit_> {
     try {
       const { AsyncStorageService } = require('../AsyncStorageService');
       const token = await AsyncStorageService.getAuthToken();
       console.log('인증 토큰 확인:', token ? '토큰 있음' : '토큰 없음');
+
       return {
         ...(token && { Authorization: `Bearer ${token}` }),
       };
@@ -427,7 +446,9 @@ export class IngredientControllerAPI {
       console.error('인증 헤더 생성 실패:', error);
       return {};
     }
-  } // ========== 시뮬레이터용 안전한 메소드들 ==========
+  }
+
+  // ========== 시뮬레이터용 안전한 메소드들 ==========
 
   static async scanPhotoForSimulator(
     imageUri: string,
@@ -624,13 +645,15 @@ export class IngredientControllerAPI {
     }
 
     const encodedKeyword = encodeURIComponent(keyword.trim());
-    const endpoint = `${this.BASE_PATH}/auto-complete?keyword=${encodedKeyword}`;
+    const endpoint = `/ap1/v1/ingredient/auto-complete?keyword=${encodedKeyword}`;
 
     try {
       console.log(`식재료 검색: "${keyword}"`);
+
       const response = await ApiService.apiCall<AutoCompleteSearchResponse[]>(
         endpoint,
       );
+
       console.log(`검색 결과: ${response.length}개`);
       return response;
     } catch (error) {
@@ -664,7 +687,7 @@ export class IngredientControllerAPI {
     params.append('page', defaultFilter.page.toString());
     params.append('size', defaultFilter.size.toString());
 
-    const endpoint = `${this.BASE_PATH}/${refrigeratorId}?${params.toString()}`;
+    const endpoint = `/ap1/v1/ingredient/${refrigeratorId}?${params.toString()}`;
 
     try {
       console.log(`냉장고 ${refrigeratorId} 식재료 목록 조회`, {
@@ -700,7 +723,7 @@ export class IngredientControllerAPI {
       })),
     };
 
-    const endpoint = `${this.BASE_PATH}/${refrigeratorId}`;
+    const endpoint = `/ap1/v1/ingredient/${refrigeratorId}`;
 
     try {
       console.log('냉장고에 식재료 추가:', {
@@ -744,7 +767,7 @@ export class IngredientControllerAPI {
       processedData.quantity = updateData.quantity;
     }
 
-    const endpoint = `${this.BASE_PATH}/${refrigeratorIngredientId}`;
+    const endpoint = `/ap1/v1/ingredient/${refrigeratorIngredientId}`;
 
     try {
       console.log(
@@ -969,31 +992,6 @@ export class IngredientControllerAPI {
     };
 
     return nameToIdMap[categoryName] || 10;
-  }
-
-  // ========== 디버깅 및 개발용 메소드들 ==========
-
-  /**
-   * API 기본 URL과 경로 확인
-   */
-  static getAPIInfo(): { baseURL: string; basePath: string; fullURL: string } {
-    return {
-      baseURL: ApiService.BASE_URL || 'BASE_URL_NOT_SET',
-      basePath: this.BASE_PATH,
-      fullURL: `${ApiService.BASE_URL || 'BASE_URL_NOT_SET'}${this.BASE_PATH}`,
-    };
-  }
-
-  /**
-   * 개발용 로그 출력
-   */
-  static logAPIInfo(): void {
-    const info = this.getAPIInfo();
-    console.log('=== IngredientControllerAPI 정보 ===');
-    console.log('Base URL:', info.baseURL);
-    console.log('Base Path:', info.basePath);
-    console.log('Full URL:', info.fullURL);
-    console.log('================================');
   }
 }
 

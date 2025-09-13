@@ -19,7 +19,7 @@ export class PermissionAPIService {
         };
       }
 
-      console.log('권한 API 호출 시작...');
+      // console.log('권한 API 호출 시작...');
 
       const response = await fetch(
         `${Config.API_BASE_URL}/api/v1/refrigerator/permissions`,
@@ -33,7 +33,7 @@ export class PermissionAPIService {
         },
       );
 
-      console.log('권한 API 응답 상태:', response.status);
+      // console.log('권한 API 응답 상태:', response.status);
 
       if (!response.ok) {
         throw {
@@ -44,7 +44,7 @@ export class PermissionAPIService {
       }
 
       const data: PermissionResponse = await response.json();
-      console.log('권한 API 원본 응답:', JSON.stringify(data, null, 2));
+      // console.log('권한 API 원본 응답:', JSON.stringify(data, null, 2));
 
       // 성공 코드 확인 (실제 API 스펙에 맞게 수정 필요)
       if (!data.code || !data.code.includes('OK')) {

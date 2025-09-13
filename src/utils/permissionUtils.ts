@@ -96,7 +96,7 @@ export class PermissionUtils {
       return [];
     }
 
-    console.log('파싱할 권한 데이터:', permissionData);
+    // console.log('파싱할 권한 데이터:', permissionData);
 
     // 객체를 배열로 변환
     const permissions: FridgePermission[] = [];
@@ -118,7 +118,7 @@ export class PermissionUtils {
       }
     }
 
-    console.log('최종 파싱된 권한 목록:', permissions);
+    // console.log('최종 파싱된 권한 목록:', permissions);
     return permissions;
   }
 
@@ -130,17 +130,13 @@ export class PermissionUtils {
     fridges: any[],
     permissions: FridgePermission[],
   ): FridgeWithRole[] {
-    console.log('=== mergeFridgeWithPermissions 시작 ===');
-    console.log('서버 냉장고들:', fridges);
-    console.log('권한 목록:', permissions);
-
     const validFridges: FridgeWithRole[] = [];
 
     for (const fridge of fridges) {
       console.log(`\n냉장고 ${fridge.name} (ID: ${fridge.id}) 처리 중...`);
 
       const permission = permissions.find(p => {
-        console.log(`권한 비교: ${p.fridgeId} === ${fridge.id.toString()}`);
+        // console.log(`권한 비교: ${p.fridgeId} === ${fridge.id.toString()}`);
         return p.fridgeId === fridge.id.toString();
       });
 
@@ -149,10 +145,10 @@ export class PermissionUtils {
         continue;
       }
 
-      console.log(`냉장고 ${fridge.id} 권한 찾음:`, permission);
+      // console.log(`냉장고 ${fridge.id} 권한 찾음:`, permission);
 
       const rolePermissions = this.getRolePermissions(permission.role);
-      console.log(`역할 권한:`, rolePermissions);
+      // console.log(`역할 권한:`, rolePermissions);
 
       const fridgeWithRole: FridgeWithRole = {
         id: fridge.id.toString(),
@@ -171,8 +167,7 @@ export class PermissionUtils {
       validFridges.push(fridgeWithRole);
     }
 
-    console.log('=== mergeFridgeWithPermissions 완료 ===');
-    console.log('최종 결과:', validFridges);
+    console.log('User Fridge Info :', validFridges);
     return validFridges;
   }
 

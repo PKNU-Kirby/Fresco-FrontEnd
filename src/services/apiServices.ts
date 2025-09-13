@@ -25,9 +25,6 @@ let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
 export class ApiService {
-  // 서버 URL
-  private static readonly BASE_URL = `${Config.API_BASE_URL}`;
-
   // 공통 헤더 생성
   private static async getHeaders(): Promise<HeadersInit_> {
     const token = await AsyncStorageService.getAuthToken();
