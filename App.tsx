@@ -5,11 +5,14 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Config from 'react-native-config';
 import NaverLogin from '@react-native-seoul/naver-login';
+
 // Fonts
 // import CustomText from './src/components/common/CustomText';
+
 // Icons
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+
 // Screens
 import SplashScreen from './src/screens/SplashScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -30,6 +33,9 @@ import NotificationSettingsScreen from './src/screens/FridgeSettingsScreen/Notif
 // 딥링크 핸들러
 import { DeepLinkHandler } from './src/utils/deepLinkHandler';
 
+// Types
+import { ConfirmedIngredient } from './src/services/API/ingredientControllerAPI';
+
 interface NaverConfig {
   consumerKey: string;
   consumerSecret: string;
@@ -46,7 +52,7 @@ const NAVER_CONFIG: NaverConfig = {
   disableNaverAppAuthIOS: true,
 };
 
-// Stack Navigator Type
+// Stack Navigator Type (수정됨)
 export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
@@ -59,7 +65,12 @@ export type RootStackParamList = {
       memberCount?: number;
     };
   };
-  MainTabs: { fridgeId: string; fridgeName: string };
+  MainTabs: {
+    fridgeId: string;
+    fridgeName: string;
+    screen?: keyof MainTabParamList;
+    params?: any;
+  };
 
   CameraScreen: {
     fridgeId: string;
@@ -75,6 +86,7 @@ export type RootStackParamList = {
       fileName?: string;
     };
     fridgeId: string;
+    scanMode?: 'ingredient' | 'receipt';
   };
 
   AddItemScreen: {
@@ -87,10 +99,10 @@ export type RootStackParamList = {
       expiryDate?: string;
       itemCategory?: string;
     };
-    // 3. 카메라 → 스캔 결과
     scanResults?: ConfirmedIngredient[];
     scanMode?: 'ingredient' | 'receipt';
   };
+
   FridgeSettings: {
     fridgeId: string;
     fridgeName: string;
@@ -108,9 +120,14 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-// Tab Navigator Type
+// Tab Navigator Type (수정됨)
 export type MainTabParamList = {
-  FridgeHomeScreen: { fridgeId: string; fridgeName: string };
+  FridgeHomeScreen: {
+    fridgeId: string;
+    fridgeName: string;
+    newItems?: any[];
+    refreshKey?: number;
+  };
   Recipe: { fridgeId: string; fridgeName: string };
   ShoppingListScreen: { fridgeId: string; fridgeName: string };
 };
@@ -119,9 +136,16 @@ export type MainTabParamList = {
 function MainTabNavigator({
   route,
 }: {
-  route: { params: { fridgeId: string; fridgeName: string } };
+  route: {
+    params: {
+      fridgeId: string;
+      fridgeName: string;
+      screen?: string;
+      params?: any;
+    };
+  };
 }) {
-  const { fridgeId, fridgeName } = route.params;
+  const { fridgeId, fridgeName, screen, params } = route.params;
 
   return (
     <Tab.Navigator
@@ -145,11 +169,14 @@ function MainTabNavigator({
           marginTop: 6,
         },
       }}
+      initialRouteName={
+        (screen as keyof MainTabParamList) || 'FridgeHomeScreen'
+      }
     >
       <Tab.Screen
         name="FridgeHomeScreen"
         component={FridgeHomeScreen}
-        initialParams={{ fridgeId, fridgeName }}
+        initialParams={params || { fridgeId, fridgeName }}
         options={{
           tabBarLabel: '홈',
           tabBarIcon: ({ color, size }) => (

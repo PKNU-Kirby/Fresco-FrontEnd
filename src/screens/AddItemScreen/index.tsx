@@ -312,7 +312,7 @@ const AddItemScreen: React.FC = () => {
     }));
 
     // 홈화면으로 돌아가면서 새 아이템들 전달
-    navigation.navigate('HomeScreen', {
+    navigation.navigate('FridgeHome', {
       fridgeId,
       newItems,
       refreshKey: Date.now(), // 강제 새로고침 트리거
