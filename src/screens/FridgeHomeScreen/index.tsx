@@ -43,12 +43,15 @@ type Props = {
       fridgeId: string;
       fridgeName: string;
       shouldRefresh?: boolean;
+      newItems?: any[]; // 추가
+      refreshKey?: number; // 추가
     };
   };
 };
 
 const FridgeHomeScreen = ({ route }: Props) => {
-  const { fridgeId, fridgeName, shouldRefresh } = route.params;
+  const { fridgeId, fridgeName, shouldRefresh, newItems, refreshKey } =
+    route.params;
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -158,6 +161,22 @@ const FridgeHomeScreen = ({ route }: Props) => {
       loadActualFridgeItems();
     }, [loadActualFridgeItems]),
   );
+
+  // newItems와 refreshKey 처리를 위한 useEffect 추가
+  useEffect(() => {
+    if (newItems && newItems.length > 0) {
+      console.log('새로 추가된 아이템들 감지:', newItems);
+      // 새 아이템이 있으면 데이터 새로고침
+      loadActualFridgeItems();
+
+      // 성공 메시지 표시 (선택사항)
+      Alert.alert(
+        '추가 완료',
+        `${newItems.length}개의 식재료가 냉장고에 추가되었습니다.`,
+        [{ text: '확인' }],
+      );
+    }
+  }, [newItems, refreshKey, loadActualFridgeItems]);
 
   // shouldRefresh 파라미터가 있을 때 추가 새로고침
   useEffect(() => {

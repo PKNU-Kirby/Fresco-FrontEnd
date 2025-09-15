@@ -14,9 +14,10 @@ export type AutoCompleteSearchResponse = {
 export type SaveIngredientInfo = {
   ingredientId: number;
   categoryId: number;
+  quantity?: number; // 추가
+  unit?: string; // 추가
   expirationDate: string;
 };
-
 export type SaveIngredientsRequest = {
   ingredientsInfo: SaveIngredientInfo[];
   ingredientIds?: number[];
@@ -310,7 +311,7 @@ export class IngredientControllerAPI {
       // 파일 검증
       this.validateImageFile({ uri: imageUri });
 
-      // FormData 생성 - 백엔드 파라미터명과 정확히 맞춤
+      // FormData 생성
       const formData = new FormData();
       formData.append('ingredientImage', {
         uri: imageUri,
@@ -325,27 +326,57 @@ export class IngredientControllerAPI {
         {
           method: 'POST',
           headers: {
-            // Content-Type 자동 설정되도록 헤더에서 제외
             ...(await this.getAuthHeaders()),
           },
           body: formData,
         },
       );
 
-      console.log('API 응답 상태:', response.status);
+      // === 여기에 디버깅 로그 추가 ===
+      console.log('=== API 응답 디버깅 ===');
+      console.log('응답 상태:', response.status);
+      console.log('응답 헤더:', response.headers);
+
+      // 응답 텍스트 확인
+      const responseText = await response.text();
+      console.log('===== 원본 응답 내용 =====');
+      console.log(responseText);
+      console.log('===========================');
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API 에러 응답:', errorText);
-        throw new Error(`스캔 API 실패: ${response.status} - ${errorText}`);
+        console.error('API 에러 응답:', responseText);
+        throw new Error(`스캔 API 실패: ${response.status} - ${responseText}`);
       }
 
-      const result = await response.json();
-      console.log('사진 스캔 API 성공 응답:', result);
+      // 빈 응답 체크
+      if (!responseText.trim()) {
+        console.log('서버에서 빈 응답 받음');
+        return [];
+      }
 
-      // SuccessResponse 구조 처리
-      const data = result.data || result;
-      return Array.isArray(data) ? data : [];
+      try {
+        const responseData = JSON.parse(responseText);
+        console.log('===== 파싱된 응답 =====');
+        console.log(JSON.stringify(responseData, null, 2));
+        console.log('======================');
+
+        // SuccessResponse 구조 처리
+        const data = responseData.data || responseData.result || responseData;
+        console.log('===== 추출된 데이터 =====');
+        console.log(JSON.stringify(data, null, 2));
+        console.log('========================');
+
+        const finalResult = Array.isArray(data) ? data : [];
+        console.log('===== 최종 반환값 =====');
+        console.log(JSON.stringify(finalResult, null, 2));
+        console.log('======================');
+
+        return finalResult;
+      } catch (parseError) {
+        console.error('JSON 파싱 실패:', parseError);
+        console.log('파싱 실패한 응답:', responseText);
+        throw new Error(`응답 파싱 실패: ${parseError.message}`);
+      }
     } catch (error) {
       console.error('사진 스캔 실패:', error);
       throw new Error(`식재료 사진 스캔에 실패했습니다: ${error.message}`);
@@ -435,8 +466,11 @@ export class IngredientControllerAPI {
    */
   private static async getAuthHeaders(): Promise<HeadersInit_> {
     try {
-      const { AsyncStorageService } = require('../AsyncStorageService');
-      const token = await AsyncStorageService.getAuthToken();
+      // AsyncStorage를 직접 import해서 사용
+      const AsyncStorage =
+        require('@react-native-async-storage/async-storage').default;
+      const token = await AsyncStorage.getItem('accessToken');
+
       console.log('인증 토큰 확인:', token ? '토큰 있음' : '토큰 없음');
 
       return {
@@ -714,33 +748,40 @@ export class IngredientControllerAPI {
     refrigeratorId: string,
     saveRequest: SaveIngredientsRequest,
   ): Promise<any> {
+    console.log('=== addIngredientsToRefrigerator 디버깅 ===');
+    console.log('refrigeratorId:', refrigeratorId);
+    console.log('saveRequest:', JSON.stringify(saveRequest, null, 2));
+
+    // Swagger 성공 요청과 동일한 형식으로 수정
     const processedRequest = {
-      ...saveRequest,
       ingredientsInfo: saveRequest.ingredientsInfo.map(item => ({
         ingredientId: item.ingredientId,
         categoryId: item.categoryId,
+        quantity: 1, // 추가: 기본 수량
+        unit: 'string', // 추가: 기본 단위 (Swagger에서 확인된 값)
         expirationDate: this.formatDateForAPI(item.expirationDate),
       })),
+      ingredientIds: [0], // Swagger와 동일하게 0 사용
     };
+
+    console.log('processedRequest:', JSON.stringify(processedRequest, null, 2));
 
     const endpoint = `/ap1/v1/ingredient/${refrigeratorId}`;
 
     try {
-      console.log('냉장고에 식재료 추가:', {
-        refrigeratorId,
-        ingredientsCount: processedRequest.ingredientsInfo.length,
-      });
-      console.log('요청 데이터:', processedRequest);
+      console.log('API 호출 시작...');
 
       const response = await ApiService.apiCall(endpoint, {
         method: 'POST',
         body: JSON.stringify(processedRequest),
       });
 
-      console.log('식재료 추가 성공:', response);
+      console.log('=== API 응답 성공 ===');
+      console.log('응답 데이터:', JSON.stringify(response, null, 2));
       return response;
     } catch (error) {
-      console.error('식재료 추가 실패:', error);
+      console.log('=== API 응답 실패 ===');
+      console.error('API 에러:', error);
       throw new Error(`식재료 추가에 실패했습니다: ${error.message}`);
     }
   }
@@ -893,22 +934,41 @@ export class IngredientControllerAPI {
   /**
    * 냉장고 식재료 삭제 (임시 구현)
    */
+  /**
+   * 여러 식재료 배치 삭제
+   * DELETE /ap1/v1/ingredient/batch
+   * Body: { ingredientIds: [1, 2, 3] }
+   */
+  static async batchDeleteIngredients(ingredientIds: string[]): Promise<void> {
+    try {
+      console.log('배치 삭제 API 호출:', ingredientIds);
+
+      const response = await ApiService.apiCall<void>(
+        '/ap1/v1/ingredient/batch', // 정확한 엔드포인트는 백엔드팀에 확인 필요
+        {
+          method: 'DELETE',
+          body: JSON.stringify({
+            ingredientIds: ingredientIds.map(id => parseInt(id, 10)), // string을 number로 변환
+          }),
+        },
+      );
+
+      console.log('배치 삭제 성공');
+      return response;
+    } catch (error) {
+      console.error('배치 삭제 실패:', error);
+      throw new Error(`식재료 삭제에 실패했습니다: ${error.message}`);
+    }
+  }
+
+  /**
+   * 기존 단일 삭제 메서드를 배치 삭제로 변경
+   */
   static async deleteRefrigeratorIngredient(
     refrigeratorIngredientId: string,
   ): Promise<void> {
-    console.warn('DELETE API가 없어서 수량을 0으로 업데이트합니다.');
-
-    try {
-      await this.updateRefrigeratorIngredient(refrigeratorIngredientId, {
-        quantity: 0,
-        expirationDate: new Date().toISOString().split('T')[0],
-      });
-
-      console.log(`식재료 ${refrigeratorIngredientId} 삭제 처리 완료 (수량 0)`);
-    } catch (error) {
-      console.error('식재료 삭제 처리 실패:', error);
-      throw new Error(`식재료 삭제에 실패했습니다: ${error.message}`);
-    }
+    // 단일 삭제도 배치 API 사용
+    return await this.batchDeleteIngredients([refrigeratorIngredientId]);
   }
 
   // ========== 유틸리티 메소드 ==========

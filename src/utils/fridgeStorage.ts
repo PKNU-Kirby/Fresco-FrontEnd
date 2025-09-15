@@ -61,17 +61,16 @@ const isApiAvailable = (): boolean => {
     return false;
   }
 };
-
-// API 응답을 앱에서 사용하는 형태로 변환
 const mapApiItemToFridgeItem = (
   apiItem: RefrigeratorIngredientResponse,
+  actualFridgeId: string, // 실제 냉장고 ID를 파라미터로 받음
 ): FridgeItem => ({
-  id: apiItem.id,
+  id: apiItem.id, // refrigeratorIngredientId (업데이트할 때 사용할 ID)
   name: apiItem.ingredientName,
   quantity: apiItem.quantity?.toString() || '0',
   expiryDate: apiItem.expirationDate,
   itemCategory: CATEGORY_ID_TO_NAME[apiItem.categoryId] || '기타',
-  fridgeId: apiItem.id, // refrigeratorIngredientId를 fridgeId로 사용
+  fridgeId: actualFridgeId, // ✅ 실제 냉장고 ID 사용 (27)
   unit: apiItem.unit || 'g',
   createdAt: apiItem.createdAt,
   updatedAt: apiItem.updatedAt,
@@ -135,8 +134,21 @@ export const getFridgeItemsByFridgeId = async (
       console.log('API 응답:', response);
 
       if (response.content && Array.isArray(response.content)) {
-        const mappedItems = response.content.map(mapApiItemToFridgeItem);
+        // ✅ 실제 fridgeId를 파라미터로 전달
+        const mappedItems = response.content.map(item =>
+          mapApiItemToFridgeItem(item, fridgeId),
+        );
+
         console.log('변환된 아이템들:', mappedItems);
+        console.log(
+          'fridgeId 확인:',
+          mappedItems.map(item => ({
+            name: item.name,
+            itemId: item.id,
+            fridgeId: item.fridgeId,
+          })),
+        );
+
         return mappedItems;
       } else {
         console.warn('빈 배열 응답:', response);
@@ -209,32 +221,43 @@ export const updateFridgeItem = async (
 };
 
 /**
- * 아이템 삭제 (IngredientControllerAPI 우선, AsyncStorage fallback)
+ * 여러 아이템 배치 삭제
  */
-export const deleteItemFromFridge = async (itemId: string): Promise<void> => {
+export const batchDeleteItems = async (itemIds: string[]): Promise<void> => {
   if (isApiAvailable()) {
     try {
-      await IngredientControllerAPI.deleteRefrigeratorIngredient(itemId);
-      console.log(`IngredientControllerAPI를 통해 아이템 ${itemId} 삭제 완료`);
+      await IngredientControllerAPI.batchDeleteIngredients(itemIds);
+      console.log(`API를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`);
     } catch (error) {
-      console.error('IngredientControllerAPI 삭제 실패:', error);
+      console.error('API 배치 삭제 실패:', error);
       throw error;
     }
   } else {
     // AsyncStorage fallback
     try {
       const existingItems = await getFridgeItemsFromStorage();
-      const updatedItems = existingItems.filter(item => item.id !== itemId);
+      const updatedItems = existingItems.filter(
+        item => !itemIds.includes(item.id),
+      );
       await AsyncStorage.setItem(
         FRIDGE_ITEMS_KEY,
         JSON.stringify(updatedItems),
       );
-      console.log(`AsyncStorage를 통해 아이템 ${itemId} 삭제 완료`);
+      console.log(
+        `AsyncStorage를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`,
+      );
     } catch (error) {
-      console.error('AsyncStorage 삭제 실패:', error);
+      console.error('AsyncStorage 배치 삭제 실패:', error);
       throw error;
     }
   }
+};
+
+/**x
+ * 기존 단일 삭제를 배치 삭제로 래핑
+ */
+export const deleteItemFromFridge = async (itemId: string): Promise<void> => {
+  return await batchDeleteItems([itemId]);
 };
 
 /**

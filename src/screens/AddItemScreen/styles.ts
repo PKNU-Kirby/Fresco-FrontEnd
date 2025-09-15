@@ -30,6 +30,9 @@ const shadows = {
 
 // AddItemScreen styles
 export const addItemStyles = StyleSheet.create({
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f2f7f2ff',

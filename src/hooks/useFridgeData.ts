@@ -15,6 +15,35 @@ export type FridgeItem = {
 // 허용되는 단위 목록
 export const ALLOWED_UNITS = ['kg', 'g', 'L', 'ml', '개'] as const;
 export type UnitType = (typeof ALLOWED_UNITS)[number];
+export const batchDeleteItems = async (itemIds: string[]): Promise<void> => {
+  if (isApiAvailable()) {
+    try {
+      await IngredientControllerAPI.batchDeleteIngredients(itemIds);
+      console.log(`API를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`);
+    } catch (error) {
+      console.error('API 배치 삭제 실패:', error);
+      throw error;
+    }
+  } else {
+    // AsyncStorage fallback
+    try {
+      const existingItems = await getFridgeItemsFromStorage();
+      const updatedItems = existingItems.filter(
+        item => !itemIds.includes(item.id),
+      );
+      await AsyncStorage.setItem(
+        FRIDGE_ITEMS_KEY,
+        JSON.stringify(updatedItems),
+      );
+      console.log(
+        `AsyncStorage를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`,
+      );
+    } catch (error) {
+      console.error('AsyncStorage 배치 삭제 실패:', error);
+      throw error;
+    }
+  }
+};
 
 export const useFridgeData = (fridgeId: string) => {
   // 식재료 카테고리 목록 (보관분류 제거)
@@ -160,5 +189,6 @@ export const useFridgeData = (fridgeId: string) => {
     addItem,
     allowedUnits: ALLOWED_UNITS,
     refreshData: loadFridgeData,
+    batchDeleteItems,
   };
 };

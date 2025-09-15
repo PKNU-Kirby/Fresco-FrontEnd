@@ -1,10 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import {
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-} from 'react-native';
+import { SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -22,6 +17,9 @@ import ConfirmModal from '../../components/modals/ConfirmModal';
 import { addItemStyles as styles } from './styles';
 import { RootStackParamList } from '../../../App';
 
+import Config from 'react-native-config';
+import { AsyncStorageService } from '../../services/AsyncStorageService';
+
 export interface ItemFormData {
   id: string;
   name: string;
@@ -37,36 +35,8 @@ export interface ValidationResult {
   message?: string;
 }
 
-// 확인된 식재료 정보 (API 응답 + 사용자 입력)
-export interface ConfirmedIngredient {
-  userInput: ItemFormData;
-  apiResult: {
-    ingredientId: number;
-    ingredientName: string;
-    categoryId: number;
-    categoryName: string;
-  };
-}
-
 // Navigation types
-type AddItemScreenRouteProp = RouteProp<RootStackParamList, 'AddItemScreen'> & {
-  params: {
-    fridgeId: string;
-    // 1. 직접 추가 - 아무 파라미터 없음
-    // 2. 카메라 → 수동 입력
-    recognizedData?: {
-      photo?: string;
-      name?: string;
-      quantity?: string;
-      unit?: string;
-      expiryDate?: string;
-      itemCategory?: string;
-    };
-    // 3. 카메라 → 스캔 결과
-    scanResults?: ConfirmedIngredient[];
-    scanMode?: 'ingredient' | 'receipt';
-  };
-};
+type AddItemScreenRouteProp = RouteProp<RootStackParamList, 'AddItemScreen'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const AddItemScreen: React.FC = () => {
@@ -138,7 +108,7 @@ const AddItemScreen: React.FC = () => {
     validateAllItems,
   } = useAddItemLogic(initialItems);
 
-  // ========== 개선된 식재료 확인 로직 ==========
+  // ========== 식재료 확인 로직 ==========
   const confirmIngredients = useCallback(async () => {
     // 이미 스캔 결과가 있으면 그대로 사용
     if (scanResults && scanResults.length > 0) {
@@ -151,14 +121,9 @@ const AddItemScreen: React.FC = () => {
       setIsLoading(true);
       console.log('식재료 확인 시작:', items);
 
-      const confirmed: ConfirmedIngredient[] = [];
-
-      // 여러 식재료를 병렬로 처리 (성능 개선)
-      const searchPromises = items.map(async (item, index) => {
+      const searchPromises = items.map(async item => {
         try {
           console.log(`"${item.name}" 검색 중...`);
-
-          // IngredientControllerAPI 사용 (일관성 개선)
           const foundIngredient =
             await IngredientControllerAPI.findIngredientByName(item.name);
 
@@ -178,15 +143,9 @@ const AddItemScreen: React.FC = () => {
         }
       });
 
-      // 모든 검색을 병렬로 실행
-      try {
-        const results = await Promise.all(searchPromises);
-        setConfirmedIngredients(results);
-        setIsEditMode(false);
-      } catch (error) {
-        // 하나라도 실패하면 전체 실패
-        throw error;
-      }
+      const results = await Promise.all(searchPromises);
+      setConfirmedIngredients(results);
+      setIsEditMode(false);
     } catch (error) {
       console.error('식재료 확인 실패:', error);
       setErrorMessage(error.message);
@@ -196,29 +155,61 @@ const AddItemScreen: React.FC = () => {
     }
   }, [items, scanResults, setIsEditMode, setIsLoading]);
 
-  // ========== 개선된 저장 로직 ==========
+  // ========== 저장 로직 ==========
+
   const handleSaveItems = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log('식재료 저장 시작:', confirmedIngredients);
+      console.log('=== API 호출 디버깅 시작 ===');
 
-      // IngredientControllerAPI의 편의 메소드 사용
+      // 1. 환경 정보 확인
+      console.log('Config.API_BASE_URL:', Config.API_BASE_URL);
+
+      // 2. 토큰 확인
+      const token = await AsyncStorageService.getAuthToken();
+      console.log(
+        '현재 토큰:',
+        token ? `${token.substring(0, 20)}...` : 'null',
+      );
+
+      // 3. fridgeId 확인
+      console.log('fridgeId:', fridgeId, typeof fridgeId);
+
+      // 4. confirmedIngredients 확인
+      console.log(
+        'confirmedIngredients:',
+        JSON.stringify(confirmedIngredients, null, 2),
+      );
+
+      // 5. 요청 데이터 생성 확인
+      const saveRequest = {
+        ingredientsInfo: confirmedIngredients.map(confirmed => ({
+          ingredientId: confirmed.apiResult.ingredientId,
+          categoryId: confirmed.apiResult.categoryId,
+          expirationDate: confirmed.userInput.expirationDate,
+        })),
+      };
+      console.log('최종 요청 데이터:', JSON.stringify(saveRequest, null, 2));
+
+      // 6. API 호출
+      console.log('API 호출 시작...');
       const response = await IngredientControllerAPI.addConfirmedIngredients(
         fridgeId,
         confirmedIngredients,
       );
 
-      console.log('저장 응답:', response);
+      console.log('=== API 호출 성공 ===');
+      console.log('응답:', JSON.stringify(response, null, 2));
 
-      // 성공 시
       setSavedItemsCount(confirmedIngredients.length);
       setShowSuccessModal(true);
     } catch (error) {
-      console.error('저장 실패:', error);
+      console.log('=== API 호출 실패 ===');
+      console.error('에러 상세:', error);
+      console.error('에러 메시지:', error.message);
+      console.error('에러 스택:', error.stack);
 
-      // 에러 타입에 따른 메시지 개선
       let errorMessage = '식재료 저장 중 오류가 발생했습니다.';
-
       if (error.message.includes('네트워크')) {
         errorMessage = '네트워크 연결을 확인해주세요.';
       } else if (error.message.includes('권한')) {
@@ -227,110 +218,43 @@ const AddItemScreen: React.FC = () => {
         errorMessage = '냉장고 정보를 찾을 수 없습니다.';
       }
 
-      setErrorMessage(errorMessage);
+      setErrorMessage(`${errorMessage}\n\n상세: ${error.message}`);
       setShowErrorModal(true);
     } finally {
       setIsLoading(false);
     }
   }, [confirmedIngredients, fridgeId, setIsLoading]);
 
-  // ========== 개선된 확인 메시지 생성 ==========
-  const confirmationMessage = useMemo(() => {
-    if (confirmedIngredients.length === 0) return '';
-
-    let source = '입력된';
-    if (scanMode === 'ingredient') source = '식재료 인식으로 확인된';
-    else if (scanMode === 'receipt') source = '영수증 스캔으로 확인된';
-
-    const messages = confirmedIngredients.map(confirmed => {
-      const userInput = confirmed.userInput.name;
-      const apiResult = confirmed.apiResult.ingredientName;
-      const category = confirmed.apiResult.categoryName;
-      const expiry = confirmed.userInput.expirationDate;
-
-      // 이름이 같으면 단순 표시, 다르면 변환 표시
-      const nameDisplay =
-        userInput === apiResult
-          ? `• ${apiResult}`
-          : `• "${userInput}" → "${apiResult}"`;
-
-      return `${nameDisplay}\n  카테고리: ${category}\n  유통기한: ${expiry}`;
-    });
-
-    return `${source} 식재료:\n\n${messages.join('\n\n')}\n\n총 ${
-      confirmedIngredients.length
-    }개 식재료를 냉장고에 추가하시겠습니까?`;
-  }, [confirmedIngredients, scanMode]);
-  // AddItemScreen.tsx에 추가할 함수
-  // AddItemScreen.tsx에 추가할 함수들
-
-  // 최종 확인 모달 핸들러들
-  const handleFinalConfirmModalConfirm = useCallback(() => {
-    setShowFinalConfirmModal(false);
-    handleSaveItems();
-  }, [handleSaveItems]);
-
-  const handleFinalConfirmModalCancel = useCallback(() => {
-    setShowFinalConfirmModal(false);
-  }, []);
-
-  // 뒤로가기 확인 모달 핸들러들
-  const handleGoBackConfirmModalConfirm = useCallback(() => {
-    setShowGoBackConfirmModal(false);
-    navigation.goBack();
-  }, [navigation]);
-
-  const handleGoBackConfirmModalCancel = useCallback(() => {
-    setShowGoBackConfirmModal(false);
-  }, []);
-  const handleBackToEdit = useCallback(() => {
-    setIsEditMode(true);
-
-    // 스캔 결과가 있었다면 items를 스캔 결과로 복원
-    if (scanResults && scanResults.length > 0) {
-      const itemsFromScan = scanResults.map(result => result.userInput);
-      setItems(itemsFromScan);
-    }
-
-    setConfirmedIngredients([]);
-  }, [setIsEditMode, scanResults, setItems]);
-  // ========== 개선된 성공 후 처리 ==========
-  const handleSuccessConfirm = useCallback(() => {
-    setShowSuccessModal(false);
-
-    // 낙관적 업데이트를 위한 새 아이템 정보 생성
-    const newItems = confirmedIngredients.map((confirmed, index) => ({
-      id: `new_${Date.now()}_${index}`, // 고유 ID 생성
-      ingredientId: confirmed.apiResult.ingredientId,
-      categoryId: confirmed.apiResult.categoryId,
-      ingredientName: confirmed.apiResult.ingredientName,
-      quantity: parseInt(confirmed.userInput.quantity) || 1,
-      unit: confirmed.userInput.unit,
-      expirationDate: confirmed.userInput.expirationDate,
-      categoryName: confirmed.apiResult.categoryName,
-      createdAt: new Date().toISOString(),
-    }));
-
-    // 홈화면으로 돌아가면서 새 아이템들 전달
-    navigation.navigate('FridgeHome', {
-      fridgeId,
-      newItems,
-      refreshKey: Date.now(), // 강제 새로고침 트리거
-    });
-  }, [navigation, confirmedIngredients, fridgeId]);
-
-  // ========== 개선된 에러 처리 ==========
-  const handleErrorConfirm = useCallback(() => {
-    setShowErrorModal(false);
-    setErrorMessage('');
-
-    // 에러 후 편집 모드로 돌아가기
-    if (!isEditMode) {
-      setIsEditMode(true);
+  // ========== 헤더 관련 로직 ==========
+  const headerButtonText = useMemo(() => {
+    if (isEditMode) {
+      return '확인';
+    } else {
+      return '저장';
     }
   }, [isEditMode]);
 
-  // ========== 개선된 뒤로가기 처리 ==========
+  const isHeaderButtonDisabled = useMemo(() => {
+    if (isEditMode) {
+      // 편집 모드에서는 최소 하나의 식재료 이름이 입력되어야 함
+      return isLoading || !items.some(item => item.name.trim() !== '');
+    } else {
+      // 확인 모드에서는 확인된 식재료가 있어야 함
+      return isLoading || confirmedIngredients.length === 0;
+    }
+  }, [isEditMode, isLoading, items, confirmedIngredients]);
+
+  const handleHeaderButtonPress = useCallback(() => {
+    if (isEditMode) {
+      // 편집 모드에서는 식재료 확인
+      confirmIngredients();
+    } else {
+      // 확인 모드에서는 최종 확인 모달 표시
+      setShowFinalConfirmModal(true);
+    }
+  }, [isEditMode, confirmIngredients]);
+
+  // ========== 뒤로가기 로직 ==========
   const handleGoBack = useCallback(() => {
     if (isEditMode) {
       // 변경사항이 있는지 확인
@@ -350,15 +274,153 @@ const AddItemScreen: React.FC = () => {
       // 확인 모드에서는 편집으로 돌아가기
       handleBackToEdit();
     }
-  }, [isEditMode, items, handleBackToEdit, navigation]);
+  }, [isEditMode, items, navigation]);
 
-  // ... 나머지 로직은 기존과 동일 ...
+  // ========== Actions 관련 로직 ==========
+  const handleBackToEdit = useCallback(() => {
+    setIsEditMode(true);
+    if (scanResults && scanResults.length > 0) {
+      const itemsFromScan = scanResults.map(result => result.userInput);
+      setItems(itemsFromScan);
+    }
+    setConfirmedIngredients([]);
+  }, [setIsEditMode, scanResults, setItems]);
+
+  const handleFocusComplete = useCallback(() => {
+    setFocusedItemId(null);
+  }, [setFocusedItemId]);
+
+  // ========== 모달 핸들러들 ==========
+  const handleFinalConfirmModalConfirm = useCallback(() => {
+    setShowFinalConfirmModal(false);
+    handleSaveItems();
+  }, [handleSaveItems]);
+
+  const handleFinalConfirmModalCancel = useCallback(() => {
+    setShowFinalConfirmModal(false);
+  }, []);
+
+  const handleGoBackConfirmModalConfirm = useCallback(() => {
+    setShowGoBackConfirmModal(false);
+    navigation.goBack();
+  }, [navigation]);
+
+  const handleGoBackConfirmModalCancel = useCallback(() => {
+    setShowGoBackConfirmModal(false);
+  }, []);
+
+  const handleSuccessConfirm = useCallback(() => {
+    setShowSuccessModal(false);
+
+    const newItems = confirmedIngredients.map((confirmed, index) => ({
+      id: `new_${Date.now()}_${index}`,
+      ingredientId: confirmed.apiResult.ingredientId,
+      categoryId: confirmed.apiResult.categoryId,
+      ingredientName: confirmed.apiResult.ingredientName,
+      quantity: parseInt(confirmed.userInput.quantity) || 1,
+      unit: confirmed.userInput.unit,
+      expirationDate: confirmed.userInput.expirationDate,
+      categoryName: confirmed.apiResult.categoryName,
+      createdAt: new Date().toISOString(),
+    }));
+
+    navigation.navigate('MainTabs', {
+      fridgeId,
+      fridgeName: '냉장고',
+      screen: 'FridgeHomeScreen',
+      params: {
+        fridgeId,
+        fridgeName: '냉장고',
+        newItems,
+        refreshKey: Date.now(),
+      },
+    });
+  }, [navigation, confirmedIngredients, fridgeId]);
+
+  const handleErrorConfirm = useCallback(() => {
+    setShowErrorModal(false);
+    setErrorMessage('');
+    if (!isEditMode) {
+      setIsEditMode(true);
+    }
+  }, [isEditMode]);
+
+  // ========== 확인 메시지 생성 ==========
+  const confirmationMessage = useMemo(() => {
+    if (confirmedIngredients.length === 0) return '';
+
+    let source = '입력된';
+    if (scanMode === 'ingredient') source = '식재료 인식으로 확인된';
+    else if (scanMode === 'receipt') source = '영수증 스캔으로 확인된';
+
+    const messages = confirmedIngredients.map(confirmed => {
+      const userInput = confirmed.userInput.name;
+      const apiResult = confirmed.apiResult.ingredientName;
+      const category = confirmed.apiResult.categoryName;
+      const expiry = confirmed.userInput.expirationDate;
+
+      const nameDisplay =
+        userInput === apiResult
+          ? `• ${apiResult}`
+          : `• "${userInput}" → "${apiResult}"`;
+
+      return `${nameDisplay}\n  카테고리: ${category}\n  유통기한: ${expiry}`;
+    });
+
+    return `${source} 식재료:\n\n${messages.join('\n\n')}\n\n총 ${
+      confirmedIngredients.length
+    }개 식재료를 냉장고에 추가하시겠습니까?`;
+  }, [confirmedIngredients, scanMode]);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* ... 기존 JSX ... */}
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={insets.top}
+      >
+        {/* 기존 컴포넌트와 맞는 props 전달 */}
+        <AddItemHeader
+          onGoBack={handleGoBack}
+          onHeaderButtonPress={handleHeaderButtonPress}
+          headerButtonText={headerButtonText}
+          isHeaderButtonDisabled={isHeaderButtonDisabled}
+        />
 
-      {/* 개선된 최종 확인 모달 */}
+        <AddItemContent
+          items={items}
+          isEditMode={isEditMode}
+          focusedItemId={focusedItemId}
+          onUpdateItem={updateItem}
+          onRemoveItem={removeItem}
+          onFocusComplete={handleFocusComplete}
+          onAddNewItem={addNewItem}
+          confirmedIngredients={confirmedIngredients}
+        />
+
+        <AddItemActions
+          isEditMode={isEditMode}
+          onAddNewItem={addNewItem}
+          onBackToEdit={handleBackToEdit}
+        />
+      </KeyboardAvoidingView>
+
+      {/* 뒤로가기 확인 모달 */}
+      <ConfirmModal
+        isAlert={true}
+        visible={showGoBackConfirmModal}
+        title="작성 중인 내용이 있습니다"
+        message="지금 나가면 작성 중인 내용이 사라집니다.\n정말 나가시겠습니까?"
+        iconContainer={{ backgroundColor: '#fff3cd' }}
+        icon={{ name: 'warning', color: '#856404', size: 48 }}
+        confirmText="나가기"
+        cancelText="계속 작성"
+        confirmButtonStyle="destructive"
+        onConfirm={handleGoBackConfirmModalConfirm}
+        onCancel={handleGoBackConfirmModalCancel}
+      />
+
+      {/* 최종 확인 모달 */}
       <ConfirmModal
         isAlert={true}
         visible={showFinalConfirmModal}
@@ -373,7 +435,7 @@ const AddItemScreen: React.FC = () => {
         onCancel={handleFinalConfirmModalCancel}
       />
 
-      {/* 개선된 성공 모달 */}
+      {/* 성공 모달 */}
       <ConfirmModal
         isAlert={false}
         visible={showSuccessModal}
@@ -388,7 +450,7 @@ const AddItemScreen: React.FC = () => {
         onCancel={handleSuccessConfirm}
       />
 
-      {/* 개선된 에러 모달 */}
+      {/* 에러 모달 */}
       <ConfirmModal
         isAlert={false}
         visible={showErrorModal}
@@ -402,7 +464,7 @@ const AddItemScreen: React.FC = () => {
         onConfirm={() => {
           setShowErrorModal(false);
           setErrorMessage('');
-          handleSaveItems(); // 자동 재시도
+          handleSaveItems();
         }}
         onCancel={handleErrorConfirm}
       />
