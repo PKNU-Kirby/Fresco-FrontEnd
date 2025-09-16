@@ -81,11 +81,14 @@ const FridgeHomeScreen = ({ route }: Props) => {
   const [isAddItemModalVisible, setIsAddItemModalVisible] = useState(false);
 
   // 카테고리별 필터링을 위한 카테고리 ID 매핑 (실제 구현에서는 API에서 카테고리 목록을 가져와야 함)
+  // FridgeHomeScreen의 getCategoryIds 함수 수정
   const getCategoryIds = useCallback((categoryName: string): number[] => {
-    if (categoryName === '전체') return [];
+    if (categoryName === '전체') {
+      // 빈 배열 대신 모든 카테고리 ID 전달
+      return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    }
 
-    // 실제로는 카테고리 이름을 ID로 변환하는 로직이 필요
-    // 지금은 임시로 하드코딩
+    // 나머지 기존 코드 그대로
     const categoryMap: { [key: string]: number } = {
       베이커리: 1,
       '채소 / 과일': 2,
@@ -93,10 +96,10 @@ const FridgeHomeScreen = ({ route }: Props) => {
       가공식품: 4,
       '수산 / 건어물': 5,
       '쌀 / 잡곡': 6,
-      '우유 / 유제품': 7,
-      건강식품: 8,
-      '장 / 양념 / 소스': 9,
-      기타: 10,
+      '주류 / 음료': 7,
+      '우유 / 유제품': 8,
+      건강식품: 9,
+      '장 / 양념 / 소스': 10,
     };
 
     const categoryId = categoryMap[categoryName];
@@ -168,13 +171,6 @@ const FridgeHomeScreen = ({ route }: Props) => {
       console.log('새로 추가된 아이템들 감지:', newItems);
       // 새 아이템이 있으면 데이터 새로고침
       loadActualFridgeItems();
-
-      // 성공 메시지 표시 (선택사항)
-      Alert.alert(
-        '추가 완료',
-        `${newItems.length}개의 식재료가 냉장고에 추가되었습니다.`,
-        [{ text: '확인' }],
-      );
     }
   }, [newItems, refreshKey, loadActualFridgeItems]);
 

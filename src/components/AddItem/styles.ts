@@ -76,14 +76,13 @@ export const addItemStyles = StyleSheet.create({
     fontSize: 14,
     color: '#2196F3',
     fontWeight: '600',
-    flex: 1,
+    paddingRight: 8,
   },
 
   confirmationApiResult: {
     fontSize: 14,
     color: '#4CAF50',
     fontWeight: '600',
-    flex: 1,
   },
 
   confirmationDetail: {
@@ -286,6 +285,90 @@ export const addItemStyles = StyleSheet.create({
 
 // AddItemCard styles
 export const cardStyles = StyleSheet.create({
+  // 검색 관련 스타일 추가
+  nameInputContainer: {
+    position: 'relative',
+    zIndex: 9999, // 매우 높은 z-index
+  },
+
+  nameInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+
+  // 기존 nameInput 스타일 유지하면서 약간 수정
+  nameInput: {
+    width: scale(200),
+    fontSize: scale(18),
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: scale(4),
+    paddingVertical: scale(4),
+    paddingHorizontal: scale(8),
+    paddingRight: scale(35), // 로딩 인디케이터 공간 확보
+    borderWidth: scale(1),
+    borderColor: '#E0E0E0',
+    borderRadius: scale(6),
+    backgroundColor: '#F9F9F9',
+    minHeight: scale(40),
+  },
+
+  searchLoadingIndicator: {
+    position: 'absolute',
+    right: scale(8),
+    top: scale(8),
+    zIndex: 10000,
+  },
+
+  searchResultsContainer: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderWidth: scale(1),
+    borderColor: '#E0E0E0',
+    borderTopWidth: 0,
+    borderBottomLeftRadius: scale(6),
+    borderBottomRightRadius: scale(6),
+    maxHeight: scale(150),
+    zIndex: 10001, // 가장 높은 z-index
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: scale(4), // 그림자를 더 강하게
+    },
+    shadowOpacity: 0.2, // 그림자 진하게
+    shadowRadius: scale(8),
+    elevation: 15, // Android elevation 높게
+  },
+
+  searchResultItem: {
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(10),
+    borderBottomWidth: scale(1),
+    borderBottomColor: '#f0f0f0',
+    backgroundColor: '#fff',
+  },
+
+  searchResultName: {
+    fontSize: scale(14),
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: scale(2),
+  },
+
+  searchResultCategory: {
+    fontSize: scale(12),
+    color: '#666',
+    fontStyle: 'italic',
+  },
+
+  // 마지막 아이템은 borderBottom 제거
+  'searchResultItem:last-child': {
+    borderBottomWidth: 0,
+  },
   itemCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
@@ -326,21 +409,6 @@ export const cardStyles = StyleSheet.create({
     justifyContent: 'space-between',
   },
 
-  // name styles
-  nameInput: {
-    width: scale(200),
-    fontSize: scale(18),
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: scale(4),
-    paddingVertical: scale(4),
-    paddingHorizontal: scale(8),
-    borderWidth: scale(1),
-    borderColor: '#E0E0E0',
-    borderRadius: scale(6),
-    backgroundColor: '#F9F9F9',
-    minHeight: scale(40),
-  },
   itemName: {
     fontSize: scale(18),
     fontWeight: 'bold',

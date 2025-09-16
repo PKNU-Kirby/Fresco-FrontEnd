@@ -28,6 +28,13 @@ export interface ItemFormData {
   expirationDate: string;
   itemCategory: string;
   photo?: string;
+  // 사용자가 선택한 식재료 정보 추가
+  selectedIngredient?: {
+    ingredientId: number;
+    ingredientName: string;
+    categoryId: number;
+    categoryName: string;
+  };
 }
 
 export interface ValidationResult {
@@ -45,6 +52,25 @@ const AddItemScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { fridgeId, recognizedData, scanResults, scanMode } = route.params;
 
+  // 카테고리 매핑 헬퍼 함수 (백엔드 기준으로 수정)
+  const getCategoryByName = (categoryName: string) => {
+    const categoryMap: { [key: string]: { id: number; name: string } } = {
+      베이커리: { id: 1, name: '베이커리' },
+      '채소 / 과일': { id: 2, name: '채소 / 과일' },
+      '정육 / 계란': { id: 3, name: '정육 / 계란' },
+      가공식품: { id: 4, name: '가공식품' },
+      '수산 / 건어물': { id: 5, name: '수산 / 건어물' },
+      '쌀 / 잡곡': { id: 6, name: '쌀 / 잡곡' },
+      '주류 / 음료': { id: 7, name: '주류 / 음료' },
+      '우유 / 유제품': { id: 8, name: '우유 / 유제품' },
+      건강식품: { id: 9, name: '건강식품' },
+      '장 / 양념 / 소스': { id: 10, name: '장 / 양념 / 소스' },
+      // 기타는 매핑되지 않은 카테고리에 대한 fallback용
+      기타: { id: 11, name: '기타' },
+    };
+    return categoryMap[categoryName] || categoryMap['기타'];
+  };
+
   // 모달 상태들
   const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
   const [showGoBackConfirmModal, setShowGoBackConfirmModal] = useState(false);
@@ -52,6 +78,9 @@ const AddItemScreen: React.FC = () => {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [savedItemsCount, setSavedItemsCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // 백엔드 응답 저장용 state 추가
+  const [savedItemsResponse, setSavedItemsResponse] = useState<any[]>([]);
 
   // 확인된 식재료 정보 상태
   const [confirmedIngredients, setConfirmedIngredients] = useState<
@@ -108,7 +137,7 @@ const AddItemScreen: React.FC = () => {
     validateAllItems,
   } = useAddItemLogic(initialItems);
 
-  // ========== 식재료 확인 로직 ==========
+  // ========== 식재료 확인 로직 (수정됨) ==========
   const confirmIngredients = useCallback(async () => {
     // 이미 스캔 결과가 있으면 그대로 사용
     if (scanResults && scanResults.length > 0) {
@@ -121,30 +150,80 @@ const AddItemScreen: React.FC = () => {
       setIsLoading(true);
       console.log('식재료 확인 시작:', items);
 
-      const searchPromises = items.map(async item => {
-        try {
-          console.log(`"${item.name}" 검색 중...`);
-          const foundIngredient =
-            await IngredientControllerAPI.findIngredientByName(item.name);
+      const confirmedList: ConfirmedIngredient[] = [];
 
-          if (foundIngredient) {
-            return {
-              userInput: item,
-              apiResult: foundIngredient,
-            };
-          } else {
-            throw new Error(`"${item.name}"에 대한 식재료를 찾을 수 없습니다.`);
+      for (const item of items) {
+        // 사용자가 이미 식재료를 선택한 경우, API 호출 없이 그 정보 사용
+        if (item.selectedIngredient) {
+          // selectedIngredient가 문자열인 경우 파싱
+          let selectedIngredient = item.selectedIngredient;
+          if (typeof selectedIngredient === 'string') {
+            try {
+              selectedIngredient = JSON.parse(selectedIngredient);
+            } catch (error) {
+              console.error('selectedIngredient 파싱 실패:', error);
+              selectedIngredient = null;
+            }
           }
-        } catch (error) {
-          console.error(`"${item.name}" 검색 실패:`, error);
-          throw new Error(
-            `"${item.name}" 확인에 실패했습니다: ${error.message}`,
-          );
-        }
-      });
 
-      const results = await Promise.all(searchPromises);
-      setConfirmedIngredients(results);
+          if (selectedIngredient) {
+            confirmedList.push({
+              userInput: item,
+              apiResult: selectedIngredient,
+            });
+            console.log(
+              `"${item.name}" - 사용자 선택한 식재료 사용:`,
+              selectedIngredient,
+            );
+            console.log('confirmedList 추가된 항목:', {
+              userInput: item,
+              apiResult: selectedIngredient,
+            });
+          } else {
+            // 파싱 실패 시 API 검색으로 fallback
+            console.log(
+              `"${item.name}" - selectedIngredient 파싱 실패, API 검색으로 fallback`,
+            );
+            // API 검색 로직으로 이동
+          }
+        } else {
+          // 사용자가 선택하지 않은 경우에만 API 호출
+          try {
+            console.log(`"${item.name}" 검색 중...`);
+            const foundIngredient =
+              await IngredientControllerAPI.findIngredientByName(item.name);
+
+            if (foundIngredient) {
+              confirmedList.push({
+                userInput: item,
+                apiResult: foundIngredient,
+              });
+            } else {
+              throw new Error(
+                `"${item.name}"에 대한 식재료를 찾을 수 없습니다.`,
+              );
+            }
+          } catch (error) {
+            console.error(`"${item.name}" 검색 실패:`, error);
+
+            // API 호출 실패 시에도 사용자 입력으로 진행할 수 있도록 처리
+            // 기본 카테고리와 함께 사용자 입력을 그대로 사용
+            const defaultCategory = getCategoryByName(item.itemCategory);
+            confirmedList.push({
+              userInput: item,
+              apiResult: {
+                ingredientId: -1, // 임시 ID (서버에서 새로 생성될 예정)
+                ingredientName: item.name,
+                categoryId: defaultCategory.id,
+                categoryName: defaultCategory.name,
+              },
+            });
+            console.log(`"${item.name}" - API 실패로 사용자 입력 그대로 사용`);
+          }
+        }
+      }
+
+      setConfirmedIngredients(confirmedList);
       setIsEditMode(false);
     } catch (error) {
       console.error('식재료 확인 실패:', error);
@@ -156,7 +235,6 @@ const AddItemScreen: React.FC = () => {
   }, [items, scanResults, setIsEditMode, setIsLoading]);
 
   // ========== 저장 로직 ==========
-
   const handleSaveItems = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -182,12 +260,36 @@ const AddItemScreen: React.FC = () => {
       );
 
       // 5. 요청 데이터 생성 확인
+      const ingredientIds: number[] = [];
+      const ingredientsInfo = confirmedIngredients.map(confirmed => {
+        // apiResult가 문자열인 경우 파싱
+        let apiResult = confirmed.apiResult;
+        if (typeof apiResult === 'string') {
+          try {
+            apiResult = JSON.parse(apiResult);
+          } catch (error) {
+            console.error('저장 시 apiResult 파싱 실패:', error);
+            apiResult = { ingredientId: -1, categoryId: 11 }; // 기본값 (기타 카테고리)
+          }
+        }
+
+        const ingredientId = apiResult.ingredientId || 0;
+        ingredientIds.push(ingredientId);
+
+        return {
+          ingredientId: ingredientId,
+          categoryId: apiResult.categoryId || 11, // 기타 카테고리
+          quantity: parseInt(confirmed.userInput.quantity) || 1,
+          unit: confirmed.userInput.unit || '개',
+          expirationDate:
+            confirmed.userInput.expirationDate ||
+            new Date().toISOString().split('T')[0],
+        };
+      });
+
       const saveRequest = {
-        ingredientsInfo: confirmedIngredients.map(confirmed => ({
-          ingredientId: confirmed.apiResult.ingredientId,
-          categoryId: confirmed.apiResult.categoryId,
-          expirationDate: confirmed.userInput.expirationDate,
-        })),
+        ingredientsInfo,
+        ingredientIds,
       };
       console.log('최종 요청 데이터:', JSON.stringify(saveRequest, null, 2));
 
@@ -201,6 +303,8 @@ const AddItemScreen: React.FC = () => {
       console.log('=== API 호출 성공 ===');
       console.log('응답:', JSON.stringify(response, null, 2));
 
+      // 백엔드 응답 저장 (result 배열 저장)
+      setSavedItemsResponse(response.result || []);
       setSavedItemsCount(confirmedIngredients.length);
       setShowSuccessModal(true);
     } catch (error) {
@@ -312,17 +416,25 @@ const AddItemScreen: React.FC = () => {
   const handleSuccessConfirm = useCallback(() => {
     setShowSuccessModal(false);
 
-    const newItems = confirmedIngredients.map((confirmed, index) => ({
-      id: `new_${Date.now()}_${index}`,
-      ingredientId: confirmed.apiResult.ingredientId,
-      categoryId: confirmed.apiResult.categoryId,
-      ingredientName: confirmed.apiResult.ingredientName,
-      quantity: parseInt(confirmed.userInput.quantity) || 1,
-      unit: confirmed.userInput.unit,
-      expirationDate: confirmed.userInput.expirationDate,
-      categoryName: confirmed.apiResult.categoryName,
-      createdAt: new Date().toISOString(),
-    }));
+    // 백엔드 응답 데이터를 사용해서 newItems 생성
+    const newItems = savedItemsResponse.map((responseItem, index) => {
+      // 해당하는 confirmedIngredient 찾기
+      const confirmedIngredient = confirmedIngredients[index];
+
+      return {
+        id: `new_${Date.now()}_${index}`,
+        ingredientId: responseItem.ingredientId,
+        categoryId: responseItem.categoryId,
+        ingredientName: responseItem.ingredientName,
+        quantity: responseItem.quantity, // 백엔드 응답값 사용
+        unit: confirmedIngredient?.userInput.unit || '개', // 단위는 프론트에서만 관리
+        expirationDate: responseItem.expirationDate, // 백엔드에서 계산된 날짜 사용
+        categoryName: confirmedIngredient?.apiResult?.categoryName || '기타',
+        createdAt: new Date().toISOString(),
+      };
+    });
+
+    console.log('홈으로 전달하는 newItems (백엔드 응답 기반):', newItems);
 
     navigation.navigate('MainTabs', {
       fridgeId,
@@ -335,7 +447,7 @@ const AddItemScreen: React.FC = () => {
         refreshKey: Date.now(),
       },
     });
-  }, [navigation, confirmedIngredients, fridgeId]);
+  }, [navigation, savedItemsResponse, confirmedIngredients, fridgeId]);
 
   const handleErrorConfirm = useCallback(() => {
     setShowErrorModal(false);
@@ -345,7 +457,7 @@ const AddItemScreen: React.FC = () => {
     }
   }, [isEditMode]);
 
-  // ========== 확인 메시지 생성 ==========
+  // ========== 확인 메시지 생성 (수정됨) ==========
   const confirmationMessage = useMemo(() => {
     if (confirmedIngredients.length === 0) return '';
 
@@ -353,18 +465,40 @@ const AddItemScreen: React.FC = () => {
     if (scanMode === 'ingredient') source = '식재료 인식으로 확인된';
     else if (scanMode === 'receipt') source = '영수증 스캔으로 확인된';
 
-    const messages = confirmedIngredients.map(confirmed => {
-      const userInput = confirmed.userInput.name;
-      const apiResult = confirmed.apiResult.ingredientName;
-      const category = confirmed.apiResult.categoryName;
-      const expiry = confirmed.userInput.expirationDate;
+    const messages = confirmedIngredients.map((confirmed, index) => {
+      // apiResult가 문자열인 경우 파싱
+      let apiResult = confirmed.apiResult;
+      if (typeof apiResult === 'string') {
+        try {
+          apiResult = JSON.parse(apiResult);
+        } catch (error) {
+          console.error('모달 메시지 apiResult 파싱 실패:', error);
+          apiResult = null;
+        }
+      }
 
+      console.log(`모달 메시지 생성 ${index}:`, {
+        confirmed,
+        userInput: confirmed.userInput,
+        originalApiResult: confirmed.apiResult,
+        parsedApiResult: apiResult,
+      });
+
+      const userInputName = confirmed.userInput?.name || '이름없음';
+      const finalName = apiResult?.ingredientName || userInputName; // undefined 방지
+      const quantity = confirmed.userInput?.quantity || '1';
+      const unit = confirmed.userInput?.unit || '개';
+      const expiry = confirmed.userInput?.expirationDate;
+
+      // 사용자 입력과 최종 이름이 다른 경우만 화살표 표시
       const nameDisplay =
-        userInput === apiResult
-          ? `• ${apiResult}`
-          : `• "${userInput}" → "${apiResult}"`;
+        userInputName === finalName
+          ? `• ${finalName}`
+          : `• "${userInputName}" → "${finalName}"`;
 
-      return `${nameDisplay}\n  카테고리: ${category}\n  유통기한: ${expiry}`;
+      return `${nameDisplay}\n  수량: ${quantity}${unit}\n  소비기한: ${
+        expiry || '자동입력'
+      }`;
     });
 
     return `${source} 식재료:\n\n${messages.join('\n\n')}\n\n총 ${

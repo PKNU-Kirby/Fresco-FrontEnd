@@ -26,8 +26,8 @@ interface AddItemContentProps {
   ) => void;
   onRemoveItem: (itemId: string) => void;
   onFocusComplete: () => void;
-  onAddNewItem?: () => string; // 새 아이템 추가하고 ID 반환
-  confirmedIngredients?: ConfirmedIngredient[]; // 확인된 식재료 정보
+  onAddNewItem?: () => string;
+  confirmedIngredients?: ConfirmedIngredient[];
 }
 
 export const AddItemContent: React.FC<AddItemContentProps> = ({
@@ -80,62 +80,56 @@ export const AddItemContent: React.FC<AddItemContentProps> = ({
                 onFocusComplete={onFocusComplete}
               />
             ))
-          : // 확인 모드: 확인된 식재료 정보 표시
-            confirmedIngredients.map((confirmed, index) => (
-              <View key={index} style={styles.confirmationCard}>
-                <View style={styles.confirmationHeader}>
-                  <Text style={styles.confirmationTitle}>
-                    {index + 1}번째 식재료
-                  </Text>
-                </View>
+          : // 확인 모드: 간단한 정보만 표시
+            confirmedIngredients.map((confirmed, index) => {
+              // apiResult가 문자열인 경우 파싱 처리
+              let apiResult = confirmed.apiResult;
+              if (typeof apiResult === 'string') {
+                try {
+                  apiResult = JSON.parse(apiResult);
+                } catch (error) {
+                  console.error('apiResult 파싱 실패:', error);
+                  apiResult = null;
+                }
+              }
 
-                <View style={styles.confirmationContent}>
-                  <View style={styles.confirmationRow}>
-                    <Text style={styles.confirmationLabel}>입력한 이름:</Text>
-                    <Text style={styles.confirmationUserInput}>
-                      "{confirmed.userInput.name}"
+              console.log(`확인 모드 렌더링 ${index}:`, {
+                userInputName: confirmed.userInput?.name,
+                apiResultName: apiResult?.ingredientName,
+                parsedApiResult: apiResult,
+                fullUserInput: confirmed.userInput,
+              });
+
+              return (
+                <View key={index} style={styles.confirmationCard}>
+                  <View style={styles.confirmationHeader}>
+                    <Text style={styles.confirmationTitle}>
+                      {apiResult?.ingredientName ||
+                        confirmed.userInput?.name ||
+                        '이름 없음'}
                     </Text>
                   </View>
 
-                  <View style={styles.confirmationArrow}>
-                    <Text style={styles.arrowText}>↓</Text>
-                  </View>
-
-                  <View style={styles.confirmationRow}>
-                    <Text style={styles.confirmationLabel}>인식된 식재료:</Text>
-                    <Text style={styles.confirmationApiResult}>
-                      "{confirmed.apiResult.ingredientName}"
-                    </Text>
-                  </View>
-
-                  <View style={styles.confirmationRow}>
-                    <Text style={styles.confirmationLabel}>카테고리:</Text>
-                    <Text style={styles.confirmationDetail}>
-                      {confirmed.apiResult.categoryName}
-                    </Text>
-                  </View>
-
-                  <View style={styles.confirmationDivider} />
-
-                  <View style={styles.confirmationRow}>
-                    <Text style={styles.confirmationLabel}>수량:</Text>
-                    <Text style={styles.confirmationDetail}>
-                      {confirmed.userInput.quantity}
-                      {confirmed.userInput.unit}
-                    </Text>
-                  </View>
-
-                  {confirmed.userInput.expirationDate && (
+                  <View style={styles.confirmationContent}>
                     <View style={styles.confirmationRow}>
-                      <Text style={styles.confirmationLabel}>유통기한:</Text>
+                      <Text style={styles.confirmationLabel}>수량:</Text>
                       <Text style={styles.confirmationDetail}>
-                        {confirmed.userInput.expirationDate}
+                        {confirmed.userInput?.quantity || '1'}
+                        {confirmed.userInput?.unit || '개'}
                       </Text>
                     </View>
-                  )}
+
+                    <View style={styles.confirmationDivider} />
+                    <View style={styles.confirmationRow}>
+                      <Text style={styles.confirmationLabel}>소비기한:</Text>
+                      <Text style={styles.confirmationDetail}>
+                        {confirmed.userInput?.expirationDate || '자동입력'}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
-              </View>
-            ))}
+              );
+            })}
 
         <View style={styles.bottomPadding} />
       </ScrollView>

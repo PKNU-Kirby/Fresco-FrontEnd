@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 import { FridgeStorage, ItemCategoryStorage } from '../utils/AsyncStorageUtils';
+// batchDeleteItems에 필요한 import 추가
+import {
+  batchDeleteItems,
+  getFridgeItemsByFridgeId,
+} from '../utils/fridgeStorage';
 
 export type FridgeItem = {
   id: string;
@@ -15,40 +20,10 @@ export type FridgeItem = {
 // 허용되는 단위 목록
 export const ALLOWED_UNITS = ['kg', 'g', 'L', 'ml', '개'] as const;
 export type UnitType = (typeof ALLOWED_UNITS)[number];
-export const batchDeleteItems = async (itemIds: string[]): Promise<void> => {
-  if (isApiAvailable()) {
-    try {
-      await IngredientControllerAPI.batchDeleteIngredients(itemIds);
-      console.log(`API를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`);
-    } catch (error) {
-      console.error('API 배치 삭제 실패:', error);
-      throw error;
-    }
-  } else {
-    // AsyncStorage fallback
-    try {
-      const existingItems = await getFridgeItemsFromStorage();
-      const updatedItems = existingItems.filter(
-        item => !itemIds.includes(item.id),
-      );
-      await AsyncStorage.setItem(
-        FRIDGE_ITEMS_KEY,
-        JSON.stringify(updatedItems),
-      );
-      console.log(
-        `AsyncStorage를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`,
-      );
-    } catch (error) {
-      console.error('AsyncStorage 배치 삭제 실패:', error);
-      throw error;
-    }
-  }
-};
 
 export const useFridgeData = (fridgeId: string) => {
   // 식재료 카테고리 목록 (보관분류 제거)
   const [itemCategories, setItemCategories] = useState<string[]>([]);
-
   // 실제 냉장고 아이템들을 상태로 관리
   const [fridgeItems, setFridgeItems] = useState<FridgeItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,15 +32,19 @@ export const useFridgeData = (fridgeId: string) => {
   const loadFridgeData = async () => {
     try {
       setLoading(true);
-
       // 냉장고 아이템과 카테고리를 병렬로 로드
       const [items, categories] = await Promise.all([
-        FridgeStorage.getFridgeItemsByFridgeId(fridgeId),
+        getFridgeItemsByFridgeId(fridgeId), // 수정된 함수 사용
         ItemCategoryStorage.getItemCategories(),
       ]);
 
       setFridgeItems(items);
-      setItemCategories(categories);
+
+      // "전체"를 맨 앞에 추가 (중복 방지)
+      const categoriesWithAll = categories.includes('전체')
+        ? categories
+        : ['전체', ...categories];
+      setItemCategories(categoriesWithAll);
     } catch (error) {
       console.error('냉장고 데이터 로드 실패:', error);
     } finally {
@@ -78,15 +57,25 @@ export const useFridgeData = (fridgeId: string) => {
     loadFridgeData();
   }, [fridgeId]);
 
-  // 아이템 삭제 함수 (AsyncStorage와 동기화)
-  const deleteItem = async (itemId: number) => {
+  // 단일 아이템 삭제 함수 (배치 삭제 사용)
+  const deleteItem = async (itemId: string) => {
     try {
-      await FridgeStorage.deleteFridgeItem(itemId);
-      setFridgeItems(prev =>
-        prev.filter(item => parseInt(item.id, 10) !== itemId),
-      );
+      await batchDeleteItems([itemId]);
+      setFridgeItems(prev => prev.filter(item => item.id !== itemId));
     } catch (error) {
       console.error('아이템 삭제 실패:', error);
+      throw error;
+    }
+  };
+
+  // 여러 아이템 배치 삭제 함수
+  const batchDelete = async (itemIds: string[]) => {
+    try {
+      await batchDeleteItems(itemIds);
+      setFridgeItems(prev => prev.filter(item => !itemIds.includes(item.id)));
+      console.log(`${itemIds.length}개 아이템 배치 삭제 완료`);
+    } catch (error) {
+      console.error('배치 삭제 실패:', error);
       throw error;
     }
   };
@@ -183,12 +172,12 @@ export const useFridgeData = (fridgeId: string) => {
     loading,
     setItemCategories: updateItemCategories,
     deleteItem,
+    batchDeleteItems: batchDelete,
     updateItemQuantity,
     updateItemUnit,
     updateItemExpiryDate,
     addItem,
     allowedUnits: ALLOWED_UNITS,
     refreshData: loadFridgeData,
-    batchDeleteItems,
   };
 };

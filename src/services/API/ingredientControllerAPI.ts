@@ -752,25 +752,23 @@ export class IngredientControllerAPI {
     console.log('refrigeratorId:', refrigeratorId);
     console.log('saveRequest:', JSON.stringify(saveRequest, null, 2));
 
-    // Swagger 성공 요청과 동일한 형식으로 수정
+    // 사용자가 입력한 실제 값들 사용
     const processedRequest = {
       ingredientsInfo: saveRequest.ingredientsInfo.map(item => ({
         ingredientId: item.ingredientId,
         categoryId: item.categoryId,
-        quantity: 1, // 추가: 기본 수량
-        unit: 'string', // 추가: 기본 단위 (Swagger에서 확인된 값)
+        quantity: item.quantity, // 사용자 입력값 사용
+        unit: item.unit, // 사용자 입력값 사용
         expirationDate: this.formatDateForAPI(item.expirationDate),
       })),
-      ingredientIds: [0], // Swagger와 동일하게 0 사용
+      ingredientIds: saveRequest.ingredientIds, // 실제 ingredient ID들 사용
     };
 
     console.log('processedRequest:', JSON.stringify(processedRequest, null, 2));
 
     const endpoint = `/ap1/v1/ingredient/${refrigeratorId}`;
-
     try {
       console.log('API 호출 시작...');
-
       const response = await ApiService.apiCall(endpoint, {
         method: 'POST',
         body: JSON.stringify(processedRequest),
@@ -862,19 +860,25 @@ export class IngredientControllerAPI {
   /**
    * AddItemScreen에서 사용하는 확인된 식재료들 추가
    */
+  // IngredientControllerAPI.addConfirmedIngredients 함수에서
   static async addConfirmedIngredients(
-    refrigeratorId: string,
+    fridgeId: string,
     confirmedIngredients: ConfirmedIngredient[],
   ): Promise<any> {
     const saveRequest: SaveIngredientsRequest = {
       ingredientsInfo: confirmedIngredients.map(confirmed => ({
         ingredientId: confirmed.apiResult.ingredientId,
         categoryId: confirmed.apiResult.categoryId,
+        quantity: parseInt(confirmed.userInput.quantity, 10) || 1, // 추가
+        unit: confirmed.userInput.unit || '개', // 추가
         expirationDate: confirmed.userInput.expirationDate,
       })),
+      ingredientIds: confirmedIngredients.map(
+        confirmed => confirmed.apiResult.ingredientId,
+      ), // 추가
     };
 
-    return await this.addIngredientsToRefrigerator(refrigeratorId, saveRequest);
+    return this.addIngredientsToRefrigerator(fridgeId, saveRequest);
   }
 
   /**
@@ -939,21 +943,24 @@ export class IngredientControllerAPI {
    * DELETE /ap1/v1/ingredient/batch
    * Body: { ingredientIds: [1, 2, 3] }
    */
+  /**
+   * 배치 삭제 API
+   * DELETE /ap1/v1/ingredient
+   * Body: [1, 2, 3] (삭제할 refrigeratorIngredientId 배열)
+   */
   static async batchDeleteIngredients(ingredientIds: string[]): Promise<void> {
     try {
       console.log('배치 삭제 API 호출:', ingredientIds);
 
-      const response = await ApiService.apiCall<void>(
-        '/ap1/v1/ingredient/batch', // 정확한 엔드포인트는 백엔드팀에 확인 필요
-        {
-          method: 'DELETE',
-          body: JSON.stringify({
-            ingredientIds: ingredientIds.map(id => parseInt(id, 10)), // string을 number로 변환
-          }),
-        },
-      );
+      // string을 number로 변환
+      const numericIds = ingredientIds.map(id => parseInt(id, 10));
 
-      console.log('배치 삭제 성공');
+      const response = await ApiService.apiCall<void>('/ap1/v1/ingredient', {
+        method: 'DELETE',
+        body: JSON.stringify(numericIds), // 단순 배열 형태
+      });
+
+      console.log(`배치 삭제 성공: ${ingredientIds.length}개 아이템 삭제됨`);
       return response;
     } catch (error) {
       console.error('배치 삭제 실패:', error);
@@ -967,7 +974,6 @@ export class IngredientControllerAPI {
   static async deleteRefrigeratorIngredient(
     refrigeratorIngredientId: string,
   ): Promise<void> {
-    // 단일 삭제도 배치 API 사용
     return await this.batchDeleteIngredients([refrigeratorIngredientId]);
   }
 
@@ -1025,10 +1031,10 @@ export class IngredientControllerAPI {
       4: '가공식품',
       5: '수산 / 건어물',
       6: '쌀 / 잡곡',
-      7: '우유 / 유제품',
-      8: '건강식품',
-      9: '장 / 양념 / 소스',
-      10: '기타',
+      7: '주류 / 음료',
+      8: '우유 / 유제품',
+      9: '건강식품',
+      10: '장 / 양념 / 소스',
     };
 
     return categoryMap[categoryId] || '기타';
@@ -1045,10 +1051,10 @@ export class IngredientControllerAPI {
       가공식품: 4,
       '수산 / 건어물': 5,
       '쌀 / 잡곡': 6,
-      '우유 / 유제품': 7,
-      건강식품: 8,
-      '장 / 양념 / 소스': 9,
-      기타: 10,
+      '주류 / 음료': 7,
+      '우유 / 유제품': 8,
+      건강식품: 9,
+      '장 / 양념 / 소스': 10,
     };
 
     return nameToIdMap[categoryName] || 10;

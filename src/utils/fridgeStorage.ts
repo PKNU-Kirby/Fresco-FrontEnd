@@ -30,10 +30,10 @@ const CATEGORY_MAP: { [key: string]: number } = {
   가공식품: 4,
   '수산 / 건어물': 5,
   '쌀 / 잡곡': 6,
-  '우유 / 유제품': 7,
-  건강식품: 8,
-  '장 / 양념 / 소스': 9,
-  기타: 10,
+  '주류 / 음료': 7,
+  '우유 / 유제품': 8,
+  건강식품: 9,
+  '장 / 양념 / 소스': 10,
 };
 
 const CATEGORY_ID_TO_NAME: { [key: number]: string } = {
@@ -43,10 +43,10 @@ const CATEGORY_ID_TO_NAME: { [key: number]: string } = {
   4: '가공식품',
   5: '수산 / 건어물',
   6: '쌀 / 잡곡',
-  7: '우유 / 유제품',
-  8: '건강식품',
-  9: '장 / 양념 / 소스',
-  10: '기타',
+  7: '주류 / 음료',
+  8: '우유 / 유제품',
+  9: '건강식품',
+  10: '장 / 양념 / 소스',
 };
 
 // API 호출 가능 여부 확인
@@ -253,8 +253,8 @@ export const batchDeleteItems = async (itemIds: string[]): Promise<void> => {
   }
 };
 
-/**x
- * 기존 단일 삭제를 배치 삭제로 래핑
+/**
+ * 기존 deleteItemFromFridge를 배치 삭제로 래핑
  */
 export const deleteItemFromFridge = async (itemId: string): Promise<void> => {
   return await batchDeleteItems([itemId]);
