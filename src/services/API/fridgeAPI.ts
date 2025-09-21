@@ -2,7 +2,7 @@
 // services/fridgeApi.ts - 냉장고 관련 API만 담당
 // ===================================================================
 
-import { apiCallWithAuth } from '../utils/authUtils';
+import { apiCallWithAuth } from '../../utils/apiUtils';
 
 export class FridgeAPIService {
   // 냉장고 목록 조회

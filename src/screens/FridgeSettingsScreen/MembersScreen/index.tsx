@@ -12,7 +12,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import BackButton from '../../../components/_common/BackButton';
 import InviteMemberModal from '../../../components/FridgeSettings/InviteMemberModal';
 import MemberGroups from '../../../components/FridgeSettings/MemberGroups';
-import { useMembers } from '../../../hooks/useMembers';
+import { useApiMembers } from '../../../hooks/useApiMembers';
 import { RootStackParamList } from '../../../../App';
 import { styles } from '../styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -31,10 +31,9 @@ const MembersScreen = ({ route }: Props) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { fridgeId, fridgeName, userRole } = route.params;
-
   const [showInviteModal, setShowInviteModal] = useState(false);
 
-  const { members, isLoading, loadMembers, handleMemberPress } = useMembers(
+  const { members, isLoading, loadMembers, handleMemberPress } = useApiMembers(
     fridgeId,
     fridgeName,
   );
@@ -84,8 +83,10 @@ const MembersScreen = ({ route }: Props) => {
         <MemberGroups
           members={members}
           fridgeName={fridgeName}
+          userRole={userRole}
           onMemberInvite={handleMemberInvite}
           onMemberPress={handleMemberPress}
+          onMemberRemove={loadMembers} // 멤버 제거 후 목록 새로고침
         />
       </ScrollView>
 
@@ -93,7 +94,7 @@ const MembersScreen = ({ route }: Props) => {
       <InviteMemberModal
         visible={showInviteModal}
         onClose={() => setShowInviteModal(false)}
-        fridgeId={parseInt(fridgeId, 10)}
+        fridgeId={fridgeId}
         fridgeName={fridgeName}
         onInviteSuccess={loadMembers}
       />

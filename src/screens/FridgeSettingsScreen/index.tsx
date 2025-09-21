@@ -11,7 +11,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import BackButton from '../../components/_common/BackButton';
 import InviteMemberModal from '../../components/FridgeSettings/InviteMemberModal';
 import SettingsGroups from '../../components/FridgeSettings/SettingsGroups';
-import { useFridgeSettings } from '../../hooks/useFridgeSettings';
+import { useApiFridgeSettings } from '../../hooks/useApiFridgeSettings';
 import { RootStackParamList } from '../../../App';
 import { styles } from './styles';
 
@@ -29,23 +29,37 @@ const FridgeSettingsScreen = ({ route }: Props) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { fridgeId, fridgeName, userRole } = route.params;
-
   const [showInviteModal, setShowInviteModal] = useState(false);
 
   const {
     members,
+    permissions,
+    currentUserRole,
     isLoading,
     loadMembers,
+    // 권한 체크 함수들
+    canInviteMembers,
+    canDeleteMembers,
+    canDeleteFridge,
+    canViewUsageHistory,
+    // 핸들러 함수들
     handleUsageHistory,
     handleNotificationSettings,
     handleMembersList,
+    handleInviteMember,
     handleLogout,
     handleFridgeDelete,
     handleLeaveFridge,
-  } = useFridgeSettings(fridgeId, fridgeName, userRole);
+  } = useApiFridgeSettings(fridgeId, fridgeName, userRole);
 
   const handleBack = () => {
     navigation.goBack();
+  };
+
+  const handleInviteMemberPress = () => {
+    if (handleInviteMember()) {
+      setShowInviteModal(true);
+    }
   };
 
   if (isLoading) {
@@ -79,8 +93,16 @@ const FridgeSettingsScreen = ({ route }: Props) => {
       >
         <SettingsGroups
           members={members}
-          userRole={userRole}
+          userRole={currentUserRole}
           fridgeName={fridgeName}
+          permissions={permissions}
+          // 권한 체크 결과 전달
+          canInviteMembers={canInviteMembers()}
+          canDeleteMembers={canDeleteMembers()}
+          canDeleteFridge={canDeleteFridge()}
+          canViewUsageHistory={canViewUsageHistory()}
+          // 핸들러 함수들 전달
+          onMemberInvite={handleInviteMemberPress}
           onMembersList={handleMembersList}
           onUsageHistory={handleUsageHistory}
           onNotificationSettings={handleNotificationSettings}
@@ -94,7 +116,7 @@ const FridgeSettingsScreen = ({ route }: Props) => {
       <InviteMemberModal
         visible={showInviteModal}
         onClose={() => setShowInviteModal(false)}
-        fridgeId={parseInt(fridgeId, 10)}
+        fridgeId={fridgeId}
         fridgeName={fridgeName}
         onInviteSuccess={loadMembers}
       />

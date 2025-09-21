@@ -1,4 +1,3 @@
-// components/FridgeSettings/InviteMemberModal.tsx - iOS 스타일로 완전히 변경된 버전
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -13,13 +12,13 @@ import {
   ScrollView,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { AsyncStorageService } from '../../services/AsyncStorageService';
+import { FridgeSettingsAPIService } from '../../services/API/FridgeSettingsAPI';
 import { styles } from './styles';
 
 type InviteMemberModalProps = {
   visible: boolean;
   onClose: () => void;
-  fridgeId: number;
+  fridgeId: string;
   fridgeName: string;
   onInviteSuccess?: () => void;
 };
@@ -38,19 +37,18 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
   const loadInviteCode = React.useCallback(async () => {
     try {
       setIsLoading(true);
-      const code = await AsyncStorageService.getFridgeInviteCode(fridgeId);
-      if (code) {
-        setInviteCode(code);
-      } else {
-        Alert.alert('오류', '초대 코드를 생성할 수 없습니다.');
-      }
+      const code = await FridgeSettingsAPIService.generateInviteCode(
+        fridgeId,
+        fridgeName,
+      );
+      setInviteCode(code);
     } catch (error) {
       console.error('초대 코드 로드 실패:', error);
-      Alert.alert('오류', '초대 코드를 불러올 수 없습니다.');
+      Alert.alert('오류', '초대 코드를 생성할 수 없습니다.');
     } finally {
       setIsLoading(false);
     }
-  }, [fridgeId]);
+  }, [fridgeId, fridgeName]);
 
   // 컴포넌트가 보여질 때 초대 코드 로드
   useEffect(() => {
@@ -71,18 +69,15 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
           onPress: async () => {
             try {
               setIsLoading(true);
-              const newCode = await AsyncStorageService.regenerateInviteCode(
+              const newCode = await FridgeSettingsAPIService.generateInviteCode(
                 fridgeId,
+                fridgeName,
               );
-              if (newCode) {
-                setInviteCode(newCode);
-                Alert.alert('완료', '새로운 초대 코드가 생성되었습니다.');
-              } else {
-                Alert.alert('오류', '초대 코드 재생성에 실패했습니다.');
-              }
+              setInviteCode(newCode);
+              Alert.alert('완료', '새로운 초대 코드가 생성되었습니다.');
             } catch (error) {
               console.error('초대 코드 재생성 실패:', error);
-              Alert.alert('오류', '초대 코드 재생성 중 오류가 발생했습니다.');
+              Alert.alert('오류', '초대 코드 재생성에 실패했습니다.');
             } finally {
               setIsLoading(false);
             }
@@ -96,6 +91,27 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
   const copyToClipboard = () => {
     Clipboard.setString(inviteCode);
     Alert.alert('복사 완료', '초대 코드가 클립보드에 복사되었습니다.');
+  };
+
+  // 문자 메시지로 공유
+  const shareToSMS = () => {
+    const message = `🏠 ${fridgeName} 냉장고에 초대되었습니다!\n\n초대 코드: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 위 코드를 입력해주세요!`;
+    const smsUrl = `sms:?body=${encodeURIComponent(message)}`;
+
+    Linking.canOpenURL(smsUrl)
+      .then(supported => {
+        if (supported) {
+          return Linking.openURL(smsUrl);
+        } else {
+          Alert.alert(
+            'SMS 지원 안함',
+            '이 기기에서는 SMS를 지원하지 않습니다.',
+          );
+        }
+      })
+      .catch(() => {
+        Alert.alert('SMS 공유 실패', 'SMS 공유에 실패했습니다.');
+      });
   };
 
   // 카카오톡으로 공유
@@ -131,16 +147,6 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
       });
   };
 
-  // 문자로 공유
-  const shareToSMS = () => {
-    const message = `🏠 ${fridgeName} 냉장고에 초대되었습니다!\n\n초대 코드: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 위 코드를 입력해주세요!`;
-    const smsUrl = `sms:?body=${encodeURIComponent(message)}`;
-
-    Linking.openURL(smsUrl).catch(() => {
-      Alert.alert('오류', '문자 앱을 열 수 없습니다.');
-    });
-  };
-
   // 일반 공유
   const shareGeneral = () => {
     const message = `🏠 ${fridgeName} 냉장고에 초대되었습니다!\n\n초대 코드: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 위 코드를 입력해주세요!`;
@@ -153,47 +159,30 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
     });
   };
 
-  // 설정 아이템 컴포넌트 (모달 내부용)
-  const ModalSettingsItem = ({
-    title,
-    subtitle,
-    icon,
-    iconColor = '#6B7280',
-    onPress,
-    isLast = false,
-    rightComponent,
-  }: {
+  // 공유 아이템 컴포넌트
+  const ModalSettingsItem: React.FC<{
     title: string;
-    subtitle?: string;
+    subtitle: string;
     icon: string;
-    iconColor?: string;
-    onPress?: () => void;
+    iconColor: string;
+    onPress: () => void;
     isLast?: boolean;
-    rightComponent?: React.ReactNode;
-  }) => (
+  }> = ({ title, subtitle, icon, iconColor, onPress, isLast = false }) => (
     <TouchableOpacity
       style={[styles.settingsItem, isLast && styles.settingsItemLast]}
       onPress={onPress}
-      disabled={!onPress}
     >
       <View style={styles.settingsItemLeft}>
-        <View style={styles.settingsItemIcon}>
-          <Ionicons name={icon} size={20} color={iconColor} />
+        <View style={[styles.settingsItemIcon, { backgroundColor: iconColor }]}>
+          <Ionicons name={icon} size={20} color="white" />
         </View>
         <View style={styles.settingsItemContent}>
           <Text style={styles.settingsItemTitle}>{title}</Text>
-          {subtitle && (
-            <Text style={styles.settingsItemSubtitle}>{subtitle}</Text>
-          )}
+          <Text style={styles.settingsItemSubtitle}>{subtitle}</Text>
         </View>
       </View>
       <View style={styles.settingsItemRight}>
-        {rightComponent}
-        {onPress && (
-          <View style={styles.settingsItemArrow}>
-            <Ionicons name="chevron-forward" size={16} color="#C4C4C4" />
-          </View>
-        )}
+        <Ionicons name="chevron-forward" size={16} color="#C4C4C4" />
       </View>
     </TouchableOpacity>
   );
