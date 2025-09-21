@@ -20,6 +20,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../App';
 import {
   launchCamera,
+  launchImageLibrary,
   ImagePickerResponse,
   MediaType,
   PhotoQuality,
@@ -60,6 +61,7 @@ const cameraOptions = {
 // 개발용 목업 이미지 URI
 const MOCK_INGREDIENT_IMAGE = require('../../../grocery1.jpg');
 const MOCK_RECEIPT_IMAGE = require('../../../reciept1.jpg');
+
 const CameraScreen: React.FC = () => {
   const navigation = useNavigation<CameraScreenNavigationProp>();
   const route = useRoute<CameraScreenRouteProp>();
@@ -156,10 +158,8 @@ const CameraScreen: React.FC = () => {
       }
     }
 
-    // 스캔 모드별 카메라 옵션 조정
     const modeSpecificOptions = {
       ...cameraOptions,
-      // 영수증 스캔시에는 더 높은 품질로 설정
       quality: scanMode === 'receipt' ? 0.9 : 0.8,
       maxHeight: scanMode === 'receipt' ? 4000 : 3000,
       maxWidth: scanMode === 'receipt' ? 3000 : 2000,
@@ -213,7 +213,7 @@ const CameraScreen: React.FC = () => {
     navigation.navigate('PhotoPreview', {
       photo: capturedPhoto,
       fridgeId,
-      scanMode, // scanMode 전달
+      scanMode,
     });
   }, [capturedPhoto, fridgeId, scanMode, navigation]);
 
@@ -222,7 +222,6 @@ const CameraScreen: React.FC = () => {
       console.log(`촬영 모드 선택: ${mode}`);
       setScanMode(mode);
 
-      // 모드 선택 후 바로 카메라 실행
       setTimeout(() => {
         openCamera();
       }, 100);
@@ -230,7 +229,6 @@ const CameraScreen: React.FC = () => {
     [openCamera],
   );
 
-  // 사진 촬영 완료 시 자동 이동
   useEffect(() => {
     if (capturedPhoto && scanMode) {
       setTimeout(() => {
@@ -239,13 +237,66 @@ const CameraScreen: React.FC = () => {
     }
   }, [capturedPhoto, scanMode, navigateToPreview]);
 
-  // ========== 목업 데이터 테스트 (FormData 우회) ==========
+  // FormData 검증 테스트
+  // CameraScreen.tsx에서 testFormDataValidation 메서드만 수정하면 됩니다
 
-  // CameraScreen.tsx의 목업 테스트 수정
+  const testFormDataValidation = useCallback(async () => {
+    try {
+      Alert.alert(
+        'FormData 검증 테스트',
+        '갤러리에서 이미지를 선택해서 서버 전송을 상세 분석합니다.',
+        [
+          { text: '취소', style: 'cancel' },
+          {
+            text: '갤러리 선택',
+            onPress: () => {
+              launchImageLibrary(
+                { mediaType: 'photo', quality: 0.8 },
+                async response => {
+                  if (response.assets?.[0]?.uri) {
+                    setIsLoading(true);
+                    try {
+                      console.log('=== FormData 검증 테스트 시작 ===');
+                      const imageUri = response.assets[0].uri;
+
+                      // ✅ fridgeId를 포함한 새로운 검증 메서드 사용
+                      await IngredientControllerAPI.validateFormDataTransmissionWithFridgeId(
+                        imageUri,
+                        fridgeId,
+                      );
+                      await IngredientControllerAPI.validateServerParametersWithFridgeId(
+                        fridgeId,
+                      );
+                      await IngredientControllerAPI.compareRealVsDummyImageWithFridgeId(
+                        imageUri,
+                        fridgeId,
+                      );
+
+                      Alert.alert(
+                        '검증 완료',
+                        'FormData 검증이 완료되었습니다.\n콘솔에서 상세 로그를 확인하세요.',
+                      );
+                    } catch (error) {
+                      console.error('FormData 검증 실패:', error);
+                      Alert.alert('검증 오류', `오류: ${error.message}`);
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }
+                },
+              );
+            },
+          },
+        ],
+      );
+    } catch (error) {
+      console.error('FormData 검증 준비 실패:', error);
+    }
+  }, [fridgeId]); // fridgeId 의존성 추가
+  // 목업 테스트
   const testWithMockData = useCallback(
     (mode: 'ingredient' | 'receipt') => {
       try {
-        // 목업 사진 객체 생성
         const mockPhoto = {
           uri:
             mode === 'ingredient' ? MOCK_INGREDIENT_IMAGE : MOCK_RECEIPT_IMAGE,
@@ -256,7 +307,6 @@ const CameraScreen: React.FC = () => {
           fileName: `mock_${mode}.jpg`,
         };
 
-        // PhotoPreview로 이동 (정상 플로우)
         navigation.navigate('PhotoPreview', {
           photo: mockPhoto,
           fridgeId,
@@ -272,424 +322,107 @@ const CameraScreen: React.FC = () => {
     },
     [fridgeId, navigation],
   );
-  const testAutoCompleteOnly = useCallback(async () => {
-    try {
-      const testKeywords = ['토마토', '우유', '식빵', '바나나', '오이'];
-      const randomKeyword =
-        testKeywords[Math.floor(Math.random() * testKeywords.length)];
 
-      Alert.alert(
-        'Auto Complete API 테스트',
-        `"${randomKeyword}"로 자동완성 API를 테스트하시겠습니까?`,
-        [
-          { text: '취소', style: 'cancel' },
-          {
-            text: '테스트',
-            onPress: async () => {
-              setIsLoading(true);
-              try {
-                console.log(`Auto Complete API 테스트: "${randomKeyword}"`);
+  // CameraScreen.tsx에 추가할 긴급 해결 메서드
 
-                const results = await IngredientControllerAPI.searchIngredients(
-                  randomKeyword,
-                );
+  const handleEmergencyWorkaround = useCallback(() => {
+    Alert.alert(
+      '서버 문제 감지',
+      '현재 서버에서 500 오류가 발생하고 있습니다.\n임시 해결책을 선택해주세요.',
+      [
+        {
+          text: '목업 데이터로 테스트',
+          onPress: () => {
+            // 목업 데이터로 바로 AddItemScreen으로 이동
+            const mockConfirmedIngredients: ConfirmedIngredient[] = [
+              {
+                userInput: {
+                  id: 'mock_1',
+                  name: '토마토',
+                  quantity: '2',
+                  unit: '개',
+                  expirationDate: '2025-10-01',
+                  itemCategory: '채소 / 과일',
+                  photo: undefined,
+                },
+                apiResult: {
+                  ingredientId: 123,
+                  ingredientName: '토마토',
+                  categoryId: 2,
+                  categoryName: '채소 / 과일',
+                },
+              },
+              {
+                userInput: {
+                  id: 'mock_2',
+                  name: '우유',
+                  quantity: '1',
+                  unit: '개',
+                  expirationDate: '2025-09-25',
+                  itemCategory: '우유 / 유제품',
+                  photo: undefined,
+                },
+                apiResult: {
+                  ingredientId: 456,
+                  ingredientName: '우유',
+                  categoryId: 8,
+                  categoryName: '우유 / 유제품',
+                },
+              },
+            ];
 
-                console.log('자동완성 결과:', results);
-
-                if (results && results.length > 0) {
-                  const resultText = results
-                    .slice(0, 3)
-                    .map(
-                      (item, index) =>
-                        `${index + 1}. ${item.ingredientName} (ID: ${
-                          item.ingredientId
-                        })\n   카테고리: ${item.categoryName}`,
-                    )
-                    .join('\n\n');
-
-                  Alert.alert(
-                    'API 테스트 성공!',
-                    `검색어: "${randomKeyword}"\n\n결과 (${Math.min(
-                      results.length,
-                      3,
-                    )}개 표시):\n\n${resultText}${
-                      results.length > 3
-                        ? '\n\n... 외 ' + (results.length - 3) + '개 더'
-                        : ''
-                    }`,
-                    [{ text: '확인' }],
-                  );
-                } else {
-                  Alert.alert(
-                    'API 응답',
-                    `"${randomKeyword}"에 대한 검색 결과가 없습니다.`,
-                  );
-                }
-              } catch (error) {
-                console.error('Auto Complete API 에러:', error);
-                Alert.alert('API 에러', `오류: ${error.message}`);
-              } finally {
-                setIsLoading(false);
-              }
-            },
+            navigation.navigate('AddItemScreen', {
+              fridgeId,
+              scanResults: mockConfirmedIngredients,
+              scanMode: 'ingredient',
+              isEmergencyMode: true,
+            });
           },
-        ],
-      );
-    } catch (error) {
-      console.error('테스트 함수 에러:', error);
-    }
-  }, []);
-
-  const testSaveAPI = useCallback(async () => {
-    try {
-      const mockSaveData = {
-        ingredientsInfo: [
-          {
-            ingredientId: 123,
-            categoryId: 2,
-            expirationDate: '2025-10-12',
+        },
+        {
+          text: '수동 입력으로 진행',
+          onPress: () => {
+            navigation.navigate('AddItemScreen', {
+              fridgeId,
+              recognizedData: {
+                photo: undefined,
+                name: '',
+                quantity: '1',
+                unit: '개',
+                expiryDate: '',
+                itemCategory: '기타',
+              },
+              isManualInput: true,
+            });
           },
-        ],
-      };
+        },
+        {
+          text: '나중에 시도',
+          style: 'cancel',
+          onPress: () => navigation.goBack(),
+        },
+      ],
+    );
+  }, [fridgeId, navigation]);
 
-      Alert.alert(
-        '저장 API 테스트',
-        '목업 데이터로 냉장고 저장 API를 테스트합니다.\n실제 서버에 데이터가 저장됩니다.',
-        [
-          { text: '취소', style: 'cancel' },
-          {
-            text: '테스트',
-            onPress: async () => {
-              setIsLoading(true);
-              try {
-                console.log('저장 API 테스트 시작');
-
-                const response =
-                  await IngredientControllerAPI.addIngredientsToRefrigerator(
-                    fridgeId,
-                    mockSaveData,
-                  );
-
-                console.log('저장 API 응답:', response);
-                Alert.alert(
-                  '저장 성공!',
-                  '목업 데이터가 성공적으로 저장되었습니다.',
-                );
-              } catch (error) {
-                console.error('저장 API 에러:', error);
-                Alert.alert('저장 실패', `오류: ${error.message}`);
-              } finally {
-                setIsLoading(false);
-              }
-            },
-          },
-        ],
-      );
-    } catch (error) {
-      console.error('저장 테스트 함수 에러:', error);
-    }
-  }, [fridgeId]);
-
-  // ========== 실제 API 테스트 메소드들 ==========
-
-  const testRealIngredientAPI = useCallback(async () => {
-    try {
-      Alert.alert(
-        '실제 식재료 스캔 API 테스트',
-        '갤러리에서 식재료 이미지를 선택하여 실제 서버에 전송합니다.\n네트워크 사용량이 발생할 수 있습니다.',
-        [
-          { text: '취소', style: 'cancel' },
-          {
-            text: '갤러리 선택',
-            onPress: async () => {
-              setIsLoading(true);
-              try {
-                console.log('실제 식재료 스캔 API 테스트 시작');
-
-                const results =
-                  await IngredientControllerAPI.testScanWithGalleryImage(
-                    'ingredient',
-                  );
-
-                console.log('실제 식재료 스캔 결과:', results);
-
-                if (results && results.length > 0) {
-                  const resultText = results
-                    .map(
-                      (item: any, index: number) =>
-                        `${index + 1}. ${
-                          item.ingredientName || item.name
-                        } (ID: ${item.ingredientId || item.id})`,
-                    )
-                    .join('\n');
-
-                  Alert.alert(
-                    '실제 API 테스트 성공!',
-                    `서버에서 ${results.length}개의 식재료를 인식했습니다:\n\n${resultText}`,
-                    [
-                      {
-                        text: '상세 로그 보기',
-                        onPress: () => {
-                          Alert.alert(
-                            '상세 응답',
-                            JSON.stringify(results, null, 2),
-                          );
-                        },
-                      },
-                      { text: '확인' },
-                    ],
-                  );
-                } else {
-                  Alert.alert(
-                    'API 응답',
-                    '서버에서 식재료를 인식하지 못했습니다.\n응답: 빈 배열',
-                  );
-                }
-              } catch (error) {
-                console.error('실제 식재료 API 테스트 실패:', error);
-                Alert.alert(
-                  '실제 API 테스트 실패',
-                  `오류 유형: ${error.name || 'Unknown'}\n메시지: ${
-                    error.message
-                  }\n\n이는 실제 서버 응답입니다.`,
-                  [
-                    {
-                      text: '네트워크 로그 보기',
-                      onPress: () => {
-                        console.log('=== 네트워크 오류 상세 정보 ===');
-                        console.log('Error Stack:', error.stack);
-                        console.log('Error Object:', error);
-                      },
-                    },
-                    { text: '확인' },
-                  ],
-                );
-              } finally {
-                setIsLoading(false);
-              }
-            },
-          },
-        ],
-      );
-    } catch (error) {
-      console.error('테스트 함수 에러:', error);
-    }
-  }, []);
-
-  const testRealReceiptAPI = useCallback(async () => {
-    try {
-      Alert.alert(
-        '실제 영수증 스캔 API 테스트',
-        '갤러리에서 영수증 이미지를 선택하여 실제 서버에 전송합니다.\n네트워크 사용량이 발생할 수 있습니다.',
-        [
-          { text: '취소', style: 'cancel' },
-          {
-            text: '갤러리 선택',
-            onPress: async () => {
-              setIsLoading(true);
-              try {
-                console.log('실제 영수증 스캔 API 테스트 시작');
-
-                const results =
-                  await IngredientControllerAPI.testScanWithGalleryImage(
-                    'receipt',
-                  );
-
-                console.log('실제 영수증 스캔 결과:', results);
-
-                if (results && results.length > 0) {
-                  const resultText = results
-                    .map(
-                      (item: any, index: number) =>
-                        `${index + 1}. ${item.ingredientName} (입력: ${
-                          item.input_name || item.ingredientName
-                        })`,
-                    )
-                    .join('\n');
-
-                  Alert.alert(
-                    '실제 API 테스트 성공!',
-                    `서버에서 ${results.length}개의 식재료를 인식했습니다:\n\n${resultText}`,
-                    [
-                      {
-                        text: '상세 로그 보기',
-                        onPress: () => {
-                          Alert.alert(
-                            '상세 응답',
-                            JSON.stringify(results, null, 2),
-                          );
-                        },
-                      },
-                      { text: '확인' },
-                    ],
-                  );
-                } else {
-                  Alert.alert(
-                    'API 응답',
-                    '서버에서 영수증의 식재료를 인식하지 못했습니다.\n응답: 빈 배열',
-                  );
-                }
-              } catch (error) {
-                console.error('실제 영수증 API 테스트 실패:', error);
-                Alert.alert(
-                  '실제 API 테스트 실패',
-                  `오류 유형: ${error.name || 'Unknown'}\n메시지: ${
-                    error.message
-                  }\n\n이는 실제 서버 응답입니다.`,
-                  [
-                    {
-                      text: '네트워크 로그 보기',
-                      onPress: () => {
-                        console.log('=== 네트워크 오류 상세 정보 ===');
-                        console.log('Error Stack:', error.stack);
-                        console.log('Error Object:', error);
-                      },
-                    },
-                    { text: '확인' },
-                  ],
-                );
-              } finally {
-                setIsLoading(false);
-              }
-            },
-          },
-        ],
-      );
-    } catch (error) {
-      console.error('테스트 함수 에러:', error);
-    }
-  }, []);
-
-  const runFullAPITest = useCallback(async () => {
-    try {
-      Alert.alert(
-        '종합 API 테스트',
-        '모든 API 엔드포인트를 순차적으로 테스트합니다.\n시간이 다소 걸릴 수 있습니다.',
-        [
-          { text: '취소', style: 'cancel' },
-          {
-            text: '테스트 시작',
-            onPress: async () => {
-              setIsLoading(true);
-              try {
-                console.log('=== 종합 API 테스트 시작 ===');
-
-                const testResults =
-                  await IngredientControllerAPI.runFullAPITest();
-
-                console.log('종합 API 테스트 완료:', testResults);
-
-                const formatResult = (test: any) => {
-                  const status = test.success ? '✅ 성공' : '❌ 실패';
-                  const time = `${test.responseTime}ms`;
-                  const error = test.error ? `\n오류: ${test.error}` : '';
-                  return `${status} (${time})${error}`;
-                };
-
-                const reportText =
-                  `자동완성 API: ${formatResult(
-                    testResults.autoComplete,
-                  )}\n\n` +
-                  `서버 연결: ${formatResult(
-                    testResults.serverConnection,
-                  )}\n\n` +
-                  `저장 API: ${formatResult(testResults.saveTest)}`;
-
-                Alert.alert('API 테스트 완료', reportText, [
-                  {
-                    text: '상세 로그 보기',
-                    onPress: () => {
-                      console.log('=== 종합 테스트 상세 결과 ===');
-                      console.log(JSON.stringify(testResults, null, 2));
-                      Alert.alert(
-                        '상세 결과',
-                        JSON.stringify(testResults, null, 2),
-                      );
-                    },
-                  },
-                  { text: '확인' },
-                ]);
-              } catch (error) {
-                console.error('종합 API 테스트 실패:', error);
-                Alert.alert(
-                  '종합 테스트 실패',
-                  `전체 테스트 중 오류 발생: ${error.message}`,
-                );
-              } finally {
-                setIsLoading(false);
-              }
-            },
-          },
-        ],
-      );
-    } catch (error) {
-      console.error('테스트 함수 에러:', error);
-    }
-  }, []);
-
-  const testNetworkAndServer = useCallback(async () => {
-    try {
-      Alert.alert(
-        '네트워크 & 서버 테스트',
-        '네트워크 연결 상태와 서버 응답 속도를 테스트합니다.',
-        [
-          { text: '취소', style: 'cancel' },
-          {
-            text: '테스트 시작',
-            onPress: async () => {
-              setIsLoading(true);
-              try {
-                console.log('네트워크 & 서버 테스트 시작');
-
-                const connectionResult =
-                  await IngredientControllerAPI.testServerConnection();
-
-                console.log('연결 테스트 결과:', connectionResult);
-
-                const statusIcon = connectionResult.isConnected ? '🟢' : '🔴';
-                const statusText = connectionResult.isConnected
-                  ? '연결됨'
-                  : '연결 실패';
-                const responseTimeText = `응답 시간: ${connectionResult.responseTime}ms`;
-                const serverInfoText = connectionResult.serverInfo
-                  ? `\n검색 결과: ${connectionResult.serverInfo.resultsCount}개`
-                  : '';
-                const errorText = connectionResult.error
-                  ? `\n오류: ${connectionResult.error}`
-                  : '';
-
-                Alert.alert(
-                  '네트워크 테스트 결과',
-                  `${statusIcon} 서버 상태: ${statusText}\n${responseTimeText}${serverInfoText}${errorText}`,
-                  [
-                    {
-                      text: '네트워크 정보 보기',
-                      onPress: () => {
-                        console.log('=== 네트워크 상세 정보 ===');
-                        console.log('Connection Result:', connectionResult);
-                      },
-                    },
-                    { text: '확인' },
-                  ],
-                );
-              } catch (error) {
-                console.error('네트워크 테스트 실패:', error);
-                Alert.alert(
-                  '네트워크 테스트 실패',
-                  `테스트 중 오류 발생: ${error.message}`,
-                );
-              } finally {
-                setIsLoading(false);
-              }
-            },
-          },
-        ],
-      );
-    } catch (error) {
-      console.error('테스트 함수 에러:', error);
-    }
-  }, []);
-
+  // 기존 모드 선택 화면에 긴급 버튼 추가
+  const EmergencyButton = () => (
+    <TouchableOpacity
+      style={[styles.modeButton, { backgroundColor: '#ffebee' }]}
+      onPress={handleEmergencyWorkaround}
+      disabled={isLoading}
+    >
+      <View style={[styles.modeIconContainer, { backgroundColor: '#f44336' }]}>
+        <MaterialIcons name="warning" size={48} color="#fff" />
+      </View>
+      <Text style={[styles.modeTitle, { color: '#c62828' }]}>
+        서버 문제 해결
+      </Text>
+      <Text style={[styles.modeDescription, { color: '#c62828' }]}>
+        500 오류 발생 시{'\n'}임시 해결책 사용
+      </Text>
+    </TouchableOpacity>
+  );
   // 모드 선택 화면
   if (!scanMode) {
     return (
@@ -715,7 +448,7 @@ const CameraScreen: React.FC = () => {
             </View>
 
             <View style={styles.modeOptions}>
-              {/* 기존 카메라 촬영 옵션들 */}
+              {/* 기본 카메라 촬영 옵션들 */}
               <TouchableOpacity
                 style={styles.modeButton}
                 onPress={() => handleModeSelect('ingredient')}
@@ -754,214 +487,112 @@ const CameraScreen: React.FC = () => {
                 </Text>
               </TouchableOpacity>
 
-              {/* 개발 환경에서만 보이는 API 테스트 섹션 */}
-              {isDevelopment && (
-                <>
-                  {/* 목업 테스트 구분선 */}
-                  <View style={styles.divider}>
-                    <Text style={styles.dividerText}>🧪 목업 테스트</Text>
-                  </View>
+              {/* 개발 환경 테스트 섹션 */}
+              <View style={styles.divider}>
+                <Text style={styles.dividerText}>🧪 개발 테스트</Text>
+              </View>
 
-                  <TouchableOpacity
-                    style={[styles.modeButton, { backgroundColor: '#e3f2fd' }]}
-                    onPress={() => testWithMockData('ingredient')}
-                    disabled={isLoading}
-                  >
-                    <View
-                      style={[
-                        styles.modeIconContainer,
-                        { backgroundColor: '#2196f3' },
-                      ]}
-                    >
-                      <MaterialIcons name="eco" size={48} color="#fff" />
-                    </View>
-                    <Text style={[styles.modeTitle, { color: '#1976d2' }]}>
-                      식재료 목업 테스트
-                    </Text>
-                    <Text
-                      style={[styles.modeDescription, { color: '#1976d2' }]}
-                    >
-                      목업 데이터로 식재료 스캔{'\n'}결과를 시뮬레이션합니다
-                    </Text>
-                  </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modeButton, { backgroundColor: '#e3f2fd' }]}
+                onPress={() => testWithMockData('ingredient')}
+                disabled={isLoading}
+              >
+                <View
+                  style={[
+                    styles.modeIconContainer,
+                    { backgroundColor: '#2196f3' },
+                  ]}
+                >
+                  <MaterialIcons name="eco" size={48} color="#fff" />
+                </View>
+                <Text style={[styles.modeTitle, { color: '#1976d2' }]}>
+                  식재료 목업 테스트
+                </Text>
+                <Text style={[styles.modeDescription, { color: '#1976d2' }]}>
+                  목업 데이터로 식재료 스캔{'\n'}결과를 시뮬레이션합니다
+                </Text>
+              </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={[styles.modeButton, { backgroundColor: '#f3e5f5' }]}
-                    onPress={() => testWithMockData('receipt')}
-                    disabled={isLoading}
-                  >
-                    <View
-                      style={[
-                        styles.modeIconContainer,
-                        { backgroundColor: '#9c27b0' },
-                      ]}
-                    >
-                      <MaterialIcons name="receipt" size={48} color="#fff" />
-                    </View>
-                    <Text style={[styles.modeTitle, { color: '#7b1fa2' }]}>
-                      영수증 목업 테스트
-                    </Text>
-                    <Text
-                      style={[styles.modeDescription, { color: '#7b1fa2' }]}
-                    >
-                      목업 데이터로 영수증 스캔{'\n'}결과를 시뮬레이션합니다
-                    </Text>
-                  </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modeButton, { backgroundColor: '#f3e5f5' }]}
+                onPress={() => testWithMockData('receipt')}
+                disabled={isLoading}
+              >
+                <View
+                  style={[
+                    styles.modeIconContainer,
+                    { backgroundColor: '#9c27b0' },
+                  ]}
+                >
+                  <MaterialIcons name="receipt" size={48} color="#fff" />
+                </View>
+                <Text style={[styles.modeTitle, { color: '#7b1fa2' }]}>
+                  영수증 목업 테스트
+                </Text>
+                <Text style={[styles.modeDescription, { color: '#7b1fa2' }]}>
+                  목업 데이터로 영수증 스캔{'\n'}결과를 시뮬레이션합니다
+                </Text>
+              </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={[styles.modeButton, { backgroundColor: '#e8f5e8' }]}
-                    onPress={testAutoCompleteOnly}
-                    disabled={isLoading}
-                  >
-                    <View
-                      style={[
-                        styles.modeIconContainer,
-                        { backgroundColor: '#4caf50' },
-                      ]}
-                    >
-                      <MaterialIcons name="search" size={48} color="#fff" />
-                    </View>
-                    <Text style={[styles.modeTitle, { color: '#388e3c' }]}>
-                      자동완성 API 테스트
-                    </Text>
-                    <Text
-                      style={[styles.modeDescription, { color: '#388e3c' }]}
-                    >
-                      식재료 검색 API를{'\n'}직접 호출해서 테스트합니다
-                    </Text>
-                  </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modeButton, { backgroundColor: '#fff3e0' }]}
+                onPress={testFormDataValidation}
+                disabled={isLoading}
+              >
+                <View
+                  style={[
+                    styles.modeIconContainer,
+                    { backgroundColor: '#ff9800' },
+                  ]}
+                >
+                  <MaterialIcons name="bug-report" size={48} color="#fff" />
+                </View>
+                <Text style={[styles.modeTitle, { color: '#f57c00' }]}>
+                  FormData 전송 검증
+                </Text>
+                <Text style={[styles.modeDescription, { color: '#f57c00' }]}>
+                  이미지 파라미터가 제대로{'\n'}전송되는지 상세 분석
+                </Text>
+              </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={[styles.modeButton, { backgroundColor: '#fff3e0' }]}
-                    onPress={testSaveAPI}
-                    disabled={isLoading}
-                  >
-                    <View
-                      style={[
-                        styles.modeIconContainer,
-                        { backgroundColor: '#ff9800' },
-                      ]}
-                    >
-                      <MaterialIcons name="save" size={48} color="#fff" />
-                    </View>
-                    <Text style={[styles.modeTitle, { color: '#f57c00' }]}>
-                      저장 API 테스트
-                    </Text>
-                    <Text
-                      style={[styles.modeDescription, { color: '#f57c00' }]}
-                    >
-                      실제 냉장고 저장 API를{'\n'}목업 데이터로 테스트합니다
-                    </Text>
-                  </TouchableOpacity>
-
-                  {/* 실제 API 테스트 구분선 */}
-                  <View style={styles.divider}>
-                    <Text style={styles.dividerText}>🔥 실제 API 테스트</Text>
-                  </View>
-
-                  <TouchableOpacity
-                    style={[styles.modeButton, { backgroundColor: '#ffebee' }]}
-                    onPress={testRealIngredientAPI}
-                    disabled={isLoading}
-                  >
-                    <View
-                      style={[
-                        styles.modeIconContainer,
-                        { backgroundColor: '#f44336' },
-                      ]}
-                    >
-                      <MaterialIcons name="camera" size={48} color="#fff" />
-                    </View>
-                    <Text style={[styles.modeTitle, { color: '#c62828' }]}>
-                      실제 식재료 스캔 API
-                    </Text>
-                    <Text
-                      style={[styles.modeDescription, { color: '#c62828' }]}
-                    >
-                      갤러리 이미지로 실제 서버에{'\n'}식재료 스캔 요청을
-                      보냅니다
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.modeButton, { backgroundColor: '#f3e5f5' }]}
-                    onPress={testRealReceiptAPI}
-                    disabled={isLoading}
-                  >
-                    <View
-                      style={[
-                        styles.modeIconContainer,
-                        { backgroundColor: '#9c27b0' },
-                      ]}
-                    >
-                      <MaterialIcons
-                        name="receipt-long"
-                        size={48}
-                        color="#fff"
-                      />
-                    </View>
-                    <Text style={[styles.modeTitle, { color: '#7b1fa2' }]}>
-                      실제 영수증 스캔 API
-                    </Text>
-                    <Text
-                      style={[styles.modeDescription, { color: '#7b1fa2' }]}
-                    >
-                      갤러리 이미지로 실제 서버에{'\n'}영수증 스캔 요청을
-                      보냅니다
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.modeButton, { backgroundColor: '#e8f5e8' }]}
-                    onPress={testNetworkAndServer}
-                    disabled={isLoading}
-                  >
-                    <View
-                      style={[
-                        styles.modeIconContainer,
-                        { backgroundColor: '#4caf50' },
-                      ]}
-                    >
-                      <MaterialIcons
-                        name="network-check"
-                        size={48}
-                        color="#fff"
-                      />
-                    </View>
-                    <Text style={[styles.modeTitle, { color: '#388e3c' }]}>
-                      네트워크 & 서버 테스트
-                    </Text>
-                    <Text
-                      style={[styles.modeDescription, { color: '#388e3c' }]}
-                    >
-                      서버 연결 상태와{'\n'}응답 속도를 확인합니다
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.modeButton, { backgroundColor: '#fff3e0' }]}
-                    onPress={runFullAPITest}
-                    disabled={isLoading}
-                  >
-                    <View
-                      style={[
-                        styles.modeIconContainer,
-                        { backgroundColor: '#ff9800' },
-                      ]}
-                    >
-                      <MaterialIcons name="assessment" size={48} color="#fff" />
-                    </View>
-                    <Text style={[styles.modeTitle, { color: '#f57c00' }]}>
-                      종합 API 테스트
-                    </Text>
-                    <Text
-                      style={[styles.modeDescription, { color: '#f57c00' }]}
-                    >
-                      모든 API 엔드포인트를{'\n'}한 번에 테스트합니다
-                    </Text>
-                  </TouchableOpacity>
-                </>
-              )}
+              <TouchableOpacity
+                style={[styles.modeButton, { backgroundColor: '#e8f5e8' }]}
+                onPress={async () => {
+                  setIsLoading(true);
+                  try {
+                    const result =
+                      await IngredientControllerAPI.testServerConnection();
+                    Alert.alert(
+                      '서버 연결 테스트',
+                      `상태: ${
+                        result.isConnected ? '연결됨' : '연결 실패'
+                      }\n응답시간: ${result.responseTime}ms\n${
+                        result.error ? `오류: ${result.error}` : '정상'
+                      }`,
+                    );
+                  } catch (error) {
+                    Alert.alert('테스트 실패', `오류: ${error.message}`);
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+                disabled={isLoading}
+              >
+                <View
+                  style={[
+                    styles.modeIconContainer,
+                    { backgroundColor: '#4caf50' },
+                  ]}
+                >
+                  <MaterialIcons name="network-check" size={48} color="#fff" />
+                </View>
+                <Text style={[styles.modeTitle, { color: '#388e3c' }]}>
+                  서버 연결 테스트
+                </Text>
+                <Text style={[styles.modeDescription, { color: '#388e3c' }]}>
+                  서버 상태와 네트워크{'\n'}연결을 확인합니다
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {/* 로딩 상태 표시 */}

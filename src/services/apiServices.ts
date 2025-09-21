@@ -235,8 +235,9 @@ export class ApiService {
 
   // 냉장고 나가기
   static async leaveFridge(fridgeId: string, userId: string): Promise<void> {
+    // ⚠️ 수정: 쿼리 파라미터로 ids 전달
     await this.apiCall<void>(
-      `/api/v1/refrigerator/users/${fridgeId}/${userId}`,
+      `/api/v1/refrigerator/users/${fridgeId}/${userId}?ids=${userId}`,
       {
         method: 'DELETE',
       },
@@ -271,17 +272,36 @@ export class ApiService {
     name: string;
     description?: string;
   }): Promise<{ id: string; name: string }> {
+    // 입력값 검증 추가
+    if (!fridgeData.name || fridgeData.name.trim() === '') {
+      throw new Error('냉장고 이름을 입력해주세요.');
+    }
+
     return this.apiCall<{ id: string; name: string }>('/api/v1/refrigerator', {
       method: 'POST',
-      body: JSON.stringify(fridgeData),
+      body: JSON.stringify({
+        name: fridgeData.name.trim(),
+        description: fridgeData.description?.trim() || '',
+      }),
     });
   }
 
   // 냉장고 멤버 초대
-  static async inviteMember(): Promise<void> {
+  static async inviteMember(
+    fridgeId: string,
+    inviteData: {
+      email?: string;
+      userName?: string;
+      message?: string;
+    },
+  ): Promise<void> {
+    // ⚠️ 수정: 실제 초대 데이터 전달
     await this.apiCall<void>(`/api/v1/refrigerator/invitation`, {
       method: 'POST',
-      body: JSON.stringify({}),
+      body: JSON.stringify({
+        fridgeId,
+        ...inviteData, // 실제 초대에 필요한 데이터
+      }),
     });
   }
 
@@ -307,6 +327,10 @@ export class ApiService {
     total: number;
   }> {
     const queryParams = new URLSearchParams();
+
+    // ⚠️ 수정: fridgeId 파라미터 추가
+    queryParams.append('fridgeId', fridgeId);
+
     if (options?.limit) queryParams.append('limit', options.limit.toString());
     if (options?.offset)
       queryParams.append('offset', options.offset.toString());

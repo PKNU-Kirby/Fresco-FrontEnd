@@ -3,6 +3,8 @@ import {
   IngredientControllerAPI,
   type RefrigeratorIngredientResponse,
   type AutoCompleteSearchResponse,
+  type ConfirmedIngredient,
+  type SaveIngredientsRequest,
 } from '../services/API/ingredientControllerAPI';
 
 // 기존 FridgeItem 타입 유지 (하위 호환성)
@@ -22,20 +24,7 @@ export type FridgeItem = {
 // AsyncStorage 키
 const FRIDGE_ITEMS_KEY = 'fridgeItems';
 
-// 카테고리 매핑 (하드코딩)
-const CATEGORY_MAP: { [key: string]: number } = {
-  베이커리: 1,
-  '채소 / 과일': 2,
-  '정육 / 계란': 3,
-  가공식품: 4,
-  '수산 / 건어물': 5,
-  '쌀 / 잡곡': 6,
-  '주류 / 음료': 7,
-  '우유 / 유제품': 8,
-  건강식품: 9,
-  '장 / 양념 / 소스': 10,
-};
-
+// 카테고리 매핑
 const CATEGORY_ID_TO_NAME: { [key: number]: string } = {
   1: '베이커리',
   2: '채소 / 과일',
@@ -49,34 +38,23 @@ const CATEGORY_ID_TO_NAME: { [key: number]: string } = {
   10: '장 / 양념 / 소스',
 };
 
-// API 호출 가능 여부 확인
-const isApiAvailable = (): boolean => {
-  try {
-    return (
-      IngredientControllerAPI &&
-      typeof IngredientControllerAPI.getRefrigeratorIngredients === 'function'
-    );
-  } catch (error) {
-    console.warn('IngredientControllerAPI를 사용할 수 없습니다:', error);
-    return false;
-  }
-};
+// API 응답을 FridgeItem으로 변환
 const mapApiItemToFridgeItem = (
   apiItem: RefrigeratorIngredientResponse,
-  actualFridgeId: string, // 실제 냉장고 ID를 파라미터로 받음
+  actualFridgeId: string,
 ): FridgeItem => ({
-  id: apiItem.id, // refrigeratorIngredientId (업데이트할 때 사용할 ID)
+  id: apiItem.id,
   name: apiItem.ingredientName,
   quantity: apiItem.quantity?.toString() || '0',
   expiryDate: apiItem.expirationDate,
   itemCategory: CATEGORY_ID_TO_NAME[apiItem.categoryId] || '기타',
-  fridgeId: actualFridgeId, // ✅ 실제 냉장고 ID 사용 (27)
+  fridgeId: actualFridgeId,
   unit: apiItem.unit || 'g',
   createdAt: apiItem.createdAt,
   updatedAt: apiItem.updatedAt,
 });
 
-// AsyncStorage에서 데이터 가져오기 (fallback용)
+// AsyncStorage fallback 함수들
 const getFridgeItemsFromStorage = async (): Promise<FridgeItem[]> => {
   try {
     const itemsJson = await AsyncStorage.getItem(FRIDGE_ITEMS_KEY);
@@ -87,7 +65,6 @@ const getFridgeItemsFromStorage = async (): Promise<FridgeItem[]> => {
   }
 };
 
-// AsyncStorage에서 특정 냉장고 아이템 가져오기 (fallback용)
 const getFridgeItemsByFridgeIdFromStorage = async (
   fridgeId: string,
 ): Promise<FridgeItem[]> => {
@@ -107,7 +84,7 @@ const getFridgeItemsByFridgeIdFromStorage = async (
 };
 
 /**
- * 냉장고 아이템 조회 (IngredientControllerAPI 우선, AsyncStorage fallback)
+ * 냉장고 아이템 조회 (API 우선, AsyncStorage fallback)
  */
 export const getFridgeItemsByFridgeId = async (
   fridgeId: string,
@@ -115,91 +92,66 @@ export const getFridgeItemsByFridgeId = async (
   page: number = 0,
   size: number = 100,
 ): Promise<FridgeItem[]> => {
-  if (isApiAvailable()) {
-    try {
-      console.log(
-        `IngredientControllerAPI를 통해 냉장고 ${fridgeId} 아이템 조회 중...`,
+  try {
+    console.log(`API를 통해 냉장고 ${fridgeId} 아이템 조회 중...`);
+
+    const response = await IngredientControllerAPI.getRefrigeratorIngredients(
+      fridgeId,
+      {
+        categoryIds,
+        page,
+        size,
+        sort: 'expirationDate',
+      },
+    );
+
+    console.log('API 응답:', response);
+
+    if (response.content && Array.isArray(response.content)) {
+      const mappedItems = response.content.map(item =>
+        mapApiItemToFridgeItem(item, fridgeId),
       );
 
-      const response = await IngredientControllerAPI.getRefrigeratorIngredients(
-        fridgeId,
-        {
-          categoryIds,
-          page,
-          size,
-          sort: 'expirationDate',
-        },
-      );
-
-      console.log('API 응답:', response);
-
-      if (response.content && Array.isArray(response.content)) {
-        // ✅ 실제 fridgeId를 파라미터로 전달
-        const mappedItems = response.content.map(item =>
-          mapApiItemToFridgeItem(item, fridgeId),
-        );
-
-        console.log('변환된 아이템들:', mappedItems);
-        console.log(
-          'fridgeId 확인:',
-          mappedItems.map(item => ({
-            name: item.name,
-            itemId: item.id,
-            fridgeId: item.fridgeId,
-          })),
-        );
-
-        return mappedItems;
-      } else {
-        console.warn('빈 배열 응답:', response);
-        return [];
-      }
-    } catch (error) {
-      console.error(
-        'IngredientControllerAPI 조회 실패, AsyncStorage fallback 시도:',
-        error,
-      );
-      return await getFridgeItemsByFridgeIdFromStorage(fridgeId);
+      console.log('변환된 아이템들:', mappedItems);
+      return mappedItems;
+    } else {
+      console.warn('빈 배열 응답:', response);
+      return [];
     }
-  } else {
-    console.log('IngredientControllerAPI 사용 불가, AsyncStorage 사용');
+  } catch (error) {
+    console.error('API 조회 실패, AsyncStorage fallback 시도:', error);
     return await getFridgeItemsByFridgeIdFromStorage(fridgeId);
   }
 };
 
 /**
- * 아이템 업데이트 (IngredientControllerAPI 우선, AsyncStorage fallback)
+ * 아이템 업데이트 (API 우선, AsyncStorage fallback)
  */
 export const updateFridgeItem = async (
   itemId: string,
   updates: Partial<Omit<FridgeItem, 'id' | 'createdAt'>>,
 ): Promise<void> => {
-  if (isApiAvailable()) {
-    try {
-      const apiUpdates: any = {};
+  try {
+    const apiUpdates: any = {};
 
-      if (updates.quantity !== undefined) {
-        apiUpdates.quantity = parseInt(updates.quantity, 10);
-      }
-      if (updates.unit !== undefined) {
-        apiUpdates.unit = updates.unit;
-      }
-      if (updates.expiryDate !== undefined) {
-        apiUpdates.expirationDate = updates.expiryDate;
-      }
-
-      await IngredientControllerAPI.updateRefrigeratorIngredient(
-        itemId,
-        apiUpdates,
-      );
-      console.log(
-        `IngredientControllerAPI를 통해 아이템 ${itemId} 업데이트 완료`,
-      );
-    } catch (error) {
-      console.error('IngredientControllerAPI 업데이트 실패:', error);
-      throw error;
+    if (updates.quantity !== undefined) {
+      apiUpdates.quantity = parseInt(updates.quantity, 10);
     }
-  } else {
+    if (updates.unit !== undefined) {
+      apiUpdates.unit = updates.unit;
+    }
+    if (updates.expiryDate !== undefined) {
+      apiUpdates.expirationDate = updates.expiryDate;
+    }
+
+    await IngredientControllerAPI.updateRefrigeratorIngredient(
+      itemId,
+      apiUpdates,
+    );
+    console.log(`API를 통해 아이템 ${itemId} 업데이트 완료`);
+  } catch (error) {
+    console.error('API 업데이트 실패, AsyncStorage fallback:', error);
+
     // AsyncStorage fallback
     try {
       const existingItems = await getFridgeItemsFromStorage();
@@ -213,26 +165,23 @@ export const updateFridgeItem = async (
         JSON.stringify(updatedItems),
       );
       console.log(`AsyncStorage를 통해 아이템 ${itemId} 업데이트 완료`);
-    } catch (error) {
-      console.error('AsyncStorage 업데이트 실패:', error);
-      throw error;
+    } catch (storageError) {
+      console.error('AsyncStorage 업데이트도 실패:', storageError);
+      throw error; // 원래 API 에러를 던짐
     }
   }
 };
 
 /**
- * 여러 아이템 배치 삭제
+ * 여러 아이템 배치 삭제 (API 우선, AsyncStorage fallback)
  */
 export const batchDeleteItems = async (itemIds: string[]): Promise<void> => {
-  if (isApiAvailable()) {
-    try {
-      await IngredientControllerAPI.batchDeleteIngredients(itemIds);
-      console.log(`API를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`);
-    } catch (error) {
-      console.error('API 배치 삭제 실패:', error);
-      throw error;
-    }
-  } else {
+  try {
+    await IngredientControllerAPI.batchDeleteIngredients(itemIds);
+    console.log(`API를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`);
+  } catch (error) {
+    console.error('API 배치 삭제 실패, AsyncStorage fallback:', error);
+
     // AsyncStorage fallback
     try {
       const existingItems = await getFridgeItemsFromStorage();
@@ -246,9 +195,9 @@ export const batchDeleteItems = async (itemIds: string[]): Promise<void> => {
       console.log(
         `AsyncStorage를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`,
       );
-    } catch (error) {
-      console.error('AsyncStorage 배치 삭제 실패:', error);
-      throw error;
+    } catch (storageError) {
+      console.error('AsyncStorage 배치 삭제도 실패:', storageError);
+      throw error; // 원래 API 에러를 던짐
     }
   }
 };
@@ -266,10 +215,10 @@ export const deleteItemFromFridge = async (itemId: string): Promise<void> => {
 export const searchIngredients = async (
   keyword: string,
 ): Promise<AutoCompleteSearchResponse[]> => {
-  if (isApiAvailable()) {
+  try {
     return await IngredientControllerAPI.searchIngredients(keyword);
-  } else {
-    console.warn('IngredientControllerAPI 사용 불가, 빈 배열 반환');
+  } catch (error) {
+    console.error('식재료 검색 실패:', error);
     return [];
   }
 };
@@ -280,10 +229,10 @@ export const searchIngredients = async (
 export const findIngredientByName = async (
   ingredientName: string,
 ): Promise<AutoCompleteSearchResponse | null> => {
-  if (isApiAvailable()) {
+  try {
     return await IngredientControllerAPI.findIngredientByName(ingredientName);
-  } else {
-    console.warn('IngredientControllerAPI 사용 불가, null 반환');
+  } catch (error) {
+    console.error('식재료 이름 검색 실패:', error);
     return null;
   }
 };
@@ -296,19 +245,23 @@ export const confirmMultipleIngredients = async (
 ): Promise<
   { name: string; result: AutoCompleteSearchResponse | null; error?: string }[]
 > => {
-  if (!isApiAvailable()) {
+  try {
+    return await IngredientControllerAPI.findMultipleIngredients(
+      ingredientNames,
+    );
+  } catch (error) {
+    console.error('다중 식재료 검색 실패:', error);
     return ingredientNames.map(name => ({
       name,
       result: null,
-      error: 'IngredientControllerAPI 사용 불가',
+      error: '검색 실패',
     }));
   }
-
-  return await IngredientControllerAPI.findMultipleIngredients(ingredientNames);
 };
 
 /**
  * 냉장고에 확인된 식재료 추가 (AddItemScreen에서 사용)
+ * ⚠️ 수정: 올바른 API 함수 호출
  */
 export const addConfirmedIngredientsToFridge = async (
   fridgeId: string,
@@ -329,22 +282,27 @@ export const addConfirmedIngredientsToFridge = async (
     };
   }>,
 ): Promise<any> => {
-  if (isApiAvailable()) {
-    try {
-      console.log('확인된 식재료 추가 시작:', confirmedIngredients);
+  try {
+    console.log('확인된 식재료 추가 시작:', confirmedIngredients);
 
-      const response = await IngredientControllerAPI.addConfirmedIngredients(
-        fridgeId,
-        confirmedIngredients,
-      );
-      console.log('식재료 추가 응답:', response);
+    // ConfirmedIngredient 형태로 변환
+    const formattedIngredients: ConfirmedIngredient[] =
+      confirmedIngredients.map(item => ({
+        userInput: item.userInput,
+        apiResult: item.apiResult,
+      }));
 
-      return response;
-    } catch (error) {
-      console.error('IngredientControllerAPI를 통한 식재료 추가 실패:', error);
-      throw new Error(`식재료 추가에 실패했습니다: ${error.message}`);
-    }
-  } else {
+    // ⚠️ 수정: 올바른 API 함수 호출
+    const response = await IngredientControllerAPI.addConfirmedIngredients(
+      fridgeId,
+      formattedIngredients,
+    );
+
+    console.log('식재료 추가 API 응답:', response);
+    return response;
+  } catch (error) {
+    console.error('API를 통한 식재료 추가 실패, AsyncStorage fallback:', error);
+
     // AsyncStorage fallback
     try {
       const existingItems = await getFridgeItemsFromStorage();
@@ -376,9 +334,9 @@ export const addConfirmedIngredientsToFridge = async (
 
       console.log(`AsyncStorage를 통해 ${newItems.length}개 아이템 추가 완료`);
       return newItems;
-    } catch (error) {
-      console.error('AsyncStorage 추가 실패:', error);
-      throw error;
+    } catch (storageError) {
+      console.error('AsyncStorage 추가도 실패:', storageError);
+      throw error; // 원래 API 에러를 던짐
     }
   }
 };
@@ -393,102 +351,51 @@ export const addItemToFridge = async (
   item: Omit<FridgeItem, 'id' | 'createdAt' | 'updatedAt'>,
   categoryId: number = 0,
 ): Promise<FridgeItem> => {
-  if (isApiAvailable()) {
-    try {
-      const result = await IngredientControllerAPI.addSingleIngredient(
-        fridgeId,
-        item.name,
-        item.expiryDate,
-      );
+  try {
+    const result = await IngredientControllerAPI.addSingleIngredient(
+      fridgeId,
+      item.name,
+      item.expiryDate,
+    );
 
-      // 결과를 FridgeItem 형태로 변환
-      const mappedResult: FridgeItem = {
-        id: `new_${Date.now()}`,
-        name: item.name,
-        quantity: item.quantity,
-        unit: item.unit || 'g',
-        expiryDate: item.expiryDate,
-        itemCategory: item.itemCategory,
-        fridgeId,
-        createdAt: new Date().toISOString(),
-      };
+    const mappedResult: FridgeItem = {
+      id: `new_${Date.now()}`,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit || 'g',
+      expiryDate: item.expiryDate,
+      itemCategory: item.itemCategory,
+      fridgeId,
+      createdAt: new Date().toISOString(),
+    };
 
-      console.log(
-        'IngredientControllerAPI를 통해 아이템 추가 완료:',
-        mappedResult,
-      );
-      return mappedResult;
-    } catch (error) {
-      console.error('IngredientControllerAPI 추가 실패:', error);
-      throw error;
-    }
-  } else {
+    console.log('API를 통해 아이템 추가 완료:', mappedResult);
+    return mappedResult;
+  } catch (error) {
+    console.error('API 추가 실패, AsyncStorage fallback:', error);
+
     // AsyncStorage fallback
-    try {
-      const existingItems = await getFridgeItemsFromStorage();
-      const currentTime = new Date().toISOString();
-      const maxId =
-        existingItems.length > 0
-          ? Math.max(...existingItems.map(item => parseInt(item.id, 10)))
-          : 0;
+    const existingItems = await getFridgeItemsFromStorage();
+    const currentTime = new Date().toISOString();
+    const maxId =
+      existingItems.length > 0
+        ? Math.max(...existingItems.map(item => parseInt(item.id, 10)))
+        : 0;
 
-      const newItem: FridgeItem = {
-        ...item,
-        id: (maxId + 1).toString(),
-        fridgeId,
-        createdAt: currentTime,
-        updatedAt: currentTime,
-      };
+    const newItem: FridgeItem = {
+      ...item,
+      id: (maxId + 1).toString(),
+      fridgeId,
+      createdAt: currentTime,
+      updatedAt: currentTime,
+    };
 
-      const updatedItems = [...existingItems, newItem];
-      await AsyncStorage.setItem(
-        FRIDGE_ITEMS_KEY,
-        JSON.stringify(updatedItems),
-      );
+    const updatedItems = [...existingItems, newItem];
+    await AsyncStorage.setItem(FRIDGE_ITEMS_KEY, JSON.stringify(updatedItems));
 
-      console.log('AsyncStorage를 통해 아이템 추가 완료:', newItem);
-      return newItem;
-    } catch (error) {
-      console.error('AsyncStorage 추가 실패:', error);
-      throw error;
-    }
+    console.log('AsyncStorage를 통해 아이템 추가 완료:', newItem);
+    return newItem;
   }
-};
-
-/**
- * 여러 아이템 추가 (기존 함수 - deprecated)
- */
-export const addItemsToFridge = async (
-  fridgeId: string,
-  newItems: Omit<FridgeItem, 'id' | 'createdAt' | 'updatedAt'>[],
-  categoryMapping: { [categoryName: string]: number } = {},
-): Promise<FridgeItem[]> => {
-  console.warn(
-    'addItemsToFridge는 deprecated입니다. addConfirmedIngredientsToFridge를 사용하세요.',
-  );
-
-  const results = [];
-  for (const item of newItems) {
-    try {
-      const categoryId = categoryMapping[item.itemCategory] || 0;
-      const result = await addItemToFridge(fridgeId, item, categoryId);
-      results.push(result);
-    } catch (error) {
-      console.error(`아이템 "${item.name}" 추가 실패:`, error);
-    }
-  }
-
-  return results;
-};
-
-/**
- * 기존 전체 조회 함수 (deprecated)
- */
-export const getFridgeItems = async (): Promise<FridgeItem[]> => {
-  console.warn(
-    'getFridgeItems는 deprecated입니다. getFridgeItemsByFridgeId를 사용하세요.',
-  );
-  return await getFridgeItemsFromStorage();
 };
 
 /**
