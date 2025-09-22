@@ -72,7 +72,7 @@ export const useAddItemSave = (
               categoryName: string;
             }>
           >(
-            `/ap1/v1/ingredient/auto-complete?keyword=${encodeURIComponent(
+            `/api/v1/ingredient/auto-complete?keyword=${encodeURIComponent(
               item.name,
             )}`,
           );
@@ -162,7 +162,7 @@ export const useAddItemSave = (
             categoryName: string;
             expirationDate: string;
           }>
-        >(`/ap1/v1/ingredient/${fridgeId}`, {
+        >(`/api/v1/ingredient/${fridgeId}`, {
           method: 'POST',
           body: JSON.stringify(saveRequest),
         });

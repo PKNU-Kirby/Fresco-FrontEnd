@@ -52,13 +52,13 @@ export const API_ENDPOINTS = {
     },
   },
   INGREDIENT: {
-    LIST: (refrigeratorId: string) => `/ap1/v1/ingredient/${refrigeratorId}`,
+    LIST: (refrigeratorId: string) => `/api/v1/ingredient/${refrigeratorId}`,
     BY_CATEGORY: (refrigeratorId: string) =>
-      `/ap1/v1/ingredient/${refrigeratorId}/category`,
+      `/api/v1/ingredient/${refrigeratorId}/category`,
     UPDATE: (refrigeratorId: string, ingredientId: string) =>
-      `/ap1/v1/ingredient/${refrigeratorId}/${ingredientId}`,
+      `/api/v1/ingredient/${refrigeratorId}/${ingredientId}`,
     USAGE_HISTORY: (refrigeratorId: string) =>
-      `/ap1/v1/ingredient/${refrigeratorId}/history`,
+      `/api/v1/ingredient/${refrigeratorId}/history`,
   },
   GROCERY: {
     CREATE: '/grocery/item',

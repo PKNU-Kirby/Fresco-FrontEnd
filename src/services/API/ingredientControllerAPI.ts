@@ -110,7 +110,7 @@ export class IngredientControllerAPI {
 
   /**
    * 식재료 사진 스캔
-   * POST /ap1/v1/ingredient/scan-photo
+   * POST /api/v1/ingredient/scan-photo
    */
   // 기존 IngredientControllerAPI 클래스에서 수정해야 할 메서드들
 
@@ -131,7 +131,7 @@ export class IngredientControllerAPI {
 
       // 서버 다운 감지를 위한 빠른 테스트
       const testResponse = await fetch(
-        `${Config.API_BASE_URL}/ap1/v1/ingredient/auto-complete?keyword=test`,
+        `${Config.API_BASE_URL}/api/v1/ingredient/auto-complete?keyword=test`,
         {
           method: 'GET',
           headers: await this.getAuthHeaders(),
@@ -152,7 +152,7 @@ export class IngredientControllerAPI {
       } as any);
 
       const response = await fetch(
-        `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-photo`,
+        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
         {
           method: 'POST',
           headers: await this.getAuthHeaders(),
@@ -186,7 +186,7 @@ export class IngredientControllerAPI {
       } as any);
 
       const response = await fetch(
-        `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-receipt`,
+        `${Config.API_BASE_URL}/api/v1/ingredient/scan-receipt`,
         {
           method: 'POST',
           headers: await this.getAuthHeaders(),
@@ -465,7 +465,7 @@ export class IngredientControllerAPI {
       const startTime = Date.now();
 
       const response = await fetch(
-        `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-photo`,
+        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
         {
           method: 'POST',
           headers,
@@ -514,7 +514,7 @@ export class IngredientControllerAPI {
       const headers = await this.getAuthHeaders();
 
       const response = await fetch(
-        `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-photo`,
+        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
         {
           method: 'POST',
           headers,
@@ -545,7 +545,7 @@ export class IngredientControllerAPI {
 
       const headers = await this.getAuthHeaders();
       const response = await fetch(
-        `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-photo`,
+        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
         {
           method: 'POST',
           headers,
@@ -613,7 +613,7 @@ export class IngredientControllerAPI {
       const startTime = Date.now();
 
       const response = await fetch(
-        `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-photo`,
+        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
         {
           method: 'POST',
           headers,
@@ -920,7 +920,7 @@ export class IngredientControllerAPI {
     }
 
     const encodedKeyword = encodeURIComponent(keyword.trim());
-    const endpoint = `/ap1/v1/ingredient/auto-complete?keyword=${encodedKeyword}`;
+    const endpoint = `/api/v1/ingredient/auto-complete?keyword=${encodedKeyword}`;
 
     try {
       console.log(`식재료 검색: "${keyword}"`);
@@ -959,7 +959,7 @@ export class IngredientControllerAPI {
     params.append('page', defaultFilter.page.toString());
     params.append('size', defaultFilter.size.toString());
 
-    const endpoint = `/ap1/v1/ingredient/${refrigeratorId}?${params.toString()}`;
+    const endpoint = `/api/v1/ingredient/${refrigeratorId}?${params.toString()}`;
 
     try {
       console.log(`냉장고 ${refrigeratorId} 식재료 목록 조회`, {
@@ -1185,7 +1185,7 @@ export class IngredientControllerAPI {
 
     console.log('processedRequest:', JSON.stringify(processedRequest, null, 2));
 
-    const endpoint = `/ap1/v1/ingredient/${refrigeratorId}`;
+    const endpoint = `/api/v1/ingredient/${refrigeratorId}`;
     try {
       console.log('API 호출 시작...');
       const response = await ApiService.apiCall(endpoint, {
@@ -1221,7 +1221,7 @@ export class IngredientControllerAPI {
       processedData.quantity = updateData.quantity;
     }
 
-    const endpoint = `/ap1/v1/ingredient/${refrigeratorIngredientId}`;
+    const endpoint = `/api/v1/ingredient/${refrigeratorIngredientId}`;
 
     try {
       console.log(
@@ -1296,7 +1296,7 @@ export class IngredientControllerAPI {
 
       console.log('배치 삭제 요청 body:', JSON.stringify(requestBody));
 
-      const response = await ApiService.apiCall<void>('/ap1/v1/ingredient', {
+      const response = await ApiService.apiCall<void>('/api/v1/ingredient', {
         method: 'DELETE',
         body: JSON.stringify(requestBody),
       });
@@ -1727,7 +1727,7 @@ export class IngredientControllerAPI {
       const startTime = Date.now();
 
       const response = await fetch(
-        `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-photo`,
+        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
         {
           method: 'POST',
           headers,
@@ -1772,7 +1772,7 @@ export class IngredientControllerAPI {
       const headers = await this.getAuthHeaders();
 
       const response = await fetch(
-        `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-photo`,
+        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
         {
           method: 'POST',
           headers,
@@ -1807,7 +1807,7 @@ export class IngredientControllerAPI {
 
       const headers = await this.getAuthHeaders();
       const response = await fetch(
-        `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-photo`,
+        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
         {
           method: 'POST',
           headers,
@@ -1863,7 +1863,7 @@ export class IngredientControllerAPI {
       const startTime = Date.now();
 
       const response = await fetch(
-        `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-photo`,
+        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
         {
           method: 'POST',
           headers,
@@ -1983,7 +1983,7 @@ export class IngredientControllerAPI {
     const headers = await this.getAuthHeaders();
 
     const response = await fetch(
-      `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-photo`,
+      `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
       {
         method: 'POST',
         headers,
@@ -2024,7 +2024,7 @@ export class IngredientControllerAPI {
     const headers = await this.getAuthHeaders();
 
     const response = await fetch(
-      `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-photo`,
+      `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
       {
         method: 'POST',
         headers,
@@ -2150,7 +2150,7 @@ export class IngredientControllerAPI {
     const headers = await this.getAuthHeaders();
 
     const response = await fetch(
-      `${Config.API_BASE_URL}/ap1/v1/ingredient/scan-receipt`,
+      `${Config.API_BASE_URL}/api/v1/ingredient/scan-receipt`,
       {
         method: 'POST',
         headers,
