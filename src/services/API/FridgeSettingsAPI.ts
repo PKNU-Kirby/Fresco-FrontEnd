@@ -217,6 +217,9 @@ export class FridgeSettingsAPIService {
   /**
    * 초대장 생성
    */
+  /**
+   * 초대장 생성 - 쿼리 파라미터 방식으로 수정
+   */
   static async generateInviteCode(
     fridgeId: string,
     fridgeName: string,
@@ -266,12 +269,10 @@ export class FridgeSettingsAPIService {
       // 사용자 정보가 없는 경우의 처리 개선
       if (!currentUser) {
         console.warn('getCurrentUser가 null을 반환함');
-
         // 대안: getCurrentUserId로 사용자 ID만이라도 가져오기
         try {
           const userId = await AsyncStorageService.getCurrentUserId();
           console.log('대안으로 사용자 ID 조회:', userId);
-
           if (userId) {
             // 사용자 ID로 임시 사용자 객체 생성
             currentUser = {
@@ -304,15 +305,20 @@ export class FridgeSettingsAPIService {
         };
       }
 
-      const requestData = {
+      // 쿼리 파라미터 방식으로 변경 (cURL과 동일)
+      const queryParams = new URLSearchParams({
         refrigeratorId: fridgeId,
         refrigeratorName: fridgeName,
-        inviterId: currentUser.id,
+        inviterId: currentUser.id.toString(),
         inviterName: currentUser.name,
-      };
+      });
+
+      console.log('초대 API 호출 - 쿼리 파라미터:', queryParams.toString());
 
       const response = await fetch(
-        `${Config.API_BASE_URL}/api/v1/refrigerator/invitation`,
+        `${
+          Config.API_BASE_URL
+        }/api/v1/refrigerator/invitation?${queryParams.toString()}`,
         {
           method: 'POST',
           headers: {
@@ -320,7 +326,7 @@ export class FridgeSettingsAPIService {
             'Content-Type': 'application/json',
             Accept: 'application/json',
           },
-          body: JSON.stringify(requestData),
+          body: '', // 빈 body (cURL과 동일)
         },
       );
 
@@ -333,6 +339,7 @@ export class FridgeSettingsAPIService {
       }
 
       const data = await response.json();
+      console.log('초대 API 응답:', data);
 
       if (!data.code || !data.code.includes('OK')) {
         throw {

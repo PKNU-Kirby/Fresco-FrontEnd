@@ -32,6 +32,7 @@ export class FridgeControllerAPI {
     options: RequestInit = {},
   ): Promise<T> {
     try {
+      // 기존 토큰 방식 대신 개선된 방식 사용 (필요시)
       const token = await getValidAccessToken();
       if (!token) {
         throw new Error('인증 토큰이 없습니다');
@@ -40,19 +41,45 @@ export class FridgeControllerAPI {
       const url = `${Config.API_BASE_URL}${endpoint}`;
       console.log(`API 요청: ${options.method || 'GET'} ${url}`);
 
+      // 토큰 정보 디버깅 (DELETE 요청시에만)
+      if (options.method === 'DELETE') {
+        await debugTokenInfo();
+      }
+
+      const headers = {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+        ...options.headers,
+      };
+
+      console.log('요청 헤더:', JSON.stringify(headers, null, 2));
+
       const response = await fetch(url, {
         ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: `Bearer ${token}`,
-          ...options.headers,
-        },
+        headers,
       });
 
       console.log(`API 응답: ${response.status} ${response.statusText}`);
 
       if (!response.ok) {
+        if (response.status === 403) {
+          console.log('403 Forbidden 에러 발생!');
+          try {
+            const errorBody = await response.text();
+            console.log('403 에러 응답 본문:', errorBody);
+
+            try {
+              const errorJson = JSON.parse(errorBody);
+              console.log('403 에러 상세 정보:', errorJson);
+            } catch (e) {
+              console.log('403 에러 본문 (텍스트):', errorBody);
+            }
+          } catch (bodyError) {
+            console.log('403 에러 본문 읽기 실패:', bodyError);
+          }
+        }
+
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
@@ -68,7 +95,6 @@ export class FridgeControllerAPI {
       throw error;
     }
   }
-
   /**
    * 냉장고 생성 - POST
    */
@@ -108,7 +134,12 @@ export class FridgeControllerAPI {
    * 냉장고 삭제 - DELETE
    */
   static async delete(fridgeId: string): Promise<FridgeDeleteResponse> {
-    console.log('냉장고 삭제 요청:', fridgeId);
+    console.log('🔍 냉장고 삭제 요청 시작:', fridgeId);
+
+    // 토큰 상태 확인
+    const token = await getValidAccessToken();
+    console.log('🔍 삭제 요청 토큰 존재:', !!token);
+    console.log('🔍 토큰 앞 20자:', token ? token.substring(0, 20) : 'N/A');
 
     return await this.makeRequest<FridgeDeleteResponse>(
       `/api/v1/refrigerator/${fridgeId}`,

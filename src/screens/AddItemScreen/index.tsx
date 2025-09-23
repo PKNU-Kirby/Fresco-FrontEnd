@@ -28,7 +28,6 @@ export interface ItemFormData {
   expirationDate: string;
   itemCategory: string;
   photo?: string;
-  // 사용자가 선택한 식재료 정보 추가
   selectedIngredient?: {
     ingredientId: number;
     ingredientName: string;
@@ -52,7 +51,6 @@ const AddItemScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { fridgeId, recognizedData, scanResults, scanMode } = route.params;
 
-  // 카테고리 매핑 헬퍼 함수 (백엔드 기준으로 수정)
   const getCategoryByName = (categoryName: string) => {
     const categoryMap: { [key: string]: { id: number; name: string } } = {
       베이커리: { id: 1, name: '베이커리' },
@@ -65,13 +63,12 @@ const AddItemScreen: React.FC = () => {
       '우유 / 유제품': { id: 8, name: '우유 / 유제품' },
       건강식품: { id: 9, name: '건강식품' },
       '장 / 양념 / 소스': { id: 10, name: '장 / 양념 / 소스' },
-      // 기타는 매핑되지 않은 카테고리에 대한 fallback용
       기타: { id: 11, name: '기타' },
     };
     return categoryMap[categoryName] || categoryMap['기타'];
   };
 
-  // 모달 상태들
+  // 모달 상태
   const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
   const [showGoBackConfirmModal, setShowGoBackConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -79,7 +76,7 @@ const AddItemScreen: React.FC = () => {
   const [savedItemsCount, setSavedItemsCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // 백엔드 응답 저장용 state 추가
+  // 백엔드 응답 저장용 state
   const [savedItemsResponse, setSavedItemsResponse] = useState<any[]>([]);
 
   // 확인된 식재료 정보 상태
@@ -89,12 +86,12 @@ const AddItemScreen: React.FC = () => {
 
   // init item
   const initialItems = useMemo(() => {
-    // 1. 스캔 결과가 있는 경우 (카메라 → 스캔)
+    // 스캔 결과가 있는 경우 (카메라 → 스캔)
     if (scanResults && scanResults.length > 0) {
       return scanResults.map(result => result.userInput);
     }
 
-    // 2. 카메라에서 수동 입력 선택한 경우
+    // 카메라에서 수동 입력 선택한 경우
     if (recognizedData) {
       return [
         {
@@ -109,7 +106,7 @@ const AddItemScreen: React.FC = () => {
       ];
     }
 
-    // 3. 직접 추가 (빈 폼)
+    // 직접 추가
     return [
       {
         id: '1',
@@ -137,9 +134,9 @@ const AddItemScreen: React.FC = () => {
     validateAllItems,
   } = useAddItemLogic(initialItems);
 
-  // ========== 식재료 확인 로직 (수정됨) ==========
+  // 식재료 확인 로직
   const confirmIngredients = useCallback(async () => {
-    // 이미 스캔 결과가 있으면 그대로 사용
+    // 스캔 결과가 있으면 그대로 사용
     if (scanResults && scanResults.length > 0) {
       setConfirmedIngredients(scanResults);
       setIsEditMode(false);
@@ -171,20 +168,6 @@ const AddItemScreen: React.FC = () => {
               userInput: item,
               apiResult: selectedIngredient,
             });
-            console.log(
-              `"${item.name}" - 사용자 선택한 식재료 사용:`,
-              selectedIngredient,
-            );
-            console.log('confirmedList 추가된 항목:', {
-              userInput: item,
-              apiResult: selectedIngredient,
-            });
-          } else {
-            // 파싱 실패 시 API 검색으로 fallback
-            console.log(
-              `"${item.name}" - selectedIngredient 파싱 실패, API 검색으로 fallback`,
-            );
-            // API 검색 로직으로 이동
           }
         } else {
           // 사용자가 선택하지 않은 경우에만 API 호출
@@ -206,13 +189,11 @@ const AddItemScreen: React.FC = () => {
           } catch (error) {
             console.error(`"${item.name}" 검색 실패:`, error);
 
-            // API 호출 실패 시에도 사용자 입력으로 진행할 수 있도록 처리
-            // 기본 카테고리와 함께 사용자 입력을 그대로 사용
             const defaultCategory = getCategoryByName(item.itemCategory);
             confirmedList.push({
               userInput: item,
               apiResult: {
-                ingredientId: -1, // 임시 ID (서버에서 새로 생성될 예정)
+                ingredientId: -1,
                 ingredientName: item.name,
                 categoryId: defaultCategory.id,
                 categoryName: defaultCategory.name,
@@ -227,7 +208,11 @@ const AddItemScreen: React.FC = () => {
       setIsEditMode(false);
     } catch (error) {
       console.error('식재료 확인 실패:', error);
-      setErrorMessage(error.message);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : '알 수 없는 오류가 발생했습니다.';
+      setErrorMessage(errorMessage);
       setShowErrorModal(true);
     } finally {
       setIsLoading(false);
@@ -279,7 +264,7 @@ const AddItemScreen: React.FC = () => {
         return {
           ingredientId: ingredientId,
           categoryId: apiResult.categoryId || 11, // 기타 카테고리
-          quantity: parseInt(confirmed.userInput.quantity) || 1,
+          quantity: parseInt(confirmed.userInput.quantity, 10) || 1,
           unit: confirmed.userInput.unit || '개',
           expirationDate:
             confirmed.userInput.expirationDate ||
@@ -293,7 +278,6 @@ const AddItemScreen: React.FC = () => {
       };
       console.log('최종 요청 데이터:', JSON.stringify(saveRequest, null, 2));
 
-      // 6. API 호출
       console.log('API 호출 시작...');
       const response = await IngredientControllerAPI.addConfirmedIngredients(
         fridgeId,
@@ -303,7 +287,7 @@ const AddItemScreen: React.FC = () => {
       console.log('=== API 호출 성공 ===');
       console.log('응답:', JSON.stringify(response, null, 2));
 
-      // 백엔드 응답 저장 (result 배열 저장)
+      // 백엔드 응답 저장
       setSavedItemsResponse(response.result || []);
       setSavedItemsCount(confirmedIngredients.length);
       setShowSuccessModal(true);
@@ -329,7 +313,7 @@ const AddItemScreen: React.FC = () => {
     }
   }, [confirmedIngredients, fridgeId, setIsLoading]);
 
-  // ========== 헤더 관련 로직 ==========
+  // 헤더 로직
   const headerButtonText = useMemo(() => {
     if (isEditMode) {
       return '확인';
@@ -358,7 +342,7 @@ const AddItemScreen: React.FC = () => {
     }
   }, [isEditMode, confirmIngredients]);
 
-  // ========== 뒤로가기 로직 ==========
+  // 뒤로가기
   const handleGoBack = useCallback(() => {
     if (isEditMode) {
       // 변경사항이 있는지 확인
@@ -457,54 +441,12 @@ const AddItemScreen: React.FC = () => {
     }
   }, [isEditMode]);
 
-  // ========== 확인 메시지 생성 (수정됨) ==========
+  // 확인 메시지 생성
   const confirmationMessage = useMemo(() => {
     if (confirmedIngredients.length === 0) return '';
 
-    let source = '입력된';
-    if (scanMode === 'ingredient') source = '식재료 인식으로 확인된';
-    else if (scanMode === 'receipt') source = '영수증 스캔으로 확인된';
-
-    const messages = confirmedIngredients.map((confirmed, index) => {
-      // apiResult가 문자열인 경우 파싱
-      let apiResult = confirmed.apiResult;
-      if (typeof apiResult === 'string') {
-        try {
-          apiResult = JSON.parse(apiResult);
-        } catch (error) {
-          console.error('모달 메시지 apiResult 파싱 실패:', error);
-          apiResult = null;
-        }
-      }
-
-      console.log(`모달 메시지 생성 ${index}:`, {
-        confirmed,
-        userInput: confirmed.userInput,
-        originalApiResult: confirmed.apiResult,
-        parsedApiResult: apiResult,
-      });
-
-      const userInputName = confirmed.userInput?.name || '이름없음';
-      const finalName = apiResult?.ingredientName || userInputName; // undefined 방지
-      const quantity = confirmed.userInput?.quantity || '1';
-      const unit = confirmed.userInput?.unit || '개';
-      const expiry = confirmed.userInput?.expirationDate;
-
-      // 사용자 입력과 최종 이름이 다른 경우만 화살표 표시
-      const nameDisplay =
-        userInputName === finalName
-          ? `• ${finalName}`
-          : `• "${userInputName}" → "${finalName}"`;
-
-      return `${nameDisplay}\n  수량: ${quantity}${unit}\n  소비기한: ${
-        expiry || '자동입력'
-      }`;
-    });
-
-    return `${source} 식재료:\n\n${messages.join('\n\n')}\n\n총 ${
-      confirmedIngredients.length
-    }개 식재료를 냉장고에 추가하시겠습니까?`;
-  }, [confirmedIngredients, scanMode]);
+    return `총 ${confirmedIngredients.length}개 식재료를 냉장고에 추가하시겠습니까?`;
+  }, [confirmedIngredients]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -543,13 +485,13 @@ const AddItemScreen: React.FC = () => {
       <ConfirmModal
         isAlert={true}
         visible={showGoBackConfirmModal}
-        title="작성 중인 내용이 있습니다"
-        message="지금 나가면 작성 중인 내용이 사라집니다.\n정말 나가시겠습니까?"
-        iconContainer={{ backgroundColor: '#fff3cd' }}
-        icon={{ name: 'warning', color: '#856404', size: 48 }}
+        title="식재료 추가 중단"
+        message="지금 나가면 작성 중인 내용이 사라집니다. 정말 나가시겠습니까?"
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
         confirmText="나가기"
         cancelText="계속 작성"
-        confirmButtonStyle="destructive"
+        confirmButtonStyle="danger"
         onConfirm={handleGoBackConfirmModalConfirm}
         onCancel={handleGoBackConfirmModalCancel}
       />
@@ -594,7 +536,7 @@ const AddItemScreen: React.FC = () => {
         icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
         confirmText="다시 시도"
         cancelText="편집으로 돌아가기"
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => {
           setShowErrorModal(false);
           setErrorMessage('');

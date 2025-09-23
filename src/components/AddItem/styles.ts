@@ -50,9 +50,10 @@ export const addItemStyles = StyleSheet.create({
   },
 
   confirmationTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     color: '#333',
+    margin: 4,
   },
 
   confirmationContent: {
@@ -62,14 +63,15 @@ export const addItemStyles = StyleSheet.create({
   confirmationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
   },
 
   confirmationLabel: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#666',
-    width: 100,
+    width: 80,
     fontWeight: '500',
+    marginLeft: 4,
+    marginTop: 2,
   },
 
   confirmationUserInput: {
@@ -86,7 +88,7 @@ export const addItemStyles = StyleSheet.create({
   },
 
   confirmationDetail: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#333',
     flex: 1,
   },
@@ -105,7 +107,8 @@ export const addItemStyles = StyleSheet.create({
   confirmationDivider: {
     height: 1,
     backgroundColor: '#e0e0e0',
-    marginVertical: 8,
+    marginVertical: 4,
+    marginLeft: 4,
   },
   /////////////////////////////////////////////////
   container: {

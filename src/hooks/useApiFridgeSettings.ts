@@ -39,6 +39,13 @@ export const useApiFridgeSettings = (
         FridgeSettingsAPIService.getFridgeMembers(fridgeId),
       ]);
 
+      console.log('=== 디버깅 정보 ===');
+      console.log('membersResponse:', JSON.stringify(membersResponse, null, 2));
+      console.log(
+        'permissionsResponse:',
+        JSON.stringify(permissionsResponse, null, 2),
+      );
+
       // 권한 데이터를 UserPermissions 형태로 변환 (실제 구조에 맞게 수정 필요)
       const userPermissions: UserPermissions = {
         additionalProp1: permissionsResponse.length > 0, // 임시 변환 로직
@@ -46,17 +53,59 @@ export const useApiFridgeSettings = (
         additionalProp3: true, // 기본값
       };
 
-      setPermissions(userPermissions);
-      setMembers(membersResponse);
+      // 현재 냉장고에 대한 권한 정보 찾기
+      const currentFridgePermission = permissionsResponse.find(
+        perm => perm.fridgeId === fridgeId,
+      );
 
-      // 현재 사용자의 역할 확인
+      console.log('현재 냉장고 권한 정보:', currentFridgePermission);
+
+      // 현재 사용자 ID 가져오기
       const currentUserId = await AsyncStorageService.getCurrentUserId();
-      if (currentUserId && membersResponse.length > 0) {
-        const currentUser = membersResponse.find(
-          member => member.userId === currentUserId,
+      console.log('현재 사용자 ID:', currentUserId);
+
+      // 멤버 데이터에 역할 정보 추가
+      const enrichedMembers: FridgeMember[] = membersResponse.map(member => {
+        // 현재 사용자가 OWNER이고, 멤버 목록에 한 명만 있다면 그 멤버가 방장일 가능성이 높음
+        // 또는 실제 방장 정보를 다른 방식으로 확인해야 할 수도 있음
+
+        // 임시 해결책: 현재 사용자가 OWNER 권한을 가지고 있으면 첫 번째 멤버를 OWNER로 설정
+        const isOwner = currentFridgePermission?.role === 'OWNER';
+        const role = isOwner ? 'OWNER' : 'MEMBER';
+
+        console.log(
+          `멤버 ${member.userName}(${member.userId}): 권한기반역할=${role}`,
         );
-        if (currentUser) {
-          setCurrentUserRole(currentUser.role === 'OWNER' ? 'owner' : 'member');
+
+        return {
+          ...member,
+          role: role as 'OWNER' | 'MEMBER',
+        };
+      });
+
+      console.log('완성된 멤버 데이터:', enrichedMembers);
+      setMembers(enrichedMembers);
+
+      // 현재 사용자의 역할을 권한으로 판단
+      if (currentUserId) {
+        try {
+          // 현재 냉장고에 대한 권한 확인
+          const [canEdit, canDelete] = await Promise.all([
+            PermissionAPIService.checkFridgePermission(fridgeId, 'edit'),
+            PermissionAPIService.checkFridgePermission(fridgeId, 'view'),
+          ]);
+
+          console.log(`사용자 ${currentUserId} 권한:`, { canEdit, canDelete });
+
+          // canEdit과 canDelete 둘 다 true면 방장, 아니면 구성원
+          const isOwner = canEdit && canDelete;
+          setCurrentUserRole(isOwner ? 'owner' : 'member');
+
+          console.log('판단된 역할:', isOwner ? 'owner' : 'member');
+        } catch (permissionError) {
+          console.error('권한 확인 중 오류:', permissionError);
+          // 권한 확인 실패 시 route에서 전달받은 userRole 사용
+          setCurrentUserRole(userRole || null);
         }
       }
     } catch (error) {

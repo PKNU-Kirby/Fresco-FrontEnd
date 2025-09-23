@@ -10,7 +10,7 @@ import { PermissionUtils } from '../utils/permissionUtils';
 import { ApiErrorHandler } from '../utils/errorHandler';
 import { ApiUtils } from '../utils/apiUtils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { getTokenUserId } from '../utils/authUtils';
 // API 호출 상태 관리
 let isLoadingFridges = false;
 
@@ -25,18 +25,50 @@ export const useFridgeSelect = (navigation: any) => {
       setLoading(true);
       setError(null);
 
-      const userId = await AsyncStorageService.getCurrentUserId();
-      if (!userId) {
+      // 토큰에서 사용자 ID 추출
+      const tokenUserId = await getTokenUserId();
+      const localUserId = await AsyncStorageService.getCurrentUserId();
+
+      console.log('토큰 사용자 ID:', tokenUserId);
+      console.log('로컬 사용자 ID:', localUserId);
+
+      if (!tokenUserId) {
         navigation.replace('Login');
         return;
       }
 
-      const user = await AsyncStorageService.getUserById(userId);
+      let user: User | null = null;
+
+      // 토큰 사용자와 로컬 사용자가 다르면 토큰 기준으로 변경
+      if (tokenUserId !== localUserId) {
+        console.log('사용자 ID 불일치 - 토큰 기준으로 동기화');
+
+        // 토큰 사용자 정보로 사용자 조회 시도
+        user = await AsyncStorageService.getUserById(tokenUserId);
+
+        if (!user) {
+          // 토큰 사용자 정보가 로컬에 없으면 기본 정보로 생성
+          user = {
+            id: tokenUserId,
+            provider: 'UNKNOWN',
+            providerId: 'UNKNOWN',
+            name: `User ${tokenUserId}`,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          console.log('토큰 사용자 정보를 기본값으로 생성:', user);
+        }
+      } else {
+        // 일치하면 기존대로 로컬 사용자 사용
+        user = await AsyncStorageService.getUserById(localUserId);
+      }
+
       if (!user) {
         navigation.replace('Login');
         return;
       }
 
+      console.log('최종 설정된 사용자:', user);
       setCurrentUser(user);
       await loadUserFridges(user);
     } catch (error: any) {

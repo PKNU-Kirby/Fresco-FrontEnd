@@ -37,19 +37,9 @@ export const AddItemContent: React.FC<AddItemContentProps> = ({
   onUpdateItem,
   onRemoveItem,
   onFocusComplete,
-  onAddNewItem,
   confirmedIngredients = [],
 }) => {
   const scrollViewRef = useRef<ScrollView>(null);
-
-  const handleAddNewItem = () => {
-    if (onAddNewItem) {
-      const newItemId = onAddNewItem();
-      setTimeout(() => {
-        scrollViewRef.current?.scrollTo({ y: 0, animated: true });
-      }, 50);
-    }
-  };
 
   return (
     <View style={styles.contentContainer}>

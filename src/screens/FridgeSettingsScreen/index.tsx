@@ -86,13 +86,12 @@ const FridgeSettingsScreen = ({ route }: Props) => {
         <Text style={styles.headerTitle}>냉장고 설정</Text>
         <View style={styles.headerRight} />
       </View>
-
       <ScrollView
         style={styles.settingsContainer}
         showsVerticalScrollIndicator={false}
       >
         <SettingsGroups
-          members={members}
+          members={members} // useApiFridgeSettings의 데이터 사용
           userRole={currentUserRole}
           fridgeName={fridgeName}
           permissions={permissions}
@@ -111,14 +110,13 @@ const FridgeSettingsScreen = ({ route }: Props) => {
           onLeaveFridge={handleLeaveFridge}
         />
       </ScrollView>
-
       {/* Invite Member Modal */}
       <InviteMemberModal
         visible={showInviteModal}
         onClose={() => setShowInviteModal(false)}
         fridgeId={fridgeId}
         fridgeName={fridgeName}
-        onInviteSuccess={loadMembers}
+        onInviteSuccess={loadMembers} // 기존 핸들러 사용
       />
     </SafeAreaView>
   );

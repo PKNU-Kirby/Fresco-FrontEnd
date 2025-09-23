@@ -16,7 +16,8 @@ import { useFridgeActions } from '../../hooks/useFridgeActions';
 import { useOptimisticEdit } from '../../hooks/useOptimisticEdit';
 import { usePermissions } from '../../hooks/usePermissions';
 import { FridgeControllerAPI } from '../../services/API/fridgeControllerAPI';
-
+// 기존 import들 중에서 authUtils 관련 부분을 찾아서 수정
+import { validateUserTokenMatch } from '../../utils/authUtils';
 // 기존 컴포넌트들
 import { HiddenFridgesBottomSheet } from '../../components/FridgeSelect/HiddenFridgeBottomSheet';
 import { FridgeHeader } from '../../components/FridgeSelect/FridgeHeader';
@@ -92,6 +93,42 @@ const FridgeSelectScreen = () => {
     editingFridge,
     navigation,
   });
+
+  // ✅ 추가된 부분: commitChanges용 서버 액션 함수들
+  const handleCreateFridge = async (name: string) => {
+    try {
+      console.log('냉장고 생성 요청:', name);
+      const response = await FridgeControllerAPI.create({ name });
+      console.log('냉장고 생성 완료:', response);
+      return response;
+    } catch (error) {
+      console.error('냉장고 생성 실패:', error);
+      throw error;
+    }
+  };
+
+  const handleUpdateFridge = async (id: string, name: string) => {
+    try {
+      console.log('냉장고 업데이트 요청:', id, name);
+      const response = await FridgeControllerAPI.update(id, { name });
+      console.log('냉장고 업데이트 완료:', response);
+      return response;
+    } catch (error) {
+      console.error('냉장고 업데이트 실패:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteFridge = async (id: string) => {
+    try {
+      console.log('냉장고 삭제 요청:', id);
+      await FridgeControllerAPI.delete(id);
+      console.log('냉장고 삭제 완료:', id);
+    } catch (error) {
+      console.error('냉장고 삭제 실패:', error);
+      throw error;
+    }
+  };
 
   // 권한 기반 액션 핸들러들
   const handleEditFridge = (fridge: FridgeWithRole) => {
@@ -216,31 +253,58 @@ const FridgeSelectScreen = () => {
     }
   };
 
-  // 편집 완료
+  // ✅ 수정된 부분: 편집 완료
   const handleSaveChanges = async () => {
     try {
+      console.log('===== 변경사항 저장 시작 =====');
+      console.log('현재 사용자 ID:', currentUser?.id);
+
+      // 사용자 ID와 토큰 일치성 검증
+      if (currentUser?.id) {
+        const { isValid, needsReauth, tokenUserId } =
+          await validateUserTokenMatch(currentUser.id);
+
+        if (!isValid) {
+          console.log(
+            `사용자 ID 불일치! 현재: ${currentUser.id}, 토큰: ${tokenUserId}`,
+          );
+          Alert.alert(
+            '인증 오류',
+            '사용자 인증 정보가 일치하지 않습니다. 다시 로그인해주세요.',
+            [
+              { text: '취소', style: 'cancel' },
+              { text: '로그인', onPress: () => handleLogout() },
+            ],
+          );
+          return;
+        }
+      }
+
+      // ✅ 함수들을 전달하여 commitChanges 호출
       await commitChanges(
-        // Create - 수정 필요
-        async (name: string) => {
-          await FridgeControllerAPI.create({ name }); // 새로운 API 사용
-        },
-        // Update - 수정 필요
-        async (id: string, name: string) => {
-          await FridgeControllerAPI.update(id, { name }); // 새로운 API 사용
-        },
-        // Delete - 수정 필요
-        async (id: string) => {
-          await FridgeControllerAPI.delete(id); // 새로운 API 사용
-        },
+        handleCreateFridge,
+        handleUpdateFridge,
+        handleDeleteFridge,
       );
 
-      // 성공 시 서버 데이터 새로고침
       await loadUserFridges();
-
       Alert.alert('성공', '모든 변경사항이 저장되었습니다.');
     } catch (error) {
       console.error('변경사항 저장 실패:', error);
-      Alert.alert('오류', '변경사항 저장에 실패했습니다.');
+
+      if (error.message.includes('403')) {
+        console.log('403 에러 발생 - 사용자 ID 불일치 또는 권한 부족');
+        Alert.alert(
+          '권한 오류',
+          '인증 정보에 문제가 있습니다. 다시 로그인해주세요.',
+          [
+            { text: '취소', style: 'cancel' },
+            { text: '로그인', onPress: () => handleLogout() },
+          ],
+        );
+      } else {
+        Alert.alert('오류', `변경사항 저장에 실패했습니다: ${error.message}`);
+      }
     }
   };
 

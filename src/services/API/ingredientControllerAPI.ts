@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import { launchImageLibrary, MediaType } from 'react-native-image-picker';
 import Config from 'react-native-config';
 
-// 식재료 관련 타입 정의
+// 식재료 관련 타입
 export type AutoCompleteSearchResponse = {
   ingredientId: number;
   ingredientName: string;
@@ -63,27 +63,26 @@ export type UpdateIngredientRequest = {
   quantity?: number;
 };
 
-// ✅ 수정된 영수증 스캔 응답 타입
+// 영수증 스캔 응답 타입
 export type ScanResultItem = {
   ingredientId: number;
   ingredientName: string;
   categoryId: number;
   categoryName: string;
   expirationDate: string;
-  inputName: string; // JSON 응답에서는 input_name이지만 TypeScript에서는 camelCase 사용
+  inputName: string;
 };
 
-// ✅ 수정된 식재료 스캔 응답 타입
+// 식재료 스캔 응답 타입
 export type PhotoScanResult = {
   ingredientId: number;
   ingredientName: string;
   categoryId: number;
   categoryName: string;
   expirationDate: string;
-  // quantity 필드 제거 - 서버 응답에 없음
 };
 
-// ConfirmedIngredient 타입 정의
+// ConfirmedIngredient 타입
 export type ConfirmedIngredient = {
   userInput: {
     id: string;
@@ -106,25 +105,8 @@ export type ConfirmedIngredient = {
  * 식재료 전용 API 컨트롤러
  */
 export class IngredientControllerAPI {
-  // ========== 기본 스캔 관련 메소드 ==========
-
   /**
    * 식재료 사진 스캔
-   * POST /api/v1/ingredient/scan-photo
-   */
-  // 기존 IngredientControllerAPI 클래스에서 수정해야 할 메서드들
-
-  /**
-   * 식재료 사진 스캔 (refrigeratorId 추가)
-   */
-  // ingredientControllerAPI.ts의 scanPhoto, scanReceipt 메서드 수정
-
-  /**
-   * 식재료 사진 스캔 (백엔드 스펙에 맞춤)
-   */ // IngredientControllerAPI.ts의 수정된 스캔 메서드들
-
-  /**
-   * 식재료 사진 스캔 (500 오류 해결 버전)
    */ static async scanPhoto(imageUri: string): Promise<PhotoScanResult[]> {
     try {
       console.log('서버 상태 체크 후 스캔 시작');
@@ -135,7 +117,6 @@ export class IngredientControllerAPI {
         {
           method: 'GET',
           headers: await this.getAuthHeaders(),
-          timeout: 3000,
         },
       );
 
@@ -157,7 +138,6 @@ export class IngredientControllerAPI {
           method: 'POST',
           headers: await this.getAuthHeaders(),
           body: formData,
-          timeout: 15000,
         },
       );
 
@@ -191,7 +171,6 @@ export class IngredientControllerAPI {
           method: 'POST',
           headers: await this.getAuthHeaders(),
           body: formData,
-          timeout: 15000,
         },
       );
 
@@ -231,7 +210,6 @@ export class IngredientControllerAPI {
         imageUri.substring(0, 50) + '...',
       );
 
-      // ✅ 수정된 스캔 메서드 사용
       if (scanMode === 'ingredient') {
         scanResults = await this.scanPhoto(imageUri);
       } else {
@@ -248,7 +226,6 @@ export class IngredientControllerAPI {
           `${scanMode} 스캔 결과 없음 - 서버는 정상이지만 인식된 항목이 없음`,
         );
 
-        // ✅ 빈 결과도 정상 케이스로 처리 (사용자에게 알림)
         return [];
       }
 
@@ -378,10 +355,6 @@ export class IngredientControllerAPI {
   }
 
   /**
-   * 영수증 스캔 (refrigeratorId 추가)
-   */
-
-  /**
    * FormData 구성 및 전송 과정을 단계별로 검증 (refrigeratorId 포함)
    */
   static async validateFormDataTransmissionWithFridgeId(
@@ -391,13 +364,13 @@ export class IngredientControllerAPI {
     try {
       console.log('=== FormData 전송 검증 시작 (fridgeId 포함) ===');
 
-      // 1. 이미지 파일 기본 정보 확인
-      console.log('1️⃣ 이미지 파일 기본 정보');
+      // 이미지 파일 기본 정보 확인
+      console.log('>> 이미지 파일 기본 정보');
       console.log('URI:', imageUri);
       console.log('fridgeId:', fridgeId);
 
-      // 2. 파일 읽기 테스트
-      console.log('2️⃣ 파일 읽기 테스트');
+      // 파일 읽기 테스트
+      console.log('>> 파일 읽기 테스트');
       try {
         const fileResponse = await fetch(imageUri);
         const fileBlob = await fileResponse.blob();

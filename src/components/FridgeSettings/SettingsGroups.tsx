@@ -3,14 +3,26 @@ import { View, Text } from 'react-native';
 import SettingsItem from './SettingsItem';
 import { styles } from '../../screens/FridgeSettingsScreen/styles';
 
-interface Member {
+// API에서 오는 FridgeMember 타입
+interface ApiFridgeMember {
   userId: string;
   userName: string;
   role: 'OWNER' | 'MEMBER';
 }
 
+// useMembers에서 오는 Member 타입
+interface LocalMember {
+  id: string;
+  name: string;
+  role: 'owner' | 'member';
+  joinDate: string;
+}
+
+// 두 타입을 모두 수용할 수 있는 유니온 타입
+type MemberData = ApiFridgeMember | LocalMember;
+
 interface SettingsGroupsProps {
-  members: Member[];
+  members: MemberData[]; // 두 타입 모두 수용
   userRole?: 'owner' | 'member' | null;
   fridgeName: string;
   permissions?: {
@@ -50,13 +62,14 @@ const SettingsGroups: React.FC<SettingsGroupsProps> = ({
   onLeaveFridge,
 }) => {
   const safeMembers = Array.isArray(members) ? members : [];
-  const ownerCount = safeMembers.filter(
-    member => member.role === 'OWNER',
-  ).length;
-  const memberCount = safeMembers.filter(
-    member => member.role === 'MEMBER',
-  ).length;
   const totalMemberCount = safeMembers.length;
+
+  // userRole을 한국어로 변환하는 함수
+  const getRoleDisplayName = (role?: string | null) => {
+    if (role === 'owner') return '방장';
+    if (role === 'member') return '구성원';
+    return '알 수 없음';
+  };
 
   return (
     <View>
@@ -71,16 +84,9 @@ const SettingsGroups: React.FC<SettingsGroupsProps> = ({
           value={fridgeName}
           showArrow={false}
         />
-
-        <SettingsItem
-          title="구성원"
-          value={`${totalMemberCount}명`}
-          onPress={onMembersList}
-        />
-
         <SettingsItem
           title="내 역할"
-          value={userRole === 'owner' ? '방장' : '구성원'}
+          value={getRoleDisplayName(userRole)}
           showArrow={false}
         />
       </View>
@@ -98,7 +104,7 @@ const SettingsGroups: React.FC<SettingsGroupsProps> = ({
 
           <SettingsItem
             title="구성원 목록"
-            value={`방장 ${ownerCount}명, 구성원 ${memberCount}명`}
+            value={`총 ${totalMemberCount}명`}
             onPress={onMembersList}
           />
         </View>

@@ -16,6 +16,7 @@ const MemberItem: React.FC<MemberItemProps> = ({ member, onPress }) => (
       <View style={styles.settingsItemContent}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Text style={styles.settingsItemTitle}>{member.name}</Text>
+          {/* owner 역할 체크 (소문자) */}
           {member.role === 'owner' && (
             <View style={styles.ownerBadge}>
               <FontAwesome5 name="crown" size={10} color="#92400E" />

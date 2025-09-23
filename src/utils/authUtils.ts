@@ -150,6 +150,177 @@ export const getValidAccessToken = async (): Promise<string | null> => {
     return null;
   }
 };
+
+/**
+ * 토큰 정보 디버깅 (JWT 페이로드 분석)
+ */
+export const debugTokenInfo = async (): Promise<void> => {
+  try {
+    const accessToken = await getAccessToken();
+    const refreshToken = await getRefreshToken();
+
+    console.log('=== 토큰 디버깅 정보 ===');
+    console.log('액세스 토큰 존재:', !!accessToken);
+    console.log('리프레시 토큰 존재:', !!refreshToken);
+
+    if (accessToken) {
+      try {
+        const parts = accessToken.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          const currentTime = Math.floor(Date.now() / 1000);
+
+          console.log('토큰 페이로드:', {
+            userId: payload.userId,
+            발급시간: new Date(payload.iat * 1000),
+            만료시간: new Date(payload.exp * 1000),
+            현재시간: new Date(),
+            남은시간_초: payload.exp - currentTime,
+            만료여부: payload.exp <= currentTime,
+          });
+        }
+      } catch (parseError) {
+        console.error('토큰 파싱 실패:', parseError);
+      }
+    }
+    console.log('=====================');
+  } catch (error) {
+    console.error('토큰 디버깅 실패:', error);
+  }
+};
+
+/**
+ * 토큰의 사용자 ID 추출
+ */
+export const getTokenUserId = async (): Promise<string | null> => {
+  try {
+    const accessToken = await getAccessToken();
+    if (!accessToken) return null;
+
+    const parts = accessToken.split('.');
+    if (parts.length !== 3) return null;
+
+    const payload = JSON.parse(atob(parts[1]));
+    return payload.userId ? String(payload.userId) : null;
+  } catch (error) {
+    console.error('토큰에서 사용자 ID 추출 실패:', error);
+    return null;
+  }
+};
+
+/**
+ * 현재 사용자 ID와 토큰 사용자 ID 일치 검증
+ */
+export const validateUserTokenMatch = async (
+  currentUserId: string,
+): Promise<{
+  isValid: boolean;
+  tokenUserId?: string;
+  needsReauth: boolean;
+}> => {
+  try {
+    const tokenUserId = await getTokenUserId();
+
+    console.log('사용자 ID 검증:', {
+      현재사용자ID: currentUserId,
+      토큰사용자ID: tokenUserId,
+      일치여부: currentUserId === tokenUserId,
+    });
+
+    if (!tokenUserId) {
+      return {
+        isValid: false,
+        needsReauth: true,
+      };
+    }
+
+    const isValid = currentUserId === tokenUserId;
+
+    return {
+      isValid,
+      tokenUserId,
+      needsReauth: !isValid,
+    };
+  } catch (error) {
+    console.error('사용자-토큰 매칭 검증 실패:', error);
+    return {
+      isValid: false,
+      needsReauth: true,
+    };
+  }
+};
+
+/**
+ * 개선된 유효한 액세스 토큰 조회 (사용자 ID 검증 포함)
+ */
+export const getValidAccessTokenWithUserCheck = async (
+  expectedUserId?: string,
+): Promise<{
+  token: string | null;
+  needsReauth: boolean;
+  reason?: string;
+}> => {
+  try {
+    let accessToken = await getAccessToken();
+
+    if (!accessToken) {
+      console.log('액세스 토큰이 없습니다');
+      return {
+        token: null,
+        needsReauth: true,
+        reason: '토큰 없음',
+      };
+    }
+
+    // 토큰 만료 확인
+    if (isTokenExpired(accessToken)) {
+      console.log('토큰이 만료되었습니다. 갱신을 시도합니다...');
+
+      const refreshSuccess = await performTokenRefresh();
+      if (refreshSuccess) {
+        accessToken = await getAccessToken();
+        if (!accessToken) {
+          return {
+            token: null,
+            needsReauth: true,
+            reason: '갱신 후 토큰 없음',
+          };
+        }
+      } else {
+        return {
+          token: null,
+          needsReauth: true,
+          reason: '토큰 갱신 실패',
+        };
+      }
+    }
+
+    // 사용자 ID 검증 (제공된 경우)
+    if (expectedUserId) {
+      const validation = await validateUserTokenMatch(expectedUserId);
+      if (!validation.isValid) {
+        return {
+          token: null,
+          needsReauth: true,
+          reason: `사용자 ID 불일치 (기대: ${expectedUserId}, 토큰: ${validation.tokenUserId})`,
+        };
+      }
+    }
+
+    return {
+      token: accessToken,
+      needsReauth: false,
+    };
+  } catch (error) {
+    console.error('개선된 토큰 조회 실패:', error);
+    return {
+      token: null,
+      needsReauth: true,
+      reason: '토큰 조회 오류',
+    };
+  }
+};
+
 /**
  * 토큰 상태 확인 (디버깅용)
  */

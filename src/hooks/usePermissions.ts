@@ -42,7 +42,21 @@ export const usePermissions = (currentUser: User | null) => {
 
   const getPermission = useCallback(
     (fridgeId: string) => {
-      return permissions.find(p => p.fridgeId === fridgeId);
+      const permission = permissions.find(p => p.fridgeId === fridgeId);
+
+      // 삭제 권한 관련 로그만 출력
+      if (permission) {
+        console.log(`🔍 권한 조회 - 냉장고 ${fridgeId}:`, {
+          role: permission.role,
+          canDelete: permission.canDelete,
+          canEdit: permission.canEdit,
+          fridgeId: permission.fridgeId,
+        });
+      } else {
+        console.log(`🔍 권한 없음 - 냉장고 ${fridgeId}`);
+      }
+
+      return permission;
     },
     [permissions],
   );
