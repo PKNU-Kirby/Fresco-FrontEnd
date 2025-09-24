@@ -16,15 +16,13 @@ let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
 export class AuthAPIService {
-  private static readonly BASE_URL = Config.API_BASE_URL;
-
   // login API
   static async login(
     provider: SocialProvider,
     accessToken: string,
   ): Promise<LoginResponse> {
     try {
-      const response = await fetch(`${this.BASE_URL}/api/v1/auth/login`, {
+      const response = await fetch(`${Config.API_BASE_URL}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ provider, accessToken }),
@@ -45,7 +43,7 @@ export class AuthAPIService {
   static async logout(accessToken?: string): Promise<void> {
     try {
       if (accessToken) {
-        await fetch(`${this.BASE_URL}/api/v1/auth/logout`, {
+        await fetch(`${Config.API_BASE_URL}/api/v1/auth/logout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -61,13 +59,13 @@ export class AuthAPIService {
   }
 
   // token Refresh API
+  // token Refresh API
   static async refreshToken(): Promise<boolean> {
     if (isRefreshing && refreshPromise) {
       return await refreshPromise;
     }
 
     isRefreshing = true;
-
     refreshPromise = (async () => {
       try {
         const beforeToken = await getAccessToken();
@@ -77,11 +75,17 @@ export class AuthAPIService {
           return false;
         }
 
-        const response = await fetch(`${this.BASE_URL}/api/v1/auth/refresh`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken }),
-        });
+        const response = await fetch(
+          `${Config.API_BASE_URL}/api/v1/auth/refresh`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${beforeToken}`, // 이 부분 추가!
+            },
+            body: JSON.stringify({ refreshToken }),
+          },
+        );
 
         if (!response.ok) {
           console.log('토큰 갱신 HTTP 에러:', response.status);
@@ -101,13 +105,11 @@ export class AuthAPIService {
         if (result.code === 'AUTH_OK_002' && result.result.accessToken) {
           const newAccessToken = result.result.accessToken;
           const newRefreshToken = result.result.refreshToken || refreshToken;
-
           await saveTokens(newAccessToken, newRefreshToken);
 
           const afterToken = await getAccessToken();
           const tokenChanged = beforeToken !== afterToken;
           console.log('변경된 토큰 :', tokenChanged);
-
           return true;
         }
 

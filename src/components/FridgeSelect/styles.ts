@@ -370,6 +370,33 @@ export const fridgeTileStyles = StyleSheet.create({
     shadowRadius: scale(8),
     elevation: 10,
   },
+  transparentTile: {
+    width: scale(168),
+    height: scale(168),
+    backgroundColor: 'transparent',
+    borderRadius: scale(16),
+  },
+  inviteJoinButton: {
+    backgroundColor: '#d3f0d3',
+    borderWidth: scale(2),
+    borderStyle: 'dashed',
+    borderColor: 'limegreen',
+    borderRadius: scale(12),
+    paddingVertical: scale(16),
+    paddingHorizontal: scale(12),
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: scale(120),
+    height: scale(120),
+  },
+  inviteJoinButtonText: {
+    fontSize: scale(12),
+    fontWeight: '600',
+    color: '#25A325',
+    textAlign: 'center',
+    marginTop: scale(8),
+    lineHeight: scale(16),
+  },
 });
 export const fridgeModalFormStyles = StyleSheet.create({
   overlay: {

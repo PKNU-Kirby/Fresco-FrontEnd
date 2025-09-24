@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Config from 'react-native-config';
 
 // hooks utils import
 import { useFridgeSelect } from '../../hooks/useFridgeSelect';
@@ -17,14 +18,14 @@ import { useOptimisticEdit } from '../../hooks/useOptimisticEdit';
 import { usePermissions } from '../../hooks/usePermissions';
 import { FridgeControllerAPI } from '../../services/API/fridgeControllerAPI';
 // 기존 import들 중에서 authUtils 관련 부분을 찾아서 수정
-import { validateUserTokenMatch } from '../../utils/authUtils';
+import { validateUserTokenMatch, getAccessToken } from '../../utils/authUtils';
 // 기존 컴포넌트들
 import { HiddenFridgesBottomSheet } from '../../components/FridgeSelect/HiddenFridgeBottomSheet';
 import { FridgeHeader } from '../../components/FridgeSelect/FridgeHeader';
 import { FridgeList } from '../../components/FridgeSelect/FridgeTileList';
 import { FridgeModals } from '../../components/FridgeSelect/FridgeModal';
 import { FridgeModalManager } from '../../components/FridgeSelect/FridgeModalManager';
-
+import { InviteCodeModal } from '../../components/FridgeSelect/InviteCodeModal';
 import { FridgeWithRole } from '../../types/permission';
 import { styles } from './styles';
 
@@ -49,6 +50,7 @@ const FridgeSelectScreen = () => {
     // permissionError,
     hasPermission,
     getPermission,
+    loadPermissions, // 이 함수 추가
   } = usePermissions(currentUser);
 
   // 낙관적 편집 관리
@@ -77,6 +79,8 @@ const FridgeSelectScreen = () => {
   const [bottomSheetHeight] = useState(new Animated.Value(80));
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
 
+  const [showInviteCodeModal, setShowInviteCodeModal] = useState(false);
+
   // 서버 액션들
   const {
     handleLogout,
@@ -93,6 +97,78 @@ const FridgeSelectScreen = () => {
     editingFridge,
     navigation,
   });
+
+  const handleJoinWithInviteCode = () => {
+    setShowInviteCodeModal(true);
+  };
+
+  const handleInviteCodeSubmit = async (inviteCode: string) => {
+    try {
+      console.log('=== 초대코드 참여 시작 ===');
+      console.log('입력된 초대코드:', inviteCode);
+
+      const accessToken = await getAccessToken();
+      console.log('Access Token 존재:', !!accessToken);
+
+      // GET 요청으로 초대 정보 조회 + 자동 참여 처리
+      console.log('초대 정보 조회 및 참여 처리');
+      const inviteUrl = `${Config.API_BASE_URL}/api/v1/refrigerator/invitation/${inviteCode}`;
+      console.log('요청 URL:', inviteUrl);
+
+      const response = await fetch(inviteUrl, {
+        method: 'GET',
+        headers: {
+          accept: '*/*',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      console.log('응답 상태:', response.status);
+
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+          console.log('에러 응답:', errorData);
+        } catch (e) {
+          const errorText = await response.text();
+          console.log('에러 응답 텍스트:', errorText);
+          errorData = { message: errorText };
+        }
+        throw new Error(errorData.message || '초대코드 처리에 실패했습니다.');
+      }
+
+      const result = await response.json();
+      console.log('참여 처리 성공:', result);
+
+      const refrigeratorName = result.result?.refrigeratorName || '냉장고';
+
+      Alert.alert(
+        '참여 완료',
+        `${refrigeratorName}에 성공적으로 참여했습니다!`,
+        [
+          {
+            text: '확인',
+            onPress: () => {
+              console.log('냉장고 목록 및 권한 정보 새로고침 중...');
+              // 냉장고 목록과 권한 정보를 동시에 새로고침
+              Promise.all([loadUserFridges(), loadPermissions()])
+                .then(() => {
+                  console.log('새로고침 완료');
+                })
+                .catch(error => {
+                  console.error('새로고침 실패:', error);
+                });
+            },
+          },
+        ],
+      );
+    } catch (error: any) {
+      console.error('초대코드 참여 실패:', error);
+      console.error('에러 메시지:', error.message);
+      Alert.alert('참여 실패', error.message || '초대코드를 확인해주세요.');
+    }
+  };
 
   // ✅ 추가된 부분: commitChanges용 서버 액션 함수들
   const handleCreateFridge = async (name: string) => {
@@ -366,6 +442,7 @@ const FridgeSelectScreen = () => {
           onEditFridge={handleEditFridge}
           onLeaveFridge={handleLeaveFridge}
           onToggleHidden={toggleHiddenLocally}
+          onJoinWithInviteCode={handleJoinWithInviteCode}
           permissions={permissions}
         />
 
@@ -395,6 +472,12 @@ const FridgeSelectScreen = () => {
         />
 
         <FridgeModalManager modals={modals} modalHandlers={modalHandlers} />
+
+        <InviteCodeModal
+          visible={showInviteCodeModal}
+          onClose={() => setShowInviteCodeModal(false)}
+          onSubmit={handleInviteCodeSubmit}
+        />
       </SafeAreaView>
     </GestureHandlerRootView>
   );
