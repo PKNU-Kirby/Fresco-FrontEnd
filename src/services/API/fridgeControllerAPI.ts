@@ -42,9 +42,6 @@ export class FridgeControllerAPI {
       console.log(`API 요청: ${options.method || 'GET'} ${url}`);
 
       // 토큰 정보 디버깅 (DELETE 요청시에만)
-      if (options.method === 'DELETE') {
-        await debugTokenInfo();
-      }
 
       const headers = {
         'Content-Type': 'application/json',
