@@ -1,23 +1,30 @@
-// styles.ts - iOS 스타일로 완전히 수정된 전체 코드
 import { StyleSheet, Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
+// iPhone 16 Pro
+const baseWidth = 402;
+//const baseHeight = 874;
+
+// 반응형 함수
+//const wp = (percentage: number) => (width * percentage) / 100;
+//const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
+
 export const styles = StyleSheet.create({
-  // 기본 컨테이너
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7', // iOS 설정 앱의 기본 배경색
+    backgroundColor: '#F2F2F7',
   },
 
-  // 헤더 스타일
+  // Setting Screen Header
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#F2F2F7', // 배경과 동일하게
+    backgroundColor: '#F2F2F7',
     borderBottomWidth: 0,
   },
   headerTitle: {
@@ -51,43 +58,30 @@ export const styles = StyleSheet.create({
   // iOS 스타일 설정 컨테이너
   settingsContainer: {
     flex: 1,
-    marginHorizontal: 16,
+    marginHorizontal: 0,
   },
 
-  // 그룹 스타일
+  // 냉장고 정보 섹션 스타일
   settingsGroup: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16, // 좌우 여백 추가
-    marginBottom: 32, // 그룹 간 간격 증가
-    borderRadius: 12, // 둥근 모서리 추가
-    overflow: 'hidden', // 내부 요소들이 둥근 모서리를 넘지 않도록
-    // iOS 스타일 그림자 효과
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
+    backgroundColor: '#fff',
+    marginHorizontal: scale(22),
+    marginBottom: scale(12),
+    borderRadius: scale(20),
+    paddingBottom: scale(8),
   },
-
   groupHeader: {
-    paddingHorizontal: 32, // 그룹의 패딩과 맞춤
-    paddingBottom: 8,
-    paddingTop: 24, // 상단 여백 증가
-    backgroundColor: '#F2F2F7', // 배경과 동일하게
+    paddingHorizontal: scale(24),
+    paddingBottom: scale(12),
+    paddingTop: scale(28),
   },
-
   groupTitle: {
-    fontSize: 13, // iOS처럼 조금 더 작게
-    fontWeight: '400', // iOS처럼 조금 더 가볍게
-    color: '#6D6D72', // iOS 스타일 회색
+    fontSize: scale(18),
+    fontWeight: '800',
+    color: 'rgba(51, 61, 75, 1)',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
 
-  // 개별 설정 아이템
   settingsItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -96,12 +90,12 @@ export const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 0.5,
-    borderBottomColor: '#C6C6C8', // iOS 스타일 구분선 색상
-    minHeight: 44, // iOS 최소 터치 영역
+    borderBottomColor: '#C6C6C8',
+    minHeight: 44,
   },
 
   settingsItemLast: {
-    borderBottomWidth: 0, // 마지막 아이템은 하단 보더 제거
+    borderBottomWidth: 0,
   },
 
   settingsItemLeft: {
@@ -112,7 +106,7 @@ export const styles = StyleSheet.create({
 
   settingsItemIcon: {
     marginRight: 12,
-    width: 28, // 아이콘 크기 조정
+    width: 28,
     alignItems: 'center',
   },
 

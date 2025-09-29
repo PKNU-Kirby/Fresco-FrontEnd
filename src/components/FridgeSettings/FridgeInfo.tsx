@@ -1,19 +1,20 @@
-// components/FridgeSettings/FridgeInfo.tsx
 import React from 'react';
 import { View, Text } from 'react-native';
 import SettingsItem from './SettingsItem';
-import { styles } from '../../screens/FridgeSettingsScreen/styles';
+import { styles } from './styles';
 
 interface FridgeInfoProps {
   fridgeName: string;
-  userRole: 'owner' | 'member' | null;
+  userRole: 'owner' | 'member';
   memberCount: number;
+  onMembersList?: () => void;
 }
 
 const FridgeInfo: React.FC<FridgeInfoProps> = ({
   fridgeName,
   userRole,
   memberCount,
+  onMembersList,
 }) => {
   const getRoleDisplayName = (role: 'owner' | 'member' | null) => {
     if (role === 'owner') return '방장';
@@ -27,7 +28,7 @@ const FridgeInfo: React.FC<FridgeInfoProps> = ({
         <Text style={styles.groupTitle}>냉장고 정보</Text>
       </View>
 
-      <SettingsItem title="냉장고 이름" value={fridgeName} showArrow={false} />
+      <SettingsItem title="그룹 이름" value={fridgeName} showArrow={false} />
 
       <SettingsItem
         title="내 역할"
@@ -35,10 +36,12 @@ const FridgeInfo: React.FC<FridgeInfoProps> = ({
         showArrow={false}
       />
 
+      {/* 구성원 항목 - 클릭하면 구성원 리스트 페이지로 이동 */}
       <SettingsItem
-        title="구성원 수"
+        title="구성원"
         value={`총 ${memberCount}명`}
-        showArrow={false}
+        onPress={onMembersList}
+        showArrow={true}
       />
     </View>
   );

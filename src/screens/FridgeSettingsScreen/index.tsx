@@ -37,12 +37,12 @@ const FridgeSettingsScreen = ({ route }: Props) => {
     currentUserRole,
     isLoading,
     loadMembers,
-    // 권한 체크 함수들
+    // 권한 체크 함수
     canInviteMembers,
     canDeleteMembers,
     canDeleteFridge,
     canViewUsageHistory,
-    // 핸들러 함수들
+    // 핸들러 함수
     handleUsageHistory,
     handleNotificationSettings,
     handleMembersList,
@@ -91,7 +91,7 @@ const FridgeSettingsScreen = ({ route }: Props) => {
         showsVerticalScrollIndicator={false}
       >
         <SettingsGroups
-          members={members} // useApiFridgeSettings의 데이터 사용
+          members={members} // useApiFridgeSettings 에서 받아온 members
           userRole={currentUserRole}
           fridgeName={fridgeName}
           permissions={permissions}
@@ -116,7 +116,7 @@ const FridgeSettingsScreen = ({ route }: Props) => {
         onClose={() => setShowInviteModal(false)}
         fridgeId={fridgeId}
         fridgeName={fridgeName}
-        onInviteSuccess={loadMembers} // 기존 핸들러 사용
+        onInviteSuccess={loadMembers}
       />
     </SafeAreaView>
   );

@@ -1,8 +1,7 @@
-// components/FridgeSettings/FridgeManagement.tsx
 import React from 'react';
 import { View, Text } from 'react-native';
 import SettingsItem from './SettingsItem';
-import { styles } from '../../screens/FridgeSettingsScreen/styles';
+import { styles } from './styles';
 
 interface FridgeManagementProps {
   userRole: 'owner' | 'member' | null;
@@ -24,7 +23,7 @@ const FridgeManagement: React.FC<FridgeManagementProps> = ({
       </View>
 
       {userRole === 'owner' ? (
-        // 방장인 경우 - 냉장고 삭제
+        // 방장 - 냉장고 삭제
         canDeleteFridge && (
           <SettingsItem
             title="냉장고 삭제"
@@ -34,7 +33,7 @@ const FridgeManagement: React.FC<FridgeManagementProps> = ({
           />
         )
       ) : (
-        // 구성원인 경우 - 냉장고 나가기
+        // 구성원 - 냉장고 나가기
         <SettingsItem
           title="냉장고 나가기"
           onPress={onLeaveFridge}

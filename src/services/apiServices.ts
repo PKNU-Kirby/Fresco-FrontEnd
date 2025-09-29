@@ -305,6 +305,33 @@ export class ApiService {
     });
   }
 
+  // 냉장고 멤버 삭제 (방장이 구성원을 삭제)
+  // ApiService에 추가해야 할 메서드 (기존 코드에 없다면 추가)
+
+  // 냉장고 멤버 삭제 (방장이 구성원을 삭제)
+  static async deleteFridgeMember(
+    fridgeId: string,
+    deleteUserId: string,
+  ): Promise<void> {
+    console.log('=== 멤버 삭제 API 호출 ===');
+    console.log('fridgeId:', fridgeId);
+    console.log('deleteUserId:', deleteUserId);
+
+    try {
+      const result = await this.apiCall<void>(
+        `/api/v1/refrigerator/users/${fridgeId}/${deleteUserId}`,
+        {
+          method: 'DELETE',
+        },
+      );
+      console.log('멤버 삭제 성공:', result);
+      return result;
+    } catch (error) {
+      console.error('멤버 삭제 API 실패:', error);
+      throw error;
+    }
+  }
+
   // 사용 기록 조회
   static async getUsageHistory(
     fridgeId: string,

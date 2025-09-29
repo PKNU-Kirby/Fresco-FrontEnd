@@ -93,7 +93,6 @@ const FridgeSelectScreen = () => {
     navigation,
   });
 
-  // ✅ 추가된 부분: commitChanges용 서버 액션 함수들
   const handleCreateFridge = async (name: string) => {
     try {
       console.log('냉장고 생성 요청:', name);

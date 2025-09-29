@@ -1,8 +1,7 @@
-// components/FridgeSettings/FridgeActivity.tsx
 import React from 'react';
 import { View, Text } from 'react-native';
 import SettingsItem from './SettingsItem';
-import { styles } from '../../screens/FridgeSettingsScreen/styles';
+import { styles } from './styles';
 
 interface FridgeActivityProps {
   canViewUsageHistory: boolean;
@@ -22,10 +21,13 @@ const FridgeActivity: React.FC<FridgeActivityProps> = ({
       </View>
 
       {canViewUsageHistory && (
-        <SettingsItem title="사용 기록" onPress={onUsageHistory} />
+        <SettingsItem title="식재료 사용 기록" onPress={onUsageHistory} />
       )}
 
-      <SettingsItem title="알림 설정" onPress={onNotificationSettings} />
+      <SettingsItem
+        title="알림 설정 (나머지 API 연결 후 설정)"
+        onPress={onNotificationSettings}
+      />
     </View>
   );
 };

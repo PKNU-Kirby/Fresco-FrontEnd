@@ -7,6 +7,10 @@ import {
   FridgeMember,
 } from '../services/API/FridgeSettingsAPI';
 import { AsyncStorageService } from '../services/AsyncStorageService';
+import { CommonActions } from '@react-navigation/native';
+import { AuthAPIService } from '../services/API/authAPI';
+import { getAccessToken } from '../utils/authUtils';
+import { FridgeControllerAPI } from '../services/API/fridgeControllerAPI';
 
 interface UserPermissions {
   additionalProp1: boolean;
@@ -225,20 +229,27 @@ export const useApiFridgeSettings = (
     return true;
   };
 
-  // 로그아웃
+  // useApiFridgeSettings 훅 내부에 추가:
   const handleLogout = () => {
-    Alert.alert('로그아웃', '정말 로그아웃하시겠습니까?', [
+    Alert.alert('로그아웃', '로그아웃 하시겠습니까?', [
       { text: '취소', style: 'cancel' },
       {
         text: '로그아웃',
-        style: 'destructive',
         onPress: async () => {
           try {
-            await AsyncStorageService.clearAllAuthData();
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'LoginScreen' }],
-            });
+            // 현재 액세스 토큰 가져오기
+            const accessToken = await getAccessToken();
+
+            // AuthAPIService로 로그아웃
+            await AuthAPIService.logout(accessToken);
+
+            // 로그인 화면으로 이동
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: 'Login' }], // 실제 로그인 화면 이름으로 변경
+              }),
+            );
           } catch (error) {
             console.error('로그아웃 실패:', error);
             Alert.alert('오류', '로그아웃 중 문제가 발생했습니다.');
@@ -248,91 +259,69 @@ export const useApiFridgeSettings = (
     ]);
   };
 
-  // 냉장고 삭제 (방장만)
+  // useApiFridgeSettings 훅 내부에 추가:
   const handleFridgeDelete = () => {
-    if (!canDeleteFridge()) {
-      Alert.alert('권한 없음', '냉장고를 삭제할 수 있는 권한이 없습니다.');
-      return;
-    }
-
     Alert.alert(
       '냉장고 삭제',
-      `'${fridgeName}' 냉장고를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없으며, 모든 데이터가 삭제됩니다.`,
+      `"${fridgeName}" 냉장고를 삭제하시겠습니까?\n\n⚠️ 삭제된 냉장고의 모든 데이터가 영구적으로 사라지며, 복구가 불가능합니다.\n\n• 저장된 모든 식재료\n• 사용 기록\n• 구성원 정보`,
       [
         { text: '취소', style: 'cancel' },
         {
           text: '삭제',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              // 냉장고 삭제 API가 실제로 없으므로 임시로 주석 처리
-              // await FridgeSettingsAPIService.deleteFridge(fridgeId);
-
-              // 현재는 나가기 기능으로 대체 (실제 삭제 API 구현 시 교체)
-              console.warn('냉장고 삭제 API가 구현되지 않아 나가기로 대체');
-              await FridgeSettingsAPIService.leaveFridge(fridgeId);
-
-              Alert.alert('완료', '냉장고가 삭제되었습니다.', [
+          onPress: () => {
+            // 2차 확인
+            Alert.alert(
+              '최종 확인',
+              `"${fridgeName}" 냉장고를 정말 삭제하시겠습니까?`,
+              [
+                { text: '취소', style: 'cancel' },
                 {
-                  text: '확인',
-                  onPress: () => {
-                    navigation.reset({
-                      index: 0,
-                      routes: [{ name: 'MainScreen' }],
-                    });
-                  },
+                  text: '삭제',
+                  style: 'destructive',
+                  onPress: performFridgeDelete,
                 },
-              ]);
-            } catch (error) {
-              console.error('냉장고 삭제 실패:', error);
-              Alert.alert('오류', '냉장고 삭제에 실패했습니다.');
-            }
+              ],
+            );
           },
         },
       ],
     );
   };
 
-  // 냉장고 나가기 (구성원만)
-  const handleLeaveFridge = () => {
-    if (currentUserRole === 'owner') {
-      Alert.alert(
-        '안내',
-        '방장은 냉장고를 나갈 수 없습니다. 냉장고를 삭제하거나 방장을 다른 사람에게 위임해주세요.',
-      );
-      return;
-    }
+  const performFridgeDelete = async () => {
+    try {
+      console.log('냉장고 삭제 시작:', fridgeId);
 
-    Alert.alert(
-      '냉장고 나가기',
-      `'${fridgeName}' 냉장고를 나가시겠습니까?\n나중에 다시 초대받아야 참여할 수 있습니다.`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '나가기',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await FridgeSettingsAPIService.leaveFridge(fridgeId);
-              Alert.alert('완료', '냉장고를 나갔습니다.', [
-                {
-                  text: '확인',
-                  onPress: () => {
-                    navigation.reset({
-                      index: 0,
-                      routes: [{ name: 'MainScreen' }],
-                    });
-                  },
-                },
-              ]);
-            } catch (error) {
-              console.error('냉장고 나가기 실패:', error);
-              Alert.alert('오류', '냉장고 나가기에 실패했습니다.');
-            }
+      // FridgeControllerAPI로 냉장고 삭제
+      await FridgeControllerAPI.delete(fridgeId);
+
+      Alert.alert(
+        '삭제 완료',
+        `"${fridgeName}" 냉장고가 성공적으로 삭제되었습니다.`,
+        [
+          {
+            text: '확인',
+            onPress: () => {
+              // 냉장고 선택 화면으로 이동
+              navigation.dispatch(
+                CommonActions.reset({
+                  index: 0,
+                  routes: [{ name: 'FridgeSelect' }],
+                }),
+              );
+            },
           },
-        },
-      ],
-    );
+        ],
+        { cancelable: false },
+      );
+    } catch (error) {
+      console.error('냉장고 삭제 실패:', error);
+      Alert.alert(
+        '삭제 실패',
+        '냉장고 삭제 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.',
+      );
+    }
   };
 
   return {
@@ -354,6 +343,6 @@ export const useApiFridgeSettings = (
     handleInviteMember,
     handleLogout,
     handleFridgeDelete,
-    handleLeaveFridge,
+    performFridgeDelete,
   };
 };
