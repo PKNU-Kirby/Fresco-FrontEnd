@@ -88,40 +88,35 @@ const getFridgeItemsByFridgeIdFromStorage = async (
  */
 export const getFridgeItemsByFridgeId = async (
   fridgeId: string,
-  categoryIds: number[] = [],
+  categoryIds: number[] = [], // 기본값 유지
   page: number = 0,
   size: number = 100,
 ): Promise<FridgeItem[]> => {
-  try {
-    console.log(`API를 통해 냉장고 ${fridgeId} 아이템 조회 중...`);
+  console.log(`API를 통해 냉장고 ${fridgeId} 아이템 조회 중...`);
 
-    const response = await IngredientControllerAPI.getRefrigeratorIngredients(
-      fridgeId,
-      {
-        categoryIds,
-        page,
-        size,
-        sort: 'expirationDate',
-      },
+  // ✅ categoryIds가 비어있으면 모든 카테고리 포함
+  const finalCategoryIds =
+    categoryIds.length === 0 ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : categoryIds;
+
+  const response = await IngredientControllerAPI.getRefrigeratorIngredients(
+    fridgeId,
+    {
+      categoryIds: finalCategoryIds, // ← 수정
+      page,
+      size,
+      sort: 'expirationDate',
+    },
+  );
+
+  if (response.content && Array.isArray(response.content)) {
+    const mappedItems = response.content.map(item =>
+      mapApiItemToFridgeItem(item, fridgeId),
     );
-
-    console.log('API 응답:', response);
-
-    if (response.content && Array.isArray(response.content)) {
-      const mappedItems = response.content.map(item =>
-        mapApiItemToFridgeItem(item, fridgeId),
-      );
-
-      console.log('변환된 아이템들:', mappedItems);
-      return mappedItems;
-    } else {
-      console.warn('빈 배열 응답:', response);
-      return [];
-    }
-  } catch (error) {
-    console.error('API 조회 실패, AsyncStorage fallback 시도:', error);
-    return await getFridgeItemsByFridgeIdFromStorage(fridgeId);
+    console.log('변환된 아이템들:', mappedItems);
+    return mappedItems;
   }
+
+  return [];
 };
 
 /**
@@ -175,14 +170,55 @@ export const updateFridgeItem = async (
 /**
  * 여러 아이템 배치 삭제 (API 우선, AsyncStorage fallback)
  */
+/**
+ * 여러 아이템 배치 삭제 (API 우선, AsyncStorage fallback)
+ */
 export const batchDeleteItems = async (itemIds: string[]): Promise<void> => {
   try {
     await IngredientControllerAPI.batchDeleteIngredients(itemIds);
     console.log(`API를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`);
-  } catch (error) {
-    console.error('API 배치 삭제 실패, AsyncStorage fallback:', error);
 
-    // AsyncStorage fallback
+    // API 삭제 성공 시 AsyncStorage도 정리
+    try {
+      const existingItems = await getFridgeItemsFromStorage();
+      const updatedItems = existingItems.filter(
+        item => !itemIds.includes(item.id),
+      );
+      await AsyncStorage.setItem(
+        FRIDGE_ITEMS_KEY,
+        JSON.stringify(updatedItems),
+      );
+      console.log('AsyncStorage 동기화 완료');
+    } catch (syncError) {
+      console.warn('AsyncStorage 동기화 실패 (무시):', syncError);
+    }
+  } catch (error) {
+    console.error('API 배치 삭제 실패:', error);
+
+    // 권한 오류(NP)는 서버에 이미 없는 것이므로 AsyncStorage만 정리
+    if (
+      error.message?.includes('권한') ||
+      error.message?.includes('Permission')
+    ) {
+      console.log('⚠️ 권한 오류 - 서버에 아이템 없음, AsyncStorage만 정리');
+      try {
+        const existingItems = await getFridgeItemsFromStorage();
+        const updatedItems = existingItems.filter(
+          item => !itemIds.includes(item.id),
+        );
+        await AsyncStorage.setItem(
+          FRIDGE_ITEMS_KEY,
+          JSON.stringify(updatedItems),
+        );
+        console.log(`AsyncStorage에서 ${itemIds.length}개 아이템 정리 완료`);
+        return; // 성공으로 처리
+      } catch (storageError) {
+        console.error('AsyncStorage 정리 실패:', storageError);
+        throw storageError;
+      }
+    }
+
+    // 다른 에러는 fallback 처리
     try {
       const existingItems = await getFridgeItemsFromStorage();
       const updatedItems = existingItems.filter(
@@ -197,7 +233,7 @@ export const batchDeleteItems = async (itemIds: string[]): Promise<void> => {
       );
     } catch (storageError) {
       console.error('AsyncStorage 배치 삭제도 실패:', storageError);
-      throw error; // 원래 API 에러를 던짐
+      throw error;
     }
   }
 };

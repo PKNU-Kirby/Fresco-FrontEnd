@@ -1,4 +1,3 @@
-// hooks/useGroceryList.ts
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -26,20 +25,33 @@ export const useGroceryList = (groceryListId: number | null) => {
 
       const response = await GroceryListAPI.getGroceryList(groceryListId);
 
-      // API 응답을 CartItem 형식으로 변환
-      const items: CartItem[] = (
-        response.result?.items ||
-        response.items ||
-        []
-      ).map((item, index) => ({
-        id: item.id.toString(),
-        groceryListId: item.groceryListId.toString(),
-        name: item.name,
-        quantity: item.quantity,
-        purchased: item.purchased,
-        unit: 'g', // 기본 단위 (FE에서만 관리)
-        order: index,
-      }));
+      // ✅ 실제 응답 확인
+      console.log(
+        '[useGroceryList] 서버 응답 전체:',
+        JSON.stringify(response, null, 2),
+      );
+
+      const rawItems = response.result?.items || response.items || [];
+      console.log(
+        '[useGroceryList] 첫 번째 아이템:',
+        JSON.stringify(rawItems[0], null, 2),
+      );
+
+      const items: CartItem[] = rawItems.map((item, index) => {
+        console.log(`[useGroceryList] 아이템 ${item.id} unit:`, item.unit); // ← 추가
+
+        return {
+          id: item.id.toString(),
+          groceryListId: groceryListId.toString(),
+          name: item.name,
+          quantity: item.quantity || 1,
+          purchased: item.purchased,
+          unit: item.unit || 'g', // ← 여기서 null이면 'g'로 대체됨
+          order: index,
+        };
+      });
+
+      console.log('[useGroceryList] 변환된 아이템들:', items);
 
       // 정렬: 구매하지 않은 항목이 먼저
       const sortedItems = items.sort((a, b) => {
@@ -106,10 +118,10 @@ export const useGroceryList = (groceryListId: number | null) => {
     try {
       setIsSyncing(true);
 
-      // 서버에 추가 요청
       const newItem = await GroceryListAPI.createItem({
         name: name.trim(),
         quantity,
+        unit, // ← 서버에 전송
         purchased: false,
         groceryListId,
       });
@@ -145,6 +157,8 @@ export const useGroceryList = (groceryListId: number | null) => {
   };
 
   // 단일 아이템 업데이트 (즉시 서버 동기화)
+
+  // updateSingleItem 함수
   const updateSingleItem = async (
     itemId: string,
     updates: Partial<CartItem>,
@@ -161,6 +175,7 @@ export const useGroceryList = (groceryListId: number | null) => {
         id: Number(itemId),
         name: updates.name ?? item.name,
         quantity: updates.quantity ?? item.quantity,
+        unit: updates.unit ?? item.unit, // ← 추가
         purchased: updates.purchased ?? item.purchased,
       };
 
@@ -208,6 +223,7 @@ export const useGroceryList = (groceryListId: number | null) => {
             id: Number(id),
             name: updates.name ?? item.name,
             quantity: updates.quantity ?? item.quantity,
+            unit: updates.unit ?? item.unit, // ← 추가
             purchased: updates.purchased ?? item.purchased,
           };
         },

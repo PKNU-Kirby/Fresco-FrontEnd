@@ -92,6 +92,14 @@ export const useLogin = (): UseLoginReturn => {
 
           console.log('토큰 저장 완료');
 
+          // ✅ 여기에 추가: 토큰에서 userId 추출하여 저장
+          const { getTokenUserId } = require('../../utils/authUtils');
+          const tokenUserId = await getTokenUserId();
+          if (tokenUserId) {
+            await AsyncStorageService.setCurrentUserId(tokenUserId);
+            console.log('토큰에서 추출한 userId 저장:', tokenUserId);
+          }
+
           // 3. 저장 확인
           const savedAccessToken = await AsyncStorage.getItem('accessToken');
           const savedRefreshToken = await AsyncStorage.getItem('refreshToken');
@@ -135,7 +143,12 @@ export const useLogin = (): UseLoginReturn => {
           throw new Error('사용자 정보 저장에 실패했습니다.');
         }
 
-        await AsyncStorageService.setCurrentUserId(user.id);
+        // ❌ 이 줄 삭제
+        // await AsyncStorageService.setCurrentUserId(user.id);
+
+        // ✅ 토큰의 userId는 이미 100번째 줄에서 저장했으므로
+        // 여기서는 setCurrentUserId를 호출하지 않음
+        console.log('토큰 userId(3)가 currentUserId로 설정됨');
 
         // 기본 냉장고 설정
         try {

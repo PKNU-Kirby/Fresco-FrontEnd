@@ -18,12 +18,18 @@ export const useAuth = () => {
   const checkAuthStatus = useCallback(async () => {
     try {
       setIsLoading(true);
+      console.log('=== 인증 상태 확인 시작 ===');
 
       // 토큰 상태 확인
       const status = await getTokenStatus();
+      console.log('토큰 상태:', status);
       setTokenStatus(status);
 
       if (!status.hasAccessToken || !status.hasRefreshToken) {
+        console.log('❌ 토큰 없음:', {
+          hasAccessToken: status.hasAccessToken,
+          hasRefreshToken: status.hasRefreshToken,
+        });
         setIsAuthenticated(false);
         setUser(null);
         return false;
@@ -31,13 +37,22 @@ export const useAuth = () => {
 
       // 사용자 정보 조회
       const userId = await AsyncStorageService.getCurrentUserId();
+      console.log('현재 userId:', userId);
+
       if (userId) {
         const userData = await AsyncStorageService.getUserById(userId);
+        console.log('사용자 데이터:', userData);
+
         if (userData) {
           setUser(userData);
           setIsAuthenticated(true);
+          console.log('✅ 인증 성공');
           return true;
+        } else {
+          console.log('❌ 사용자 데이터 없음');
         }
+      } else {
+        console.log('❌ userId 없음');
       }
 
       setIsAuthenticated(false);

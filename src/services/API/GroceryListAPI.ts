@@ -1,34 +1,35 @@
-// services/API/GroceryListAPI.ts
 import Config from 'react-native-config';
 import { getValidAccessToken } from '../../utils/authUtils';
 
-export interface GroceryItem {
+export type GroceryItem = {
   id: number;
   name: string;
   quantity: number;
+  unit: string | null;
   purchased: boolean;
-  groceryListId: number;
-}
+  groceryListId?: number;
+};
 
 export interface GroceryListResponse {
   groceryListId: number;
   items: GroceryItem[];
 }
 
-export interface CreateItemRequest {
+export type CreateItemRequest = {
   name: string;
   quantity: number;
+  unit: string;
   purchased: boolean;
   groceryListId: number;
-}
+};
 
-export interface UpdateItemRequest {
+export type UpdateItemRequest = {
   id: number;
   name: string;
   quantity: number;
+  unit: string;
   purchased: boolean;
-}
-
+};
 export interface DeleteItemsRequest {
   itemIds: number[];
 }

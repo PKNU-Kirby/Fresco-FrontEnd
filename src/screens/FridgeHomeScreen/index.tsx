@@ -151,14 +151,12 @@ const FridgeHomeScreen = ({ route }: Props) => {
   const handleEditModeToggle = useCallback(async () => {
     if (!isEditMode) {
       console.log('편집 모드 진입');
-      // 현재 상태를 깊은 복사로 저장
       setEditModeStartState(JSON.parse(JSON.stringify(fridgeItems)));
       setIsEditMode(true);
     } else {
       console.log('편집 모드 종료 - 변경사항 적용 중...');
 
       try {
-        // ✅ 수정: 훅의 applyEditChanges 함수 사용
         const changedCount = await applyEditChanges(editModeStartState);
 
         if (changedCount > 0) {
@@ -173,17 +171,25 @@ const FridgeHomeScreen = ({ route }: Props) => {
 
         // 최신 데이터 다시 로드
         await refreshWithCategory(activeItemCategory);
+
+        // ✅ 성공했을 때만 편집 모드 종료 및 상태 초기화
+        setEditModeStartState([]);
+        setIsEditMode(false);
       } catch (error) {
         console.error('편집 모드 종료 중 오류:', error);
+
+        // ✅ 실패하면 서버에서 최신 데이터 다시 불러오기
+        await refreshWithCategory(activeItemCategory);
+
         Alert.alert(
           '오류',
-          '변경사항 저장 중 오류가 발생했습니다. 다시 시도해주세요.',
+          '일부 항목을 저장할 수 없습니다. 삭제 권한이 없거나 이미 삭제된 항목일 수 있습니다.',
         );
-        return;
-      }
 
-      setEditModeStartState([]);
-      setIsEditMode(false);
+        // ✅ 편집 모드는 종료하되, 실패한 내용 반영
+        setEditModeStartState([]);
+        setIsEditMode(false);
+      }
     }
   }, [
     isEditMode,

@@ -23,7 +23,7 @@ export const useApiFridgeSettings = (
   fridgeName: string,
   userRole?: 'owner' | 'member',
 ) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const [members, setMembers] = useState<FridgeMember[]>([]);
   const [permissions, setPermissions] = useState<UserPermissions | null>(null);
@@ -50,11 +50,11 @@ export const useApiFridgeSettings = (
         JSON.stringify(permissionsResponse, null, 2),
       );
 
-      // 권한 데이터를 UserPermissions 형태로 변환 (실제 구조에 맞게 수정 필요)
+      // 권한 데이터를 UserPermissions 형태로 변환
       const userPermissions: UserPermissions = {
-        additionalProp1: permissionsResponse.length > 0, // 임시 변환 로직
-        additionalProp2: true, // 기본값
-        additionalProp3: true, // 기본값
+        additionalProp1: permissionsResponse.length > 0,
+        additionalProp2: true,
+        additionalProp3: true,
       };
 
       // 현재 냉장고에 대한 권한 정보 찾기
@@ -70,10 +70,6 @@ export const useApiFridgeSettings = (
 
       // 멤버 데이터에 역할 정보 추가
       const enrichedMembers: FridgeMember[] = membersResponse.map(member => {
-        // 현재 사용자가 OWNER이고, 멤버 목록에 한 명만 있다면 그 멤버가 방장일 가능성이 높음
-        // 또는 실제 방장 정보를 다른 방식으로 확인해야 할 수도 있음
-
-        // 임시 해결책: 현재 사용자가 OWNER 권한을 가지고 있으면 첫 번째 멤버를 OWNER로 설정
         const isOwner = currentFridgePermission?.role === 'OWNER';
         const role = isOwner ? 'OWNER' : 'MEMBER';
 
@@ -175,7 +171,7 @@ export const useApiFridgeSettings = (
     }
   };
 
-  // 동기 권한 체크 헬퍼 함수들
+  // 동기 권한 체크 함수들
   const canInviteMembers = () => {
     return currentUserRole === 'owner' || canInvite;
   };

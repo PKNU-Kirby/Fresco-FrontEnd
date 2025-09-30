@@ -207,10 +207,15 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
   };
 
   // 단위 변경 (FE에서만 관리)
-  const handleUnitChange = (itemId: string, newUnit: string) => {
-    // unit은 서버에 저장하지 않으므로 로컬만 업데이트
-    // TODO: 필요시 AsyncStorage에 별도 저장
-    console.log('[ShoppingList] 단위 변경 (로컬만):', itemId, newUnit);
+  // 단위 변경 - 서버에 동기화
+  const handleUnitChange = async (itemId: string, newUnit: string) => {
+    console.log('[ShoppingList] 단위 변경:', itemId, newUnit);
+
+    try {
+      await updateSingleItem(itemId, { unit: newUnit });
+    } catch (error) {
+      console.error('[ShoppingList] 단위 변경 실패:', error);
+    }
   };
 
   // 이름 변경

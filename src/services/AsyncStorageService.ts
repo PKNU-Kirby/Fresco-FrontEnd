@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Config from 'react-native-config';
+import { getTokenUserId } from '../utils/authUtils';
 import { User, SocialProvider, UserId } from '../types/auth';
 
 // 타입 정의들
@@ -221,9 +222,21 @@ export class AsyncStorageService {
 
   static async getCurrentUserId(): Promise<string | null> {
     try {
-      return await AsyncStorage.getItem('currentUserId');
+      // 먼저 토큰에서 userId 확인
+      const tokenUserId = await getTokenUserId();
+      if (tokenUserId) {
+        console.log('토큰에서 userId 추출:', tokenUserId);
+        // AsyncStorage에도 동기화
+        await AsyncStorage.setItem('currentUserId', tokenUserId);
+        return tokenUserId;
+      }
+
+      // 토큰에서 추출 실패 시 AsyncStorage 확인
+      const storedUserId = await AsyncStorage.getItem('currentUserId');
+      console.log('저장된 userId:', storedUserId);
+      return storedUserId;
     } catch (error) {
-      console.error('getCurrentUserId error:', error);
+      console.error('사용자 ID 조회 실패:', error);
       return null;
     }
   }
@@ -262,60 +275,48 @@ export class AsyncStorageService {
   // ============================================================================
 
   static async createUserFromLogin(
-    provider: SocialProvider,
+    provider: string,
     providerId: string,
     name: string,
     email?: string,
     profileImage?: string,
-    fcmToken?: string,
   ): Promise<User> {
     try {
-      const users = await this.getUsers();
+      // 토큰에서 userId 추출
+      const tokenUserId = await getTokenUserId();
+      const serverUserId = tokenUserId || '1';
 
-      // 기존 사용자가 있는지 확인
-      let existingUser = users.find(
-        u => u.provider === provider && u.providerId === providerId,
-      );
+      console.log('서버 userId로 사용자 생성:', serverUserId);
 
-      if (existingUser) {
-        // 기존 사용자 정보 업데이트
-        existingUser = {
-          ...existingUser,
-          name,
-          fcmToken,
-          updatedAt: new Date().toISOString(),
-        };
+      // 서버 userId로 사용자 생성
+      const newUser: User = {
+        id: serverUserId,
+        provider,
+        providerId,
+        name,
+        email,
+        profileImage,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-        const updatedUsers = users.map(u =>
-          u.id === existingUser!.id ? existingUser! : u,
-        );
-        await AsyncStorage.setItem(
-          this.KEYS.USERS,
-          JSON.stringify(updatedUsers),
-        );
+      // users 목록에서 해당 ID의 사용자를 업데이트 또는 추가
+      const usersJson = await AsyncStorage.getItem('users');
+      const users: User[] = usersJson ? JSON.parse(usersJson) : [];
 
-        console.log('기존 사용자 업데이트 완료:', existingUser);
-        return existingUser;
+      const existingIndex = users.findIndex(u => u.id === serverUserId);
+      if (existingIndex >= 0) {
+        users[existingIndex] = { ...users[existingIndex], ...newUser };
       } else {
-        // 새 사용자 생성
-        const newUser: User = {
-          id: (await this.getNextId('users')).toString(),
-          provider,
-          providerId,
-          name,
-          fcmToken,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
         users.push(newUser);
-        await AsyncStorage.setItem(this.KEYS.USERS, JSON.stringify(users));
-
-        console.log('새 사용자 생성 완료:', newUser);
-        return newUser;
       }
+
+      await AsyncStorage.setItem('users', JSON.stringify(users));
+      console.log('사용자 저장 완료:', newUser);
+
+      return newUser;
     } catch (error) {
-      console.error('Create user from login error:', error);
+      console.error('사용자 생성 실패:', error);
       throw error;
     }
   }

@@ -20,7 +20,6 @@ export const useApiCall = <T>(options: UseApiCallOptions<T> = {}) => {
       setError(null);
 
       try {
-        // 타임아웃과 재시도가 포함된 API 호출
         const timeoutPromise = options.timeout
           ? ApiUtils.createTimeoutPromise(
               ApiUtils.callWithRetry(apiCall, options.retries || 2),
@@ -57,7 +56,6 @@ export const useApiCall = <T>(options: UseApiCallOptions<T> = {}) => {
     data,
     execute,
     reset,
-    // 편의 메서드들
     isSuccess: !loading && !error && data !== null,
     isError: !loading && error !== null,
     errorMessage: error ? ApiErrorHandler.getErrorMessage(error) : null,

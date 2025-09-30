@@ -1,6 +1,9 @@
-// utils/UsageTrackingService.ts - 사용 기록 관리 시스템
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AsyncStorageService } from '../services/AsyncStorageService';
+import {
+  UsageHistoryAPI,
+  HistoryRecord,
+} from '../services/API/usageHistoryAPI';
 
 export interface UsageRecord {
   id: string;
@@ -67,14 +70,27 @@ export class UsageTrackingService {
   // 특정 냉장고의 사용 기록 조회
   static async getFridgeUsageRecords(fridgeId: string): Promise<UsageRecord[]> {
     try {
-      const allRecords = await this.getUsageRecords();
-      return allRecords.filter(record => record.fridgeId === fridgeId);
+      const records = await UsageHistoryAPI.getAllUsageHistory(fridgeId);
+
+      return records.map((item: HistoryRecord) => ({
+        id: item.refrigeratorIngredientId.toString(),
+        userId: item.consumerId.toString(),
+        userName: item.consumerName,
+        userAvatar: item.consumerName.charAt(0),
+        itemId: item.refrigeratorIngredientId.toString(),
+        itemName: item.ingredientName,
+        quantity: item.usedQuantity.toString(),
+        unit: item.unit,
+        fridgeId: fridgeId,
+        usageType: 'consume',
+        usedAt: item.usedAt,
+        time: UsageHistoryAPI.formatTime(item.usedAt), // ← 이렇게
+      }));
     } catch (error) {
-      console.error('냉장고별 사용 기록 조회 실패:', error);
+      console.error('서버 사용 기록 조회 실패:', error);
       return [];
     }
   }
-
   // 특정 사용자의 사용 기록 조회
   static async getUserUsageRecords(userId: string): Promise<UsageRecord[]> {
     try {

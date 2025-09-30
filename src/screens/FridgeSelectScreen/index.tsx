@@ -1,4 +1,3 @@
-// FridgeSelectScreen.tsx - 개선된 버전 사용 예시
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -10,15 +9,13 @@ import {
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-// hooks utils import
 import { useFridgeSelect } from '../../hooks/useFridgeSelect';
 import { useFridgeActions } from '../../hooks/useFridgeActions';
 import { useOptimisticEdit } from '../../hooks/useOptimisticEdit';
 import { usePermissions } from '../../hooks/usePermissions';
 import { FridgeControllerAPI } from '../../services/API/fridgeControllerAPI';
-// 기존 import들 중에서 authUtils 관련 부분을 찾아서 수정
+
 import { validateUserTokenMatch } from '../../utils/authUtils';
-// 기존 컴포넌트들
 import { HiddenFridgesBottomSheet } from '../../components/FridgeSelect/HiddenFridgeBottomSheet';
 import { FridgeHeader } from '../../components/FridgeSelect/FridgeHeader';
 import { FridgeList } from '../../components/FridgeSelect/FridgeTileList';
@@ -30,7 +27,6 @@ import { styles } from './styles';
 const FridgeSelectScreen = () => {
   const navigation = useNavigation<any>();
 
-  // 서버 데이터 관리
   const {
     currentUser,
     fridges: serverFridges,
@@ -50,7 +46,7 @@ const FridgeSelectScreen = () => {
     getPermission,
   } = usePermissions(currentUser);
 
-  // 낙관적 편집 관리
+  // Optimistic Update 관리
   const {
     isEditMode,
     editableFridges,
@@ -251,7 +247,6 @@ const FridgeSelectScreen = () => {
     }
   };
 
-  // ✅ 수정된 부분: 편집 완료
   const handleSaveChanges = async () => {
     try {
       console.log('===== 변경사항 저장 시작 =====');
@@ -278,7 +273,6 @@ const FridgeSelectScreen = () => {
         }
       }
 
-      // ✅ 함수들을 전달하여 commitChanges 호출
       await commitChanges(
         handleCreateFridge,
         handleUpdateFridge,
