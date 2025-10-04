@@ -1,16 +1,14 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
-import Config from 'react-native-config';
-import { AsyncStorageService } from '../services/AsyncStorageService';
-import { FridgeWithRole } from '../types/permission';
-import { User } from '../types/auth';
-import { getValidAccessToken } from '../utils/authUtils';
+import { ApiService } from '../services/apiServices';
+import { getTokenUserId } from '../utils/authUtils';
 import { PermissionAPIService } from '../services/API/permissionAPI';
 import { PermissionUtils } from '../utils/permissionUtils';
-import { ApiErrorHandler } from '../utils/errorHandler';
-import { ApiUtils } from '../utils/apiUtils';
+import { AsyncStorageService } from '../services/AsyncStorageService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getTokenUserId } from '../utils/authUtils';
+import { FridgeWithRole } from '../types/permission';
+import { User } from '../types/auth';
+
 // API 호출 상태 관리
 let isLoadingFridges = false;
 
@@ -85,46 +83,30 @@ export const useFridgeSelect = (navigation: any) => {
     const targetUser = user || currentUser;
     if (!targetUser) return;
 
-    // 중복 호출 방지
-    if (isLoadingFridges) {
-      // console.log('냉장고 목록 로딩이 이미 진행 중입니다.');
-      return;
-    }
-
     try {
-      isLoadingFridges = true;
-      //      console.log('서버에서 냉장고 목록 및 권한 로딩...');
-
-      // 병렬로 냉장고 목록과 권한 정보 가져오기
+      // ApiService 사용 (자동 토큰 갱신)
       const [fridgeData, permissions] = await Promise.all([
-        loadFridgeListFromServer(),
-        PermissionAPIService.getUserPermissions(),
+        ApiService.apiCall<any[]>('/api/v1/refrigerator'), // 토큰 갱신 자동
+        PermissionAPIService.getUserPermissions(), // 토큰 갱신 자동
       ]);
 
       if (fridgeData && permissions) {
-        // 권한이 있는 냉장고만 필터링하고 병합
         const fridgesWithPermissions =
           PermissionUtils.mergeFridgeWithPermissions(fridgeData, permissions);
 
-        // 로컬 숨김 설정 적용
         const fridgesWithHiddenStatus = await applyLocalHiddenSettings(
           fridgesWithPermissions,
           targetUser,
         );
 
         setFridges(fridgesWithHiddenStatus);
-        // console.log('냉장고 목록 로딩 완료:', fridgesWithHiddenStatus);
-
-        // 로컬 데이터와 동기화 (백그라운드)
         syncWithLocalStorage(fridgesWithHiddenStatus, targetUser);
-      } else {
-        throw new Error('서버에서 데이터를 가져올 수 없습니다');
       }
     } catch (error: any) {
-      console.error('서버에서 냉장고 목록 로딩 실패:', error);
+      console.error('냉장고 목록 로딩 실패:', error);
 
-      // 인증 관련 에러는 로그인으로 이동
-      if (ApiErrorHandler.getErrorAction(error) === 'login') {
+      // 401 에러는 이미 ApiService에서 처리되므로 여기서는 다른 에러만
+      if (error.message?.includes('인증이 만료')) {
         Alert.alert('세션 만료', '다시 로그인해주세요.', [
           { text: '확인', onPress: () => navigation.replace('Login') },
         ]);
@@ -132,10 +114,7 @@ export const useFridgeSelect = (navigation: any) => {
       }
 
       // 기타 에러는 로컬 데이터로 폴백
-      console.log('로컬 데이터로 폴백...');
       await loadLocalFridges(targetUser);
-    } finally {
-      isLoadingFridges = false;
     }
   };
 

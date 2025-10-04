@@ -1,3 +1,4 @@
+// screens/RecipeScreen/index.tsx - API 연동 버전
 import React, { useState, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
@@ -9,12 +10,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { styles } from './styles';
 import { Recipe, RecipeStackParamList } from './RecipeNavigator';
 
-// AsyncStorage 유틸리티 import
-import {
-  RecipeStorage,
-  FavoriteStorage,
-  SharedRecipeStorage,
-} from '../../utils/AsyncStorageUtils';
+// API 서비스 import
+import RecipeAPI from '../../services/API/RecipeAPI';
+import ingredientControllerAPI from '../../services/API/ingredientControllerAPI';
 
 // 조리 가능성 계산 유틸리티 import
 import {
@@ -34,26 +32,6 @@ type RecipeHomeNavigationProp = NativeStackNavigationProp<
   'RecipeHome'
 >;
 
-// Mock 공동 레시피 데이터 (초기값)
-const mockSharedRecipes: Recipe[] = [];
-
-// Mock 데이터 생성 함수 (초기 데이터용)
-const generateInitialMockRecipes = (count: number): Recipe[] => {
-  const baseRecipes = [{ title: '레시피 이름' }];
-
-  return Array.from({ length: count }, (_, index) => {
-    const baseRecipe = baseRecipes[index % baseRecipes.length];
-    return {
-      id: (index + 1).toString(),
-      title: `${baseRecipe.title} ${
-        Math.floor(index / baseRecipes.length) + 1
-      }`,
-      createdAt: `2024-01-${String(15 - (index % 15)).padStart(2, '0')}`,
-    };
-  });
-};
-
-// 메인 컴포넌트 props 인터페이스
 interface RecipeScreenProps {
   route: {
     params: {
@@ -77,7 +55,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   const [showFloatingMenu, setShowFloatingMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  // 새로 추가: 조리 가능성 정보
   const [recipeAvailabilities, setRecipeAvailabilities] = useState<
     Map<string, RecipeAvailabilityInfo>
   >(new Map());
@@ -87,10 +64,16 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   const flatListRef = useRef<any>(null);
   const ITEMS_PER_PAGE = 15;
 
-  // 조리 가능성 계산 함수
+  // 조리 가능성 계산 함수 (API 기반)
   const calculateRecipeAvailabilities = async () => {
     try {
       if (personalRecipes.length > 0 && fridgeId) {
+        // 냉장고 재료를 API에서 가져오기
+        const fridgeItems = await ingredientControllerAPI.getIngredients(
+          fridgeId,
+        );
+
+        // 기존 로직 재활용 (recipeAvailabilityUtils 사용)
         const availabilities = await calculateMultipleRecipeAvailability(
           personalRecipes,
           fridgeId,
@@ -103,49 +86,36 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     }
   };
 
-  // 초기 데이터 로드
+  // 초기 데이터 로드 (API 기반)
   const loadInitialData = async () => {
     try {
       setIsLoading(true);
 
-      // 병렬로 모든 데이터 로드
-      const [storedPersonalRecipes, storedFavoriteIds, storedSharedRecipes] =
+      // API에서 데이터 로드
+      const [apiPersonalRecipes, apiFavoriteRecipes, apiSharedRecipes] =
         await Promise.all([
-          RecipeStorage.getPersonalRecipes(),
-          FavoriteStorage.getFavoriteIds(),
-          SharedRecipeStorage.getSharedRecipes(),
+          RecipeAPI.getRecipeList(),
+          RecipeAPI.getFavoriteRecipes(),
+          RecipeAPI.getSharedRecipes(fridgeId),
         ]);
 
-      // 개인 레시피 설정 (없으면 초기 mock 데이터 사용)
-      if (storedPersonalRecipes.length > 0) {
-        setPersonalRecipes(storedPersonalRecipes);
-      } else {
-        // 첫 실행 시 초기 데이터 생성 및 저장
-        const initialRecipes = generateInitialMockRecipes(20);
-        setPersonalRecipes(initialRecipes);
-        await RecipeStorage.savePersonalRecipes(initialRecipes);
-      }
+      // 개인 레시피 설정
+      setPersonalRecipes(apiPersonalRecipes);
 
-      // 공유 레시피 설정 (없으면 mock 데이터 사용)
-      if (storedSharedRecipes.length > 0) {
-        setSharedRecipes(storedSharedRecipes);
-      } else {
-        setSharedRecipes(mockSharedRecipes);
-        await SharedRecipeStorage.saveSharedRecipes(mockSharedRecipes);
-      }
+      // 공유 레시피 설정
+      setSharedRecipes(apiSharedRecipes);
 
-      // 즐겨찾기 설정
-      setFavoriteRecipeIds(storedFavoriteIds);
+      // 즐겨찾기 ID 추출
+      const favoriteIds = apiFavoriteRecipes.map(recipe => recipe.id);
+      setFavoriteRecipeIds(favoriteIds);
 
-      // 조리 가능성 계산 (데이터 로드 후 잠시 대기)
+      // 조리 가능성 계산
       setTimeout(() => {
         calculateRecipeAvailabilities();
       }, 100);
     } catch (error) {
       console.error('초기 데이터 로드 실패:', error);
-      // 에러 시 기본값 설정
-      setPersonalRecipes(generateInitialMockRecipes(20));
-      setSharedRecipes(mockSharedRecipes);
+      Alert.alert('오류', '레시피 데이터를 불러오는데 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -166,10 +136,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   // 화면 포커스 시 데이터 동기화
   useFocusEffect(
     React.useCallback(() => {
-      // 검색에서 돌아올 때 상태 초기화
       setCurrentPage(1);
-
-      // 데이터 다시 로드 (다른 화면에서 변경될 수 있으므로)
       loadInitialData();
     }, []),
   );
@@ -205,12 +172,13 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   const allFilteredRecipes = getAllRecipesCount();
   const hasMoreRecipes = filteredRecipes.length < allFilteredRecipes;
 
+  // 즐겨찾기 토글 (API 기반)
   const toggleFavorite = async (recipeId: string) => {
     try {
-      const isNowFavorite = await FavoriteStorage.toggleFavorite(recipeId);
+      const result = await RecipeAPI.toggleFavorite(recipeId);
 
       // 로컬 상태 업데이트
-      if (isNowFavorite) {
+      if (result.favorite) {
         setFavoriteRecipeIds(prev => [...prev, recipeId]);
       } else {
         setFavoriteRecipeIds(prev => prev.filter(id => id !== recipeId));
@@ -221,6 +189,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     }
   };
 
+  // 레시피 삭제 (API 기반)
   const deleteRecipe = (recipeId: string) => {
     Alert.alert('레시피 삭제', '이 레시피를 삭제하시겠습니까?', [
       { text: '취소', style: 'cancel' },
@@ -229,17 +198,13 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
         style: 'destructive',
         onPress: async () => {
           try {
-            // AsyncStorage에서 삭제
-            await RecipeStorage.deletePersonalRecipe(recipeId);
+            await RecipeAPI.deleteRecipe(recipeId);
 
             // 로컬 상태 업데이트
             setPersonalRecipes(prev => prev.filter(r => r.id !== recipeId));
+            setFavoriteRecipeIds(prev => prev.filter(id => id !== recipeId));
 
-            // 즐겨찾기에서도 제거
-            if (favoriteRecipeIds.includes(recipeId)) {
-              await FavoriteStorage.removeFavorite(recipeId);
-              setFavoriteRecipeIds(prev => prev.filter(id => id !== recipeId));
-            }
+            Alert.alert('성공', '레시피가 삭제되었습니다.');
           } catch (error) {
             console.error('레시피 삭제 실패:', error);
             Alert.alert('오류', '레시피 삭제에 실패했습니다.');
@@ -249,16 +214,11 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     ]);
   };
 
+  // 드래그 엔드 핸들러 (순서 변경은 로컬에서만)
   const handleDragEnd = async ({ data }: { data: Recipe[] }) => {
     if (currentTab === 'all') {
-      try {
-        // AsyncStorage에 새로운 순서 저장
-        await RecipeStorage.savePersonalRecipes(data);
-        setPersonalRecipes(data);
-      } catch (error) {
-        console.error('레시피 순서 저장 실패:', error);
-        Alert.alert('오류', '레시피 순서 변경에 실패했습니다.');
-      }
+      // TODO: 순서 변경 API가 있다면 여기서 호출
+      setPersonalRecipes(data);
     } else {
       Alert.alert(
         '순서 변경 불가',
@@ -271,22 +231,15 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   // 스크롤 방향 기반 버튼 표시 로직
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
-
-    // 스크롤 방향 계산
     const isScrollingUp = scrollY < lastScrollY;
     const isScrollingDown = scrollY > lastScrollY;
     const hasScrolledEnough = scrollY > 100;
 
-    // 위로 스크롤 중이고 충분히 스크롤했을 때 버튼 표시
     if (isScrollingUp && hasScrolledEnough) {
       setShowScrollToTop(true);
-    }
-    // 아래로 스크롤 중일 때 버튼 숨김
-    else if (isScrollingDown) {
+    } else if (isScrollingDown) {
       setShowScrollToTop(false);
-    }
-    // 맨 위에 거의 도달했을 때도 버튼 숨김
-    else if (scrollY < 100) {
+    } else if (scrollY < 100) {
       setShowScrollToTop(false);
     }
 
@@ -372,7 +325,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
             onScroll={handleScroll}
             scrollEventThrottle={16}
           >
-            {/* 공동 레시피 폴더 */}
             {currentTab === 'all' && (
               <SharedRecipeFolder
                 recipeCount={sharedRecipes.length}
@@ -406,7 +358,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
               keyExtractor={item => item.id}
               renderItem={({ item, drag, isActive }) => {
                 const isDragEnabled = currentTab === 'all';
-                const availability = recipeAvailabilities.get(item.id); // 조리 가능성 정보 가져오기
+                const availability = recipeAvailabilities.get(item.id);
 
                 return (
                   <RenderRecipeItem
@@ -425,7 +377,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                       });
                     }}
                     isFavorite={isFavorite(item.id)}
-                    // 조리 가능성 정보 전달
                     availableIngredientsCount={
                       availability?.availableIngredientsCount || 0
                     }
@@ -437,7 +388,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                 );
               }}
               onScrollOffsetChange={offset => {
-                // 간단한 스크롤 로직: 100px 이상 스크롤하면 버튼 표시
                 if (offset > 100) {
                   setShowScrollToTop(true);
                 } else {
