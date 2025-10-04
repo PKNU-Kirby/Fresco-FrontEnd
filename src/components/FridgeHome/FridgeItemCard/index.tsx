@@ -1,11 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DatePicker from '../../modals/DatePicker';
 import SliderQuantityEditor from './SliderQuantityEditor';
 import UnitSelector from './UnitSelector';
 import DeleteButton from './DeleteButton';
 import ConfirmModal from '../../modals/ConfirmModal';
 import { cardStyles as styles } from './styles';
+
+// 카테고리별 아이콘
+const getCategoryIcon = (category: string) => {
+  const iconMap: { [key: string]: { name: string; color: string } } = {
+    베이커리: { name: 'bread-slice', color: '#999' },
+    '채소 / 과일': { name: 'food-apple', color: '#999' },
+    '정육 / 계란': { name: 'food-steak', color: '#999' },
+    가공식품: { name: 'package-variant-closed', color: '#999' },
+    '수산 / 건어물': { name: 'fish', color: '#999' },
+    '쌀 / 잡곡': { name: 'rice', color: '#999' },
+    '주류 / 음료': { name: 'cup', color: '#999' },
+    '우유 / 유제품': { name: 'cheese', color: '#999' },
+    건강식품: { name: 'leaf', color: '#999' },
+    '장 / 양념 / 소스': { name: 'bottle-tonic', color: '#999' },
+    기타: { name: 'food', color: '#999' },
+  };
+
+  return iconMap[category] || iconMap['기타'];
+};
 
 type FridgeItem = {
   id: string;
@@ -56,12 +76,38 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     onPress && !isEditMode ? TouchableOpacity : View;
   const unitOptions = ['개', 'ml', 'g', 'kg', 'L'];
 
-  // 수량 포맷 함수: 정수면 소수점 없이, 소수면 둘째자리까지
+  // 소비기한 계산 함수
+  const getDaysUntilExpiry = (expiryDate: string): number => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const expiry = new Date(expiryDate);
+    expiry.setHours(0, 0, 0, 0);
+
+    const diffTime = expiry.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    return diffDays;
+  };
+
+  // 소비기한 상태 계산
+  const daysLeft = getDaysUntilExpiry(localExpiryDate);
+  const isExpiringSoon = daysLeft <= 3 && daysLeft >= 0; // 3일 이하
+  const isExpired = daysLeft < 0; // 지남
+
+  // 소비기한 경고 텍스트
+  const getExpiryWarningText = (): string => {
+    if (isExpired) return '기한 만료';
+    if (daysLeft === 0) return '오늘까지';
+    if (daysLeft === 1) return '내일까지';
+    return `${daysLeft}일 남음`;
+  };
+
+  // 수량 포맷 -> 정수면 소수점 없이, 소수면 둘째자리까지
   const formatQuantity = (value: number | string): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(numValue)) return '0';
 
-    // 정수인지 확인 (소수점이 .00인 경우도 정수로 취급)
     if (numValue % 1 === 0) {
       return Math.round(numValue).toString();
     } else {
@@ -79,19 +125,19 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
       );
       setMaxQuantity(initialMaxQuantity);
     }
-  }, [isEditMode]);
+  }, [isEditMode, item.quantity, item.maxQuantity]);
 
   // item.quantity prop 변경 -> localQuantity 동기화
   useEffect(() => {
     setLocalQuantity(item.quantity);
   }, [item.quantity]);
 
-  // item.maxQuantity prop 변경 시 maxQuantity 동기화 (외부에서 변경된 경우만)
+  // item.maxQuantity prop 변경 시 maxQuantity 동기화
   useEffect(() => {
     if (item.maxQuantity !== undefined && item.maxQuantity !== maxQuantity) {
       setMaxQuantity(item.maxQuantity);
     }
-  }, [item.maxQuantity]);
+  }, [item.maxQuantity, maxQuantity]);
 
   const handleUnitSelect = (unit: string) => {
     setLocalUnit(unit);
@@ -142,7 +188,6 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
 
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
-    // 수량이 0으로 변경되어서 삭제 모달이 나타난 경우, 이전 수량으로 복원
     if (localQuantity === '0') {
       setLocalQuantity(previousQuantity);
     }
@@ -157,13 +202,33 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
 
   return (
     <>
-      <CardComponent style={styles.itemCard} onPress={onPress}>
+      <CardComponent
+        style={[
+          styles.itemCard,
+          isExpiringSoon && styles.cardExpiringSoon,
+          isExpired && styles.cardExpired,
+        ]}
+        onPress={onPress}
+      >
         {isEditMode && (
           <DeleteButton onPress={() => handleDeleteConfirm(item.name)} />
         )}
 
+        {/* 소비기한 경고 배지 (일반 모드에서만 표시) */}
+        {!isEditMode && (isExpiringSoon || isExpired) && (
+          <View style={[styles.expiryBadge, isExpired && styles.expiredBadge]}>
+            <Text style={styles.expiryBadgeText}>{getExpiryWarningText()}</Text>
+          </View>
+        )}
+
         <View style={styles.itemImageContainer}>
-          <View style={styles.itemImagePlaceholder} />
+          <View style={styles.itemImagePlaceholder}>
+            <Icon
+              name={getCategoryIcon(item.itemCategory).name}
+              size={40}
+              color={getCategoryIcon(item.itemCategory).color}
+            />
+          </View>
         </View>
 
         <View style={styles.itemInfo}>
@@ -200,7 +265,15 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
                 <Text style={styles.itemQuantity}>
                   {formatQuantity(item.quantity)} {item.unit || '개'}
                 </Text>
-                <Text style={styles.itemExpiry}>{item.expiryDate}</Text>
+                <Text
+                  style={[
+                    styles.itemExpiry,
+                    isExpiringSoon && styles.expiryTextSoon,
+                    isExpired && styles.expiryTextExpired,
+                  ]}
+                >
+                  {item.expiryDate}
+                </Text>
               </View>
               <Text style={styles.itemStatus}>{item.itemCategory}</Text>
             </>
@@ -224,7 +297,6 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
         onClose={() => setShowDatePicker(false)}
       />
 
-      {/* 새로운 삭제 확인 모달 */}
       <ConfirmModal
         visible={showDeleteModal}
         title="식재료 삭제"

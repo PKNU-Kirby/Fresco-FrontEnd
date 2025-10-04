@@ -51,15 +51,64 @@ export const cardStyles = StyleSheet.create({
     elevation: 3,
     position: 'relative',
   },
+
+  // 소비기한 별 카드 스타일
+  cardExpiringSoon: {
+    borderWidth: scale(2),
+    borderColor: '#999',
+  },
+  cardExpired: {
+    borderWidth: scale(2),
+    borderColor: 'tomato',
+    backgroundColor: '#FFEBEE',
+    opacity: 0.85,
+  },
+
+  // 소비기한 경고 배지
+  expiryBadge: {
+    position: 'absolute',
+    top: scale(8),
+    right: scale(8),
+    backgroundColor: '#999',
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
+    borderRadius: scale(10),
+    zIndex: 10,
+  },
+  // 만료 배지
+  expiredBadge: {
+    backgroundColor: 'tomato',
+  },
+  // 배지 텍스트
+  expiryBadgeText: {
+    color: '#f8f8f8',
+    fontSize: scale(11),
+    fontWeight: 'bold',
+  },
+
+  // 소비기한 텍스트 스타일
+  expiryTextSoon: {
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  expiryTextExpired: {
+    color: 'tomato',
+    fontWeight: 'bold',
+    textDecorationLine: 'line-through',
+  },
+
   itemImageContainer: {
     marginRight: scale(16),
   },
   itemImagePlaceholder: {
+    borderRadius: scale(8),
     width: scale(60),
     height: scale(60),
-    backgroundColor: '#e0e0e0',
-    borderRadius: scale(8),
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+
   itemInfo: {
     flex: 1,
     justifyContent: 'space-between',
@@ -228,7 +277,6 @@ export const modalStyles = StyleSheet.create({
 
 // Slider Quantity Editor Style : './SliderQuantityEditor.tsx'
 export const sliderQuantityStyles = StyleSheet.create({
-  // Stepper and Input Section Styles
   quantityEditContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -275,7 +323,6 @@ export const sliderQuantityStyles = StyleSheet.create({
     color: '#666',
     marginLeft: scale(2),
   },
-  // Toggle Button Styles
   isSlidderButton: {
     width: scale(36),
     height: scale(36),
@@ -306,7 +353,6 @@ export const sliderQuantityStyles = StyleSheet.create({
     color: '#999',
     fontStyle: 'italic',
   },
-  // Slider Section Styles
   sliderSection: {
     marginTop: scale(18),
   },
