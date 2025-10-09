@@ -9,7 +9,10 @@ import {
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import ConfirmModal from '../ConfirmModal';
-import type { Recipe, RecipeFolder } from '../../../../types';
+import type {
+  Recipe,
+  RecipeFolder,
+} from '../../../screens/RecipeScreen/RecipeNavigator';
 import { createModalStyles } from './styles';
 
 interface CreateRecipeModalProps {
@@ -119,7 +122,7 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
       title: title.trim(),
       ingredients: filteredIngredients,
       instructions: filteredInstructions,
-      cookingTime: parseInt(cookingTime) || 30,
+      cookingTime: parseInt(cookingTime, 10) || 30,
       difficulty,
       link: link.trim() || undefined,
       isAIGenerated: false,

@@ -1,10 +1,8 @@
-// services/RecipeAPI.ts
 import { ApiService } from '../apiServices';
-import { Recipe, RecipeIngredient } from '../../utils/AsyncStorageUtils';
+import { Recipe } from '../../utils/AsyncStorageUtils';
+import { AsyncStorageService } from '../AsyncStorageService';
 
-// ============ API 요청/응답 타입 정의 ============
-
-// API 응답의 Recipe 타입 (백엔드 형식)
+// API 응답의 Recipe 타입
 interface ApiRecipe {
   recipeId: number;
   title: string;
@@ -99,39 +97,88 @@ class RecipeTypeConverter {
 // ============ RecipeAPI 서비스 ============
 
 export class RecipeAPI {
-  // 📋 레시피 목록 조회
+  // 레시피 목록 조회
   static async getRecipeList(): Promise<Recipe[]> {
     try {
-      const apiRecipes = await ApiService.apiCall<ApiRecipe[]>(
-        '/api/v1/recipe/list',
-      );
-
+      const apiRecipes = await ApiService.apiCall<ApiRecipe[]>('/recipe/list');
       return apiRecipes.map(RecipeTypeConverter.apiToFrontend);
-    } catch (error) {
+    } catch (error: any) {
       console.error('레시피 목록 조회 실패:', error);
+
+      // 권한 에러 -> 빈 배열 반환
+      if (
+        error.message?.includes('권한') ||
+        error.message?.includes('Permission')
+      ) {
+        console.warn('⚠️ 레시피 목록 접근 권한 없음 - 빈 배열 반환');
+        return [];
+      }
+
       throw error;
     }
   }
 
-  // ⭐ 즐겨찾기 레시피 목록 조회
+  // 즐겨찾기 레시피 목록 조회
   static async getFavoriteRecipes(): Promise<Recipe[]> {
     try {
       const apiRecipes = await ApiService.apiCall<ApiRecipe[]>(
-        '/api/v1/recipe/favorites',
+        '/recipe/favorites',
       );
-
       return apiRecipes.map(RecipeTypeConverter.apiToFrontend);
-    } catch (error) {
+    } catch (error: any) {
       console.error('즐겨찾기 레시피 조회 실패:', error);
+
+      if (
+        error.message?.includes('권한') ||
+        error.message?.includes('Permission')
+      ) {
+        console.warn('⚠️ 즐겨찾기 접근 권한 없음 - 빈 배열 반환');
+        return [];
+      }
+
       throw error;
     }
   }
 
-  // 📝 레시피 상세 조회
+  // 공유된 레시피 목록 조회
+  static async getSharedRecipes(refrigeratorId: string): Promise<Recipe[]> {
+    try {
+      const token = await AsyncStorageService.getAuthToken();
+      console.log('-> 공유 레시피 조회 시작:', {
+        refrigeratorId,
+        hasToken: !!token,
+        tokenPreview: token ? token.substring(0, 20) + '...' : 'null',
+      });
+
+      const apiRecipes = await ApiService.apiCall<ApiRecipe[]>(
+        `/recipe/share/${refrigeratorId}`,
+      );
+
+      console.log('O 공유 레시피 조회 성공:', apiRecipes.length);
+      return apiRecipes.map(RecipeTypeConverter.apiToFrontend);
+    } catch (error: any) {
+      console.error('X 공유 레시피 조회 실패:', {
+        error: error.message,
+        refrigeratorId,
+      });
+
+      if (
+        error.message?.includes('권한') ||
+        error.message?.includes('Permission')
+      ) {
+        console.warn('!! 공유 레시피 접근 권한 없음 - 빈 배열 반환');
+        return [];
+      }
+
+      throw error;
+    }
+  }
+
+  // 레시피 상세 조회
   static async getRecipeDetail(recipeId: string): Promise<Recipe> {
     try {
       const apiRecipe = await ApiService.apiCall<ApiRecipe>(
-        `/api/v1/recipe/detail/${recipeId}`,
+        `/recipe/detail/${recipeId}`,
       );
 
       return RecipeTypeConverter.apiToFrontend(apiRecipe);
@@ -141,18 +188,15 @@ export class RecipeAPI {
     }
   }
 
-  // ➕ 레시피 생성
+  // 레시피 생성
   static async createRecipe(recipe: Recipe): Promise<Recipe> {
     try {
       const requestData = RecipeTypeConverter.frontendToApi(recipe);
 
-      const apiRecipe = await ApiService.apiCall<ApiRecipe>(
-        '/api/v1/recipe/create',
-        {
-          method: 'POST',
-          body: JSON.stringify(requestData),
-        },
-      );
+      const apiRecipe = await ApiService.apiCall<ApiRecipe>('/recipe/create', {
+        method: 'POST',
+        body: JSON.stringify(requestData),
+      });
 
       return RecipeTypeConverter.apiToFrontend(apiRecipe);
     } catch (error) {
@@ -161,7 +205,7 @@ export class RecipeAPI {
     }
   }
 
-  // ✏️ 레시피 수정
+  // 레시피 수정
   static async updateRecipe(
     recipeId: string,
     updates: Partial<Recipe>,
@@ -179,7 +223,7 @@ export class RecipeAPI {
       };
 
       const apiRecipe = await ApiService.apiCall<ApiRecipe>(
-        `/api/v1/recipe/replace/${recipeId}`,
+        `/recipe/replace/${recipeId}`,
         {
           method: 'PUT',
           body: JSON.stringify(requestData),
@@ -193,10 +237,10 @@ export class RecipeAPI {
     }
   }
 
-  // 🗑️ 레시피 삭제
+  // 레시피 삭제
   static async deleteRecipe(recipeId: string): Promise<void> {
     try {
-      await ApiService.apiCall<void>(`/api/v1/recipe/delete/${recipeId}`, {
+      await ApiService.apiCall<void>(`/recipe/delete/${recipeId}`, {
         method: 'DELETE',
       });
     } catch (error) {
@@ -205,13 +249,13 @@ export class RecipeAPI {
     }
   }
 
-  // ⭐ 즐겨찾기 토글
+  // 즐겨찾기 토글
   static async toggleFavorite(
     recipeId: string,
   ): Promise<{ favorite: boolean }> {
     try {
       const result = await ApiService.apiCall<{ favorite: boolean }>(
-        `/api/v1/recipe/favorite/toggle/${recipeId}`,
+        `/recipe/favorite/toggle/${recipeId}`,
         {
           method: 'POST',
         },
@@ -224,19 +268,19 @@ export class RecipeAPI {
     }
   }
 
-  // 🔗 레시피 공유 (특정 냉장고에)
+  // 레시피 공유 (특정 냉장고에)
   static async shareRecipe(
     refrigeratorId: string,
     recipeId: string,
   ): Promise<void> {
     try {
       const requestData: ShareRecipeRequest = {
-        refrigeratorId: parseInt(refrigeratorId),
-        recipeId: parseInt(recipeId),
+        refrigeratorId: parseInt(refrigeratorId, 10),
+        recipeId: parseInt(recipeId, 10),
       };
 
       await ApiService.apiCall<void>(
-        `/api/v1/recipe/share/toggle/${refrigeratorId}/${recipeId}`,
+        `/recipe/share/toggle/${refrigeratorId}/${recipeId}`,
         {
           method: 'POST',
           body: JSON.stringify(requestData),
@@ -248,25 +292,11 @@ export class RecipeAPI {
     }
   }
 
-  // 📂 공유된 레시피 목록 조회 (특정 냉장고)
-  static async getSharedRecipes(refrigeratorId: string): Promise<Recipe[]> {
-    try {
-      const apiRecipes = await ApiService.apiCall<ApiRecipe[]>(
-        `/api/v1/recipe/share/${refrigeratorId}`,
-      );
-
-      return apiRecipes.map(RecipeTypeConverter.apiToFrontend);
-    } catch (error) {
-      console.error('공유 레시피 조회 실패:', error);
-      throw error;
-    }
-  }
-
-  // 🔍 레시피 검색
+  // 레시피 검색
   static async searchRecipes(query: string): Promise<Recipe[]> {
     try {
       const apiRecipes = await ApiService.apiCall<ApiRecipe[]>(
-        `/api/v1/recipe/search?query=${encodeURIComponent(query)}`,
+        `/recipe/search?query=${encodeURIComponent(query)}`,
       );
 
       return apiRecipes.map(RecipeTypeConverter.apiToFrontend);
@@ -276,7 +306,7 @@ export class RecipeAPI {
     }
   }
 
-  // 📅 소비기한 임박 재료 기반 레시피 조회
+  // 소비기한 임박 재료 기반 레시피 조회
   static async getExpiryRecipes(refrigeratorId: string): Promise<{
     refrigeratorId: number;
     day1: string[];
@@ -284,23 +314,21 @@ export class RecipeAPI {
     day3: string[];
   }> {
     try {
-      return await ApiService.apiCall(
-        `/api/v1/recipe/expiry/${refrigeratorId}`,
-      );
+      return await ApiService.apiCall(`/recipe/expiry/${refrigeratorId}`);
     } catch (error) {
       console.error('소비기한 레시피 조회 실패:', error);
       throw error;
     }
   }
 
-  // 🍳 재료 사용 (조리 시)
+  // 재료 사용 (조리 시)
   static async useIngredients(
     ingredients: Array<{ ingredientId: number; usedQuantity: number }>,
   ): Promise<void> {
     try {
       const requestData: UseIngredientsRequest = { ingredients };
 
-      await ApiService.apiCall<void>('/api/v1/recipe/cook/use-ingredients', {
+      await ApiService.apiCall<void>('/recipe/cook/use-ingredients', {
         method: 'POST',
         body: JSON.stringify(requestData),
       });
@@ -310,12 +338,10 @@ export class RecipeAPI {
     }
   }
 
-  // 🤖 AI 레시피 조회
+  // AI 레시피 조회
   static async getAIRecipe(): Promise<Recipe> {
     try {
-      const apiRecipe = await ApiService.apiCall<ApiRecipe>(
-        '/api/v1/recipe/ai',
-      );
+      const apiRecipe = await ApiService.apiCall<ApiRecipe>('/recipe/ai');
 
       return RecipeTypeConverter.apiToFrontend(apiRecipe);
     } catch (error) {
@@ -324,18 +350,15 @@ export class RecipeAPI {
     }
   }
 
-  // 🤖 AI 레시피 저장
+  // AI 레시피 저장
   static async saveAIRecipe(recipe: Recipe): Promise<Recipe> {
     try {
       const requestData = RecipeTypeConverter.frontendToApi(recipe);
 
-      const apiRecipe = await ApiService.apiCall<ApiRecipe>(
-        '/api/v1/recipe/ai/save',
-        {
-          method: 'POST',
-          body: JSON.stringify(requestData),
-        },
-      );
+      const apiRecipe = await ApiService.apiCall<ApiRecipe>('/recipe/ai/save', {
+        method: 'POST',
+        body: JSON.stringify(requestData),
+      });
 
       return RecipeTypeConverter.apiToFrontend(apiRecipe);
     } catch (error) {
@@ -344,12 +367,10 @@ export class RecipeAPI {
     }
   }
 
-  // 📊 조리 단계별 재고 조회 (특정 냉장고)
+  // 조리 단계별 재고 조회 (특정 냉장고)
   static async getCookStocks(refrigeratorId: string): Promise<any> {
     try {
-      return await ApiService.apiCall(
-        `/api/v1/recipe/cook/stocks/${refrigeratorId}`,
-      );
+      return await ApiService.apiCall(`/recipe/cook/stocks/${refrigeratorId}`);
     } catch (error) {
       console.error('조리 재고 조회 실패:', error);
       throw error;

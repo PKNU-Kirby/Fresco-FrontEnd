@@ -1,5 +1,11 @@
 import React, { useState, useCallback } from 'react';
-import { ScrollView, KeyboardAvoidingView, Platform, View } from 'react-native';
+import {
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  View,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -7,7 +13,7 @@ import { RecipeStackParamList, RecipeIngredient } from '../RecipeNavigator';
 import { SharedRecipeStorage } from '../../../utils/AsyncStorageUtils';
 import { AsyncStorageService } from '../../../services/AsyncStorageService';
 import { FridgeWithRole } from '../../../types/permission';
-import { useRecipeDetail } from '../../../components/RecipeDetail/RecipeDetail';
+import RecipeAPI from '../../../services/API/RecipeAPI'; // ✅ 추가
 import { Header } from '../../../components/RecipeDetail/Header';
 import { SharedRecipeIndicator } from '../../../components/RecipeDetail/RecipeDetail';
 import { RecipeTitleSection } from '../../../components/RecipeDetail/RecipeDetail';
@@ -77,24 +83,11 @@ const RecipeDetailScreen: React.FC = () => {
     }
   };
 
-  // 커스텀 훅 사용
-  const {
-    currentRecipe,
-    setCurrentRecipe,
-    isEditMode,
-    setIsEditMode,
-    isFavorite,
-    isLoading,
-    handleSave,
-    toggleFavorite,
-    getStepsArray,
-    getIngredientsArray,
-  } = useRecipeDetail(
-    getInitialRecipe(),
-    isNewRecipe,
-    isEditing,
-    aiGeneratedData,
-  );
+  // ✅ state 선언 (useRecipeDetail 대체)
+  const [currentRecipe, setCurrentRecipe] = useState(getInitialRecipe());
+  const [isEditMode, setIsEditMode] = useState(isNewRecipe || isEditing);
+  const [isFavorite, setIsFavorite] = useState(recipe?.isFavorite || false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // 기존 모달 상태
   const [showUseRecipeModal, setShowUseRecipeModal] = useState(false);
@@ -111,20 +104,15 @@ const RecipeDetailScreen: React.FC = () => {
 
   // ConfirmModal 상태들
   const [modals, setModals] = useState({
-    // 에러 모달들 (빨간색)
     noIngredientsVisible: false,
     userNotFoundVisible: false,
     fridgeLoadErrorVisible: false,
     shareErrorVisible: false,
     selectIngredientsVisible: false,
-
-    // 성공/정보 모달들 (초록색)
     shareSuccessVisible: false,
     noFridgesVisible: false,
     noSelectedFridgesVisible: false,
     alreadySharedVisible: false,
-
-    // 모달 메시지
     modalTitle: '',
     modalMessage: '',
     shareSuccessCount: 0,
@@ -149,6 +137,123 @@ const RecipeDetailScreen: React.FC = () => {
       setModals(prev => ({ ...prev, noSelectedFridgesVisible: visible })),
     setAlreadySharedVisible: (visible: boolean) =>
       setModals(prev => ({ ...prev, alreadySharedVisible: visible })),
+  };
+
+  // ✅ 유틸 함수들 추가
+  const getStepsArray = (steps: any): string[] => {
+    if (!steps) return [];
+    if (Array.isArray(steps)) {
+      return steps.filter(
+        step => step && typeof step === 'string' && step.trim().length > 0,
+      );
+    }
+    if (typeof steps === 'string') {
+      return steps
+        .split('\n')
+        .map(step => step.trim())
+        .filter(step => step.length > 0);
+    }
+    return [];
+  };
+
+  const getIngredientsArray = (ingredients: any) => {
+    if (!ingredients || !Array.isArray(ingredients)) return [];
+    return ingredients;
+  };
+
+  // ✅ handleSave 함수 (API 연동)
+  const handleSave = async () => {
+    // 1. 유효성 검사
+    if (!currentRecipe.title.trim()) {
+      Alert.alert('알림', '레시피 제목을 입력해주세요.');
+      return;
+    }
+
+    const filteredIngredients = (currentRecipe.ingredients || []).filter(
+      ing => ing.name.trim() !== '',
+    );
+
+    const filteredSteps = getStepsArray(currentRecipe.steps).filter(
+      step => step.trim() !== '',
+    );
+
+    if (filteredIngredients.length === 0) {
+      Alert.alert('알림', '재료를 하나 이상 입력해주세요.');
+      return;
+    }
+
+    if (filteredSteps.length === 0) {
+      Alert.alert('알림', '조리 방법을 하나 이상 입력해주세요.');
+      return;
+    }
+
+    // 2. 레시피 데이터 준비
+    const recipeToSave = {
+      ...currentRecipe,
+      title: currentRecipe.title.trim(),
+      ingredients: filteredIngredients,
+      steps: filteredSteps.join('\n'), // 백엔드는 string으로 받음
+      referenceUrl: currentRecipe.referenceUrl?.trim() || undefined,
+    };
+
+    try {
+      setIsLoading(true);
+
+      if (isNewRecipe) {
+        // ✅ 신규 레시피 생성 API
+        console.log('📝 레시피 생성 중...');
+        const createdRecipe = await RecipeAPI.createRecipe(recipeToSave);
+        console.log('✅ 레시피 생성 성공:', createdRecipe);
+
+        setCurrentRecipe(createdRecipe);
+        Alert.alert('성공', '레시피가 생성되었습니다.', [
+          {
+            text: '확인',
+            onPress: () => navigation.goBack(),
+          },
+        ]);
+      } else {
+        // ✅ 기존 레시피 수정 API
+        if (!currentRecipe.id) {
+          Alert.alert('오류', '레시피 ID가 없습니다.');
+          return;
+        }
+
+        console.log('📝 레시피 수정 중...', currentRecipe.id);
+        const updatedRecipe = await RecipeAPI.updateRecipe(
+          currentRecipe.id,
+          recipeToSave,
+        );
+        console.log('✅ 레시피 수정 성공:', updatedRecipe);
+
+        setCurrentRecipe(updatedRecipe);
+        Alert.alert('성공', '레시피가 수정되었습니다.');
+        setIsEditMode(false);
+      }
+    } catch (error: any) {
+      console.error('❌ 레시피 저장 실패:', error);
+      Alert.alert('오류', error.message || '레시피 저장에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ✅ 즐겨찾기 토글 (API 연동)
+  const toggleFavorite = async () => {
+    if (!currentRecipe.id) {
+      Alert.alert('알림', '저장된 레시피만 즐겨찾기할 수 있습니다.');
+      return;
+    }
+
+    try {
+      console.log('⭐ 즐겨찾기 토글:', currentRecipe.id);
+      const result = await RecipeAPI.toggleFavorite(currentRecipe.id);
+      setIsFavorite(result.favorite);
+      console.log('✅ 즐겨찾기 상태:', result.favorite);
+    } catch (error: any) {
+      console.error('❌ 즐겨찾기 토글 실패:', error);
+      Alert.alert('오류', '즐겨찾기 설정에 실패했습니다.');
+    }
   };
 
   const handleEnhancedIngredientsChange = useCallback(
@@ -238,7 +343,7 @@ const RecipeDetailScreen: React.FC = () => {
     navigation.navigate('SharedFolder' as any);
   };
 
-  // 레시피 공유 모달 - AsyncStorageService 사용
+  // ✅ 레시피 공유 (API 연동)
   const openShareModal = async () => {
     if (!currentRecipe.id || isSharedRecipe) {
       setModals(prev => ({
@@ -252,7 +357,7 @@ const RecipeDetailScreen: React.FC = () => {
 
     try {
       const currentUserId = await AsyncStorageService.getCurrentUserId();
-      console.log('🔍 Current User ID:', currentUserId); // 디버깅
+      console.log('🔍 Current User ID:', currentUserId);
 
       if (!currentUserId) {
         modalHandlers.setUserNotFoundVisible(true);
@@ -260,7 +365,7 @@ const RecipeDetailScreen: React.FC = () => {
       }
 
       const currentUser = await AsyncStorageService.getUserById(currentUserId);
-      console.log('🔍 Current User:', currentUser); // 디버깅
+      console.log('🔍 Current User:', currentUser);
 
       if (!currentUser) {
         modalHandlers.setUserNotFoundVisible(true);
@@ -271,8 +376,7 @@ const RecipeDetailScreen: React.FC = () => {
         parseInt(currentUser.id, 10),
       );
 
-      console.log('🔍 User Fridge List:', userFridgeList); // 🎯 중요한 디버깅
-      console.log('🔍 User Fridge List Length:', userFridgeList.length); // 🎯 중요한 디버깅
+      console.log('🔍 User Fridge List:', userFridgeList);
 
       const fridges: CheckableFridge[] = userFridgeList.map(
         (fridge: FridgeWithRole) => ({
@@ -282,10 +386,7 @@ const RecipeDetailScreen: React.FC = () => {
         }),
       );
 
-      console.log('🔍 Mapped Fridges:', fridges); // 디버깅
-
       if (fridges.length === 0) {
-        console.log('🔍 No fridges found, showing noFridgesVisible modal'); // 디버깅
         modalHandlers.setNoFridgesVisible(true);
         return;
       }
@@ -297,6 +398,7 @@ const RecipeDetailScreen: React.FC = () => {
       modalHandlers.setFridgeLoadErrorVisible(true);
     }
   };
+
   const toggleFridgeCheck = (id: number) => {
     setCheckableFridges(prev =>
       prev.map(fridge =>
@@ -305,45 +407,40 @@ const RecipeDetailScreen: React.FC = () => {
     );
   };
 
+  // ✅ 레시피 공유 실행 (API 연동)
   const shareToSelectedFridges = async () => {
     const selectedFridges = checkableFridges.filter(fridge => fridge.isChecked);
+
     if (selectedFridges.length === 0) {
       modalHandlers.setNoSelectedFridgesVisible(true);
       return;
     }
 
     try {
-      const currentSharedRecipes = await SharedRecipeStorage.getSharedRecipes();
-      let newRecipesAdded = 0;
+      let successCount = 0;
 
+      // ✅ 각 냉장고에 API로 공유
       for (const fridge of selectedFridges) {
-        const sharedRecipe = {
-          ...currentRecipe,
-          id: `shared-${fridge.id}-${currentRecipe.id}-${Date.now()}`,
-          isShared: true,
-          sharedBy: '나',
-        };
-
-        const alreadyShared = currentSharedRecipes.some(
-          sr =>
-            sr.title === currentRecipe.title &&
-            sr.id.includes(`-${fridge.id}-`),
-        );
-
-        if (!alreadyShared) {
-          currentSharedRecipes.unshift(sharedRecipe);
-          newRecipesAdded++;
+        try {
+          await RecipeAPI.shareRecipe(fridge.id.toString(), currentRecipe.id);
+          successCount++;
+          console.log(`✅ 냉장고 ${fridge.id}에 공유 성공`);
+        } catch (error: any) {
+          // 이미 공유된 경우 무시
+          if (error.message?.includes('이미')) {
+            console.log(`⚠️ 냉장고 ${fridge.id}에 이미 공유됨`);
+          } else {
+            console.error(`❌ 냉장고 ${fridge.id} 공유 실패:`, error);
+          }
         }
       }
 
-      await SharedRecipeStorage.saveSharedRecipes(currentSharedRecipes);
-
-      if (newRecipesAdded > 0) {
+      if (successCount > 0) {
         setModals(prev => ({
           ...prev,
           modalTitle: '공유 완료',
-          modalMessage: `${newRecipesAdded}개의 냉장고에 레시피가 새로 공유되었습니다.`,
-          shareSuccessCount: newRecipesAdded,
+          modalMessage: `${successCount}개의 냉장고에 레시피가 공유되었습니다.`,
+          shareSuccessCount: successCount,
           shareSuccessVisible: true,
         }));
       } else {
@@ -391,7 +488,6 @@ const RecipeDetailScreen: React.FC = () => {
       modalHandlers.setSelectIngredientsVisible(true);
       return;
     }
-    // 실제 구현은 UseRecipeScreen에서
   };
 
   return (
@@ -462,7 +558,6 @@ const RecipeDetailScreen: React.FC = () => {
           <View style={styles.bottomSpacer} />
         </ScrollView>
 
-        {/* Use Recipe Modal */}
         <UseRecipeModal
           visible={showUseRecipeModal}
           ingredients={checkableIngredients}
@@ -471,7 +566,6 @@ const RecipeDetailScreen: React.FC = () => {
           onDeleteCheckedIngredients={deleteCheckedIngredients}
         />
 
-        {/* Share Recipe Modal */}
         <ShareRecipeModal
           visible={showShareModal}
           fridges={checkableFridges}
@@ -480,7 +574,7 @@ const RecipeDetailScreen: React.FC = () => {
           onShareToSelectedFridges={shareToSelectedFridges}
         />
 
-        {/* ConfirmModal들 - 에러/경고 모달들 (빨간색) */}
+        {/* 모달들 */}
         <ConfirmModal
           isAlert={false}
           visible={modals.noIngredientsVisible}
@@ -565,7 +659,6 @@ const RecipeDetailScreen: React.FC = () => {
           onCancel={() => modalHandlers.setNoSelectedFridgesVisible(false)}
         />
 
-        {/* ConfirmModal들 - 성공/정보 모달들 (초록색) */}
         <ConfirmModal
           isAlert={false}
           visible={modals.shareSuccessVisible}
@@ -604,7 +697,7 @@ const RecipeDetailScreen: React.FC = () => {
           confirmText="확인"
           cancelText=""
           confirmButtonStyle="primary"
-          onConfirm={() => modalHandlers.setAlreadySharedVisible(false)}
+          onConfirm={() => modalHandlers.setAlreadySharedVisible(true)}
           onCancel={() => modalHandlers.setAlreadySharedVisible(false)}
         />
       </KeyboardAvoidingView>

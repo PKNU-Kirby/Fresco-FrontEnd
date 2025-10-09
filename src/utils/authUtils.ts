@@ -58,6 +58,8 @@ export const clearTokens = async (): Promise<void> => {
   }
 };
 
+// utils/authUtils.ts 일부 수정
+
 export const isTokenExpired = (token: string): boolean => {
   try {
     if (!token) return true;
@@ -69,9 +71,32 @@ export const isTokenExpired = (token: string): boolean => {
     const currentTime = Math.floor(Date.now() / 1000);
 
     // 30초 여유를 두고 만료 판단
-    return payload.exp <= currentTime + 30;
+    const isExpired = payload.exp <= currentTime + 30;
+
+    if (isExpired) {
+      console.log('⏰ 토큰 만료 감지:', {
+        expiryTime: new Date(payload.exp * 1000).toLocaleString(),
+        currentTime: new Date().toLocaleString(),
+        remainingSeconds: payload.exp - currentTime,
+      });
+    }
+
+    return isExpired;
   } catch (error) {
-    console.error('토큰 파싱 실패:', error);
+    console.error('❌ 토큰 파싱 실패:', error);
+    return true;
+  }
+};
+
+// Refresh Token 만료 체크 추가
+export const isRefreshTokenExpired = async (): Promise<boolean> => {
+  try {
+    const refreshToken = await getRefreshToken();
+    if (!refreshToken) return true;
+
+    return isTokenExpired(refreshToken);
+  } catch (error) {
+    console.error('❌ Refresh Token 확인 실패:', error);
     return true;
   }
 };
@@ -367,6 +392,90 @@ export const getTokenStatus = async (): Promise<{
       hasAccessToken: false,
       hasRefreshToken: false,
       isAccessTokenExpired: true,
+    };
+  }
+};
+
+// utils/authUtils.ts에 추가
+
+/**
+ * 로그인 후 토큰 검증 (백엔드 이슈 확인용)
+ */
+export const validateLoginTokens = async (): Promise<{
+  isValid: boolean;
+  issues: string[];
+}> => {
+  const issues: string[] = [];
+
+  try {
+    const accessToken = await getAccessToken();
+    const refreshToken = await getRefreshToken();
+
+    if (!accessToken || !refreshToken) {
+      issues.push('토큰이 저장되지 않음');
+      return { isValid: false, issues };
+    }
+
+    // 1. 토큰이 같은지 확인
+    if (accessToken === refreshToken) {
+      issues.push('⚠️ Access Token과 Refresh Token이 동일함 (백엔드 이슈)');
+    }
+
+    // 2. 만료시간 확인
+    try {
+      const accessPayload = JSON.parse(atob(accessToken.split('.')[1]));
+      const refreshPayload = JSON.parse(atob(refreshToken.split('.')[1]));
+
+      if (accessPayload.exp === refreshPayload.exp) {
+        issues.push(
+          '⚠️ Access Token과 Refresh Token의 만료시간이 동일함 (백엔드 이슈)',
+        );
+      }
+
+      const currentTime = Math.floor(Date.now() / 1000);
+      const accessExpInHours = (accessPayload.exp - currentTime) / 3600;
+      const refreshExpInHours = (refreshPayload.exp - currentTime) / 3600;
+
+      console.log('📊 토큰 만료시간 분석:', {
+        accessTokenExpiry: `${accessExpInHours.toFixed(2)} 시간`,
+        refreshTokenExpiry: `${refreshExpInHours.toFixed(2)} 시간`,
+        recommendedAccess: '1 hour',
+        recommendedRefresh: '7~30 days',
+      });
+
+      if (accessExpInHours < 0.5) {
+        issues.push(
+          `Access Token 만료시간이 너무 짧음: ${accessExpInHours.toFixed(
+            2,
+          )}시간`,
+        );
+      }
+
+      if (refreshExpInHours < 24) {
+        issues.push(
+          `Refresh Token 만료시간이 너무 짧음: ${refreshExpInHours.toFixed(
+            2,
+          )}시간`,
+        );
+      }
+    } catch (e) {
+      issues.push('토큰 페이로드 파싱 실패');
+    }
+
+    console.log('🔍 토큰 검증 결과:', {
+      isValid: issues.length === 0,
+      issues,
+    });
+
+    return {
+      isValid: issues.length === 0,
+      issues,
+    };
+  } catch (error) {
+    console.error('토큰 검증 실패:', error);
+    return {
+      isValid: false,
+      issues: ['토큰 검증 중 오류 발생'],
     };
   }
 };

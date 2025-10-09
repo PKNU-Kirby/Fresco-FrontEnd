@@ -87,35 +87,58 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   };
 
   // 초기 데이터 로드 (API 기반)
+  // 초기 데이터 로드 (API 기반) - 권한 에러 처리 추가
   const loadInitialData = async () => {
     try {
       setIsLoading(true);
 
-      // API에서 데이터 로드
-      const [apiPersonalRecipes, apiFavoriteRecipes, apiSharedRecipes] =
-        await Promise.all([
+      console.log('🔄 레시피 초기 데이터 로드 시작...');
+      console.log('📦 현재 냉장고 ID:', fridgeId);
+
+      // 🔥 수정: Promise.allSettled로 변경 (일부 실패해도 계속 진행)
+      const [personalResult, favoriteResult, sharedResult] =
+        await Promise.allSettled([
           RecipeAPI.getRecipeList(),
           RecipeAPI.getFavoriteRecipes(),
           RecipeAPI.getSharedRecipes(fridgeId),
         ]);
 
-      // 개인 레시피 설정
-      setPersonalRecipes(apiPersonalRecipes);
+      // 🔥 각 결과별 처리
+      if (personalResult.status === 'fulfilled') {
+        console.log('✅ 개인 레시피:', personalResult.value.length);
+        setPersonalRecipes(personalResult.value);
+      } else {
+        console.warn('⚠️ 개인 레시피 로드 실패:', personalResult.reason);
+        setPersonalRecipes([]);
+      }
 
-      // 공유 레시피 설정
-      setSharedRecipes(apiSharedRecipes);
+      if (favoriteResult.status === 'fulfilled') {
+        console.log('✅ 즐겨찾기:', favoriteResult.value.length);
+        const favoriteIds = favoriteResult.value.map(recipe => recipe.id);
+        setFavoriteRecipeIds(favoriteIds);
+      } else {
+        console.warn('⚠️ 즐겨찾기 로드 실패:', favoriteResult.reason);
+        setFavoriteRecipeIds([]);
+      }
 
-      // 즐겨찾기 ID 추출
-      const favoriteIds = apiFavoriteRecipes.map(recipe => recipe.id);
-      setFavoriteRecipeIds(favoriteIds);
+      if (sharedResult.status === 'fulfilled') {
+        console.log('✅ 공유 레시피:', sharedResult.value.length);
+        setSharedRecipes(sharedResult.value);
+      } else {
+        console.warn('⚠️ 공유 레시피 로드 실패:', sharedResult.reason);
+        setSharedRecipes([]);
+      }
 
       // 조리 가능성 계산
       setTimeout(() => {
         calculateRecipeAvailabilities();
       }, 100);
     } catch (error) {
-      console.error('초기 데이터 로드 실패:', error);
-      Alert.alert('오류', '레시피 데이터를 불러오는데 실패했습니다.');
+      console.error('❌ 초기 데이터 로드 실패:', error);
+      // 🔥 수정: 완전 실패 시에도 빈 상태로 표시
+      setPersonalRecipes([]);
+      setSharedRecipes([]);
+      setFavoriteRecipeIds([]);
     } finally {
       setIsLoading(false);
     }

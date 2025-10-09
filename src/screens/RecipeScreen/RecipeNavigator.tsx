@@ -17,14 +17,12 @@ export interface EnhancedIngredient extends RecipeIngredient {
 export interface Recipe {
   id: string;
   title: string;
-  imageUrl?: string;
   createdAt?: string;
-  updatedAt?: string;
   isShared?: boolean;
   sharedBy?: string;
-  // RecipeDetail에서 사용하는 추가 필드들
   ingredients?: RecipeIngredient[];
-  steps?: string[] | string; // 🔧 string 배열 또는 문자열 둘 다 허용
+  steps?: string[] | string;
+  isFavorite?: boolean;
   referenceUrl?: string;
 }
 
