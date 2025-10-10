@@ -23,24 +23,24 @@ interface ApiRecipe {
 interface CreateRecipeRequest {
   title: string;
   ingredients: Array<{
-    name: string;
+    ingredientName: string;
     quantity: string;
     unit: string;
   }>;
-  steps: string[];
-  referenceUrl?: string;
+  steps: string | string[];
+  url?: string;
 }
 
 // 레시피 수정 요청 타입
 interface UpdateRecipeRequest {
   title?: string;
   ingredients?: Array<{
-    name: string;
+    ingredientName: string;
     quantity: string;
     unit: string;
   }>;
-  steps?: string[];
-  referenceUrl?: string;
+  steps?: string | string[];
+  url?: string;
 }
 
 // 레시피 공유 요청 타입
@@ -189,9 +189,27 @@ export class RecipeAPI {
   }
 
   // 레시피 생성
-  static async createRecipe(recipe: Recipe): Promise<Recipe> {
+  // RecipeAPI.ts의 createRecipe 함수 (195-207번째 줄 근처)
+  static async createRecipe(recipe: any): Promise<Recipe> {
     try {
-      const requestData = RecipeTypeConverter.frontendToApi(recipe);
+      const requestData = {
+        title: recipe.title,
+        ingredients:
+          recipe.ingredients?.map((ing: any) => ({
+            ingredientName: ing.ingredientName || ing.name,
+            quantity: parseFloat(ing.quantity) || 0, // ← 숫자로 변환!
+            unit: ing.unit || '',
+          })) || [],
+        steps: Array.isArray(recipe.steps)
+          ? recipe.steps.join('\n')
+          : recipe.steps || '',
+        url: recipe.url || recipe.referenceUrl || '',
+      };
+
+      console.log(
+        '🔥 RecipeAPI - 보낼 데이터:',
+        JSON.stringify(requestData, null, 2),
+      );
 
       const apiRecipe = await ApiService.apiCall<ApiRecipe>('/recipe/create', {
         method: 'POST',
@@ -204,7 +222,6 @@ export class RecipeAPI {
       throw error;
     }
   }
-
   // 레시피 수정
   static async updateRecipe(
     recipeId: string,
@@ -214,12 +231,12 @@ export class RecipeAPI {
       const requestData: UpdateRecipeRequest = {
         title: updates.title,
         ingredients: updates.ingredients?.map(ing => ({
-          name: ing.name,
+          ingredientName: ing.name, // ← name을 ingredientName으로!
           quantity: ing.quantity,
           unit: ing.unit,
         })),
-        steps: updates.steps as string[],
-        referenceUrl: updates.referenceUrl,
+        steps: updates.steps,
+        url: updates.referenceUrl, // ← referenceUrl을 url로!
       };
 
       const apiRecipe = await ApiService.apiCall<ApiRecipe>(

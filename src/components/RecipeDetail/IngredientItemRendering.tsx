@@ -37,6 +37,18 @@ export const IngredientItemRendering: React.FC<IngredientItemProps> = ({
   onUpdateIngredient,
   onFridgeItemSelection,
 }) => {
+  // 로컬 state
+  const [localName, setLocalName] = React.useState(ingredient.name);
+  const [localQuantity, setLocalQuantity] = React.useState(ingredient.quantity);
+  const [localUnit, setLocalUnit] = React.useState(ingredient.unit);
+
+  // ingredient가 변경 -> state도 업데이트
+  React.useEffect(() => {
+    setLocalName(ingredient.name);
+    setLocalQuantity(ingredient.quantity);
+    setLocalUnit(ingredient.unit);
+  }, [ingredient.name, ingredient.quantity, ingredient.unit]);
+
   // 재료 상태 동그라미
   const getStatusCircle = () => {
     if (ingredient.isAvailable) {
@@ -191,24 +203,27 @@ export const IngredientItemRendering: React.FC<IngredientItemProps> = ({
       <View style={styles.ingredientEditRow}>
         <TextInput
           style={[styles.ingredientInput, styles.ingredientName]}
-          value={ingredient.name}
-          onChangeText={text => onUpdateIngredient(ingredient.id, 'name', text)}
+          value={localName}
+          onChangeText={setLocalName}
+          onBlur={() => onUpdateIngredient(ingredient.id, 'name', localName)} // 포커스 벗어날 때 업데이트
           placeholder="재료명"
           placeholderTextColor="#999"
         />
         <TextInput
           style={[styles.ingredientInput, styles.ingredientQuantity]}
-          value={ingredient.quantity}
-          onChangeText={text =>
-            onUpdateIngredient(ingredient.id, 'quantity', text)
+          value={localQuantity}
+          onChangeText={setLocalQuantity}
+          onBlur={() =>
+            onUpdateIngredient(ingredient.id, 'quantity', localQuantity)
           }
           placeholder="양"
           placeholderTextColor="#999"
         />
         <TextInput
           style={[styles.ingredientInput, styles.ingredientUnit]}
-          value={ingredient.unit}
-          onChangeText={text => onUpdateIngredient(ingredient.id, 'unit', text)}
+          value={localUnit}
+          onChangeText={setLocalUnit}
+          onBlur={() => onUpdateIngredient(ingredient.id, 'unit', localUnit)}
           placeholder="단위"
           placeholderTextColor="#999"
         />

@@ -89,6 +89,9 @@ const RecipeDetailScreen: React.FC = () => {
   const [isFavorite, setIsFavorite] = useState(recipe?.isFavorite || false);
   const [isLoading, setIsLoading] = useState(false);
 
+  console.log('🔍 isNewRecipe:', isNewRecipe);
+  console.log('🔍 isEditing:', isEditing);
+  console.log('🔍 isEditMode:', isEditMode); // ← 이게 true여야 해요!
   // 기존 모달 상태
   const [showUseRecipeModal, setShowUseRecipeModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -176,7 +179,7 @@ const RecipeDetailScreen: React.FC = () => {
     const filteredSteps = getStepsArray(currentRecipe.steps).filter(
       step => step.trim() !== '',
     );
-
+    console.log('📦 filteredIngredients:', filteredIngredients);
     if (filteredIngredients.length === 0) {
       Alert.alert('알림', '재료를 하나 이상 입력해주세요.');
       return;
@@ -187,21 +190,29 @@ const RecipeDetailScreen: React.FC = () => {
       return;
     }
 
-    // 2. 레시피 데이터 준비
+    // 2. 레시피 데이터 준비 - 백엔드 스키마에 맞춤
     const recipeToSave = {
-      ...currentRecipe,
       title: currentRecipe.title.trim(),
-      ingredients: filteredIngredients,
-      steps: filteredSteps.join('\n'), // 백엔드는 string으로 받음
-      referenceUrl: currentRecipe.referenceUrl?.trim() || undefined,
+      ingredients: filteredIngredients.map(ing => ({
+        ingredientName: ing.name, // ← 필드명 변경!
+        quantity: ing.quantity || '0',
+        unit: ing.unit || '',
+      })),
+      steps: filteredSteps.join('\n'),
+      url: currentRecipe.referenceUrl?.trim() || '', // ← referenceUrl → url
     };
+
+    console.log(
+      '📤📤📤 RecipeDetailScreen - 보낼 데이터:',
+      JSON.stringify(recipeToSave, null, 2),
+    );
 
     try {
       setIsLoading(true);
 
       if (isNewRecipe) {
-        // ✅ 신규 레시피 생성 API
         console.log('📝 레시피 생성 중...');
+        console.log('📤 보낼 데이터:', recipeToSave);
         const createdRecipe = await RecipeAPI.createRecipe(recipeToSave);
         console.log('✅ 레시피 생성 성공:', createdRecipe);
 
@@ -213,7 +224,7 @@ const RecipeDetailScreen: React.FC = () => {
           },
         ]);
       } else {
-        // ✅ 기존 레시피 수정 API
+        // 기존 레시피 수정
         if (!currentRecipe.id) {
           Alert.alert('오류', '레시피 ID가 없습니다.');
           return;
@@ -315,13 +326,20 @@ const RecipeDetailScreen: React.FC = () => {
   };
 
   const addStep = () => {
-    const currentSteps = getStepsArray(currentRecipe.steps);
-    setCurrentRecipe(prev => ({
-      ...prev,
-      steps: [...currentSteps, ''],
-    }));
-  };
+    console.log('🔥 addStep 호출됨!');
 
+    setCurrentRecipe(prev => {
+      const currentSteps = Array.isArray(prev.steps) ? prev.steps : [];
+
+      // 빈 문자열 추가하되, 기존 배열을 완전히 새로 만들기
+      const newSteps = [...currentSteps, ''];
+
+      return {
+        ...prev,
+        steps: newSteps,
+      };
+    });
+  };
   const removeStep = (index: number) => {
     const currentSteps = getStepsArray(currentRecipe.steps);
     setCurrentRecipe(prev => ({
@@ -331,11 +349,16 @@ const RecipeDetailScreen: React.FC = () => {
   };
 
   const updateStep = (index: number, value: string) => {
-    const currentSteps = getStepsArray(currentRecipe.steps);
-    setCurrentRecipe(prev => ({
-      ...prev,
-      steps: currentSteps.map((step, i) => (i === index ? value : step)),
-    }));
+    setCurrentRecipe(prev => {
+      // getStepsArray 사용하지 말고 직접 배열 복사
+      const currentSteps = Array.isArray(prev.steps) ? [...prev.steps] : [];
+      currentSteps[index] = value;
+
+      return {
+        ...prev,
+        steps: currentSteps,
+      };
+    });
   };
 
   // 냉장고 관리로 이동
@@ -540,7 +563,9 @@ const RecipeDetailScreen: React.FC = () => {
           />
 
           <StepsSection
-            steps={getStepsArray(currentRecipe.steps)}
+            steps={
+              Array.isArray(currentRecipe.steps) ? currentRecipe.steps : []
+            }
             isEditMode={isEditMode}
             onAddStep={addStep}
             onRemoveStep={removeStep}
