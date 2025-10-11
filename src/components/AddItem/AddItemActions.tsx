@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { addItemStyles as styles } from './styles';
+import { addItemActionsStyles as styles } from './styles';
 
 interface AddItemActionsProps {
   isEditMode: boolean;

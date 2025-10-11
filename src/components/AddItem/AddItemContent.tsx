@@ -2,9 +2,8 @@ import React, { useRef } from 'react';
 import { View, ScrollView, Text } from 'react-native';
 import AddItemCard from './AddItemCard';
 import { ItemFormData } from '../../screens/AddItemScreen';
-import { addItemStyles as styles } from './styles';
+import { addItemContentStyles as styles } from './styles';
 
-// 확인된 식재료 정보 타입
 export interface ConfirmedIngredient {
   userInput: ItemFormData;
   apiResult: {
@@ -56,7 +55,7 @@ export const AddItemContent: React.FC<AddItemContentProps> = ({
         automaticallyAdjustKeyboardInsets={true}
       >
         {isEditMode
-          ? // 편집 모드: 기존 카드 표시
+          ? // 편집 모드 : 기존 카드 표시
             items.map((item, index) => (
               <AddItemCard
                 key={item.id}
@@ -70,16 +69,20 @@ export const AddItemContent: React.FC<AddItemContentProps> = ({
                 onFocusComplete={onFocusComplete}
               />
             ))
-          : // 확인 모드: 간단한 정보만 표시
+          : // 확인 모드 : 간단한 정보만 표시
             confirmedIngredients.map((confirmed, index) => {
-              // apiResult가 문자열인 경우 파싱 처리
               let apiResult = confirmed.apiResult;
               if (typeof apiResult === 'string') {
                 try {
                   apiResult = JSON.parse(apiResult);
                 } catch (error) {
-                  console.error('apiResult 파싱 실패:', error);
-                  apiResult = null;
+                  // console.error('apiResult 파싱 실패:', error);
+                  apiResult = {
+                    ingredientId: 0,
+                    ingredientName: '',
+                    categoryId: 0,
+                    categoryName: '',
+                  };
                 }
               }
 

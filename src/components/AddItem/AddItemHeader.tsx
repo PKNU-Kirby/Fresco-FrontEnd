@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import BackButton from '../_common/BackButton';
-import { addItemStyles as styles } from './styles';
+import { addItemHeaderStyles as styles } from './styles';
 
 interface AddItemHeaderProps {
   onGoBack: () => void;

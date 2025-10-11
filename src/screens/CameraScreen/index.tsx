@@ -2,35 +2,24 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   TouchableOpacity,
-  Alert,
   Text,
   SafeAreaView,
   PermissionsAndroid,
   Platform,
-  ScrollView,
   ActivityIndicator,
 } from 'react-native';
 import {
-  useNavigation,
-  useRoute,
-  RouteProp,
-  useFocusEffect,
-} from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../../App';
-import {
   launchCamera,
-  launchImageLibrary,
   ImagePickerResponse,
   MediaType,
   PhotoQuality,
 } from 'react-native-image-picker';
+import { RootStackParamList } from '../../../App';
+import ConfirmModal from '../../components/modals/ConfirmModal';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { cameraStyles as styles } from './styles';
-import {
-  IngredientControllerAPI,
-  ConfirmedIngredient,
-} from '../../services/API/ingredientControllerAPI';
 
 type CameraScreenRouteProp = RouteProp<RootStackParamList, 'CameraScreen'>;
 type CameraScreenNavigationProp = NativeStackNavigationProp<
@@ -58,15 +47,10 @@ const cameraOptions = {
   presentationStyle: 'fullScreen' as const,
 };
 
-// 개발용 목업 이미지 URI
-const MOCK_INGREDIENT_IMAGE = require('../../../grocery1.jpg');
-const MOCK_RECEIPT_IMAGE = require('../../../reciept1.jpg');
-
 const CameraScreen: React.FC = () => {
   const navigation = useNavigation<CameraScreenNavigationProp>();
   const route = useRoute<CameraScreenRouteProp>();
   const { fridgeId } = route.params;
-
   const [capturedPhoto, setCapturedPhoto] = useState<CapturedPhoto | null>(
     null,
   );
@@ -75,8 +59,12 @@ const CameraScreen: React.FC = () => {
     null,
   );
 
-  // 개발 모드 체크
-  const isDevelopment = __DEV__;
+  // 모달 상태 관리
+  const [cameraErrorModalVisible, setCameraErrorModalVisible] = useState(false);
+  const [imageErrorModalVisible, setImageErrorModalVisible] = useState(false);
+  const [permissionModalVisible, setPermissionModalVisible] = useState(false);
+  const [deletePhotoModalVisible, setDeletePhotoModalVisible] = useState(false);
+  const [cancelScanModalVisible, setCancelScanModalVisible] = useState(false);
 
   const handleCameraResponse = useCallback((response: ImagePickerResponse) => {
     setIsLoading(false);
@@ -89,11 +77,7 @@ const CameraScreen: React.FC = () => {
 
     if (response.errorMessage) {
       console.error('Camera Error:', response.errorMessage);
-      Alert.alert(
-        '카메라 오류',
-        '카메라를 실행할 수 없습니다. 다시 시도해주세요.',
-        [{ text: '확인', onPress: () => setScanMode(null) }],
-      );
+      setCameraErrorModalVisible(true);
       return;
     }
 
@@ -101,7 +85,7 @@ const CameraScreen: React.FC = () => {
       const asset = response.assets[0];
 
       if (!asset.uri) {
-        Alert.alert('오류', '이미지를 가져올 수 없습니다.');
+        setImageErrorModalVisible(true);
         setScanMode(null);
         return;
       }
@@ -128,7 +112,6 @@ const CameraScreen: React.FC = () => {
   }, []);
 
   const openCamera = useCallback(async () => {
-    // Android 권한 체크
     if (Platform.OS === 'android') {
       try {
         const granted = await PermissionsAndroid.request(
@@ -145,11 +128,7 @@ const CameraScreen: React.FC = () => {
         );
 
         if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          Alert.alert(
-            '권한 필요',
-            '카메라 권한을 허용해야 촬영할 수 있습니다.\n설정에서 권한을 변경할 수 있습니다.',
-            [{ text: '취소', onPress: () => setScanMode(null) }],
-          );
+          setPermissionModalVisible(true);
           return;
         }
       } catch (err) {
@@ -173,29 +152,9 @@ const CameraScreen: React.FC = () => {
 
   const cancelPhoto = useCallback(() => {
     if (capturedPhoto) {
-      Alert.alert('사진 삭제', '촬영한 사진을 삭제하고 나가시겠습니까?', [
-        { text: '계속 진행', style: 'cancel' },
-        {
-          text: '삭제하고 나가기',
-          style: 'destructive',
-          onPress: () => {
-            setCapturedPhoto(null);
-            setScanMode(null);
-            navigation.goBack();
-          },
-        },
-      ]);
+      setDeletePhotoModalVisible(true);
     } else if (scanMode) {
-      Alert.alert('촬영 취소', '촬영을 취소하고 나가시겠습니까?', [
-        { text: '계속 촬영', style: 'cancel' },
-        {
-          text: '나가기',
-          onPress: () => {
-            setScanMode(null);
-            navigation.goBack();
-          },
-        },
-      ]);
+      setCancelScanModalVisible(true);
     } else {
       navigation.goBack();
     }
@@ -237,193 +196,6 @@ const CameraScreen: React.FC = () => {
     }
   }, [capturedPhoto, scanMode, navigateToPreview]);
 
-  // FormData 검증 테스트
-  // CameraScreen.tsx에서 testFormDataValidation 메서드만 수정하면 됩니다
-
-  const testFormDataValidation = useCallback(async () => {
-    try {
-      Alert.alert(
-        'FormData 검증 테스트',
-        '갤러리에서 이미지를 선택해서 서버 전송을 상세 분석합니다.',
-        [
-          { text: '취소', style: 'cancel' },
-          {
-            text: '갤러리 선택',
-            onPress: () => {
-              launchImageLibrary(
-                { mediaType: 'photo', quality: 0.8 },
-                async response => {
-                  if (response.assets?.[0]?.uri) {
-                    setIsLoading(true);
-                    try {
-                      console.log('=== FormData 검증 테스트 시작 ===');
-                      const imageUri = response.assets[0].uri;
-
-                      // ✅ fridgeId를 포함한 새로운 검증 메서드 사용
-                      await IngredientControllerAPI.validateFormDataTransmissionWithFridgeId(
-                        imageUri,
-                        fridgeId,
-                      );
-                      await IngredientControllerAPI.validateServerParametersWithFridgeId(
-                        fridgeId,
-                      );
-                      await IngredientControllerAPI.compareRealVsDummyImageWithFridgeId(
-                        imageUri,
-                        fridgeId,
-                      );
-
-                      Alert.alert(
-                        '검증 완료',
-                        'FormData 검증이 완료되었습니다.\n콘솔에서 상세 로그를 확인하세요.',
-                      );
-                    } catch (error) {
-                      console.error('FormData 검증 실패:', error);
-                      Alert.alert('검증 오류', `오류: ${error.message}`);
-                    } finally {
-                      setIsLoading(false);
-                    }
-                  }
-                },
-              );
-            },
-          },
-        ],
-      );
-    } catch (error) {
-      console.error('FormData 검증 준비 실패:', error);
-    }
-  }, [fridgeId]); // fridgeId 의존성 추가
-  // 목업 테스트
-  const testWithMockData = useCallback(
-    (mode: 'ingredient' | 'receipt') => {
-      try {
-        const mockPhoto = {
-          uri:
-            mode === 'ingredient' ? MOCK_INGREDIENT_IMAGE : MOCK_RECEIPT_IMAGE,
-          width: 1000,
-          height: 1000,
-          fileSize: 500000,
-          type: 'image/jpeg',
-          fileName: `mock_${mode}.jpg`,
-        };
-
-        navigation.navigate('PhotoPreview', {
-          photo: mockPhoto,
-          fridgeId,
-          scanMode: mode,
-        });
-      } catch (error) {
-        console.error('목업 테스트 에러:', error);
-        Alert.alert(
-          '오류',
-          `목업 테스트 중 오류가 발생했습니다: ${error.message}`,
-        );
-      }
-    },
-    [fridgeId, navigation],
-  );
-
-  // CameraScreen.tsx에 추가할 긴급 해결 메서드
-
-  const handleEmergencyWorkaround = useCallback(() => {
-    Alert.alert(
-      '서버 문제 감지',
-      '현재 서버에서 500 오류가 발생하고 있습니다.\n임시 해결책을 선택해주세요.',
-      [
-        {
-          text: '목업 데이터로 테스트',
-          onPress: () => {
-            // 목업 데이터로 바로 AddItemScreen으로 이동
-            const mockConfirmedIngredients: ConfirmedIngredient[] = [
-              {
-                userInput: {
-                  id: 'mock_1',
-                  name: '토마토',
-                  quantity: '2',
-                  unit: '개',
-                  expirationDate: '2025-10-01',
-                  itemCategory: '채소 / 과일',
-                  photo: undefined,
-                },
-                apiResult: {
-                  ingredientId: 123,
-                  ingredientName: '토마토',
-                  categoryId: 2,
-                  categoryName: '채소 / 과일',
-                },
-              },
-              {
-                userInput: {
-                  id: 'mock_2',
-                  name: '우유',
-                  quantity: '1',
-                  unit: '개',
-                  expirationDate: '2025-09-25',
-                  itemCategory: '우유 / 유제품',
-                  photo: undefined,
-                },
-                apiResult: {
-                  ingredientId: 456,
-                  ingredientName: '우유',
-                  categoryId: 8,
-                  categoryName: '우유 / 유제품',
-                },
-              },
-            ];
-
-            navigation.navigate('AddItemScreen', {
-              fridgeId,
-              scanResults: mockConfirmedIngredients,
-              scanMode: 'ingredient',
-              isEmergencyMode: true,
-            });
-          },
-        },
-        {
-          text: '수동 입력으로 진행',
-          onPress: () => {
-            navigation.navigate('AddItemScreen', {
-              fridgeId,
-              recognizedData: {
-                photo: undefined,
-                name: '',
-                quantity: '1',
-                unit: '개',
-                expiryDate: '',
-                itemCategory: '기타',
-              },
-              isManualInput: true,
-            });
-          },
-        },
-        {
-          text: '나중에 시도',
-          style: 'cancel',
-          onPress: () => navigation.goBack(),
-        },
-      ],
-    );
-  }, [fridgeId, navigation]);
-
-  // 기존 모드 선택 화면에 긴급 버튼 추가
-  const EmergencyButton = () => (
-    <TouchableOpacity
-      style={[styles.modeButton, { backgroundColor: '#ffebee' }]}
-      onPress={handleEmergencyWorkaround}
-      disabled={isLoading}
-    >
-      <View style={[styles.modeIconContainer, { backgroundColor: '#f44336' }]}>
-        <MaterialIcons name="warning" size={48} color="#fff" />
-      </View>
-      <Text style={[styles.modeTitle, { color: '#c62828' }]}>
-        서버 문제 해결
-      </Text>
-      <Text style={[styles.modeDescription, { color: '#c62828' }]}>
-        500 오류 발생 시{'\n'}임시 해결책 사용
-      </Text>
-    </TouchableOpacity>
-  );
-  // 모드 선택 화면
   if (!scanMode) {
     return (
       <SafeAreaView style={styles.container}>
@@ -448,7 +220,6 @@ const CameraScreen: React.FC = () => {
             </View>
 
             <View style={styles.modeOptions}>
-              {/* 기본 카메라 촬영 옵션들 */}
               <TouchableOpacity
                 style={styles.modeButton}
                 onPress={() => handleModeSelect('ingredient')}
@@ -488,7 +259,6 @@ const CameraScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
 
-            {/* 로딩 상태 표시 */}
             {isLoading && (
               <View style={styles.loadingOverlay}>
                 <ActivityIndicator size="large" color="#f8f8f8" />
@@ -497,11 +267,65 @@ const CameraScreen: React.FC = () => {
             )}
           </View>
         </View>
+
+        {/* Modals */}
+        <ConfirmModal
+          isAlert={false}
+          visible={cameraErrorModalVisible}
+          title="카메라 오류"
+          message="카메라를 실행할 수 없습니다. 다시 시도해주세요."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => {
+            setCameraErrorModalVisible(false);
+            setScanMode(null);
+          }}
+          onCancel={() => {
+            setCameraErrorModalVisible(false);
+            setScanMode(null);
+          }}
+        />
+
+        <ConfirmModal
+          isAlert={false}
+          visible={imageErrorModalVisible}
+          title="오류"
+          message="이미지를 가져올 수 없습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setImageErrorModalVisible(false)}
+          onCancel={() => setImageErrorModalVisible(false)}
+        />
+
+        <ConfirmModal
+          isAlert={false}
+          visible={permissionModalVisible}
+          title="권한 필요"
+          message="카메라 권한을 허용해 주세요.\n설정에서 권한을 변경할 수 있습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => {
+            setPermissionModalVisible(false);
+            setScanMode(null);
+          }}
+          onCancel={() => {
+            setPermissionModalVisible(false);
+            setScanMode(null);
+          }}
+        />
       </SafeAreaView>
     );
   }
 
-  // 기존 카메라 화면 로직
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.cameraLaunchContainer}>
@@ -547,6 +371,44 @@ const CameraScreen: React.FC = () => {
           </Text>
         </View>
       </View>
+
+      {/* Camera Screen Modal */}
+      <ConfirmModal
+        isAlert={true}
+        visible={deletePhotoModalVisible}
+        title="촬영 취소"
+        message="촬영한 사진을 삭제하고 나가시겠습니까?"
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="나가기"
+        cancelText="계속 진행"
+        confirmButtonStyle="danger"
+        onConfirm={() => {
+          setDeletePhotoModalVisible(false);
+          setCapturedPhoto(null);
+          setScanMode(null);
+          navigation.goBack();
+        }}
+        onCancel={() => setDeletePhotoModalVisible(false)}
+      />
+
+      <ConfirmModal
+        isAlert={true}
+        visible={cancelScanModalVisible}
+        title="촬영 취소"
+        message="촬영을 취소하고 나가시겠습니까?"
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="나가기"
+        cancelText="계속 촬영"
+        confirmButtonStyle="danger"
+        onConfirm={() => {
+          setCancelScanModalVisible(false);
+          setScanMode(null);
+          navigation.goBack();
+        }}
+        onCancel={() => setCancelScanModalVisible(false)}
+      />
     </SafeAreaView>
   );
 };
