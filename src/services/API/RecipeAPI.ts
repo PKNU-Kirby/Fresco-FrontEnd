@@ -57,6 +57,42 @@ interface UseIngredientsRequest {
   }>;
 }
 
+interface AIRecipeResponse {
+  code: string;
+  message: string;
+  result: {
+    title: string;
+    ingredients: Array<{
+      ingredientName: string;
+      quantity: number;
+      unit: string;
+    }>;
+    steps: string[];
+    substitutions: Array<{
+      original: string;
+      substitute: string;
+    }>;
+  };
+}
+
+interface SaveAIRecipeResponse {
+  code: string;
+  message: string;
+  result: {
+    recipeId: number;
+    title: string;
+    steps: string;
+    url: string | null;
+    ingredients: Array<{
+      recipeIngredientId: number;
+      name: string;
+      quantity: number;
+      unit: string;
+      instead: string | null;
+    }>;
+  };
+}
+
 // ============ 타입 변환 유틸리티 ============
 
 class RecipeTypeConverter {
@@ -354,36 +390,6 @@ export class RecipeAPI {
       throw error;
     }
   }
-
-  // AI 레시피 조회
-  static async getAIRecipe(): Promise<Recipe> {
-    try {
-      const apiRecipe = await ApiService.apiCall<ApiRecipe>('/recipe/ai');
-
-      return RecipeTypeConverter.apiToFrontend(apiRecipe);
-    } catch (error) {
-      console.error('AI 레시피 조회 실패:', error);
-      throw error;
-    }
-  }
-
-  // AI 레시피 저장
-  static async saveAIRecipe(recipe: Recipe): Promise<Recipe> {
-    try {
-      const requestData = RecipeTypeConverter.frontendToApi(recipe);
-
-      const apiRecipe = await ApiService.apiCall<ApiRecipe>('/recipe/ai/save', {
-        method: 'POST',
-        body: JSON.stringify(requestData),
-      });
-
-      return RecipeTypeConverter.apiToFrontend(apiRecipe);
-    } catch (error) {
-      console.error('AI 레시피 저장 실패:', error);
-      throw error;
-    }
-  }
-
   // 조리 단계별 재고 조회 (특정 냉장고)
   static async getCookStocks(refrigeratorId: string): Promise<any> {
     try {
@@ -391,6 +397,46 @@ export class RecipeAPI {
     } catch (error) {
       console.error('조리 재고 조회 실패:', error);
       throw error;
+    }
+  }
+
+  /**
+   * AI 레시피 추천
+   */
+  static async getAIRecipe(prompt: string) {
+    try {
+      console.log('📤 AI 레시피 요청:', prompt);
+
+      const result = await ApiService.apiCall(
+        `/recipe/ai?prompt=${encodeURIComponent(prompt)}`,
+        { method: 'GET' },
+      );
+
+      console.log('✅ AI 레시피 추천 성공:', result);
+      return result;
+    } catch (error: any) {
+      console.error('❌ AI 레시피 추천 실패:', error);
+      throw new Error(error.message || 'AI 레시피 생성에 실패했습니다.');
+    }
+  }
+
+  /**
+   * AI 추천 레시피 저장
+   */
+  static async saveAIRecipe(recipeData: any) {
+    try {
+      console.log('📤 AI 레시피 저장 요청:', recipeData);
+
+      const result = await ApiService.apiCall('/recipe/ai/save', {
+        method: 'POST',
+        body: JSON.stringify(recipeData),
+      });
+
+      console.log('✅ AI 레시피 저장 성공:', result);
+      return result;
+    } catch (error: any) {
+      console.error('❌ AI 레시피 저장 실패:', error);
+      throw new Error(error.message || 'AI 레시피 저장에 실패했습니다.');
     }
   }
 }

@@ -165,6 +165,8 @@ const RecipeDetailScreen: React.FC = () => {
   };
 
   // ✅ handleSave 함수 (API 연동)
+  // RecipeDetailScreen의 handleSave 함수만 수정
+
   const handleSave = async () => {
     // 1. 유효성 검사
     if (!currentRecipe.title.trim()) {
@@ -179,7 +181,7 @@ const RecipeDetailScreen: React.FC = () => {
     const filteredSteps = getStepsArray(currentRecipe.steps).filter(
       step => step.trim() !== '',
     );
-    console.log('📦 filteredIngredients:', filteredIngredients);
+
     if (filteredIngredients.length === 0) {
       Alert.alert('알림', '재료를 하나 이상 입력해주세요.');
       return;
@@ -190,29 +192,60 @@ const RecipeDetailScreen: React.FC = () => {
       return;
     }
 
-    // 2. 레시피 데이터 준비 - 백엔드 스키마에 맞춤
+    // ✅ 2. AI 생성 레시피인 경우 /recipe/ai/save 사용
+    if (aiGeneratedData) {
+      try {
+        setIsLoading(true);
+
+        const saveData = {
+          title: currentRecipe.title.trim(),
+          ingredients: filteredIngredients.map(ing => ({
+            ingredientName: ing.name,
+            quantity: parseFloat(ing.quantity) || 0,
+            unit: ing.unit,
+          })),
+          steps: filteredSteps,
+          substitutions: [], // AI에서 받은 substitutions가 있다면 추가
+        };
+
+        console.log('📤 AI 레시피 저장:', saveData);
+        const savedRecipe = await RecipeAPI.saveAIRecipe(saveData);
+        console.log('✅ AI 레시피 저장 성공:', savedRecipe);
+
+        Alert.alert('성공', '레시피가 저장되었습니다.', [
+          {
+            text: '확인',
+            onPress: () => navigation.goBack(),
+          },
+        ]);
+      } catch (error: any) {
+        console.error('❌ AI 레시피 저장 실패:', error);
+        Alert.alert('오류', error.message || '레시피 저장에 실패했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // ✅ 3. 일반 레시피 저장/수정 (기존 로직)
     const recipeToSave = {
       title: currentRecipe.title.trim(),
       ingredients: filteredIngredients.map(ing => ({
-        ingredientName: ing.name, // ← 필드명 변경!
+        ingredientName: ing.name,
         quantity: ing.quantity || '0',
         unit: ing.unit || '',
       })),
       steps: filteredSteps.join('\n'),
-      url: currentRecipe.referenceUrl?.trim() || '', // ← referenceUrl → url
+      url: currentRecipe.referenceUrl?.trim() || '',
     };
 
-    console.log(
-      '📤📤📤 RecipeDetailScreen - 보낼 데이터:',
-      JSON.stringify(recipeToSave, null, 2),
-    );
+    console.log('📤 일반 레시피 저장:', recipeToSave);
 
     try {
       setIsLoading(true);
 
       if (isNewRecipe) {
         console.log('📝 레시피 생성 중...');
-        console.log('📤 보낼 데이터:', recipeToSave);
         const createdRecipe = await RecipeAPI.createRecipe(recipeToSave);
         console.log('✅ 레시피 생성 성공:', createdRecipe);
 

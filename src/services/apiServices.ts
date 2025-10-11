@@ -268,18 +268,17 @@ export class ApiService {
         responseData.code !== undefined &&
         responseData.result !== undefined
       ) {
+        // ✅ 성공 코드 체크 로직 수정
         if (
-          !responseData.code.includes('OK') &&
-          !responseData.code.startsWith('RECIPE_') &&
-          !responseData.code.startsWith('INGREDIENT_') &&
-          !responseData.code.startsWith('REFRIGERATOR_')
+          responseData.code.includes('OK') ||
+          responseData.code.startsWith('RECIPE_') ||
+          responseData.code.startsWith('INGREDIENT_') ||
+          responseData.code.startsWith('REFRIGERATOR_')
         ) {
+          return responseData.result as T;
+        } else {
           throw new Error(responseData.message || 'API 호출 실패');
         }
-
-        return responseData.result as T;
-      } else {
-        return responseData as T;
       }
     } catch (error) {
       console.error('X API 호출 실패:', error);

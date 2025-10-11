@@ -427,7 +427,7 @@ const CameraScreen: React.FC = () => {
   if (!scanMode) {
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView
+        <View
           style={styles.scrollContainer}
           contentContainerStyle={styles.scrollContent}
         >
@@ -486,113 +486,6 @@ const CameraScreen: React.FC = () => {
                   영수증을 촬영하여 여러 식재료를{'\n'}한 번에 등록합니다
                 </Text>
               </TouchableOpacity>
-
-              {/* 개발 환경 테스트 섹션 */}
-              <View style={styles.divider}>
-                <Text style={styles.dividerText}>🧪 개발 테스트</Text>
-              </View>
-
-              <TouchableOpacity
-                style={[styles.modeButton, { backgroundColor: '#e3f2fd' }]}
-                onPress={() => testWithMockData('ingredient')}
-                disabled={isLoading}
-              >
-                <View
-                  style={[
-                    styles.modeIconContainer,
-                    { backgroundColor: '#2196f3' },
-                  ]}
-                >
-                  <MaterialIcons name="eco" size={48} color="#fff" />
-                </View>
-                <Text style={[styles.modeTitle, { color: '#1976d2' }]}>
-                  식재료 목업 테스트
-                </Text>
-                <Text style={[styles.modeDescription, { color: '#1976d2' }]}>
-                  목업 데이터로 식재료 스캔{'\n'}결과를 시뮬레이션합니다
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modeButton, { backgroundColor: '#f3e5f5' }]}
-                onPress={() => testWithMockData('receipt')}
-                disabled={isLoading}
-              >
-                <View
-                  style={[
-                    styles.modeIconContainer,
-                    { backgroundColor: '#9c27b0' },
-                  ]}
-                >
-                  <MaterialIcons name="receipt" size={48} color="#fff" />
-                </View>
-                <Text style={[styles.modeTitle, { color: '#7b1fa2' }]}>
-                  영수증 목업 테스트
-                </Text>
-                <Text style={[styles.modeDescription, { color: '#7b1fa2' }]}>
-                  목업 데이터로 영수증 스캔{'\n'}결과를 시뮬레이션합니다
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modeButton, { backgroundColor: '#fff3e0' }]}
-                onPress={testFormDataValidation}
-                disabled={isLoading}
-              >
-                <View
-                  style={[
-                    styles.modeIconContainer,
-                    { backgroundColor: '#ff9800' },
-                  ]}
-                >
-                  <MaterialIcons name="bug-report" size={48} color="#fff" />
-                </View>
-                <Text style={[styles.modeTitle, { color: '#f57c00' }]}>
-                  FormData 전송 검증
-                </Text>
-                <Text style={[styles.modeDescription, { color: '#f57c00' }]}>
-                  이미지 파라미터가 제대로{'\n'}전송되는지 상세 분석
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modeButton, { backgroundColor: '#e8f5e8' }]}
-                onPress={async () => {
-                  setIsLoading(true);
-                  try {
-                    const result =
-                      await IngredientControllerAPI.testServerConnection();
-                    Alert.alert(
-                      '서버 연결 테스트',
-                      `상태: ${
-                        result.isConnected ? '연결됨' : '연결 실패'
-                      }\n응답시간: ${result.responseTime}ms\n${
-                        result.error ? `오류: ${result.error}` : '정상'
-                      }`,
-                    );
-                  } catch (error) {
-                    Alert.alert('테스트 실패', `오류: ${error.message}`);
-                  } finally {
-                    setIsLoading(false);
-                  }
-                }}
-                disabled={isLoading}
-              >
-                <View
-                  style={[
-                    styles.modeIconContainer,
-                    { backgroundColor: '#4caf50' },
-                  ]}
-                >
-                  <MaterialIcons name="network-check" size={48} color="#fff" />
-                </View>
-                <Text style={[styles.modeTitle, { color: '#388e3c' }]}>
-                  서버 연결 테스트
-                </Text>
-                <Text style={[styles.modeDescription, { color: '#388e3c' }]}>
-                  서버 상태와 네트워크{'\n'}연결을 확인합니다
-                </Text>
-              </TouchableOpacity>
             </View>
 
             {/* 로딩 상태 표시 */}
@@ -603,7 +496,7 @@ const CameraScreen: React.FC = () => {
               </View>
             )}
           </View>
-        </ScrollView>
+        </View>
       </SafeAreaView>
     );
   }
