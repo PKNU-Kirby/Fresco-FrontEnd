@@ -5,7 +5,7 @@ export interface RecipeIngredient {
   id: string;
   ingredientId?: number; // 백엔드 ID
   name: string; // ingredientName과 매핑
-  quantity: string; // 백엔드와 동일
+  quantity: number; // 백엔드와 동일
   // instead 제거 (등록 시 사용 안함)
 }
 
@@ -38,7 +38,7 @@ export interface RecipeCreateRequest {
   title: string;
   ingredients: Array<{
     ingredientName: string;
-    quantity: string;
+    quantity: number;
   }>;
   steps: string;
   url?: string;
@@ -52,7 +52,7 @@ export interface RecipeDetailResponse {
   ingredients: Array<{
     ingredientId: number;
     name: string;
-    quantity: string;
+    quantity: number;
     instead: string; // 백엔드에서 관리 (조회 시에만)
   }>;
 }
@@ -63,7 +63,7 @@ export interface UseRecipeCheckResponse {
   ingredients: Array<{
     ingredientId: number;
     name: string;
-    quantity: string;
+    quantity: number;
     available: boolean;
     fridgeQuantity?: number;
     alternatives?: Array<{

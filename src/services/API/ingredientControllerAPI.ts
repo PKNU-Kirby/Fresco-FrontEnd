@@ -87,7 +87,7 @@ export type ConfirmedIngredient = {
   userInput: {
     id: string;
     name: string;
-    quantity: string;
+    quantity: number;
     unit: string;
     expirationDate: string;
     itemCategory: string;
@@ -838,7 +838,7 @@ export class IngredientControllerAPI {
             userInput: {
               id: `scan_${index + 1}`,
               name: photoResult.ingredientName,
-              quantity: '1', // quantity가 null이면 기본값 '1'
+              quantity: 1, // quantity가 null이면 기본값 '1'
               unit: '개', // 기본값 '개'
               expirationDate:
                 photoResult.expirationDate || this.getDefaultExpiryDate(),
@@ -861,7 +861,7 @@ export class IngredientControllerAPI {
             userInput: {
               id: `scan_${index + 1}`,
               name: receiptResult.inputName || receiptResult.ingredientName,
-              quantity: '1', // quantity가 null이면 기본값 '1'
+              quantity: 1, // quantity가 null이면 기본값 '1'
               unit: '개', // 기본값 '개'
               expirationDate:
                 receiptResult.expirationDate || this.getDefaultExpiryDate(),
@@ -1248,7 +1248,7 @@ export class IngredientControllerAPI {
       ingredientsInfo: confirmedIngredients.map(confirmed => ({
         ingredientId: confirmed.apiResult.ingredientId,
         categoryId: confirmed.apiResult.categoryId,
-        quantity: parseInt(confirmed.userInput.quantity, 10) || 1,
+        quantity: confirmed.userInput.quantity || 1,
         unit: confirmed.userInput.unit || '개',
         expirationDate: confirmed.userInput.expirationDate,
       })),
@@ -1748,140 +1748,6 @@ export class IngredientControllerAPI {
   }
 
   /**
-   * 서버 파라미터 요구사항 검증
-   */
-  static async validateServerParameters(): Promise<void> {
-    console.log('=== 서버 파라미터 요구사항 검증 ===');
-
-    // 1. 빈 요청으로 파라미터 오류 메시지 확인
-    try {
-      console.log('1️⃣ 빈 FormData로 파라미터 요구사항 확인');
-
-      const emptyFormData = new FormData();
-      const headers = await this.getAuthHeaders();
-
-      const response = await fetch(
-        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
-        {
-          method: 'POST',
-          headers,
-          body: emptyFormData,
-        },
-      );
-
-      const responseText = await response.text();
-      console.log('빈 요청 응답:', {
-        status: response.status,
-        response: responseText,
-      });
-
-      // 400 오류면 파라미터 오류 메시지가 있을 것
-      if (response.status === 400) {
-        console.log('🔍 파라미터 오류 메시지에서 요구사항 확인 가능');
-      }
-    } catch (error) {
-      console.error('빈 요청 테스트 실패:', error);
-    }
-
-    // 2. 잘못된 파라미터명으로 테스트
-    try {
-      console.log('2️⃣ 잘못된 파라미터명으로 테스트');
-
-      const wrongParamData = new FormData();
-      wrongParamData.append('wrongParam', {
-        uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
-        type: 'image/png',
-        name: 'test.png',
-      } as any);
-
-      const headers = await this.getAuthHeaders();
-      const response = await fetch(
-        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
-        {
-          method: 'POST',
-          headers,
-          body: wrongParamData,
-        },
-      );
-
-      const responseText = await response.text();
-      console.log('잘못된 파라미터 응답:', {
-        status: response.status,
-        response: responseText,
-      });
-    } catch (error) {
-      console.error('잘못된 파라미터 테스트 실패:', error);
-    }
-  }
-
-  /**
-   * 실제 이미지와 더미 이미지 비교 테스트
-   */
-  static async compareRealVsDummyImage(realImageUri: string): Promise<void> {
-    console.log('=== 실제 이미지 vs 더미 이미지 비교 ===');
-
-    // 1. 더미 이미지 (1x1 픽셀 PNG)
-    const dummyImageData =
-      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
-
-    console.log('1️⃣ 더미 이미지 테스트');
-    await this.testSingleImage(dummyImageData, '더미 이미지');
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    console.log('2️⃣ 실제 이미지 테스트');
-    await this.testSingleImage(realImageUri, '실제 이미지');
-  }
-
-  /**
-   * 단일 이미지로 서버 테스트
-   */
-  static async testSingleImage(
-    imageUri: string,
-    imageName: string,
-  ): Promise<void> {
-    try {
-      const formData = new FormData();
-      formData.append('ingredientImage', {
-        uri: imageUri,
-        type: imageUri.startsWith('data:') ? 'image/png' : 'image/jpeg',
-        name: imageUri.startsWith('data:') ? 'dummy.png' : 'real.jpg',
-      } as any);
-
-      const headers = await this.getAuthHeaders();
-      const startTime = Date.now();
-
-      const response = await fetch(
-        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
-        {
-          method: 'POST',
-          headers,
-          body: formData,
-        },
-      );
-
-      const endTime = Date.now();
-      const responseText = await response.text();
-
-      console.log(`${imageName} 결과:`, {
-        status: response.status,
-        duration: `${endTime - startTime}ms`,
-        responsePreview: responseText.substring(0, 100),
-      });
-
-      // 결과 비교 분석
-      if (response.status === 500) {
-        console.log(`${imageName}: 500 오류 - 이미지 처리 과정에서 문제 발생`);
-      } else if (response.status === 400) {
-        console.log(`${imageName}: 400 오류 - 파라미터 또는 이미지 형식 문제`);
-      } else if (response.ok) {
-        console.log(`${imageName}: 성공! 서버가 정상 처리함`);
-      }
-    } catch (error) {
-      console.error(`${imageName} 테스트 실패:`, error);
-    }
-  }
-  /**
    * 로그 분석 결과 기반 최종 해결책
    * 문제: 서버 AI가 복잡한 이미지 처리 시 500 오류 발생
    * 해결: 이미지 전처리 + 폴백 시스템
@@ -1993,40 +1859,6 @@ export class IngredientControllerAPI {
     }
 
     const responseData = JSON.parse(responseText);
-    return responseData.result || responseData.data || [];
-  }
-
-  /**
-   * 더미 이미지로 API 상태 확인
-   */
-  static async attemptScanWithDummyImage(): Promise<PhotoScanResult[]> {
-    const dummyImageData =
-      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
-
-    const formData = new FormData();
-    formData.append('ingredientImage', {
-      uri: dummyImageData,
-      type: 'image/png',
-      name: 'dummy.png',
-    } as any);
-
-    const headers = await this.getAuthHeaders();
-
-    const response = await fetch(
-      `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
-      {
-        method: 'POST',
-        headers,
-        body: formData,
-        timeout: 15000,
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`DUMMY_SCAN_FAILED: ${response.status}`);
-    }
-
-    const responseData = JSON.parse(await response.text());
     return responseData.result || responseData.data || [];
   }
 

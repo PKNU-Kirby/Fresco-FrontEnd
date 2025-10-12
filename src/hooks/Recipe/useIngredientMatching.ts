@@ -55,7 +55,7 @@ interface UseIngredientMatchingReturn {
     React.SetStateAction<MatchedIngredientSeparate[]>
   >;
   isLoading: boolean;
-  updateUserQuantity: (index: number, quantity: string) => void;
+  updateUserQuantity: (index: number, quantity: number) => void;
   updateMaxUserQuantity: (index: number, maxQuantity: number) => void;
   loadIngredients: () => void;
   loadFromEnhancedIngredients: (
@@ -201,19 +201,19 @@ export const useIngredientMatching = (
             recipeIngredient: recipeIng,
             fridgeIngredient: null,
             isAvailable: false,
-            userInputQuantity: '0',
+            userInputQuantity: 0,
             maxUserQuantity: 0,
             isDeducted: false,
           });
         } else {
           fridgeOptions.forEach((option, index) => {
-            const availableQuantity = parseFloat(option.quantity) || 1;
+            const availableQuantity = option.quantity || 1;
 
             matched.push({
               recipeIngredient: recipeIng,
               fridgeIngredient: option,
               isAvailable: true,
-              userInputQuantity: '0',
+              userInputQuantity: 0,
               maxUserQuantity: availableQuantity,
               isDeducted: false,
               isMultipleOption: fridgeOptions.length > 1,
@@ -335,7 +335,7 @@ export const useIngredientMatching = (
           // 선택된 냉장고 재료가 있는 경우 (초록/주황 상태)
           if (ingredient.selectedFridgeItem) {
             const availableQuantity =
-              parseFloat(ingredient.selectedFridgeItem.quantity) || 1;
+              ingredient.selectedFridgeItem.quantity || 1;
 
             matched.push({
               recipeIngredient: {
@@ -344,7 +344,7 @@ export const useIngredientMatching = (
               },
               fridgeIngredient: ingredient.selectedFridgeItem,
               isAvailable: true,
-              userInputQuantity: '0',
+              userInputQuantity: 0,
               maxUserQuantity: availableQuantity,
               isDeducted: false,
               // 대체재로 선택된 경우 표시
@@ -362,7 +362,7 @@ export const useIngredientMatching = (
               },
               fridgeIngredient: null,
               isAvailable: false,
-              userInputQuantity: '0',
+              userInputQuantity: 0,
               maxUserQuantity: 0,
               isDeducted: false,
             });
@@ -380,7 +380,7 @@ export const useIngredientMatching = (
     [],
   );
 
-  const updateUserQuantity = useCallback((index: number, quantity: string) => {
+  const updateUserQuantity = useCallback((index: number, quantity: number) => {
     setMatchedIngredients(prev => {
       const updated = [...prev];
       updated[index].userInputQuantity = quantity;

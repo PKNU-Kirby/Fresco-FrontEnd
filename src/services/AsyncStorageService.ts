@@ -31,7 +31,7 @@ export type FridgeWithRole = Refrigerator & {
 export type FridgeItem = {
   id: string;
   name: string;
-  quantity: string;
+  quantity: number;
   expiryDate: string;
   imageUri?: string;
   itemCategory: string;

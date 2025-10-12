@@ -31,7 +31,7 @@ type FridgeItem = {
   id: string;
   fridgeId: string;
   name: string;
-  quantity: string;
+  quantity: number;
   expiryDate: string;
   imageUri?: string;
   itemCategory: string;
@@ -44,8 +44,8 @@ type FridgeItemCardProps = {
   isEditMode?: boolean;
   useSlider?: boolean;
   onPress?: () => void;
-  onQuantityChange?: (itemId: string, newQuantity: string) => void;
-  onExpiryDateChange?: (itemId: string, newDate: string) => void;
+  onQuantityChange?: (itemId: number, newQuantity: number) => void;
+  onExpiryDateChange?: (itemId: number, newDate: string) => void;
   onUnitChange?: (itemId: string, newUnit: string) => void;
   onDeleteItem?: (itemId: string) => void;
   onMaxQuantityChange?: (itemId: string, newMaxQuantity: number) => void;
@@ -69,7 +69,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [previousQuantity, setPreviousQuantity] = useState(item.quantity);
   const [maxQuantity, setMaxQuantity] = useState(
-    item.maxQuantity || parseFloat(item.quantity) || 10,
+    item.maxQuantity || item.quantity || 10,
   );
 
   const CardComponent: React.ComponentType<any> =
@@ -118,7 +118,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
   // (!EditMode -> EditMode) : init maxQuantity
   useEffect(() => {
     if (isEditMode) {
-      const currentQuantity = parseFloat(item.quantity) || 10;
+      const currentQuantity = item.quantity || 10;
       const initialMaxQuantity = Math.max(
         item.maxQuantity || currentQuantity,
         currentQuantity,
@@ -188,14 +188,14 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
 
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
-    if (localQuantity === '0') {
+    if (localQuantity === 0) {
       setLocalQuantity(previousQuantity);
     }
   };
 
   const handleTextInputBlur = () => {
-    if (localQuantity === '') {
-      setLocalQuantity('1');
+    if (localQuantity === 0) {
+      setLocalQuantity(1);
       onQuantityChange?.(item.id, '1');
     }
   };

@@ -119,7 +119,7 @@ export const useFridgeData = (fridgeId: string) => {
 
   // ✅ 새로 추가: 편집 모드용 로컬 상태 업데이트 함수들
   const updateItemQuantityLocal = useCallback(
-    (itemId: string, newQuantity: string) => {
+    (itemId: string, newQuantity: number) => {
       setFridgeItems(prev =>
         prev.map(item =>
           item.id === itemId ? { ...item, quantity: newQuantity } : item,
@@ -158,7 +158,7 @@ export const useFridgeData = (fridgeId: string) => {
 
   // 아이템 수량 변경 함수 (API 사용)
   const updateItemQuantity = useCallback(
-    async (itemId: string, newQuantity: string) => {
+    async (itemId: string, newQuantity: number) => {
       try {
         await updateFridgeItem(itemId, { quantity: newQuantity });
 

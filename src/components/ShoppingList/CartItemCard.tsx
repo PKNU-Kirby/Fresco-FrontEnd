@@ -34,14 +34,14 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
   isFirstItem = false,
 }) => {
   const [tempName, setTempName] = useState(item.name);
-  const [tempQuantity, setTempQuantity] = useState(item.quantity.toString());
+  const [tempQuantity, setTempQuantity] = useState(item.quantity);
   const [showUnitModal, setShowUnitModal] = useState(false);
 
   // TextInput ref 추가
   const nameInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
-    setTempQuantity(item.quantity.toString());
+    setTempQuantity(item.quantity);
   }, [item.quantity]);
 
   useEffect(() => {
@@ -69,10 +69,10 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
     }
   };
 
-  const handleQuantityChange = (newQuantity: string) => {
+  const handleQuantityChange = (newQuantity: number) => {
     setTempQuantity(newQuantity);
 
-    const quantity = parseInt(newQuantity, 10);
+    const quantity = newQuantity;
     if (!isNaN(quantity) && quantity > 0) {
       onQuantityChange(item.id!.toString(), quantity);
     }

@@ -107,7 +107,7 @@ export const AddItemContent: React.FC<AddItemContentProps> = ({
                     <View style={styles.confirmationRow}>
                       <Text style={styles.confirmationLabel}>수량:</Text>
                       <Text style={styles.confirmationDetail}>
-                        {confirmed.userInput?.quantity || '1'}
+                        {confirmed.userInput?.quantity || 1}
                         {confirmed.userInput?.unit || '개'}
                       </Text>
                     </View>

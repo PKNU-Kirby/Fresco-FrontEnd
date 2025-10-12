@@ -35,7 +35,7 @@ export interface ItemFormData {
   ingredientId?: SmallId; // 기존 식재료 매칭시 사용 (BIGINT)
   categoryId?: SmallId; // 카테고리 ID (SMALLINT)
   name: string; // 식재료 이름 (VARCHAR(150))
-  quantity: string; // UI에서는 문자열로 관리
+  quantity: number; // UI에서는 문자열로 관리
   unit: string; // UI 표시용 (실제 DB에는 없음)
   expirationDate: string; // 소비기한 (DATE) - YYYY.MM.DD 형식
   itemCategory: string; // 카테고리명 (UI 표시용)
@@ -46,7 +46,7 @@ export interface ItemFormData {
 export interface RecognizedData {
   photo: string;
   name: string;
-  quantity: string;
+  quantity: number;
   unit?: string;
   expirationDate?: string;
   itemCategory?: string;

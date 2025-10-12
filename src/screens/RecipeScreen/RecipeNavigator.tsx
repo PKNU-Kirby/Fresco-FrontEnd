@@ -30,7 +30,7 @@ export interface Recipe {
 export interface RecipeIngredient {
   id: string;
   name: string;
-  quantity: string;
+  quantity: number;
   unit: string;
 }
 

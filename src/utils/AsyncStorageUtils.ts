@@ -20,7 +20,7 @@ export interface Recipe {
 export interface RecipeIngredient {
   id: string;
   name: string;
-  quantity: string;
+  quantity: number;
   unit: string;
 }
 
@@ -139,7 +139,7 @@ export const FridgeStorage = {
   },
 
   // 아이템 수량 업데이트
-  async updateItemQuantity(itemId: number, newQuantity: string): Promise<void> {
+  async updateItemQuantity(itemId: number, newQuantity: number): Promise<void> {
     try {
       const allItems = await this.getAllFridgeItems();
       const updatedItems = allItems.map(item =>
@@ -621,7 +621,7 @@ export const FridgeInitializer = {
           {
             id: '1',
             name: '양배추',
-            quantity: '1',
+            quantity: 1,
             unit: 'kg',
             expiryDate: '2025.07.20',
             itemCategory: '채소 / 과일',
@@ -630,7 +630,7 @@ export const FridgeInitializer = {
           {
             id: '2',
             name: '우유',
-            quantity: '1',
+            quantity: 1,
             unit: 'L',
             expiryDate: '2025.07.25',
             itemCategory: '우유 / 유제품',

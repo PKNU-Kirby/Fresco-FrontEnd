@@ -23,7 +23,7 @@ import { AsyncStorageService } from '../../services/AsyncStorageService';
 export interface ItemFormData {
   id: string;
   name: string;
-  quantity: string;
+  quantity: number;
   unit: string;
   expirationDate: string;
   itemCategory: string;
@@ -97,7 +97,7 @@ const AddItemScreen: React.FC = () => {
         {
           id: '1',
           name: recognizedData.name || '',
-          quantity: recognizedData.quantity || '1',
+          quantity: recognizedData.quantity || 1,
           unit: recognizedData.unit || '개',
           expirationDate: recognizedData.expiryDate || '',
           itemCategory: recognizedData.itemCategory || '기타',
@@ -111,7 +111,7 @@ const AddItemScreen: React.FC = () => {
       {
         id: '1',
         name: '',
-        quantity: '1',
+        quantity: 1,
         unit: '개',
         expirationDate: '',
         itemCategory: '채소 / 과일',
@@ -264,7 +264,7 @@ const AddItemScreen: React.FC = () => {
         return {
           ingredientId: ingredientId,
           categoryId: apiResult.categoryId || 11, // 기타 카테고리
-          quantity: parseInt(confirmed.userInput.quantity, 10) || 1,
+          quantity: confirmed.userInput.quantity || 1,
           unit: confirmed.userInput.unit || '개',
           expirationDate:
             confirmed.userInput.expirationDate ||
@@ -349,7 +349,7 @@ const AddItemScreen: React.FC = () => {
       const hasChanges = items.some(
         item =>
           item.name.trim() !== '' ||
-          item.quantity !== '1' ||
+          item.quantity !== 1 ||
           item.expirationDate !== '',
       );
 

@@ -14,11 +14,11 @@ import { ingredientCardStyles as styles, unavailableStyles } from './styles';
 interface EnhancedMatchedIngredientSeparate {
   recipeIngredient: {
     name: string;
-    quantity: string;
+    quantity: number;
   };
   fridgeIngredient: any | null;
   isAvailable: boolean;
-  userInputQuantity: string;
+  userInputQuantity: number;
   maxUserQuantity: number;
   isDeducted: boolean;
   isCompletelyConsumed?: boolean;
@@ -45,7 +45,7 @@ const STORAGE_KEY = '@shopping_cart_items';
 interface IngredientCardProps {
   item: EnhancedMatchedIngredientSeparate;
   index: number;
-  onQuantityChange: (index: number, quantity: string) => void;
+  onQuantityChange: (index: number, quantity: number) => void;
   onMaxQuantityChange: (index: number, maxQuantity: number) => void;
 }
 
@@ -60,7 +60,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
   // 장바구니 추가 함수
   const addToExistingCart = async (itemData: {
     name: string;
-    quantity: string;
+    quantity: number;
     unit?: string;
   }): Promise<void> => {
     try {
@@ -75,7 +75,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
         const existingItem = existingItems[existingIndex];
         existingItems[existingIndex] = {
           ...existingItem,
-          quantity: existingItem.quantity + parseFloat(itemData.quantity),
+          quantity: existingItem.quantity + itemData.quantity,
           updatedAt: new Date(),
         };
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(existingItems));
@@ -94,7 +94,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
           id: newId.toString(),
           groceryListId: '1',
           name: itemData.name.trim(),
-          quantity: parseFloat(itemData.quantity),
+          quantity: itemData.quantity,
           unit: itemData.unit || '',
           purchased: false,
           order: unpurchasedItemsCount,
@@ -134,16 +134,19 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
       // 원래 레시피 재료명 사용 (대체재인 경우)
       const itemName = item.originalRecipeName || item.recipeIngredient.name;
 
-      const quantityMatch = item.recipeIngredient.quantity.match(/[\d.]+/);
-      const quantity = quantityMatch ? quantityMatch[0] : '1';
+      const quantityMatch = item.recipeIngredient.quantity
+        .toString()
+        .match(/[\d.]+/);
+      const quantity = quantityMatch ? quantityMatch[0] : 1;
 
       const unit = item.recipeIngredient.quantity
+        .toString()
         .replace(/[\d.\s]+/g, '')
         .trim();
 
       await addToExistingCart({
         name: itemName,
-        quantity: quantity,
+        quantity: parseFloat(quantity.toString()),
         unit: unit || '개',
       });
 
@@ -214,7 +217,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
                 >
                   보유:{' '}
                   {Number(item.fridgeIngredient?.quantity) % 1 === 0
-                    ? parseInt(item.fridgeIngredient?.quantity, 10).toString()
+                    ? parseFloat(item.fridgeIngredient?.quantity).toString()
                     : parseFloat(item.fridgeIngredient?.quantity).toFixed(2)}
                   {item.fridgeIngredient?.unit}
                 </Text>
@@ -232,12 +235,14 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
         <View>
           <View style={styles.quantityEditorContainer}>
             <SliderQuantityInput
-              quantity={item.userInputQuantity}
+              quantity={item.userInputQuantity.toString()}
               unit={item.fridgeIngredient.unit || '개'}
               maxQuantity={item.maxUserQuantity}
               availableQuantity={parseFloat(item.fridgeIngredient.quantity)}
               isEditMode={!item.isDeducted}
-              onQuantityChange={quantity => onQuantityChange(index, quantity)}
+              onQuantityChange={quantity =>
+                onQuantityChange(index, parseFloat(quantity))
+              }
               onMaxQuantityChange={maxQuantity =>
                 onMaxQuantityChange(index, maxQuantity)
               }

@@ -10,7 +10,7 @@ interface ApiRecipe {
   ingredients?: Array<{
     ingredientId?: number;
     name: string;
-    quantity: string;
+    quantity: number;
     unit: string;
   }>;
   steps?: string[];
@@ -24,7 +24,7 @@ interface CreateRecipeRequest {
   title: string;
   ingredients: Array<{
     ingredientName: string;
-    quantity: string;
+    quantity: number;
     unit: string;
   }>;
   steps: string | string[];
@@ -36,7 +36,7 @@ interface UpdateRecipeRequest {
   title?: string;
   ingredients?: Array<{
     ingredientName: string;
-    quantity: string;
+    quantity: number;
     unit: string;
   }>;
   steps?: string | string[];
@@ -233,7 +233,7 @@ export class RecipeAPI {
         ingredients:
           recipe.ingredients?.map((ing: any) => ({
             ingredientName: ing.ingredientName || ing.name,
-            quantity: parseFloat(ing.quantity) || 0, // ← 숫자로 변환!
+            quantity: ing.quantity || 0,
             unit: ing.unit || '',
           })) || [],
         steps: Array.isArray(recipe.steps)

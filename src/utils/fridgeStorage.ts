@@ -11,7 +11,7 @@ import {
 export type FridgeItem = {
   id: string;
   name: string;
-  quantity: string;
+  quantity: number;
   expiryDate: string;
   imageUri?: string;
   itemCategory: string;
@@ -45,7 +45,7 @@ const mapApiItemToFridgeItem = (
 ): FridgeItem => ({
   id: apiItem.id,
   name: apiItem.ingredientName,
-  quantity: apiItem.quantity?.toString() || '0',
+  quantity: apiItem.quantity || 0,
   expiryDate: apiItem.expirationDate,
   itemCategory: CATEGORY_ID_TO_NAME[apiItem.categoryId] || '기타',
   fridgeId: actualFridgeId,
@@ -130,7 +130,7 @@ export const updateFridgeItem = async (
     const apiUpdates: any = {};
 
     if (updates.quantity !== undefined) {
-      apiUpdates.quantity = parseInt(updates.quantity, 10);
+      apiUpdates.quantity = updates.quantity;
     }
     if (updates.unit !== undefined) {
       apiUpdates.unit = updates.unit;
@@ -305,7 +305,7 @@ export const addConfirmedIngredientsToFridge = async (
     userInput: {
       id: string;
       name: string;
-      quantity: string;
+      quantity: number;
       unit: string;
       expirationDate: string;
       itemCategory: string;

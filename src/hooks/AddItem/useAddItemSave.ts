@@ -9,7 +9,7 @@ export type ConfirmedItem = {
   correctedName: string;
   ingredientId: number;
   categoryId: number;
-  quantity: string;
+  quantity: number;
   unit: string;
   expirationDate: string;
   itemCategory: string;
@@ -98,7 +98,7 @@ export const useAddItemSave = (
           correctedName: correctedName,
           ingredientId: ingredientId,
           categoryId: getCategoryId(item.itemCategory),
-          quantity: item.quantity,
+          quantity: parseFloat(item.quantity),
           unit: item.unit || '개',
           expirationDate:
             item.expirationDate || getDefaultExpiryDate(item.itemCategory),

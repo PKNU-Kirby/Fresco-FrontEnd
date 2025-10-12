@@ -24,7 +24,7 @@ type AIRecipeScreenNavigationProp = NativeStackNavigationProp<
 interface RecipeIngredient {
   id: string;
   name: string;
-  quantity: string;
+  quantity: number;
   unit: string;
 }
 
@@ -83,7 +83,7 @@ const AIRecipeScreen: React.FC = () => {
         ingredients: aiRecipeData.ingredients.map((ing, index) => ({
           id: `${Date.now()}_${index}`,
           name: ing.ingredientName,
-          quantity: ing.quantity.toString(),
+          quantity: ing.quantity,
           unit: ing.unit,
         })),
         steps: aiRecipeData.steps,
@@ -120,7 +120,7 @@ const AIRecipeScreen: React.FC = () => {
               title: generatedRecipe.title,
               ingredients: generatedRecipe.ingredients.map(ing => ({
                 ingredientName: ing.name,
-                quantity: parseFloat(ing.quantity) || 0,
+                quantity: ing.quantity || 0,
                 unit: ing.unit,
               })),
               steps: generatedRecipe.steps,
@@ -146,7 +146,7 @@ const AIRecipeScreen: React.FC = () => {
                       ingredients: savedRecipe.ingredients.map(ing => ({
                         id: ing.recipeIngredientId.toString(),
                         name: ing.name,
-                        quantity: ing.quantity.toString(),
+                        quantity: ing.quantity,
                         unit: ing.unit,
                       })),
                       steps: savedRecipe.steps.split('\n'),

@@ -6,12 +6,12 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { sliderQuantityStyles } from '../../screens/RecipeScreen/UseRecipeScreen/styles';
 
 interface SliderQuantityInputProps {
-  quantity: string;
+  quantity: number;
   unit: string;
   maxQuantity: number;
   availableQuantity: number;
   isEditMode: boolean;
-  onQuantityChange: (quantity: string) => void;
+  onQuantityChange: (quantity: number) => void;
   onMaxQuantityChange: (maxQuantity: number) => void;
   onTextBlur: () => void;
 }
@@ -30,7 +30,7 @@ const SliderQuantityInput: React.FC<SliderQuantityInputProps> = ({
   const [localQuantity, setLocalQuantity] = useState(quantity);
 
   // 단위별 step 계산
-  const getStepSize = (unit: string, maxValue: number) => {
+  const getStepSize = (maxValue: number) => {
     switch (unit.toLowerCase()) {
       case 'g':
       case 'ml':
@@ -50,7 +50,7 @@ const SliderQuantityInput: React.FC<SliderQuantityInputProps> = ({
   const getStepperStep = () => 1;
 
   // Slider step unit
-  const sliderStep = getStepSize(unit, maxQuantity);
+  const sliderStep = getStepSize(maxQuantity);
   const stepperStep = getStepperStep();
 
   useEffect(() => {
@@ -64,7 +64,7 @@ const SliderQuantityInput: React.FC<SliderQuantityInputProps> = ({
 
   // Stepper increment, derecment
   const handleStepperChange = (increment: boolean) => {
-    const currentValue = parseFloat(localQuantity) || 0;
+    const currentValue = localQuantity || 0;
     const step = stepperStep;
 
     let newValue;
@@ -78,8 +78,8 @@ const SliderQuantityInput: React.FC<SliderQuantityInputProps> = ({
     newValue = Math.round(newValue);
 
     const newQuantityStr = newValue.toString();
-    setLocalQuantity(newQuantityStr);
-    onQuantityChange(newQuantityStr);
+    setLocalQuantity(parseFloat(newQuantityStr));
+    onQuantityChange(parseFloat(newQuantityStr));
   };
 
   // Sleder change
@@ -99,27 +99,23 @@ const SliderQuantityInput: React.FC<SliderQuantityInputProps> = ({
         ? Math.round(finalValue).toString()
         : finalValue.toFixed(2);
 
-    setLocalQuantity(newQuantityStr);
-    onQuantityChange(newQuantityStr);
+    setLocalQuantity(parseFloat(newQuantityStr));
+    onQuantityChange(parseFloat(newQuantityStr));
   };
 
   // text Input
   const handleTextChange = (text: string) => {
     // 숫자, 소수점
     const cleanText = text.replace(/[^0-9.]/g, '');
-    setLocalQuantity(cleanText);
+    setLocalQuantity(parseFloat(cleanText));
   };
 
   const handleTextBlur = () => {
-    const numValue = parseFloat(localQuantity) || 0;
+    const numValue = localQuantity || 0;
     const clampedValue = Math.max(0, Math.min(numValue, maxQuantity));
 
     // 슬라이더 모드일 때는 스텝 단위로 반올림
     const finalValue = isSliderMode
-      ? roundToStep(clampedValue, sliderStep)
-      : clampedValue;
-
-    const formattedValue = isSliderMode
       ? roundToStep(clampedValue, sliderStep)
       : clampedValue;
 
@@ -129,17 +125,12 @@ const SliderQuantityInput: React.FC<SliderQuantityInputProps> = ({
         ? Math.round(finalValue).toString()
         : parseFloat(finalValue.toFixed(2)).toString();
 
-    setLocalQuantity(displayValue);
-    onQuantityChange(displayValue);
+    setLocalQuantity(parseFloat(displayValue));
+    onQuantityChange(parseFloat(displayValue));
     onTextBlur();
   };
 
-  // 최대 수량 업데이트
-  const updateMaxQuantity = () => {
-    onMaxQuantityChange(availableQuantity);
-  };
-
-  const currentQuantityNum = parseFloat(localQuantity) || 0;
+  const currentQuantityNum = localQuantity || 0;
 
   return (
     <View style={sliderQuantityStyles.sliderQuantityContainer}>
@@ -163,7 +154,7 @@ const SliderQuantityInput: React.FC<SliderQuantityInputProps> = ({
 
           <TextInput
             style={sliderQuantityStyles.quantityInput}
-            value={localQuantity}
+            value={localQuantity.toString()}
             onChangeText={handleTextChange}
             onBlur={handleTextBlur}
             keyboardType="decimal-pad"

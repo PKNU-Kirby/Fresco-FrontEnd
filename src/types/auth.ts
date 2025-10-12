@@ -238,7 +238,7 @@ export type RootStackParamList = {
     recognizedData?: {
       photo?: string;
       name?: string;
-      quantity?: string;
+      quantity?: number;
       unit?: string;
       expiryDate?: string;
       itemCategory?: string;

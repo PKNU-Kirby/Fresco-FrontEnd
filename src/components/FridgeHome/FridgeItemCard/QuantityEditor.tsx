@@ -4,9 +4,9 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { quantityStyles as styles } from './styles';
 
 interface QuantityEditorProps {
-  quantity: string;
+  quantity: number;
   unit: string;
-  onQuantityChange: (quantity: string) => void;
+  onQuantityChange: (quantity: number) => void;
   onTextBlur: () => void;
   onUnitPress: () => void;
 }
@@ -34,14 +34,14 @@ const QuantityEditor: React.FC<QuantityEditorProps> = ({
   };
 
   const handleIncrement = () => {
-    const currentNum = parseFloat(quantity) || 0;
-    const newValue = (currentNum + 1).toString();
+    const currentNum = quantity || 0;
+    const newValue = currentNum + 1;
     onQuantityChange(newValue);
   };
 
   const handleDecrement = () => {
-    const currentNum = parseFloat(quantity) || 0;
-    const newValue = Math.max(0, currentNum - 1).toString();
+    const currentNum = quantity || 0;
+    const newValue = Math.max(0, currentNum - 1);
     onQuantityChange(newValue);
   };
 
@@ -75,7 +75,7 @@ const QuantityEditor: React.FC<QuantityEditorProps> = ({
 
       <TextInput
         style={styles.quantityInput}
-        value={displayValue}
+        value={String(displayValue)}
         onChangeText={handleTextChange}
         onFocus={handleFocus}
         onBlur={handleBlur}

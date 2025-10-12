@@ -12,7 +12,7 @@ export interface UsageRecord {
   userAvatar: string;
   itemId: string;
   itemName: string;
-  quantity: string;
+  quantity: number;
   unit: string;
   fridgeId: string;
   usageType: 'consume' | 'modify' | 'delete' | 'recipe_use'; // 사용 유형
@@ -79,7 +79,7 @@ export class UsageTrackingService {
         userAvatar: item.consumerName.charAt(0),
         itemId: item.refrigeratorIngredientId.toString(),
         itemName: item.ingredientName,
-        quantity: item.usedQuantity.toString(),
+        quantity: item.usedQuantity,
         unit: item.unit,
         fridgeId: fridgeId,
         usageType: 'consume',
@@ -133,7 +133,7 @@ export class UsageTrackingService {
   static async trackItemConsumption(
     itemId: string,
     itemName: string,
-    quantity: string,
+    quantity: number,
     unit: string,
     fridgeId: string,
     details?: string,
@@ -163,7 +163,7 @@ export class UsageTrackingService {
   static async trackItemModification(
     itemId: string,
     itemName: string,
-    quantity: string,
+    quantity: number,
     unit: string,
     fridgeId: string,
     details?: string,
@@ -188,7 +188,7 @@ export class UsageTrackingService {
   static async trackItemDeletion(
     itemId: string,
     itemName: string,
-    quantity: string,
+    quantity: number,
     unit: string,
     fridgeId: string,
     details?: string,
@@ -213,7 +213,7 @@ export class UsageTrackingService {
   static async trackRecipeUsage(
     itemId: string,
     itemName: string,
-    quantity: string,
+    quantity: number,
     unit: string,
     fridgeId: string,
     recipeName: string,

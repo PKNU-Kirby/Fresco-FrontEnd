@@ -12,7 +12,7 @@ type FridgeItem = {
   id: string;
   fridgeId: string;
   name: string;
-  quantity: string;
+  quantity: number;
   expiryDate: string;
   imageUri?: string;
   itemCategory: string;
@@ -24,7 +24,7 @@ type FridgeItemListProps = {
   isEditMode: boolean;
   onAddItem: () => void;
   onItemPress?: (item: FridgeItem) => void;
-  onQuantityChange?: (itemId: string, newQuantity: string) => void;
+  onQuantityChange?: (itemId: string, newQuantity: number) => void;
   onUnitChange?: (itemId: string, newUnit: string) => void;
   onExpiryDateChange?: (itemId: string, newDate: string) => void;
   onDeleteItem?: (itemId: string) => void;

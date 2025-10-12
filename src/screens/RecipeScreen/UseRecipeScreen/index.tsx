@@ -74,7 +74,7 @@ const UseRecipeScreen: React.FC = () => {
     loadIngredients,
     loadFromEnhancedIngredients,
     setMatchedIngredients,
-  } = useIngredientMatching(recipe, numericFridgeId);
+  } = useIngredientMatching({ recipe, fridgeId: numericFridgeId });
 
   const { completedSteps, toggleStepCompletion, getStepsArray } =
     useRecipeSteps(recipe);
@@ -100,16 +100,14 @@ const UseRecipeScreen: React.FC = () => {
     // 차감할 재료들 필터링 (입력량이 0보다 큰 것들만)
     const ingredientsToDeduct = matchedIngredients.filter(
       item =>
-        item.isAvailable &&
-        item.fridgeIngredient &&
-        parseFloat(item.userInputQuantity) > 0,
+        item.isAvailable && item.fridgeIngredient && item.userInputQuantity > 0,
     );
 
     // 유효성 검사 - 수량 초과 여부 확인 (최대값 고려)
     const invalidIngredients = ingredientsToDeduct.filter(item => {
-      let inputQuantity = parseFloat(item.userInputQuantity);
-      const availableQuantity = parseFloat(item.fridgeIngredient!.quantity);
-      const maxQuantity = parseFloat(item.maxUserQuantity.toString());
+      let inputQuantity = item.userInputQuantity;
+      const availableQuantity = item.fridgeIngredient!.quantity;
+      const maxQuantity = item.maxUserQuantity;
 
       // 최대값으로 설정된 경우 정확한 총량으로 처리
       const isMaxQuantity = Math.abs(inputQuantity - maxQuantity) < 0.0001;
@@ -137,9 +135,9 @@ const UseRecipeScreen: React.FC = () => {
 
     // 완전 소진될 재료들 찾기 (정확한 차감량 고려)
     const ingredientsToDelete = ingredientsToDeduct.filter(item => {
-      let inputQuantity = parseFloat(item.userInputQuantity);
-      const currentQuantity = parseFloat(item.fridgeIngredient!.quantity);
-      const maxQuantity = parseFloat(item.maxUserQuantity.toString());
+      let inputQuantity = item.userInputQuantity;
+      const currentQuantity = item.fridgeIngredient!.quantity;
+      const maxQuantity = item.maxUserQuantity;
 
       // 최대값으로 설정된 경우 정확한 총량으로 처리
       const isMaxQuantity = Math.abs(inputQuantity - maxQuantity) < 0.0001;
@@ -154,9 +152,9 @@ const UseRecipeScreen: React.FC = () => {
     console.log(
       `🗑️ 완전 소진될 재료 ${ingredientsToDelete.length}개:`,
       ingredientsToDelete.map(item => {
-        let inputQuantity = parseFloat(item.userInputQuantity);
-        const currentQuantity = parseFloat(item.fridgeIngredient!.quantity);
-        const maxQuantity = parseFloat(item.maxUserQuantity.toString());
+        let inputQuantity = item.userInputQuantity;
+        const currentQuantity = item.fridgeIngredient!.quantity;
+        const maxQuantity = item.maxUserQuantity;
         const isMaxQuantity = Math.abs(inputQuantity - maxQuantity) < 0.0001;
         if (isMaxQuantity) {
           inputQuantity = currentQuantity;
@@ -188,13 +186,11 @@ const UseRecipeScreen: React.FC = () => {
 
       // 모든 재료를 순차적으로 처리
       for (const ingredient of completeInfo.ingredientsToDeduct) {
-        let inputQuantity = parseFloat(ingredient.userInputQuantity);
-        const currentQuantity = parseFloat(
-          ingredient.fridgeIngredient!.quantity,
-        );
+        let inputQuantity = ingredient.userInputQuantity;
+        const currentQuantity = ingredient.fridgeIngredient!.quantity;
 
         // 슬라이더 최대값 또는 스테퍼로 최대값 설정된 경우 정확한 총량으로 처리
-        const maxQuantity = parseFloat(ingredient.maxUserQuantity);
+        const maxQuantity = ingredient.maxUserQuantity;
         const isMaxQuantity = Math.abs(inputQuantity - maxQuantity) < 0.0001; // 부동소수점 오차 고려
 
         if (isMaxQuantity) {
@@ -220,7 +216,7 @@ const UseRecipeScreen: React.FC = () => {
         await UsageTrackingService.trackRecipeUsage(
           ingredient.fridgeIngredient!.id,
           ingredient.fridgeIngredient!.name,
-          inputQuantity.toString(),
+          inputQuantity,
           ingredient.fridgeIngredient!.unit || '개',
           fridgeId,
           recipe.title, // 완전 소진 여부 기록
@@ -233,7 +229,7 @@ const UseRecipeScreen: React.FC = () => {
           // 수량만 업데이트
           const finalQuantity = Math.max(0, newQuantity);
           await updateFridgeItem(ingredient.fridgeIngredient!.id, {
-            quantity: finalQuantity.toString(),
+            quantity: finalQuantity,
           });
         }
       }
@@ -248,19 +244,17 @@ const UseRecipeScreen: React.FC = () => {
           );
           if (index !== -1) {
             updated[index].isDeducted = true;
-            const inputQuantity = parseFloat(ingredient.userInputQuantity);
-            const currentQuantity = parseFloat(
-              updated[index].fridgeIngredient!.quantity,
-            );
+            const inputQuantity = ingredient.userInputQuantity;
+            const currentQuantity = updated[index].fridgeIngredient!.quantity;
+
             const newQuantity = currentQuantity - inputQuantity;
 
             if (newQuantity <= 0) {
               // 완전 소진된 경우 UI에서 표시 변경
-              updated[index].fridgeIngredient!.quantity = '0';
+              updated[index].fridgeIngredient!.quantity = 0;
               updated[index].isCompletelyConsumed = true;
             } else {
-              updated[index].fridgeIngredient!.quantity =
-                newQuantity.toString();
+              updated[index].fridgeIngredient!.quantity = newQuantity;
             }
           }
         });

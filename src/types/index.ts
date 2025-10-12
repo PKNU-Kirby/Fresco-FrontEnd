@@ -127,18 +127,18 @@ export interface Recipe {
 export interface RecipeIngredient {
   id: string;
   name: string;
-  quantity: string;
+  quantity: number;
   unit: string;
 }
 // UseRecipeScreen 전용 타입들
 export interface MatchedIngredientSeparate {
   recipeIngredient: {
     name: string;
-    quantity: string;
+    quantity: number;
   };
   fridgeIngredient: FridgeItem | null;
   isAvailable: boolean;
-  userInputQuantity: string;
+  userInputQuantity: number;
   maxUserQuantity: number;
   isDeducted: boolean;
   isCompletelyConsumed?: boolean;
@@ -150,7 +150,7 @@ export interface MatchedIngredientSeparate {
 export interface FridgeItem {
   id: string;
   name: string;
-  quantity: string;
+  quantity: number;
   unit?: string;
   expiryDate?: string;
   category?: string;
@@ -202,7 +202,7 @@ export type RootStackParamList = {
     recognizedData?: {
       photo?: string;
       name?: string;
-      quantity?: string;
+      quantity?: number;
       unit?: string;
       expiryDate?: string;
       itemCategory?: string;

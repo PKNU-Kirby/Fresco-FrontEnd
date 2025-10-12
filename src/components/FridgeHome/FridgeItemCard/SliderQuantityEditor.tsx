@@ -5,14 +5,15 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { sliderQuantityStyles as styles } from './styles';
 
 interface SliderQuantityEditorProps {
-  quantity: string;
+  quantity: number;
   unit: string;
   maxQuantity: number;
   isEditMode: boolean;
-  onQuantityChange: (quantity: string) => void;
+  onQuantityChange: (quantity: number) => void;
   onMaxQuantityChange?: (maxQuantity: number) => void;
   onTextBlur: () => void;
   onUnitPress: () => void;
+  onDeleteRequest?: () => void;
 }
 
 const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
@@ -24,6 +25,7 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
   onMaxQuantityChange,
   onTextBlur,
   onUnitPress,
+  onDeleteRequest, // 추가
 }) => {
   const [_isSliding, setIsSliding] = useState(false);
   const [_isInputFocused, setIsInputFocused] = useState(false);
@@ -31,15 +33,15 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
   const [isSliderMode, setIsSliderMode] = useState(false);
 
   // 수량 포맷 함수: 정수면 소수점 없이, 소수면 둘째자리까지
-  const formatQuantity = (value: number | string): string => {
+  const formatQuantity = (value: number | string): number => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
-    if (isNaN(numValue)) return '0';
+    if (isNaN(numValue)) return 0;
 
     // 정수인지 확인 (소수점이 .00인 경우도 정수로 취급)
     if (numValue % 1 === 0) {
-      return Math.round(numValue).toString();
+      return Math.round(numValue);
     } else {
-      return numValue.toFixed(2);
+      return parseFloat(numValue.toFixed(2));
     }
   };
 
@@ -51,17 +53,15 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
   }, [isEditMode]);
 
   // 단위별 슬라이더 스텝 크기 계산
-  const getSliderStepSize = (unit: string, maxValue: number) => {
-    const normalizedUnit = unit.toLowerCase();
+  const getSliderStepSize = (unitType: string, maxValue: number) => {
+    const normalizedUnit = unitType.toLowerCase();
 
     switch (normalizedUnit) {
       case 'g':
       case 'ml':
         return 1.0; // 정수 단위
-
       case '개':
         return maxValue >= 10 ? 1.0 : 0.01; // 10개 이상이면 1.0, 미만이면 0.01
-
       case 'kg':
       case 'l':
         if (maxValue < 1) {
@@ -71,7 +71,6 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
         } else {
           return 1.0; // 10 이상일 때 1.0
         }
-
       default:
         return 1.0;
     }
@@ -88,12 +87,21 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     return Math.round(value / step) * step;
   };
 
+  // 🔧 FIX 1: 0이 되면 삭제 모달 트리거
+  const checkAndTriggerDelete = (newValue: number) => {
+    if (newValue <= 0 && onDeleteRequest) {
+      onDeleteRequest();
+      return true; // 삭제 요청됨
+    }
+    return false; // 정상 처리
+  };
+
   // 스테퍼 증가/감소 (무조건 1.0 단위)
   const handleStepperChange = (increment: boolean) => {
-    const currentValue = parseFloat(quantity) || 0;
+    const currentValue = quantity || 0;
     const step = stepperStep;
-
     let newValue;
+
     if (increment) {
       newValue = currentValue + step;
       // 플러스 버튼으로 maxQuantity 초과 시 maxQuantity 업데이트
@@ -102,16 +110,20 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
       }
     } else {
       newValue = Math.max(0, currentValue - step);
+
+      // 🔧 FIX 1: 0이 되면 삭제 모달 트리거
+      if (checkAndTriggerDelete(newValue)) {
+        return; // 삭제 모달이 뜨므로 여기서 중단
+      }
     }
 
     // 스테퍼는 항상 정수
     newValue = Math.round(newValue);
-
     setHasUserInteracted(true);
-    onQuantityChange(newValue.toString());
+    onQuantityChange(newValue);
   };
 
-  // 슬라이더 변경 (단위별 스텝 적용)
+  // 🔧 FIX 2: 슬라이더 변경 시 소수점 표시
   const handleSliderChange = (value: number) => {
     console.log('🎚️ Slider changed:', {
       rawValue: value,
@@ -125,7 +137,12 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     const roundedValue = roundToStep(value, sliderStep);
     const clampedValue = Math.max(0, Math.min(roundedValue, maxQuantity));
 
-    // 소수점 처리
+    // 🔧 FIX 1: 0이 되면 삭제 모달 트리거
+    if (checkAndTriggerDelete(clampedValue)) {
+      return; // 삭제 모달이 뜨므로 여기서 중단
+    }
+
+    // 🔧 FIX 2: 소수점 처리 개선 - formatQuantity 활용
     let finalValue;
     if (sliderStep >= 1) {
       finalValue = Math.round(clampedValue);
@@ -136,7 +153,8 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
       finalValue = Math.round(clampedValue * 100) / 100;
     }
 
-    onQuantityChange(finalValue.toString());
+    // 포맷된 문자열로 저장 (소수점 표시 유지)
+    onQuantityChange(formatQuantity(finalValue));
   };
 
   const handleSliderComplete = (value: number) => {
@@ -166,7 +184,7 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
       }
     }
 
-    onQuantityChange(cleanText);
+    onQuantityChange(parseFloat(cleanText));
   };
 
   const handleTextFocus = () => {
@@ -177,12 +195,16 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
   const handleTextBlur = () => {
     setIsInputFocused(false);
 
-    // 빈 값이면 0으로 설정
-    if (quantity === '' || parseFloat(quantity) === 0) {
-      onQuantityChange('0');
+    // 빈 값이거나 0이면
+    if (quantity === 0 || quantity === 0) {
+      // 🔧 FIX 1: 0이 되면 삭제 모달 트리거
+      if (checkAndTriggerDelete(0)) {
+        return; // 삭제 모달이 뜨므로 여기서 중단
+      }
+      onQuantityChange(0);
     } else {
       // 유효한 숫자로 정리
-      const numValue = parseFloat(quantity) || 0;
+      const numValue = quantity || 0;
       const clampedValue = Math.max(0, numValue);
 
       // 슬라이더 모드일 때는 스텝 단위로 반올림
@@ -190,17 +212,18 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
       if (isSliderMode) {
         finalValue = roundToStep(clampedValue, sliderStep);
         if (sliderStep >= 1) {
-          onQuantityChange(Math.round(finalValue).toString());
+          onQuantityChange(Math.round(finalValue));
         } else if (sliderStep === 0.1) {
-          onQuantityChange((Math.round(finalValue * 10) / 10).toString());
+          onQuantityChange(Math.round(finalValue * 10) / 10);
         } else {
           // 0.01
-          onQuantityChange((Math.round(finalValue * 100) / 100).toString());
+          onQuantityChange(Math.round(finalValue * 100) / 100);
         }
       } else {
-        onQuantityChange(clampedValue.toString());
+        onQuantityChange(clampedValue);
       }
     }
+
     onTextBlur();
   };
 
@@ -208,7 +231,7 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     setIsSliderMode(!isSliderMode);
   };
 
-  const currentQuantityNum = parseFloat(quantity) || 0;
+  const currentQuantityNum = quantity || 0;
   const thumbColor = '#c8c8c8';
 
   return (
@@ -228,7 +251,7 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
 
           <TextInput
             style={styles.quantityInput}
-            value={quantity}
+            value={quantity.toString()}
             onChangeText={handleTextChange}
             onFocus={handleTextFocus}
             onBlur={handleTextBlur}

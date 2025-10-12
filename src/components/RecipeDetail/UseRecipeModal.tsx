@@ -7,7 +7,7 @@ import { styles } from './styles';
 interface CheckableIngredient {
   id: string;
   name: string;
-  quantity: string;
+  quantity: number;
   unit: string;
   isChecked: boolean;
 }

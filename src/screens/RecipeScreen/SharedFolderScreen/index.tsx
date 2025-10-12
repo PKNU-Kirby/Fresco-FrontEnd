@@ -28,7 +28,7 @@ import { styles } from './styles';
 interface FridgeIngredient {
   id: string;
   name: string;
-  quantity: string;
+  quantity: number;
   unit: string;
   expiryDate: string;
 }

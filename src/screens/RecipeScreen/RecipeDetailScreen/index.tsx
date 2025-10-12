@@ -201,7 +201,7 @@ const RecipeDetailScreen: React.FC = () => {
           title: currentRecipe.title.trim(),
           ingredients: filteredIngredients.map(ing => ({
             ingredientName: ing.name,
-            quantity: parseFloat(ing.quantity) || 0,
+            quantity: ing.quantity || 0,
             unit: ing.unit,
           })),
           steps: filteredSteps,
@@ -232,7 +232,7 @@ const RecipeDetailScreen: React.FC = () => {
       title: currentRecipe.title.trim(),
       ingredients: filteredIngredients.map(ing => ({
         ingredientName: ing.name,
-        quantity: ing.quantity || '0',
+        quantity: ing.quantity || 0,
         unit: ing.unit || '',
       })),
       steps: filteredSteps.join('\n'),
@@ -328,7 +328,7 @@ const RecipeDetailScreen: React.FC = () => {
     const newIngredient: RecipeIngredient = {
       id: Date.now().toString(),
       name: '',
-      quantity: '',
+      quantity: 0,
       unit: '',
     };
     setCurrentRecipe(prev => ({

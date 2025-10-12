@@ -8,7 +8,7 @@ import {
 // 레시피 재료와 냉장고 재료 매칭 결과
 export interface IngredientMatchResult {
   recipeName: string;
-  recipeQuantity: string;
+  recipeQuantity: number;
   fridgeItem?: FridgeItem;
   isAvailable: boolean;
   matchScore: number; // 0-1, 매칭 정확도
@@ -17,7 +17,7 @@ export interface IngredientMatchResult {
 export class RecipeFridgeUtils {
   // 레시피 재료와 냉장고 재료 매칭
   static async matchRecipeWithFridge(
-    recipeIngredients: Array<{ name: string; quantity: string }>,
+    recipeIngredients: Array<{ name: string; quantity: number }>,
     fridgeId: string,
   ): Promise<IngredientMatchResult[]> {
     try {
@@ -30,9 +30,7 @@ export class RecipeFridgeUtils {
           recipeName: recipeIng.name,
           recipeQuantity: recipeIng.quantity,
           fridgeItem: matchResult.item,
-          isAvailable: matchResult.item
-            ? parseFloat(matchResult.item.quantity) > 0
-            : false,
+          isAvailable: matchResult.item ? matchResult.item.quantity > 0 : false,
           matchScore: matchResult.score,
         };
       });
@@ -150,7 +148,7 @@ export class RecipeFridgeUtils {
         };
       }
 
-      const currentQuantity = parseFloat(targetItem.quantity);
+      const currentQuantity = targetItem.quantity;
 
       if (currentQuantity < deductAmount) {
         return {
@@ -162,8 +160,8 @@ export class RecipeFridgeUtils {
 
       const newQuantity = currentQuantity - deductAmount;
 
-      await updateFridgeItem(parseInt(fridgeItemId), {
-        quantity: newQuantity.toString(),
+      await updateFridgeItem(fridgeItemId, {
+        quantity: newQuantity,
       });
 
       return {
@@ -199,10 +197,7 @@ export class RecipeFridgeUtils {
             this.normalizeString(item.name),
           ),
         }))
-        .filter(
-          result =>
-            result.score >= minScore && parseFloat(result.item.quantity) > 0,
-        )
+        .filter(result => result.score >= minScore && result.item.quantity > 0)
         .sort((a, b) => b.score - a.score);
 
       return similarItems;

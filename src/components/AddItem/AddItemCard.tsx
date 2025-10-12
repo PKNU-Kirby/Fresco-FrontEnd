@@ -111,15 +111,15 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
   }, [focusedItemId, item.id, isEditMode, onFocusComplete]);
 
   const handleQuantityChange = useCallback(
-    (newQuantity: string) => {
-      onUpdateItem(item.id, 'quantity', newQuantity || '0');
+    (newQuantity: number) => {
+      onUpdateItem(item.id, 'quantity', newQuantity || 0);
     },
     [item.id, onUpdateItem],
   );
 
   const handleQuantityBlur = useCallback(() => {
-    if (!item.quantity || item.quantity === '0') {
-      onUpdateItem(item.id, 'quantity', '1');
+    if (!item.quantity || item.quantity === 0) {
+      onUpdateItem(item.id, 'quantity', 1);
     }
   }, [item.id, item.quantity, onUpdateItem]);
 

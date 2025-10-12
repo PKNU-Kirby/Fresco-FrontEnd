@@ -15,7 +15,7 @@ export const useAddItemLogic = (initialItems: ItemFormData[]) => {
     (): ItemFormData => ({
       id: generateId(),
       name: '',
-      quantity: '1',
+      quantity: 1,
       unit: '개',
       expirationDate: '',
       itemCategory: '채소 / 과일',
