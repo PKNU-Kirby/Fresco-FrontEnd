@@ -1,7 +1,7 @@
 export type FridgeRole = 'OWNER' | 'PARTICIPANT';
 
 export interface FridgeWithRole {
-  id: string;
+  id: number;
   name: string;
   createdAt: string;
   updatedAt: string;
@@ -15,7 +15,7 @@ export interface FridgeWithRole {
 }
 
 export interface FridgePermission {
-  fridgeId: string;
+  fridgeId: number;
   role: FridgeRole;
   canEdit: boolean;
   canDelete: boolean;
@@ -25,7 +25,7 @@ export interface PermissionResponse {
   code: string;
   message: string;
   result: Array<{
-    fridgeId: string;
+    fridgeId: number;
     role: FridgeRole;
     memberCount?: number;
   }>;

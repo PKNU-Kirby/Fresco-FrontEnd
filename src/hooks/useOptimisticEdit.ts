@@ -63,7 +63,7 @@ export const useOptimisticEdit = () => {
 
   // 로컬에서 냉장고 편집 (즉시 UI 반영)
   const editFridgeLocally = useCallback(
-    (fridgeId: string, newName: string) => {
+    (fridgeId: number, newName: string) => {
       const originalFridge = editableFridges.find(f => f.id === fridgeId);
       if (!originalFridge) return;
 
@@ -102,7 +102,7 @@ export const useOptimisticEdit = () => {
 
   // 로컬에서 냉장고 삭제 (즉시 UI 반영)
   const deleteFridgeLocally = useCallback(
-    (fridgeId: string) => {
+    (fridgeId: number) => {
       const fridgeToDelete = editableFridges.find(f => f.id === fridgeId);
       if (!fridgeToDelete) return;
 

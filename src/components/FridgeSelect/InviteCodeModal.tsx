@@ -1,3 +1,4 @@
+// 여기 모달 적용하기
 import React, { useState } from 'react';
 import {
   Modal,
@@ -6,14 +7,9 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  StyleSheet,
-  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
-const { width } = Dimensions.get('window');
-const baseWidth = 402;
-const scale = (size: number) => (width / baseWidth) * size;
+import { inviteCodeModalStyles as styles } from './styles';
 
 interface InviteCodeModalProps {
   visible: boolean;
@@ -121,87 +117,3 @@ export const InviteCodeModal: React.FC<InviteCodeModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    backgroundColor: 'white',
-    borderRadius: scale(16),
-    width: '85%',
-    maxWidth: scale(320),
-    paddingVertical: scale(24),
-    paddingHorizontal: scale(20),
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: scale(24),
-  },
-  iconContainer: {
-    width: scale(60),
-    height: scale(60),
-    borderRadius: scale(30),
-    backgroundColor: '#f0f9f0',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: scale(12),
-  },
-  title: {
-    fontSize: scale(20),
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: scale(8),
-  },
-  subtitle: {
-    fontSize: scale(14),
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: scale(20),
-  },
-  inputContainer: {
-    marginBottom: scale(24),
-  },
-  input: {
-    borderWidth: scale(2),
-    borderColor: '#25A325',
-    borderRadius: scale(12),
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(12),
-    fontSize: scale(16),
-    textAlign: 'center',
-    letterSpacing: scale(2),
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: scale(12),
-  },
-  button: {
-    flex: 1,
-    paddingVertical: scale(12),
-    borderRadius: scale(8),
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: '#f5f5f5',
-  },
-  cancelButtonText: {
-    fontSize: scale(16),
-    fontWeight: '600',
-    color: '#666',
-  },
-  submitButton: {
-    backgroundColor: '#25A325',
-  },
-  submitButtonText: {
-    fontSize: scale(16),
-    fontWeight: '600',
-    color: 'white',
-  },
-  disabledButton: {
-    backgroundColor: '#ccc',
-  },
-});

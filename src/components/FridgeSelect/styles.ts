@@ -11,22 +11,13 @@ const baseWidth = 402;
 //const hp = (percentage: number) => (height * percentage) / 100;
 const scale = (size: number) => (width / baseWidth) * size;
 
-export const styles = StyleSheet.create({
-  /** Fridge Select Screen Style */
-  container: {
-    flex: 1,
-    backgroundColor: '#e8f5e8',
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  /** Header Style */
+// FridgeHeader Styles
+export const fridgeHeaderStyles = StyleSheet.create({
   header: {
     paddingTop:
-      Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 8 : 8,
+      Platform.OS === 'android'
+        ? (StatusBar.currentHeight || 0) + scale(8)
+        : scale(8),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -81,72 +72,93 @@ export const styles = StyleSheet.create({
     borderRadius: scale(8),
     marginLeft: scale(28),
   },
+});
 
-  /** List Style */
-  fridgeTilesListContainer: {
+// FridgeModalForm Styles
+export const fridgeModalFormStyles = StyleSheet.create({
+  overlay: {
     flex: 1,
-    marginTop: scale(24),
-  },
-  list: {
-    marginHorizontal: scale(8),
-    gap: scale(16),
-    justifyContent: 'center',
-    paddingHorizontal: scale(16),
-  },
-
-  /** Bottom Sheet Style : Hidden Fridge Section */
-  bottomSheet: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'lightgray',
-    borderTopLeftRadius: scale(20),
-    borderTopRightRadius: scale(20),
-    borderTopWidth: scale(1),
-    borderTopColor: '#e0e0e0',
-    // Shadow effect
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: scale(-5) },
-    shadowOpacity: 0.25,
-    shadowRadius: scale(4),
-    elevation: 5,
-  },
-  bottomSheetHeader: {
-    height: scale(72),
-    paddingBottom: scale(20),
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderTopLeftRadius: scale(20),
-    borderTopRightRadius: scale(20),
-    backgroundColor: 'lightgray',
   },
-  dragHandle: {
-    width: scale(140),
-    height: scale(4),
-    backgroundColor: 'darkgray',
-    borderRadius: scale(2),
+  modalBox: {
+    backgroundColor: 'white',
+    paddingTop: scale(20),
+    borderRadius: scale(10),
+    width: '80%',
+  },
+  input: {
+    borderWidth: scale(1),
+    borderColor: '#ccc',
+    borderRadius: scale(6),
+    padding: scale(10),
+    marginHorizontal: scale(20),
     marginBottom: scale(16),
-    marginTop: scale(16),
   },
-  bottomSheetTitle: {
-    fontSize: scale(18),
-    fontWeight: 'bold',
-    color: '#666',
+  switchContainer: {
+    marginHorizontal: scale(20),
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: scale(16),
   },
-  bottomSheetContent: {
+  switchContainerText: {
+    marginLeft: scale(8),
+  },
+  switch: {
+    backgroundColor: 'lightgray',
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(6),
+    borderRadius: scale(15),
+    minWidth: scale(50),
+    alignItems: 'center',
+    marginRight: scale(2),
+  },
+  switchActive: {
+    backgroundColor: 'limegreen',
+  },
+  switchText: {
+    color: '#333',
+    fontWeight: '700',
+    fontSize: scale(12),
+  },
+
+  // 하단 버튼들
+  buttonRow: {
+    borderTopWidth: 0.5,
+    borderTopColor: '#e0e0e0',
+    flexDirection: 'row',
+  },
+  buttonRowLeft: {
     flex: 1,
-    padding: scale(16),
+    paddingVertical: scale(16),
+    alignItems: 'center',
+    borderRightWidth: scale(0.5),
+    borderRightColor: '#e0e0e0',
+  },
+  buttonRowLeftText: {
+    fontSize: scale(16),
+    color: '#333',
+    fontWeight: Platform.OS === 'android' ? '700' : '900',
+  },
+  buttonRowRight: {
+    flex: 1,
+    paddingVertical: scale(16),
+    alignItems: 'center',
+  },
+  buttonRowRightText: {
+    fontSize: scale(16),
+    color: '#333',
+    fontWeight: '400',
   },
 });
 
+// FridgeTile Styles
 export const fridgeTileStyles = StyleSheet.create({
   /** CONTAINER ********************************************************************/
   tileContainer: {
     alignItems: 'center',
-  },
-  hiddenContainer: {
-    opacity: 0.6,
   },
   editModeContainer: {
     flexDirection: 'column',
@@ -175,9 +187,6 @@ export const fridgeTileStyles = StyleSheet.create({
     height: scale(70),
     borderRadius: scale(12),
   },
-  hiddenTile: {
-    backgroundColor: '#9c9c9cff',
-  },
   editModeTile: {
     backgroundColor: '#9c9c9cff',
   },
@@ -201,19 +210,6 @@ export const fridgeTileStyles = StyleSheet.create({
 
   /** Add Button Style */
   // Plus Icon
-
-  /** 숨김 상태 표시 (좌하단) */
-  hiddenIndicator: {
-    position: 'absolute',
-    bottom: scale(-5),
-    left: scale(-5),
-    backgroundColor: '#333',
-    paddingHorizontal: scale(4),
-    paddingVertical: scale(2),
-    borderRadius: scale(8),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 
   /** Fridge Name Styles */
   fridgeName: {
@@ -371,81 +367,158 @@ export const fridgeTileStyles = StyleSheet.create({
     elevation: 10,
   },
 });
-export const fridgeModalFormStyles = StyleSheet.create({
+
+// InviteCodeModal Styles
+export const inviteCodeModalStyles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalBox: {
+  modalContainer: {
     backgroundColor: 'white',
-    paddingTop: 20,
-    borderRadius: 10,
-    width: '80%',
+    borderRadius: scale(16),
+    width: '85%',
+    maxWidth: scale(320),
+    paddingVertical: scale(24),
+    paddingHorizontal: scale(20),
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: scale(24),
+  },
+  iconContainer: {
+    width: scale(60),
+    height: scale(60),
+    borderRadius: scale(30),
+    backgroundColor: '#f0f9f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: scale(12),
+  },
+  title: {
+    fontSize: scale(20),
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: scale(8),
+  },
+  subtitle: {
+    fontSize: scale(14),
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: scale(20),
+  },
+  inputContainer: {
+    marginBottom: scale(24),
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 6,
-    padding: 10,
-    marginHorizontal: 20,
-    marginBottom: 16,
+    borderWidth: scale(2),
+    borderColor: '#25A325',
+    borderRadius: scale(12),
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(12),
+    fontSize: scale(16),
+    textAlign: 'center',
+    letterSpacing: scale(2),
   },
-  switchContainer: {
-    marginHorizontal: 20,
+  buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: scale(12),
+  },
+  button: {
+    flex: 1,
+    paddingVertical: scale(12),
+    borderRadius: scale(8),
     alignItems: 'center',
-    marginBottom: 16,
   },
-  switchContainerText: {
-    marginLeft: 8,
+  cancelButton: {
+    backgroundColor: '#f5f5f5',
   },
-  switch: {
-    backgroundColor: 'lightgray',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-    minWidth: 50,
+  cancelButtonText: {
+    fontSize: scale(16),
+    fontWeight: '600',
+    color: '#666',
+  },
+  submitButton: {
+    backgroundColor: '#25A325',
+  },
+  submitButtonText: {
+    fontSize: scale(16),
+    fontWeight: '600',
+    color: 'white',
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
+});
+
+export const styles = StyleSheet.create({
+  /** Fridge Select Screen Style */
+  container: {
+    flex: 1,
+    backgroundColor: '#e8f5e8',
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 2,
-  },
-  switchActive: {
-    backgroundColor: 'limegreen',
-  },
-  switchText: {
-    color: '#333',
-    fontWeight: '700',
-    fontSize: 12,
   },
 
-  // 하단 버튼들
-  buttonRow: {
-    borderTopWidth: 0.5,
+  /** List Style */
+  fridgeTilesListContainer: {
+    flex: 1,
+    marginTop: scale(24),
+  },
+  list: {
+    marginHorizontal: scale(8),
+    gap: scale(16),
+    justifyContent: 'center',
+    paddingHorizontal: scale(16),
+  },
+
+  /** Bottom Sheet Style : Hidden Fridge Section */
+  bottomSheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'lightgray',
+    borderTopLeftRadius: scale(20),
+    borderTopRightRadius: scale(20),
+    borderTopWidth: scale(1),
     borderTopColor: '#e0e0e0',
-    flexDirection: 'row',
+    // Shadow effect
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: scale(-5) },
+    shadowOpacity: 0.25,
+    shadowRadius: scale(4),
+    elevation: 5,
   },
-  buttonRowLeft: {
-    flex: 1,
-    paddingVertical: 16,
+  bottomSheetHeader: {
+    height: scale(72),
+    paddingBottom: scale(20),
+    justifyContent: 'center',
     alignItems: 'center',
-    borderRightWidth: 0.5,
-    borderRightColor: '#e0e0e0',
+    borderTopLeftRadius: scale(20),
+    borderTopRightRadius: scale(20),
+    backgroundColor: 'lightgray',
   },
-  buttonRowLeftText: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: Platform.OS === 'android' ? '700' : '900',
+  dragHandle: {
+    width: scale(140),
+    height: scale(4),
+    backgroundColor: 'darkgray',
+    borderRadius: scale(2),
+    marginBottom: scale(16),
+    marginTop: scale(16),
   },
-  buttonRowRight: {
+  bottomSheetTitle: {
+    fontSize: scale(18),
+    fontWeight: 'bold',
+    color: '#666',
+  },
+  bottomSheetContent: {
     flex: 1,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  buttonRowRightText: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '400',
+    padding: scale(16),
   },
 });

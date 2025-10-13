@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import BackButton from '../_common/BackButton';
 import { User } from '../../types/auth';
-import { styles } from './styles';
+import BackButton from '../_common/BackButton';
+import { fridgeHeaderStyles as styles } from './styles';
 
 interface FridgeHeaderProps {
   currentUser: User;

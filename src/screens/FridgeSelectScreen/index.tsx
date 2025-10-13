@@ -1,3 +1,5 @@
+// 컨펌모달 적용해야함
+
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -9,19 +11,18 @@ import {
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { usePermissions } from '../../hooks/usePermissions';
 import { useFridgeSelect } from '../../hooks/useFridgeSelect';
 import { useFridgeActions } from '../../hooks/useFridgeActions';
 import { useOptimisticEdit } from '../../hooks/useOptimisticEdit';
-import { usePermissions } from '../../hooks/usePermissions';
 import { FridgeControllerAPI } from '../../services/API/fridgeControllerAPI';
 
+import { FridgeWithRole } from '../../types/permission';
 import { validateUserTokenMatch } from '../../utils/authUtils';
-import { HiddenFridgesBottomSheet } from '../../components/FridgeSelect/HiddenFridgeBottomSheet';
+import { FridgeModals } from '../../components/FridgeSelect/FridgeModal';
 import { FridgeHeader } from '../../components/FridgeSelect/FridgeHeader';
 import { FridgeList } from '../../components/FridgeSelect/FridgeTileList';
-import { FridgeModals } from '../../components/FridgeSelect/FridgeModal';
 import { FridgeModalManager } from '../../components/FridgeSelect/FridgeModalManager';
-import { FridgeWithRole } from '../../types/permission';
 import { styles } from './styles';
 
 const FridgeSelectScreen = () => {
@@ -91,7 +92,6 @@ const FridgeSelectScreen = () => {
 
   const handleCreateFridge = async (name: string) => {
     try {
-      console.log('냉장고 생성 요청:', name);
       const response = await FridgeControllerAPI.create({ name });
       console.log('냉장고 생성 완료:', response);
       return response;
@@ -103,8 +103,7 @@ const FridgeSelectScreen = () => {
 
   const handleUpdateFridge = async (id: string, name: string) => {
     try {
-      console.log('냉장고 업데이트 요청:', id, name);
-      const response = await FridgeControllerAPI.update(id, { name });
+      const response = await FridgeControllerAPI.update(Number(id), { name });
       console.log('냉장고 업데이트 완료:', response);
       return response;
     } catch (error) {
@@ -115,7 +114,6 @@ const FridgeSelectScreen = () => {
 
   const handleDeleteFridge = async (id: string) => {
     try {
-      console.log('냉장고 삭제 요청:', id);
       await FridgeControllerAPI.delete(id);
       console.log('냉장고 삭제 완료:', id);
     } catch (error) {
@@ -127,7 +125,6 @@ const FridgeSelectScreen = () => {
   // 권한 기반 액션 핸들러들
   const handleEditFridge = (fridge: FridgeWithRole) => {
     if (!isEditMode) {
-      // 일반 모드에서는 상세 화면으로 이동
       if (hasPermission(fridge.id, 'view')) {
         navigation.navigate('FridgeDetail', { fridgeId: fridge.id });
       } else {
@@ -249,9 +246,6 @@ const FridgeSelectScreen = () => {
 
   const handleSaveChanges = async () => {
     try {
-      console.log('===== 변경사항 저장 시작 =====');
-      console.log('현재 사용자 ID:', currentUser?.id);
-
       // 사용자 ID와 토큰 일치성 검증
       if (currentUser?.id) {
         const { isValid, needsReauth, tokenUserId } =
@@ -300,20 +294,6 @@ const FridgeSelectScreen = () => {
     }
   };
 
-  // Bottom Sheet 토글
-  const toggleBottomSheet = () => {
-    const newExpanded = !isBottomSheetExpanded;
-    setIsBottomSheetExpanded(newExpanded);
-
-    bottomSheetHeight.stopAnimation(() => {
-      Animated.timing(bottomSheetHeight, {
-        toValue: newExpanded ? 750 : 80,
-        duration: 500,
-        useNativeDriver: false,
-      }).start();
-    });
-  };
-
   // 초기화
   useEffect(() => {
     initializeData();
@@ -355,18 +335,6 @@ const FridgeSelectScreen = () => {
           fridges={displayFridges}
           isEditMode={isEditMode}
           onAddFridge={handleAddFridge}
-          onEditFridge={handleEditFridge}
-          onLeaveFridge={handleLeaveFridge}
-          onToggleHidden={toggleHiddenLocally}
-          permissions={permissions}
-        />
-
-        <HiddenFridgesBottomSheet
-          fridges={displayFridges}
-          isEditMode={isEditMode}
-          isExpanded={isBottomSheetExpanded}
-          bottomSheetHeight={bottomSheetHeight}
-          onToggleSheet={toggleBottomSheet}
           onEditFridge={handleEditFridge}
           onLeaveFridge={handleLeaveFridge}
           onToggleHidden={toggleHiddenLocally}

@@ -66,14 +66,14 @@ export type RootStackParamList = {
     };
   };
   MainTabs: {
-    fridgeId: string;
+    fridgeId: number;
     fridgeName: string;
     screen?: keyof MainTabParamList;
     params?: any;
   };
 
   CameraScreen: {
-    fridgeId: string;
+    fridgeId: number;
   };
 
   PhotoPreview: {
@@ -85,12 +85,12 @@ export type RootStackParamList = {
       type?: string;
       fileName?: string;
     };
-    fridgeId: string;
+    fridgeId: number;
     scanMode?: 'ingredient' | 'receipt';
   };
 
   AddItemScreen: {
-    fridgeId: string;
+    fridgeId: number;
     recognizedData?: {
       photo?: string;
       name?: string;
@@ -104,12 +104,12 @@ export type RootStackParamList = {
   };
 
   FridgeSettings: {
-    fridgeId: string;
+    fridgeId: number;
     fridgeName: string;
     userRole: 'owner' | 'member';
   };
   MembersScreen: {
-    fridgeId: string;
+    fridgeId: number;
     fridgeName: string;
     userRole: 'owner' | 'member';
   };
@@ -123,13 +123,13 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 // Tab Navigator Type (수정됨)
 export type MainTabParamList = {
   FridgeHomeScreen: {
-    fridgeId: string;
+    fridgeId: number;
     fridgeName: string;
     newItems?: any[];
     refreshKey?: number;
   };
-  Recipe: { fridgeId: string; fridgeName: string };
-  ShoppingListScreen: { fridgeId: string; fridgeName: string };
+  Recipe: { fridgeId: number; fridgeName: string };
+  ShoppingListScreen: { fridgeId: number; fridgeName: string };
 };
 
 // Main Tab Navigator
@@ -138,7 +138,7 @@ function MainTabNavigator({
 }: {
   route: {
     params: {
-      fridgeId: string;
+      fridgeId: number;
       fridgeName: string;
       screen?: string;
       params?: any;

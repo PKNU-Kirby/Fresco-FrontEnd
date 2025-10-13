@@ -1,14 +1,14 @@
 import React from 'react';
 import { TouchableOpacity, View, Alert, Text } from 'react-native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { FridgeWithRole } from '../../types/permission';
 import { fridgeTileStyles as styles } from './styles';
 
 type RootStackParamList = {
-  MainTabs: { fridgeId: string; fridgeName: string };
+  MainTabs: { fridgeId: number; fridgeName: string };
 };
 
 interface FridgeTileProps {
@@ -17,7 +17,6 @@ interface FridgeTileProps {
   onEdit?: (fridge: FridgeWithRole) => void;
   onLeave?: (fridge: FridgeWithRole) => void;
   onToggleHidden?: (fridge: FridgeWithRole) => void;
-  isHidden?: boolean;
   isSmall?: boolean;
 }
 
@@ -27,7 +26,6 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
   onEdit,
   onLeave,
   onToggleHidden,
-  isHidden,
   isSmall,
 }) => {
   const navigation =
@@ -117,24 +115,20 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
 
   const containerStyle = [
     styles.tileContainer,
-    isHidden && styles.hiddenContainer,
     isEditMode && styles.editModeContainer,
   ].filter(Boolean);
 
   const tileStyle = [
     isSmall ? styles.smallTile : styles.tile,
-    isHidden && styles.hiddenTile,
     isEditMode && styles.editModeTile,
   ].filter(Boolean);
 
   const getIconColor = () => {
-    if (isHidden) return '#666';
-    else if (isEditMode) return '#777';
+    if (isEditMode) return '#777';
     return '#999';
   };
 
   const accessibilityState = {
-    disabled: isHidden,
     selected: isEditMode,
   };
 
@@ -236,7 +230,6 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
         style={[
           styles.fridgeName,
           isSmall && styles.smallFridgeName,
-          isHidden && styles.hiddenFridgeName,
           isEditMode && styles.editFridgeName,
         ]}
         numberOfLines={1}

@@ -113,7 +113,7 @@ export class FridgeControllerAPI {
    * 냉장고 수정 - PUT
    */
   static async update(
-    fridgeId: string,
+    fridgeId: number,
     updateData: FridgeUpdateRequest,
   ): Promise<FridgeUpdateResponse> {
     console.log('냉장고 수정 요청:', { fridgeId, updateData });
@@ -130,7 +130,7 @@ export class FridgeControllerAPI {
   /**
    * 냉장고 삭제 - DELETE
    */
-  static async delete(fridgeId: string): Promise<FridgeDeleteResponse> {
+  static async delete(fridgeId: number): Promise<FridgeDeleteResponse> {
     console.log('🔍 냉장고 삭제 요청 시작:', fridgeId);
 
     // 토큰 상태 확인
@@ -194,7 +194,7 @@ export class FridgeControllerAPI {
    */
   static logApiError(
     operation: string,
-    fridgeId: string | null,
+    fridgeId: number | null,
     error: any,
   ): void {
     console.log(`=== ${operation} API 에러 디버깅 ===`);

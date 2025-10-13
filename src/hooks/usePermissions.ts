@@ -34,14 +34,14 @@ export const usePermissions = (currentUser: User | null) => {
   }, [currentUser]);
 
   const hasPermission = useCallback(
-    (fridgeId: string, action: 'edit' | 'delete' | 'view') => {
+    (fridgeId: number, action: 'edit' | 'delete' | 'view') => {
       return PermissionUtils.hasPermission(permissions, fridgeId, action);
     },
     [permissions],
   );
 
   const getPermission = useCallback(
-    (fridgeId: string) => {
+    (fridgeId: number) => {
       const permission = permissions.find(p => p.fridgeId === fridgeId);
 
       // 삭제 권한 관련 로그만 출력
@@ -62,7 +62,7 @@ export const usePermissions = (currentUser: User | null) => {
   );
 
   const getFridgeRole = useCallback(
-    (fridgeId: string): FridgeRole | null => {
+    (fridgeId: number): FridgeRole | null => {
       const permission = getPermission(fridgeId);
       return permission?.role || null;
     },

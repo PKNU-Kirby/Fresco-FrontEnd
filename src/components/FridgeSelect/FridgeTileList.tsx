@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, FlatList, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
-import { FridgeWithRole, FridgePermission } from '../../types/permission';
 import { FridgeTile } from './FridgeTile';
+import { FridgeWithRole, FridgePermission } from '../../types/permission';
 import { styles, fridgeTileStyles } from './styles';
 
 interface FridgeListProps {
@@ -30,23 +30,23 @@ export const FridgeList: React.FC<FridgeListProps> = ({
 
     if (isEditMode) {
       if (tiles.length % 2 === 0) {
-        tiles.push({ id: -1, name: 'TRANSPARENT', isHidden: false } as any);
-        tiles.push({ id: -2, name: 'PLUS', isHidden: false } as any);
+        tiles.push({ id: -1, name: 'TRANSPARENT' } as any);
+        tiles.push({ id: -2, name: 'PLUS' } as any);
       } else if (tiles.length % 2 === 1) {
-        tiles.push({ id: -1, name: 'PLUS', isHidden: false } as any);
+        tiles.push({ id: -1, name: 'PLUS' } as any);
       }
     } else {
       if (tiles.length % 2 === 1) {
-        tiles.push({ id: -3, name: 'TRANSPARENT', isHidden: false } as any);
+        tiles.push({ id: -3, name: 'TRANSPARENT' } as any);
       }
     }
     return tiles;
   };
 
   const renderFridgeItem = ({ item }: { item: FridgeWithRole }) => {
-    if (isEditMode && parseInt(item.id, 10) === -2) {
+    if (isEditMode && item.id === -2) {
       return <View style={[fridgeTileStyles.tile, { opacity: 0 }]} />;
-    } else if (isEditMode && parseInt(item.id, 10) === -1) {
+    } else if (isEditMode && item.id === -1) {
       return (
         <View style={fridgeTileStyles.plusTile}>
           <TouchableOpacity
@@ -59,14 +59,13 @@ export const FridgeList: React.FC<FridgeListProps> = ({
           </TouchableOpacity>
         </View>
       );
-    } else if (!isEditMode && parseInt(item.id, 10) === -3) {
+    } else if (!isEditMode && item.id === -3) {
       return <View style={[fridgeTileStyles.tile, { opacity: 0 }]} />;
     } else {
       return (
         <FridgeTile
           fridge={item}
           isEditMode={isEditMode}
-          isHidden={false}
           onEdit={isEditMode ? onEditFridge : undefined}
           onLeave={isEditMode ? onLeaveFridge : undefined}
           onToggleHidden={isEditMode ? onToggleHidden : undefined}
