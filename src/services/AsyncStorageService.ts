@@ -3,7 +3,7 @@ import Config from 'react-native-config';
 import { getTokenUserId } from '../utils/authUtils';
 import { User, SocialProvider, UserId } from '../types/auth';
 
-// 타입 정의들
+// 타입 정의
 export type Refrigerator = {
   id: string;
   name: string;
@@ -25,17 +25,16 @@ export type FridgeWithRole = Refrigerator & {
   isOwner: boolean;
   role: 'owner' | 'member';
   memberCount: number;
-  isHidden: boolean; // UI 상태용
 };
 
 export type FridgeItem = {
-  id: string;
+  id: number;
   name: string;
   quantity: number;
   expiryDate: string;
   imageUri?: string;
   itemCategory: string;
-  fridgeId: string;
+  fridgeId: number;
   unit?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -222,21 +221,40 @@ export class AsyncStorageService {
 
   static async getCurrentUserId(): Promise<string | null> {
     try {
-      // 먼저 토큰에서 userId 확인
-      const tokenUserId = await getTokenUserId();
+      let tokenUserId = await getTokenUserId();
+
       if (tokenUserId) {
-        console.log('토큰에서 userId 추출:', tokenUserId);
-        // AsyncStorage에도 동기화
         await AsyncStorage.setItem('currentUserId', tokenUserId);
         return tokenUserId;
       }
 
-      // 토큰에서 추출 실패 시 AsyncStorage 확인
+      const expired = await isTokenExpired();
+
+      if (expired) {
+        const refreshSuccess = await refreshAccessToken();
+
+        if (refreshSuccess) {
+          tokenUserId = await getTokenUserId();
+
+          if (tokenUserId) {
+            await AsyncStorage.setItem('currentUserId', tokenUserId);
+            return tokenUserId;
+          }
+        } else {
+          // console.log('X 토큰 리프레시 실패');
+        }
+      }
+
       const storedUserId = await AsyncStorage.getItem('currentUserId');
-      console.log('저장된 userId:', storedUserId);
-      return storedUserId;
+
+      if (storedUserId) {
+        return storedUserId;
+      }
+
+      console.error('X 모든 방법으로 userId 조회 실패');
+      return null;
     } catch (error) {
-      console.error('사용자 ID 조회 실패:', error);
+      console.error('X 사용자 ID 조회 중 오류:', error);
       return null;
     }
   }
@@ -275,32 +293,24 @@ export class AsyncStorageService {
   // ============================================================================
 
   static async createUserFromLogin(
-    provider: string,
+    provider: SocialProvider,
     providerId: string,
     name: string,
-    email?: string,
-    profileImage?: string,
   ): Promise<User> {
     try {
-      // 토큰에서 userId 추출
       const tokenUserId = await getTokenUserId();
       const serverUserId = tokenUserId || '1';
 
-      console.log('서버 userId로 사용자 생성:', serverUserId);
-
-      // 서버 userId로 사용자 생성
       const newUser: User = {
         id: serverUserId,
         provider,
         providerId,
         name,
-        email,
-        profileImage,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      // users 목록에서 해당 ID의 사용자를 업데이트 또는 추가
+      // update user list
       const usersJson = await AsyncStorage.getItem('users');
       const users: User[] = usersJson ? JSON.parse(usersJson) : [];
 
@@ -334,13 +344,34 @@ export class AsyncStorageService {
       return [];
     }
   }
-
   static async getUserById(id: string): Promise<User | null> {
     try {
-      const users = await this.getUsers();
+      const usersJson = await AsyncStorage.getItem(this.KEYS.USERS);
+
+      if (!usersJson) {
+        const expired = await isTokenExpired();
+
+        if (expired) {
+          const refreshSuccess = await refreshAccessToken();
+
+          if (refreshSuccess) {
+            const retryUsersJson = await AsyncStorage.getItem(this.KEYS.USERS);
+            if (!retryUsersJson) {
+              return null;
+            }
+
+            const users: User[] = JSON.parse(retryUsersJson);
+            return users.find(user => user.id === id) || null;
+          }
+        }
+
+        return null;
+      }
+
+      const users: User[] = JSON.parse(usersJson);
       return users.find(user => user.id === id) || null;
     } catch (error) {
-      console.error('Get user by ID error:', error);
+      console.error('X Get user by ID error:', error);
       return null;
     }
   }
@@ -465,18 +496,19 @@ export class AsyncStorageService {
         ]);
 
       const userRefrigeratorRelations = refrigeratorUsers.filter(
-        ru => parseInt(ru.inviteeId) === userId,
+        ru => parseInt(ru.inviteeId, 10) === userId,
       );
 
       const fridgesWithRole: FridgeWithRole[] = userRefrigeratorRelations
         .map(relation => {
           const refrigerator = refrigerators.find(
-            r => parseInt(r.id) === parseInt(relation.refrigeratorId),
+            r => parseInt(r.id, 10) === parseInt(relation.refrigeratorId, 10),
           );
           if (!refrigerator) return null;
 
           const memberCount = refrigeratorUsers.filter(
-            ru => parseInt(ru.refrigeratorId) === parseInt(refrigerator.id),
+            ru =>
+              parseInt(ru.refrigeratorId, 10) === parseInt(refrigerator.id, 10),
           ).length;
           const isOwner = relation.inviterId === relation.inviteeId;
 
@@ -485,7 +517,7 @@ export class AsyncStorageService {
             isOwner,
             role: isOwner ? ('owner' as const) : ('member' as const),
             memberCount,
-            isHidden: hiddenFridges.includes(parseInt(refrigerator.id)),
+            isHidden: hiddenFridges.includes(parseInt(refrigerator.id, 10)),
           };
         })
         .filter(Boolean) as FridgeWithRole[];
@@ -551,10 +583,8 @@ export class AsyncStorageService {
     }
   }
 
-  // 초기 데이터 생성
   static async initializeDefaultFridgeForUser(userId: number): Promise<void> {
     try {
-      // 이미 초기화됐는지 확인하는 플래그 추가
       const initKey = `initialized_${userId}`;
       const isInitialized = await AsyncStorage.getItem(initKey);
 
@@ -563,16 +593,13 @@ export class AsyncStorageService {
         return;
       }
 
-      // 사용자의 기본 냉장고가 있는지 확인
       const userFridges = await this.getUserRefrigerators(userId);
 
       if (userFridges.length === 0) {
-        // 기본 냉장고 생성
         await this.createRefrigerator('내 냉장고', userId);
         console.log('기본 냉장고 생성 완료');
       }
 
-      // 초기화 완료 플래그 저장
       await AsyncStorage.setItem(initKey, 'true');
     } catch (error) {
       console.error('Initialize default fridge error:', error);
@@ -659,19 +686,17 @@ export const isTokenExpired = async (): Promise<boolean> => {
 
 export const refreshAccessToken = async (): Promise<boolean> => {
   if (isRefreshing && refreshPromise) {
-    console.log('토큰 갱신이 이미 진행 중입니다.');
+    console.log('토큰 갱신이 이미 진행 중, 기존 프로미스를 반환');
     return await refreshPromise;
   }
 
   isRefreshing = true;
-
   refreshPromise = (async () => {
     try {
-      console.log('토큰 갱신 시작...');
-
       const refreshToken = await getRefreshToken();
+
       if (!refreshToken) {
-        console.log('Refresh Token이 없습니다.');
+        await logout();
         return false;
       }
 
@@ -690,25 +715,29 @@ export const refreshAccessToken = async (): Promise<boolean> => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('토큰 갱신 응답:', data);
 
         if (data.code && data.code.includes('OK') && data.result) {
           await saveTokens(
             data.result.accessToken,
             data.result.refreshToken || refreshToken,
           );
-          console.log('토큰 갱신 성공');
           return true;
         } else {
-          console.log('토큰 갱신 응답 형식이 올바르지 않음:', data);
           return false;
         }
       } else {
-        console.log('토큰 갱신 API 실패:', response.status);
+        // console.log('X 토큰 갱신 API 실패:', response.status);
+
+        // 401/403 -> 재로그인 필요
+        if (response.status === 401 || response.status === 403) {
+          console.log('>> 토큰 만료 : 재로그인 필요');
+          await logout();
+        }
+
         return false;
       }
     } catch (error) {
-      console.error('토큰 갱신 중 오류:', error);
+      console.error('X 토큰 갱신 중 오류 :', error);
       return false;
     } finally {
       isRefreshing = false;
@@ -718,7 +747,6 @@ export const refreshAccessToken = async (): Promise<boolean> => {
 
   return await refreshPromise;
 };
-
 // ============================================================================
 // 기존 호환성을 위한 함수들
 // ============================================================================
@@ -767,25 +795,4 @@ export const logout = async (): Promise<boolean> => {
     console.error('로그아웃 실패:', error);
     return false;
   }
-};
-
-export const debugAuthInfo = async (): Promise<void> => {
-  const userInfo = await getUserInfo();
-  const accessToken = await getAccessToken();
-  const refreshToken = await getRefreshToken();
-  const tokenExpired = await isTokenExpired();
-
-  console.log('=== Auth Debug Info ===');
-  console.log('User Info:', userInfo);
-  console.log(
-    'Access Token:',
-    accessToken ? `${accessToken.substring(0, 20)}...` : 'null',
-  );
-  console.log(
-    'Refresh Token:',
-    refreshToken ? `${refreshToken.substring(0, 20)}...` : 'null',
-  );
-  console.log('Token Expired:', tokenExpired);
-  console.log('Is Logged In:', await isLoggedIn());
-  console.log('=====================');
 };

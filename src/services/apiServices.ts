@@ -33,6 +33,10 @@ export class ApiService {
     );
   }
 
+  private static isRecipeEndpoint(endpoint: string): boolean {
+    return endpoint.startsWith('/recipe/');
+  }
+
   // 공통 헤더 생성
   private static async getHeaders(): Promise<HeadersInit_> {
     const token = await AsyncStorageService.getAuthToken();
@@ -169,7 +173,13 @@ export class ApiService {
     retryCount: number = 0,
   ): Promise<T> {
     try {
-      const url = `${Config.API_BASE_URL}${endpoint}`;
+      const normalizedEndpoint = this.isRecipeEndpoint(endpoint)
+        ? endpoint // /recipe로 시작하는 경우, endpoint에 /api/v1 포함 안 함
+        : endpoint.startsWith('/api/v1')
+        ? endpoint // 이미 /api/v1 있는 경우
+        : `/api/v1${endpoint}`;
+
+      const url = `${Config.API_BASE_URL}${normalizedEndpoint}`;
       const headers = await this.getHeaders();
 
       console.log(`=> API 호출: ${options.method || 'GET'} ${url}`);
@@ -280,6 +290,7 @@ export class ApiService {
           throw new Error(responseData.message || 'API 호출 실패');
         }
       }
+      return responseData as T;
     } catch (error) {
       console.error('X API 호출 실패:', error);
 

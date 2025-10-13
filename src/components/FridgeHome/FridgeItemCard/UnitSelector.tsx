@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity, Modal, Text } from 'react-native';
-import { modalStyles as styles } from './styles';
+import { unitSelectorStyles as styles } from './styles';
 
 interface UnitSelectorProps {
   visible: boolean;

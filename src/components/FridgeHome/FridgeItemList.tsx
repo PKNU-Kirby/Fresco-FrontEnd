@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View } from 'react-native';
+import { View, KeyboardAvoidingView, Platform } from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
-import { KeyboardAvoidingView, Platform } from 'react-native';
-import FridgeItemCard from './FridgeItemCard';
-import ItemAddButton from './ItemAddButton';
 import FilterBar from './FilterBar';
+import ItemAddButton from './ItemAddButton';
+import FridgeItemCard from './FridgeItemCard';
 import { getFridgeItemsByFridgeId } from '../../utils/fridgeStorage';
 import { listStyles as styles } from './styles';
 
 type FridgeItem = {
-  id: string;
-  fridgeId: string;
+  id: number;
+  fridgeId: number;
   name: string;
   quantity: number;
   expiryDate: string;
@@ -24,10 +23,10 @@ type FridgeItemListProps = {
   isEditMode: boolean;
   onAddItem: () => void;
   onItemPress?: (item: FridgeItem) => void;
-  onQuantityChange?: (itemId: string, newQuantity: number) => void;
-  onUnitChange?: (itemId: string, newUnit: string) => void;
-  onExpiryDateChange?: (itemId: string, newDate: string) => void;
-  onDeleteItem?: (itemId: string) => void;
+  onQuantityChange?: (itemId: number, newQuantity: number) => void;
+  onUnitChange?: (itemId: number, newUnit: string) => void;
+  onExpiryDateChange?: (itemId: number, newDate: string) => void;
+  onDeleteItem?: (itemId: number) => void;
   // FilterBar props
   activeItemCategory: string;
   onItemCategoryPress: () => void;
@@ -67,7 +66,12 @@ const FridgeItemList: React.FC<FridgeItemListProps> = ({
       if (items.length > 0) {
         const fridgeId = items[0].fridgeId;
         const loadedItems = await getFridgeItemsByFridgeId(fridgeId);
-        setTestItems(loadedItems);
+        setTestItems(
+          loadedItems.map(item => ({
+            ...item,
+            fridgeId: Number(item.fridgeId),
+          })),
+        );
       }
     };
     loadTestData();

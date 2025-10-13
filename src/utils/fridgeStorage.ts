@@ -9,7 +9,7 @@ import {
 
 // 기존 FridgeItem 타입 유지 (하위 호환성)
 export type FridgeItem = {
-  id: string;
+  id: number;
   name: string;
   quantity: number;
   expiryDate: string;
@@ -87,7 +87,7 @@ const getFridgeItemsByFridgeIdFromStorage = async (
  * 냉장고 아이템 조회 (API 우선, AsyncStorage fallback)
  */
 export const getFridgeItemsByFridgeId = async (
-  fridgeId: string,
+  fridgeId: number,
   categoryIds: number[] = [], // 기본값 유지
   page: number = 0,
   size: number = 100,

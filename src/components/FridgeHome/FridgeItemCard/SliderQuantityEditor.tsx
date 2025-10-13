@@ -25,7 +25,7 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
   onMaxQuantityChange,
   onTextBlur,
   onUnitPress,
-  onDeleteRequest, // 추가
+  onDeleteRequest,
 }) => {
   const [_isSliding, setIsSliding] = useState(false);
   const [_isInputFocused, setIsInputFocused] = useState(false);
@@ -45,10 +45,15 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     }
   };
 
-  // 편집 모드가 변경될 때 사용자 조작 상태 리셋
+  // 편집 모드가 변경될 때 처리
   useEffect(() => {
     if (!isEditMode) {
       setHasUserInteracted(false);
+    } else {
+      // 편집 모드로 진입 시 슬라이더를 최대값으로 설정
+      if (!_hasUserInteracted && quantity < maxQuantity) {
+        onQuantityChange(maxQuantity);
+      }
     }
   }, [isEditMode]);
 
@@ -59,7 +64,7 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     switch (normalizedUnit) {
       case 'g':
       case 'ml':
-        return 1.0; // 정수 단위
+        return 1.0;
       case '개':
         return maxValue >= 10 ? 1.0 : 0.01; // 10개 이상이면 1.0, 미만이면 0.01
       case 'kg':
@@ -87,13 +92,20 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     return Math.round(value / step) * step;
   };
 
-  // 🔧 FIX 1: 0이 되면 삭제 모달 트리거
+  // 0이 되면 삭제 모달 트리거
   const checkAndTriggerDelete = (newValue: number) => {
+    console.log('>> checkAndTriggerDelete called:', {
+      newValue,
+      hasDeleteRequest: !!onDeleteRequest,
+      willTrigger: newValue <= 0 && !!onDeleteRequest,
+    });
+
     if (newValue <= 0 && onDeleteRequest) {
+      console.log('>> Triggering delete request!');
       onDeleteRequest();
-      return true; // 삭제 요청됨
+      return true;
     }
-    return false; // 정상 처리
+    return false;
   };
 
   // 스테퍼 증가/감소 (무조건 1.0 단위)
@@ -111,21 +123,20 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     } else {
       newValue = Math.max(0, currentValue - step);
 
-      // 🔧 FIX 1: 0이 되면 삭제 모달 트리거
+      // 0이 되면 삭제 모달 트리거
       if (checkAndTriggerDelete(newValue)) {
-        return; // 삭제 모달이 뜨므로 여기서 중단
+        return;
       }
     }
 
-    // 스테퍼는 항상 정수
     newValue = Math.round(newValue);
     setHasUserInteracted(true);
     onQuantityChange(newValue);
   };
 
-  // 🔧 FIX 2: 슬라이더 변경 시 소수점 표시
+  // 슬라이더 변경 시 소수점 표시
   const handleSliderChange = (value: number) => {
-    console.log('🎚️ Slider changed:', {
+    console.log('>> Slider changed:', {
       rawValue: value,
       maxQuantity,
       unit,
@@ -137,12 +148,11 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     const roundedValue = roundToStep(value, sliderStep);
     const clampedValue = Math.max(0, Math.min(roundedValue, maxQuantity));
 
-    // 🔧 FIX 1: 0이 되면 삭제 모달 트리거
+    // 0이 되면 삭제 모달 트리거
     if (checkAndTriggerDelete(clampedValue)) {
-      return; // 삭제 모달이 뜨므로 여기서 중단
+      return;
     }
 
-    // 🔧 FIX 2: 소수점 처리 개선 - formatQuantity 활용
     let finalValue;
     if (sliderStep >= 1) {
       finalValue = Math.round(clampedValue);
@@ -153,7 +163,6 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
       finalValue = Math.round(clampedValue * 100) / 100;
     }
 
-    // 포맷된 문자열로 저장 (소수점 표시 유지)
     onQuantityChange(formatQuantity(finalValue));
   };
 
@@ -165,7 +174,6 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
 
   // 직접 입력 처리
   const handleTextChange = (text: string) => {
-    // 숫자와 소수점만 허용
     let cleanText = text.replace(/[^0-9.]/g, '');
 
     // 소수점이 여러 개 있으면 첫 번째만 유지
@@ -195,16 +203,20 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
   const handleTextBlur = () => {
     setIsInputFocused(false);
 
-    // 빈 값이거나 0이면
-    if (quantity === 0 || quantity === 0) {
-      // 🔧 FIX 1: 0이 되면 삭제 모달 트리거
+    const numValue = quantity || 0;
+
+    // 입력값이 비어있거나, NaN이거나, 0 이하인 경우
+    if (
+      isNaN(numValue) ||
+      quantity === null ||
+      quantity === undefined ||
+      numValue <= 0
+    ) {
+      // 0 이하면 삭제 모달 트리거
       if (checkAndTriggerDelete(0)) {
-        return; // 삭제 모달이 뜨므로 여기서 중단
+        return;
       }
-      onQuantityChange(0);
     } else {
-      // 유효한 숫자로 정리
-      const numValue = quantity || 0;
       const clampedValue = Math.max(0, numValue);
 
       // 슬라이더 모드일 때는 스텝 단위로 반올림
@@ -306,7 +318,7 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
               style={styles.slider}
               minimumValue={0}
               maximumValue={maxQuantity}
-              step={sliderStep} // 단위별 스텝 적용
+              step={sliderStep}
               value={currentQuantityNum}
               onValueChange={handleSliderChange}
               onSlidingStart={() => setIsSliding(true)}

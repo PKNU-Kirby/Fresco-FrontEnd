@@ -14,12 +14,12 @@ interface NewItemCardProps {
 
 const NewItemCard: React.FC<NewItemCardProps> = ({ onSave, onCancel }) => {
   const [name, setName] = useState('');
-  const [quantity, setQuantity] = useState('1');
+  const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState('개');
   const [showUnitModal, setShowUnitModal] = useState(false);
 
   const handleSave = () => {
-    const qty = parseInt(quantity, 10);
+    const qty = quantity;
     onSave(name, qty, unit);
   };
 

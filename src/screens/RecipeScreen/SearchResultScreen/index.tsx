@@ -7,21 +7,17 @@ import {
   TextInput,
   Keyboard,
   Image,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import RecipeAPI from '../../../services/API/RecipeAPI';
 import { Recipe, RecipeStackParamList } from '../RecipeNavigator';
+import { SearchHistoryStorage } from '../../../utils/AsyncStorageUtils';
 import { styles } from './styles';
-
-// utility funcs
-import {
-  RecipeStorage,
-  FavoriteStorage,
-  SearchHistoryStorage,
-} from '../../../utils/AsyncStorageUtils';
 
 type SearchResultScreenNavigationProp = NativeStackNavigationProp<
   RecipeStackParamList,
@@ -75,7 +71,7 @@ const SearchRecipeCard: React.FC<{
 const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   const navigation = useNavigation<SearchResultScreenNavigationProp>();
   const route = useRoute<SearchResultScreenRouteProp>();
-  const { query: initialQuery } = route.params;
+  const { query: initialQuery, fridgeId, fridgeName } = route.params;
 
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [_searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -91,7 +87,6 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   const searchInputRef = useRef<TextInput>(null);
   const ITEMS_PER_PAGE = 15;
 
-  // 초기 검색 실행
   useEffect(() => {
     if (initialQuery) {
       handleSearch();
@@ -99,13 +94,14 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     }
   }, []);
 
-  // 즐겨찾기 목록 로드
+  // 즐겨찾기 목록 로드 API
   const loadFavorites = async () => {
     try {
-      const favorites = await FavoriteStorage.getFavoriteIds();
-      setFavoriteRecipeIds(favorites);
+      const favorites = await RecipeAPI.getFavoriteRecipes();
+      const favoriteIds = favorites.map(recipe => recipe.id);
+      setFavoriteRecipeIds(favoriteIds);
     } catch (error) {
-      console.error('즐겨찾기 로드 실패:', error);
+      setFavoriteRecipeIds([]);
     }
   };
 
@@ -114,6 +110,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     return favoriteRecipeIds.includes(recipeId);
   };
 
+  // 검색 API
   const handleSearch = React.useCallback(async () => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
@@ -123,21 +120,22 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     setIsLoading(true);
 
     try {
-      // 검색 히스토리 업데이트
+      console.log('🔍 검색 시작:', searchQuery);
+
+      // Update search history
       const newHistory = await SearchHistoryStorage.addSearchQuery(searchQuery);
       setSearchHistory(newHistory);
 
-      // 실제 레시피 데이터에서 검색
-      const allRecipes = await RecipeStorage.getPersonalRecipes();
-      const results = allRecipes.filter(recipe =>
-        recipe.title.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
+      // 레시피 검색 API
+      const results = await RecipeAPI.searchRecipes(searchQuery);
 
+      // console.log('검색 결과:', results.length);
       setSearchResults(results);
       setCurrentPage(1);
     } catch (error) {
-      console.error('검색 실패:', error);
+      // console.error('X 검색 실패:', error);
       setSearchResults([]);
+      Alert.alert('검색 실패', '레시피 검색 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -163,19 +161,25 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     searchInputRef.current?.focus();
   };
 
-  // toggle Star
+  // 즐겨찾기 토글 API
   const toggleFavorite = async (recipeId: string) => {
     try {
-      const isNowFavorite = await FavoriteStorage.toggleFavorite(recipeId);
+      console.log('>> 즐겨찾기 토글:', recipeId);
 
-      // Update local state
-      if (isNowFavorite) {
+      // API 호출
+      const result = await RecipeAPI.toggleFavorite(recipeId);
+
+      // 로컬 상태 업데이트
+      if (result.favorite) {
         setFavoriteRecipeIds(prev => [...prev, recipeId]);
+        console.log('>> 즐겨찾기 추가');
       } else {
         setFavoriteRecipeIds(prev => prev.filter(id => id !== recipeId));
+        console.log('>> 즐겨찾기 제거');
       }
     } catch (error) {
-      console.error('즐겨찾기 토글 실패:', error);
+      console.error('X 즐겨찾기 토글 실패:', error);
+      Alert.alert('오류', '즐겨찾기 설정에 실패했습니다.');
     }
   };
 
@@ -224,7 +228,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
               value={searchQuery}
               onChangeText={text => {
                 handleSearchQueryChange(text);
-                setIsInputActive(text.length > 0); // 텍스트 있으면 활성 상태
+                setIsInputActive(text.length > 0);
               }}
               onSubmitEditing={handleSearchSubmit}
               onFocus={() => {
@@ -235,7 +239,6 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
               onBlur={() => {
                 console.log('블러됨');
                 setIsSearchFocused(false);
-                // 텍스트가 있으면 활성 상태 유지, 없으면 비활성
                 setIsInputActive(searchQuery.length > 0);
               }}
               placeholder="레시피 제목을 검색해 보세요"
@@ -307,8 +310,8 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
                 onPress={recipe =>
                   navigation.navigate('RecipeDetail', {
                     recipe,
-                    fridgeId: '1',
-                    fridgeName: '우리집 냉장고',
+                    fridgeId: fridgeId || '1',
+                    fridgeName: fridgeName || '우리집 냉장고',
                   })
                 }
               />

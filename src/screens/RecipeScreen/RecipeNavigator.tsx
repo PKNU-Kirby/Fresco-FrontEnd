@@ -13,27 +13,26 @@ export interface EnhancedIngredient extends RecipeIngredient {
   isAvailable: boolean;
 }
 
-// Recipe 타입 정의 (공통으로 사용)
-export interface Recipe {
-  id: string;
-  title: string;
-  createdAt?: string;
-  isShared?: boolean;
-  sharedBy?: string;
-  ingredients?: RecipeIngredient[];
-  steps?: string[] | string;
-  isFavorite?: boolean;
-  referenceUrl?: string;
-}
+// RecipeNavigator.ts 또는 types.ts
 
-// RecipeIngredient 타입도 export
 export interface RecipeIngredient {
   id: string;
+  recipeIngredientId?: number;
   name: string;
   quantity: number;
   unit: string;
+  instead?: string; // ✅ 대체 재료 필드 추가
 }
 
+export interface Recipe {
+  id: string;
+  title: string;
+  ingredients?: RecipeIngredient[];
+  steps?: string[];
+  referenceUrl?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
 // 네비게이션 타입 정의
 export type RecipeStackParamList = {
   RecipeHome: {

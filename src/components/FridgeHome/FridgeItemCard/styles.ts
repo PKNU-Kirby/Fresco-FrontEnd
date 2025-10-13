@@ -213,8 +213,8 @@ export const quantityStyles = StyleSheet.create({
   },
 });
 
-// Unit Select Modal Style : './UnitSelector.tsx'
-export const modalStyles = StyleSheet.create({
+// UnitSclector Styles
+export const unitSelectorStyles = StyleSheet.create({
   unitModalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

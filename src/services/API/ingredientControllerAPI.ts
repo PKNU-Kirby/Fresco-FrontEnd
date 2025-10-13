@@ -25,7 +25,7 @@ export type SaveIngredientsRequest = {
 };
 
 export type RefrigeratorIngredientResponse = {
-  id: string;
+  id: number;
   ingredientId: number;
   categoryId: number;
   ingredientName: string;
@@ -427,50 +427,6 @@ export class IngredientControllerAPI {
   }
 
   /**
-   * 특정 FormData 방식으로 서버 요청 테스트 (fridgeId 포함 버전)
-   */
-  static async testFormDataMethodWithFridgeId(
-    formData: FormData,
-    methodName: string,
-  ): Promise<void> {
-    try {
-      const headers = await this.getAuthHeaders();
-      const startTime = Date.now();
-
-      const response = await fetch(
-        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
-        {
-          method: 'POST',
-          headers,
-          body: formData,
-        },
-      );
-
-      const endTime = Date.now();
-      const responseText = await response.text();
-
-      console.log(`${methodName} 결과:`, {
-        status: response.status,
-        duration: `${endTime - startTime}ms`,
-        responseLength: responseText.length,
-        success: response.ok,
-      });
-
-      if (!response.ok) {
-        console.log(`${methodName} 오류 응답:`, responseText.substring(0, 200));
-      } else {
-        console.log(`✅ ${methodName}: 성공!`);
-      }
-
-      if (response.status === 400) {
-        console.log(`🔍 ${methodName}: 400 오류 - 파라미터 문제 가능성!`);
-      }
-    } catch (error) {
-      console.error(`${methodName} 요청 실패:`, error);
-    }
-  }
-
-  /**
    * 서버 파라미터 요구사항 검증 (refrigeratorId 포함)
    */
   static async validateServerParametersWithFridgeId(
@@ -535,86 +491,6 @@ export class IngredientControllerAPI {
       console.error('완전한 요청 테스트 실패:', error);
     }
   }
-
-  /**
-   * 실제 이미지와 더미 이미지 비교 테스트 (refrigeratorId 포함)
-   */
-  static async compareRealVsDummyImageWithFridgeId(
-    realImageUri: string,
-    fridgeId: string,
-  ): Promise<void> {
-    console.log('=== 실제 이미지 vs 더미 이미지 비교 (fridgeId 포함) ===');
-
-    const dummyImageData =
-      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
-
-    console.log('1️⃣ 더미 이미지 테스트');
-    await this.testSingleImageWithFridgeId(
-      dummyImageData,
-      '더미 이미지',
-      fridgeId,
-    );
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    console.log('2️⃣ 실제 이미지 테스트');
-    await this.testSingleImageWithFridgeId(
-      realImageUri,
-      '실제 이미지',
-      fridgeId,
-    );
-  }
-
-  /**
-   * 단일 이미지로 서버 테스트 (refrigeratorId 포함)
-   */
-  static async testSingleImageWithFridgeId(
-    imageUri: string,
-    imageName: string,
-    fridgeId: string,
-  ): Promise<void> {
-    try {
-      const formData = new FormData();
-      formData.append('ingredientImage', {
-        uri: imageUri,
-        type: imageUri.startsWith('data:') ? 'image/png' : 'image/jpeg',
-        name: imageUri.startsWith('data:') ? 'dummy.png' : 'real.jpg',
-      } as any);
-      formData.append('refrigeratorId', fridgeId); // 추가
-
-      const headers = await this.getAuthHeaders();
-      const startTime = Date.now();
-
-      const response = await fetch(
-        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
-        {
-          method: 'POST',
-          headers,
-          body: formData,
-        },
-      );
-
-      const endTime = Date.now();
-      const responseText = await response.text();
-
-      console.log(`${imageName} 결과:`, {
-        status: response.status,
-        duration: `${endTime - startTime}ms`,
-        responsePreview: responseText.substring(0, 100),
-      });
-
-      if (response.status === 500) {
-        console.log(`${imageName}: 500 오류 - 이미지 처리 과정에서 문제 발생`);
-      } else if (response.status === 400) {
-        console.log(`${imageName}: 400 오류 - 파라미터 또는 이미지 형식 문제`);
-      } else if (response.ok) {
-        console.log(`✅ ${imageName}: 성공! 서버가 정상 처리함`);
-      }
-    } catch (error) {
-      console.error(`${imageName} 테스트 실패:`, error);
-    }
-  }
-
   /**
    * ✅ 수정된 파일 검증
    */
@@ -912,7 +788,7 @@ export class IngredientControllerAPI {
    * 냉장고 식재료 목록 조회
    */
   static async getRefrigeratorIngredients(
-    refrigeratorId: string,
+    refrigeratorId: number,
     filter: Partial<FilterRequest> = {},
   ): Promise<PageResponse<RefrigeratorIngredientResponse>> {
     const defaultFilter: FilterRequest = {
@@ -951,192 +827,29 @@ export class IngredientControllerAPI {
     }
   }
 
-  // ========== 테스트 메소드들 ==========
-
-  static async testScanWithGalleryImage(
-    scanMode: 'ingredient' | 'receipt',
-  ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      launchImageLibrary(
-        {
-          mediaType: 'photo' as MediaType,
-          quality: 0.8,
-          includeBase64: false,
-        },
-        async response => {
-          if (response.didCancel || response.errorMessage) {
-            reject(new Error('이미지 선택 취소됨'));
-            return;
-          }
-
-          if (response.assets?.[0]?.uri) {
-            try {
-              console.log('갤러리에서 선택한 이미지로 실제 API 테스트 시작');
-              console.log('선택된 이미지:', {
-                uri: response.assets[0].uri,
-                size: response.assets[0].fileSize,
-                type: response.assets[0].type,
-              });
-
-              let result;
-              if (scanMode === 'ingredient') {
-                // refrigeratorId 제거
-                result = await this.scanPhoto(response.assets[0].uri);
-              } else {
-                result = await this.scanReceipt(response.assets[0].uri);
-              }
-
-              console.log('실제 API 응답:', result);
-              resolve(result);
-            } catch (error) {
-              console.error('갤러리 이미지 API 테스트 실패:', error);
-              reject(error);
-            }
-          } else {
-            reject(new Error('이미지를 선택하지 않음'));
-          }
-        },
-      );
-    });
-  }
-
-  static async testServerConnection(): Promise<{
-    isConnected: boolean;
-    responseTime: number;
-    serverInfo?: any;
-    error?: string;
-  }> {
-    const startTime = Date.now();
-
+  /**
+   * 냉장고의 모든 식재료 가져오기 (레시피 계산용)
+   */
+  static async getIngredients(
+    refrigeratorId: string,
+  ): Promise<RefrigeratorIngredientResponse[]> {
     try {
-      console.log('서버 연결 테스트 시작...');
-      const response = await this.searchIngredients('테스트');
-      const responseTime = Date.now() - startTime;
+      console.log(`냉장고 ${refrigeratorId}의 식재료 조회 (레시피용)`);
 
-      console.log('서버 연결 성공:', {
-        responseTime: `${responseTime}ms`,
-        resultsCount: response.length,
+      const result = await this.getRefrigeratorIngredients(refrigeratorId, {
+        size: 1000, // 충분히 큰 사이즈로 모든 식재료 가져오기
+        sort: 'expirationDate',
+        page: 0,
+        categoryIds: [],
       });
 
-      return {
-        isConnected: true,
-        responseTime,
-        serverInfo: {
-          resultsCount: response.length,
-          sampleResult: response[0] || null,
-        },
-      };
+      console.log(`조회된 식재료: ${result.content.length}개`);
+      return result.content;
     } catch (error) {
-      const responseTime = Date.now() - startTime;
-      console.error('서버 연결 실패:', error);
-
-      return {
-        isConnected: false,
-        responseTime,
-        error: error.message,
-      };
+      console.error('식재료 조회 실패:', error);
+      throw error;
     }
   }
-
-  static async runFullAPITest(): Promise<{
-    autoComplete: {
-      success: boolean;
-      data?: any;
-      error?: string;
-      responseTime: number;
-    };
-    serverConnection: {
-      success: boolean;
-      data?: any;
-      error?: string;
-      responseTime: number;
-    };
-    saveTest: {
-      success: boolean;
-      data?: any;
-      error?: string;
-      responseTime: number;
-    };
-  }> {
-    const results = {
-      autoComplete: { success: false, responseTime: 0 },
-      serverConnection: { success: false, responseTime: 0 },
-      saveTest: { success: false, responseTime: 0 },
-    };
-
-    // 1. Auto Complete API 테스트
-    console.log('=== Auto Complete API 테스트 ===');
-    const autoStart = Date.now();
-    try {
-      const autoResult = await this.searchIngredients('토마토');
-      results.autoComplete = {
-        success: true,
-        data: autoResult,
-        responseTime: Date.now() - autoStart,
-      };
-      console.log('Auto Complete 성공:', autoResult);
-    } catch (error) {
-      results.autoComplete = {
-        success: false,
-        error: error.message,
-        responseTime: Date.now() - autoStart,
-      };
-      console.error('Auto Complete 실패:', error);
-    }
-
-    // 2. 서버 연결 테스트
-    console.log('=== 서버 연결 테스트 ===');
-    const connStart = Date.now();
-    try {
-      const connResult = await this.testServerConnection();
-      results.serverConnection = {
-        success: connResult.isConnected,
-        data: connResult,
-        responseTime: Date.now() - connStart,
-      };
-      console.log('서버 연결 테스트 완료:', connResult);
-    } catch (error) {
-      results.serverConnection = {
-        success: false,
-        error: error.message,
-        responseTime: Date.now() - connStart,
-      };
-      console.error('서버 연결 테스트 실패:', error);
-    }
-
-    // 3. 저장 API 테스트
-    console.log('=== 저장 API 테스트 ===');
-    const saveStart = Date.now();
-    try {
-      const ingredient = await this.findIngredientByName('토마토');
-
-      if (ingredient) {
-        console.log('저장 테스트는 실제 fridgeId가 필요하므로 스킵');
-        results.saveTest = {
-          success: true,
-          data: {
-            message: '저장 API 스킵 (fridgeId 필요)',
-            foundIngredient: ingredient,
-          },
-          responseTime: Date.now() - saveStart,
-        };
-      } else {
-        throw new Error('테스트용 식재료를 찾을 수 없음');
-      }
-    } catch (error) {
-      results.saveTest = {
-        success: false,
-        error: error.message,
-        responseTime: Date.now() - saveStart,
-      };
-      console.error('저장 API 테스트 실패:', error);
-    }
-
-    return results;
-  }
-
-  // ========== 나머지 메소드들 ==========
-
   static async addIngredientsToRefrigerator(
     refrigeratorId: string,
     saveRequest: SaveIngredientsRequest,
@@ -1701,49 +1414,6 @@ export class IngredientControllerAPI {
       }
     } catch (error) {
       console.error('FormData 검증 중 오류:', error);
-    }
-  }
-
-  /**
-   * 특정 FormData 방식으로 서버 요청 테스트
-   */
-  static async testFormDataMethod(
-    formData: FormData,
-    methodName: string,
-  ): Promise<void> {
-    try {
-      const headers = await this.getAuthHeaders();
-      const startTime = Date.now();
-
-      const response = await fetch(
-        `${Config.API_BASE_URL}/api/v1/ingredient/scan-photo`,
-        {
-          method: 'POST',
-          headers,
-          body: formData,
-        },
-      );
-
-      const endTime = Date.now();
-      const responseText = await response.text();
-
-      console.log(`${methodName} 결과:`, {
-        status: response.status,
-        duration: `${endTime - startTime}ms`,
-        responseLength: responseText.length,
-        success: response.ok,
-      });
-
-      if (!response.ok) {
-        console.log(`${methodName} 오류 응답:`, responseText.substring(0, 200));
-      }
-
-      // 특별히 400 오류인 경우 파라미터 문제일 가능성
-      if (response.status === 400) {
-        console.log(`🔍 ${methodName}: 400 오류 - 파라미터 문제 가능성!`);
-      }
-    } catch (error) {
-      console.error(`${methodName} 요청 실패:`, error);
     }
   }
 

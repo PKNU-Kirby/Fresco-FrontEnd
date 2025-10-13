@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
-import FilterDropdownButton from '../_common/FilterDropdownButton';
 import ActionToggleButton from '../_common/ActionToggleButton';
+import FilterDropdownButton from '../_common/FilterDropdownButton';
 import { filterBarStyles as styles } from './styles';
 
 // Filter Bar Component

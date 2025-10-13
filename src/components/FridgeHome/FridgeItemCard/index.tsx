@@ -8,7 +8,7 @@ import DeleteButton from './DeleteButton';
 import ConfirmModal from '../../modals/ConfirmModal';
 import { cardStyles as styles } from './styles';
 
-// 카테고리별 아이콘
+// 카테고리별 아이콘 설정
 const getCategoryIcon = (category: string) => {
   const iconMap: { [key: string]: { name: string; color: string } } = {
     베이커리: { name: 'bread-slice', color: '#999' },
@@ -28,8 +28,8 @@ const getCategoryIcon = (category: string) => {
 };
 
 type FridgeItem = {
-  id: string;
-  fridgeId: string;
+  id: number;
+  fridgeId: number;
   name: string;
   quantity: number;
   expiryDate: string;
@@ -46,8 +46,8 @@ type FridgeItemCardProps = {
   onPress?: () => void;
   onQuantityChange?: (itemId: number, newQuantity: number) => void;
   onExpiryDateChange?: (itemId: number, newDate: string) => void;
-  onUnitChange?: (itemId: string, newUnit: string) => void;
-  onDeleteItem?: (itemId: string) => void;
+  onUnitChange?: (itemId: number, newUnit: string) => void;
+  onDeleteItem?: (itemId: number) => void;
   onMaxQuantityChange?: (itemId: string, newMaxQuantity: number) => void;
 };
 
@@ -154,15 +154,9 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     onExpiryDateChange?.(item.id, formattedDate);
   };
 
-  const handleQuantityChange = (newQuantity: string) => {
-    if (newQuantity === '') {
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity === 0) {
       setLocalQuantity(newQuantity);
-      return;
-    }
-    if (newQuantity === '0') {
-      setPreviousQuantity(localQuantity);
-      setLocalQuantity(newQuantity);
-      setShowDeleteModal(true);
       return;
     }
 
@@ -173,8 +167,16 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
   const handleMaxQuantityChange = (newMaxQuantity: number) => {
     if (newMaxQuantity > maxQuantity) {
       setMaxQuantity(newMaxQuantity);
-      onMaxQuantityChange?.(item.id, newMaxQuantity);
+      onMaxQuantityChange?.(item.id.toString(), newMaxQuantity);
     }
+  };
+
+  const handleDeleteRequest = () => {
+    // SliderQuantityEditor에서 0이 되면 호출됨
+    console.log('>> handleDeleteRequest called in FridgeItemCard');
+    setPreviousQuantity(localQuantity);
+    setShowDeleteModal(true);
+    console.log('>> showDeleteModal set to true');
   };
 
   const handleDeleteConfirm = (_name: string) => {
@@ -188,16 +190,15 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
 
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
-    if (localQuantity === 0) {
+    // 삭제 취소 시 이전 수량으로 복원
+    if (localQuantity === 0 || localQuantity === 0) {
       setLocalQuantity(previousQuantity);
+      onQuantityChange?.(item.id, previousQuantity);
     }
   };
 
   const handleTextInputBlur = () => {
-    if (localQuantity === 0) {
-      setLocalQuantity(1);
-      onQuantityChange?.(item.id, '1');
-    }
+    // TextInput blur 시 처리 (필요시)
   };
 
   return (
@@ -257,6 +258,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
                 onMaxQuantityChange={handleMaxQuantityChange}
                 onTextBlur={handleTextInputBlur}
                 onUnitPress={() => setShowUnitModal(true)}
+                onDeleteRequest={handleDeleteRequest}
               />
             </View>
           ) : (

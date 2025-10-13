@@ -3,6 +3,7 @@ import { Recipe } from '../../utils/AsyncStorageUtils';
 import { AsyncStorageService } from '../AsyncStorageService';
 
 // API 응답의 Recipe 타입
+
 interface ApiRecipe {
   recipeId: number;
   title: string;
@@ -12,6 +13,7 @@ interface ApiRecipe {
     name: string;
     quantity: number;
     unit: string;
+    instead?: string; // ✅ 대체재 필드 추가
   }>;
   steps?: string[];
   referenceUrl?: string;
@@ -100,17 +102,22 @@ class RecipeTypeConverter {
   static apiToFrontend(apiRecipe: ApiRecipe): Recipe {
     return {
       id: apiRecipe.recipeId.toString(),
+      recipeId: apiRecipe.recipeId,
       title: apiRecipe.title,
       createdAt: apiRecipe.createdAt || new Date().toISOString(),
       updatedAt: apiRecipe.updatedAt,
       ingredients: apiRecipe.ingredients?.map(ing => ({
         id: ing.ingredientId?.toString() || Date.now().toString(),
+        ingredientId: ing.ingredientId,
         name: ing.name,
         quantity: ing.quantity,
         unit: ing.unit,
+        // ✅ instead는 RecipeIngredient에 없으므로 여기서 제외
+        // instead 정보는 getRecipeDetail에서만 사용
       })),
-      steps: apiRecipe.steps,
+      steps: apiRecipe.steps?.join('\n') || '', // ✅ string으로 변환
       referenceUrl: apiRecipe.referenceUrl,
+      isFavorite: apiRecipe.favorite,
     };
   }
 
@@ -120,12 +127,11 @@ class RecipeTypeConverter {
       title: recipe.title,
       ingredients:
         recipe.ingredients?.map(ing => ({
-          name: ing.name,
+          ingredientName: ing.name,
           quantity: ing.quantity,
-          unit: ing.unit,
         })) || [],
-      steps: recipe.steps || [],
-      referenceUrl: recipe.referenceUrl,
+      steps: recipe.steps || '',
+      url: recipe.referenceUrl,
     };
   }
 }
@@ -211,13 +217,33 @@ export class RecipeAPI {
   }
 
   // 레시피 상세 조회
-  static async getRecipeDetail(recipeId: string): Promise<Recipe> {
+  static async getRecipeDetail(recipeId: string): Promise<
+    Recipe & {
+      ingredients?: Array<RecipeIngredient & { instead?: string }>;
+    }
+  > {
     try {
+      console.log('🔍 레시피 상세 조회:', recipeId);
+
       const apiRecipe = await ApiService.apiCall<ApiRecipe>(
         `/recipe/detail/${recipeId}`,
       );
 
-      return RecipeTypeConverter.apiToFrontend(apiRecipe);
+      // ✅ instead 정보를 포함한 변환
+      const recipe = RecipeTypeConverter.apiToFrontend(apiRecipe);
+
+      // instead 정보를 추가로 포함
+      return {
+        ...recipe,
+        ingredients: apiRecipe.ingredients?.map(ing => ({
+          id: ing.ingredientId?.toString() || Date.now().toString(),
+          ingredientId: ing.ingredientId,
+          name: ing.name,
+          quantity: ing.quantity,
+          unit: ing.unit,
+          instead: ing.instead, // ✅ 대체재 정보 포함
+        })),
+      };
     } catch (error) {
       console.error('레시피 상세 조회 실패:', error);
       throw error;
@@ -346,10 +372,13 @@ export class RecipeAPI {
   }
 
   // 레시피 검색
+  // RecipeAPI.ts
+
+  // 레시피 검색
   static async searchRecipes(query: string): Promise<Recipe[]> {
     try {
       const apiRecipes = await ApiService.apiCall<ApiRecipe[]>(
-        `/recipe/search?query=${encodeURIComponent(query)}`,
+        `/recipe/search?word=${encodeURIComponent(query)}`, // ✅ query → word
       );
 
       return apiRecipes.map(RecipeTypeConverter.apiToFrontend);

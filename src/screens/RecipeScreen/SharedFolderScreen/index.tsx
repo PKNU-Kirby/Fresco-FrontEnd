@@ -9,28 +9,36 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
-import { Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import PaginationButton from '../../../components/Recipe/PaginationButton';
-import { Recipe, RecipeStackParamList } from '../RecipeNavigator';
-import { SharedRecipeStorage } from '../../../utils/AsyncStorageUtils';
-import { AsyncStorageService } from '../../../services/AsyncStorageService';
-import { FridgeWithRole } from '../../../types/permission';
+
 import { User } from '../../../types/auth';
+import RecipeAPI from '../../../services/API/RecipeAPI';
+import { ApiService } from '../../../services/apiServices';
+import {
+  Recipe,
+  RecipeIngredient,
+  RecipeDetailResponse,
+} from '../../../types/Recipe';
+import { RecipeStackParamList } from '../RecipeNavigator';
+import { AsyncStorageService } from '../../../services/AsyncStorageService';
+import ingredientControllerAPI from '../../../services/API/ingredientControllerAPI';
 import { styles } from './styles';
 
 // 냉장고 식재료 타입 정의
 interface FridgeIngredient {
   id: string;
+  ingredientId?: number;
+  categoryId?: number;
+  ingredientName?: string;
   name: string;
   quantity: number;
   unit: string;
-  expiryDate: string;
+  expirationDate?: string;
+  expiryDate?: string;
 }
 
 type SharedFolderScreenNavigationProp = NativeStackNavigationProp<
@@ -50,7 +58,7 @@ interface UserFridge {
   role: 'owner' | 'member';
   joinedAt: string;
   recipes: Recipe[];
-  ingredients: FridgeIngredient[]; // 실제 냉장고 식재료
+  ingredients: FridgeIngredient[];
 }
 
 interface SharedFolderScreenProps {
@@ -61,161 +69,189 @@ interface SharedFolderScreenProps {
   };
 }
 
-// 식재료 매칭 함수 - 이름 기반 매칭 및 대체 재료 고려
+// 식재료 매칭 결과 타입
+interface IngredientMatchResult {
+  recipeIngredient: RecipeIngredient;
+  matched: boolean;
+  fridgeIngredient?: FridgeIngredient;
+  hasEnoughQuantity: boolean;
+  instead?: string;
+}
+
+// 레시피 상태 타입
+interface RecipeAvailabilityStatus {
+  availableCount: number;
+  totalCount: number;
+  canMakeWithFridge: boolean;
+  matchResults: IngredientMatchResult[];
+}
+
+// 백엔드 제공 대체재를 활용한 식재료 매칭
 const findMatchingIngredient = (
-  recipeIngredientName: string,
+  recipeIngredient: RecipeIngredient & { instead?: string },
   fridgeIngredients: FridgeIngredient[],
 ): FridgeIngredient | null => {
+  const recipeName = recipeIngredient.name.toLowerCase().trim();
+
   console.log(
-    `🔍 매칭 시도: "${recipeIngredientName}" vs 냉장고 재료:`,
-    fridgeIngredients.map(i => i.name),
+    `🔍 매칭 시도: "${recipeIngredient.name}" (대체: ${
+      recipeIngredient.instead || '없음'
+    })`,
   );
 
-  // 1. 정확한 이름 매칭
+  // 정확한 이름 매칭
   let match = fridgeIngredients.find(
-    ingredient =>
-      ingredient.name.toLowerCase().trim() ===
-      recipeIngredientName.toLowerCase().trim(),
+    ingredient => ingredient.name.toLowerCase().trim() === recipeName,
   );
 
   if (match) {
-    console.log(
-      `✅ 정확한 매칭 발견: ${recipeIngredientName} -> ${match.name}`,
+    console.log(`✅ 정확한 매칭: ${recipeIngredient.name} → ${match.name}`);
+    return match;
+  }
+
+  // 백엔드가 제공한 대체 재료로 매칭 (instead 필드)
+  if (recipeIngredient.instead) {
+    const alternativeName = recipeIngredient.instead.toLowerCase().trim();
+
+    match = fridgeIngredients.find(
+      ingredient => ingredient.name.toLowerCase().trim() === alternativeName,
     );
-    return match;
-  }
 
-  // 2. 부분 매칭 (레시피 재료 이름이 냉장고 재료에 포함되는 경우)
-  match = fridgeIngredients.find(ingredient =>
-    ingredient.name
-      .toLowerCase()
-      .includes(recipeIngredientName.toLowerCase().trim()),
-  );
-
-  if (match) {
-    console.log(`✅ 부분 매칭 발견: ${recipeIngredientName} -> ${match.name}`);
-    return match;
-  }
-
-  // 3. 역 부분 매칭 (냉장고 재료 이름이 레시피 재료에 포함되는 경우)
-  match = fridgeIngredients.find(ingredient =>
-    recipeIngredientName
-      .toLowerCase()
-      .includes(ingredient.name.toLowerCase().trim()),
-  );
-
-  if (match) {
-    console.log(
-      `✅ 역 부분 매칭 발견: ${recipeIngredientName} -> ${match.name}`,
-    );
-    return match;
-  }
-
-  // 4. 대체 재료 매칭
-  const substitutions: { [key: string]: string[] } = {
-    소시지: ['부어스트 소시지', '소세지', '훈제소시지', '비엔나소시지'],
-    양상추: ['양배추', '상추', '샐러드', '채소'],
-    스리라차: ['저당 스리라차', '칠리소스', '매운소스'],
-    우유: ['저지방우유', '무지방우유', '두유'],
-    설탕: ['황설탕', '흑설탕', '올리고당'],
-    간장: ['진간장', '양조간장', '국간장'],
-    된장: ['쌈장', '고추장'],
-    고기: ['소고기', '돼지고기', '닭고기'],
-    양파: ['대파', '쪽파'],
-  };
-
-  // 레시피 재료명으로 대체재료 찾기
-  for (const [key, alternatives] of Object.entries(substitutions)) {
-    if (recipeIngredientName.toLowerCase().includes(key.toLowerCase())) {
-      match = fridgeIngredients.find(ingredient =>
-        alternatives.some(alt =>
-          ingredient.name.toLowerCase().includes(alt.toLowerCase()),
-        ),
+    if (match) {
+      console.log(
+        `>> 대체 재료 매칭: ${recipeIngredient.name} → ${match.name} (instead: ${recipeIngredient.instead})`,
       );
-      if (match) {
-        console.log(
-          `✅ 대체 재료 매칭 발견: ${recipeIngredientName} -> ${match.name} (${key} 대체)`,
-        );
-        return match;
-      }
+      return match;
+    }
+
+    // 대체 재료 부분 매칭
+    match = fridgeIngredients.find(
+      ingredient =>
+        ingredient.name.toLowerCase().includes(alternativeName) ||
+        alternativeName.includes(ingredient.name.toLowerCase().trim()),
+    );
+
+    if (match) {
+      console.log(
+        `>> 대체 재료 부분 매칭: ${recipeIngredient.name} → ${match.name}`,
+      );
+      return match;
     }
   }
 
-  // 냉장고 재료명으로 대체재료 찾기
-  for (const fridgeIngredient of fridgeIngredients) {
-    for (const [key, alternatives] of Object.entries(substitutions)) {
-      if (
-        alternatives.some(alt =>
-          fridgeIngredient.name.toLowerCase().includes(alt.toLowerCase()),
-        )
-      ) {
-        if (recipeIngredientName.toLowerCase().includes(key.toLowerCase())) {
-          console.log(
-            `✅ 역 대체 재료 매칭 발견: ${recipeIngredientName} -> ${fridgeIngredient.name} (${key} 대체)`,
-          );
-          return fridgeIngredient;
-        }
-      }
-    }
+  // 부분 매칭 (폴백)
+  match = fridgeIngredients.find(
+    ingredient =>
+      ingredient.name.toLowerCase().includes(recipeName) ||
+      recipeName.includes(ingredient.name.toLowerCase().trim()),
+  );
+
+  if (match) {
+    console.log(`>> 부분 매칭: ${recipeIngredient.name} → ${match.name}`);
+    return match;
   }
 
-  console.log(`❌ 매칭 실패: ${recipeIngredientName}`);
+  console.log(`X 매칭 실패: ${recipeIngredient.name}`);
   return null;
 };
 
-// 레시피 식재료 매칭 상태 계산
+// 레시피 상세 정보 가져오기 (instead 포함)
+const fetchRecipeDetailWithAlternatives = async (
+  recipeId: string,
+): Promise<RecipeDetailResponse | null> => {
+  try {
+    console.log(`📋 레시피 ${recipeId} 상세 정보 조회 (대체재 포함)`);
+
+    // RecipeAPI.getRecipeDetail 호출
+    const recipeDetail = await RecipeAPI.getRecipeDetail(recipeId);
+
+    // RecipeDetailResponse 형식으로 변환
+    return {
+      recipeId: parseInt(recipeDetail.id, 10),
+      title: recipeDetail.title,
+      steps: recipeDetail.steps?.join('\n') || '',
+      url: recipeDetail.referenceUrl || '',
+      ingredients:
+        recipeDetail.ingredients?.map(ing => ({
+          ingredientId: parseInt(ing.id, 10),
+          name: ing.name,
+          quantity: ing.quantity,
+          instead: (ing as any).instead || '',
+        })) || [],
+    };
+  } catch (error) {
+    console.error('레시피 상세 조회 실패:', error);
+    return null;
+  }
+};
+
+// 레시피 조리 가능성 계산 (대체재 정보 포함)
 const calculateIngredientStatus = (
   recipe: Recipe,
   fridgeIngredients: FridgeIngredient[],
-) => {
-  console.log(`🍳 레시피 "${recipe.title}" 식재료 매칭 시작`);
-  console.log(`📋 레시피 재료:`, recipe.ingredients);
-  console.log(`🥫 냉장고 재료:`, fridgeIngredients);
+  recipeDetail?: RecipeDetailResponse | null, // instead 정보가 있는 상세 데이터
+): RecipeAvailabilityStatus => {
+  console.log(`>> 레시피 "${recipe.title}" 식재료 매칭 시작`);
 
   if (!recipe.ingredients || recipe.ingredients.length === 0) {
-    console.log(`❌ 레시피에 재료가 없음`);
+    console.log(`X 레시피에 재료가 없음`);
     return {
       availableCount: 0,
       totalCount: 0,
       canMakeWithFridge: false,
+      matchResults: [],
     };
   }
 
+  const matchResults: IngredientMatchResult[] = [];
   let availableCount = 0;
-  let totalCount = recipe.ingredients.length;
-
-  console.log(`🔍 총 ${totalCount}개 재료 매칭 시작`);
+  const totalCount = recipe.ingredients.length;
 
   for (const recipeIngredient of recipe.ingredients) {
     console.log(`\n--- 재료 "${recipeIngredient.name}" 매칭 중 ---`);
 
+    const detailIngredient = recipeDetail?.ingredients.find(
+      ing => ing.ingredientId === recipeIngredient.ingredientId,
+    );
+
+    const instead = detailIngredient?.instead;
+
+    // 매칭 시도 (대체재 포함)
     const matchingFridgeIngredient = findMatchingIngredient(
-      recipeIngredient.name,
+      { ...recipeIngredient, instead },
       fridgeIngredients,
     );
 
+    const matched = !!matchingFridgeIngredient;
+    let hasEnoughQuantity = false;
+
     if (matchingFridgeIngredient) {
-      // 수량 체크 (단위가 다를 수 있으므로 유연하게 처리)
-      const fridgeQuantity = parseFloat(matchingFridgeIngredient.quantity) || 0;
-      const requiredQuantity = parseFloat(recipeIngredient.quantity) || 1;
+      const fridgeQuantity = matchingFridgeIngredient.quantity || 0;
+      const requiredQuantity = recipeIngredient.quantity || 1;
 
       console.log(
-        `📊 수량 비교: 냉장고 ${fridgeQuantity}${matchingFridgeIngredient.unit} vs 필요 ${requiredQuantity}${recipeIngredient.unit}`,
+        `📊 수량 비교: 냉장고 ${fridgeQuantity}${matchingFridgeIngredient.unit} vs 필요 ${requiredQuantity}`,
       );
 
-      if (fridgeQuantity >= requiredQuantity) {
+      hasEnoughQuantity = fridgeQuantity >= requiredQuantity;
+
+      if (hasEnoughQuantity) {
         availableCount++;
-        console.log(
-          `✅ 재료 충분: ${recipeIngredient.name} (${availableCount}/${totalCount})`,
-        );
+        console.log(`>> 재료 충분: ${recipeIngredient.name}`);
       } else {
-        console.log(
-          `⚠️ 재료 부족: ${recipeIngredient.name} - 냉장고 ${fridgeQuantity} < 필요 ${requiredQuantity}`,
-        );
+        console.log(`!! 재료 부족: ${recipeIngredient.name}`);
       }
     } else {
-      console.log(`❌ 매칭되는 재료 없음: ${recipeIngredient.name}`);
+      console.log(`X 매칭되는 재료 없음: ${recipeIngredient.name}`);
     }
+
+    matchResults.push({
+      recipeIngredient,
+      matched,
+      fridgeIngredient: matchingFridgeIngredient || undefined,
+      hasEnoughQuantity,
+      instead,
+    });
   }
 
   const canMakeWithFridge = availableCount === totalCount && totalCount > 0;
@@ -228,74 +264,118 @@ const calculateIngredientStatus = (
     availableCount,
     totalCount,
     canMakeWithFridge,
+    matchResults,
   };
 };
 
+// SharedRecipeCard 컴포넌트 (대체재 정보 표시)
 const SharedRecipeCard: React.FC<{
   recipe: Recipe;
   onPress: () => void;
-  availableIngredientsCount: number;
-  totalIngredientsCount: number;
-  canMakeWithFridge: boolean;
-}> = ({
-  recipe,
-  onPress,
-  availableIngredientsCount,
-  totalIngredientsCount,
-  canMakeWithFridge,
-}) => {
-  const [isSwipeOpen, setIsSwipeOpen] = useState(false);
+  availabilityStatus: RecipeAvailabilityStatus;
+}> = ({ recipe, onPress, availabilityStatus }) => {
+  const [showDetails, setShowDetails] = useState(false);
+
+  const { availableCount, totalCount, canMakeWithFridge, matchResults } =
+    availabilityStatus;
+
+  // 부족한 재료만 필터링
+  const missingIngredients = matchResults.filter(
+    result => !result.matched || !result.hasEnoughQuantity,
+  );
 
   return (
-    <TouchableOpacity
-      style={[
-        sharedRecipeStyles.recipeCard,
-        isSwipeOpen && sharedRecipeStyles.swipeOpenCard,
-        canMakeWithFridge && sharedRecipeStyles.canMakeCard,
-      ]}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View style={sharedRecipeStyles.recipeCardContent}>
-        <Image
-          source={require('../../../assets/icons/chef_hat_96dp.png')}
-          style={sharedRecipeStyles.recipeIcon}
-          resizeMode="contain"
-        />
-        <View style={sharedRecipeStyles.recipeInfo}>
-          <Text
-            style={[
-              sharedRecipeStyles.recipeTitle,
-              isSwipeOpen && sharedRecipeStyles.swipeOpenTitle,
-            ]}
-          >
-            {recipe.title}
-          </Text>
-          {/* 실제 재료 상태 표시 */}
-          <View style={sharedRecipeStyles.ingredientStatus}>
-            <View
-              style={[
-                sharedRecipeStyles.statusIndicator,
-                canMakeWithFridge
-                  ? sharedRecipeStyles.canMakeIndicator
-                  : sharedRecipeStyles.cannotMakeIndicator,
-              ]}
-            >
-              <Text
+    <View>
+      <TouchableOpacity
+        style={[
+          sharedRecipeStyles.recipeCard,
+          canMakeWithFridge && sharedRecipeStyles.canMakeCard,
+        ]}
+        onPress={onPress}
+        activeOpacity={0.7}
+      >
+        <View style={sharedRecipeStyles.recipeCardContent}>
+          <Image
+            source={require('../../../assets/icons/chef_hat_96dp.png')}
+            style={sharedRecipeStyles.recipeIcon}
+            resizeMode="contain"
+          />
+          <View style={sharedRecipeStyles.recipeInfo}>
+            <Text style={sharedRecipeStyles.recipeTitle}>{recipe.title}</Text>
+
+            {/* 재료 상태 표시 */}
+            <View style={sharedRecipeStyles.ingredientStatus}>
+              <View
                 style={[
-                  sharedRecipeStyles.statusText,
+                  sharedRecipeStyles.statusIndicator,
                   canMakeWithFridge
-                    ? sharedRecipeStyles.canMakeText
-                    : sharedRecipeStyles.cannotMakeText,
+                    ? sharedRecipeStyles.canMakeIndicator
+                    : sharedRecipeStyles.cannotMakeIndicator,
                 ]}
               >
-                {availableIngredientsCount} / {totalIngredientsCount}
-              </Text>
+                <Text
+                  style={[
+                    sharedRecipeStyles.statusText,
+                    canMakeWithFridge
+                      ? sharedRecipeStyles.canMakeText
+                      : sharedRecipeStyles.cannotMakeText,
+                  ]}
+                >
+                  {availableCount} / {totalCount}
+                </Text>
+              </View>
+
+              {/* 부족한 재료가 있으면 상세 보기 버튼 */}
+              {!canMakeWithFridge && missingIngredients.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => setShowDetails(!showDetails)}
+                  style={sharedRecipeStyles.detailButton}
+                >
+                  <Icon
+                    name={showDetails ? 'expand-less' : 'expand-more'}
+                    size={16}
+                    color="#666"
+                  />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+
+      {/* 부족한 재료 상세 표시 (대체 재료 포함) */}
+      {showDetails && missingIngredients.length > 0 && (
+        <View style={sharedRecipeStyles.missingIngredientsContainer}>
+          <Text style={sharedRecipeStyles.missingTitle}>부족한 재료:</Text>
+          {missingIngredients.map((result, index) => (
+            <View key={index} style={sharedRecipeStyles.missingItem}>
+              <Text style={sharedRecipeStyles.missingName}>
+                • {result.recipeIngredient.name} (
+                {result.recipeIngredient.quantity})
+              </Text>
+              {result.instead && (
+                <Text style={sharedRecipeStyles.alternativeText}>
+                  → 대체 가능: {result.instead}
+                </Text>
+              )}
+              {!result.matched && (
+                <Text style={sharedRecipeStyles.notFoundText}>
+                  냉장고에 없음
+                </Text>
+              )}
+              {result.matched &&
+                !result.hasEnoughQuantity &&
+                result.fridgeIngredient && (
+                  <Text style={sharedRecipeStyles.insufficientText}>
+                    현재: {result.fridgeIngredient.quantity}
+                    {result.fridgeIngredient.unit}
+                  </Text>
+                )}
+            </View>
+          ))}
+        </View>
+      )}
+    </View>
   );
 };
 
@@ -306,10 +386,7 @@ const sharedRecipeStyles = StyleSheet.create({
     marginBottom: 12,
     marginHorizontal: 16,
     shadowColor: '#333',
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
+    shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.15,
     shadowRadius: 3.84,
     elevation: 3,
@@ -337,42 +414,10 @@ const sharedRecipeStyles = StyleSheet.create({
     color: '#333',
     marginBottom: 4,
   },
-  cardActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  favoriteButton: {
-    padding: 8,
-    marginLeft: 8,
-  },
-  swipeOpenCard: {
-    borderRadius: 0,
-    transform: [{ scale: 0.98 }],
-  },
-  swipeOpenTitle: {
-    color: '#eb4e3d',
-    fontWeight: '600',
-  },
-  rightActionsContainer: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    marginBottom: 12,
-  },
-  actionButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 80,
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
-  },
-  deleteActionButton: {
-    backgroundColor: '#eb4e3d',
-    borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 0,
-  },
   ingredientStatus: {
     marginTop: 4,
-    alignItems: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   statusIndicator: {
     paddingHorizontal: 8,
@@ -397,6 +442,53 @@ const sharedRecipeStyles = StyleSheet.create({
   },
   cannotMakeText: {
     color: '#aaa',
+  },
+  detailButton: {
+    marginLeft: 8,
+    padding: 4,
+  },
+  missingIngredientsContainer: {
+    backgroundColor: '#FFF8E1',
+    borderRadius: 12,
+    padding: 12,
+    marginHorizontal: 16,
+    marginTop: -8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#FFE082',
+  },
+  missingTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#F57C00',
+    marginBottom: 8,
+  },
+  missingItem: {
+    marginBottom: 8,
+  },
+  missingName: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+  alternativeText: {
+    fontSize: 11,
+    color: '#2E7D32',
+    fontStyle: 'italic',
+    marginLeft: 12,
+    marginTop: 2,
+  },
+  notFoundText: {
+    fontSize: 11,
+    color: '#D32F2F',
+    marginLeft: 12,
+    marginTop: 2,
+  },
+  insufficientText: {
+    fontSize: 11,
+    color: '#FF9800',
+    marginLeft: 12,
+    marginTop: 2,
   },
 });
 
@@ -436,78 +528,51 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [_currentUser, setCurrentUser] = useState<User | null>(null);
+
+  // ✅ 레시피별 조리 가능성 상태
+  const [recipeAvailabilities, setRecipeAvailabilities] = useState<
+    Map<string, RecipeAvailabilityStatus>
+  >(new Map());
+
+  // ✅ 레시피 상세 정보 (instead 포함)
+  const [recipeDetails, setRecipeDetails] = useState<
+    Map<string, RecipeDetailResponse>
+  >(new Map());
+
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // 냉장고 식재료 로드 함수 - fridgeStorage 방식 사용
+  // 냉장고 식재료 로드 함수
   const loadFridgeIngredients = async (
     fridgeId: string,
   ): Promise<FridgeIngredient[]> => {
     try {
-      console.log(`🔍 냉장고 ${fridgeId} 식재료 로드 시도`);
+      console.log(`🔍 냉장고 ${fridgeId} 식재료 API 로드 시도`);
 
-      // fridgeStorage의 getFridgeItemsByFridgeId 방식과 동일한 로직
-      const FRIDGE_ITEMS_KEY = 'fridgeItems';
-      const itemsJson = await AsyncStorage.getItem(FRIDGE_ITEMS_KEY);
-
-      if (!itemsJson) {
-        console.log(`⚠️ fridgeItems 키에 데이터가 없음`);
-        return [];
-      }
-
-      const allItems = JSON.parse(itemsJson);
-      console.log(`📦 전체 냉장고 아이템 개수: ${allItems.length}`);
-
-      const fridgeItems = allItems.filter((item: any) => {
-        const itemFridgeId = item.fridgeId;
-        const targetFridgeId = fridgeId;
-        // string과 string 비교
-        const stringMatch =
-          itemFridgeId.toString() === targetFridgeId.toString();
-        // number와 number 비교 (둘 다 변환 가능한 경우)
-        const numberMatch = Number(itemFridgeId) === Number(targetFridgeId);
-        return stringMatch || numberMatch;
-      });
-
-      console.log(
-        `✅ 냉장고 ${fridgeId} 식재료 ${fridgeItems.length}개 로드 성공:`,
-        fridgeItems.map(
-          (item: any) => `${item.name}(${item.quantity}${item.unit})`,
-        ),
+      const response = await ingredientControllerAPI.getRefrigeratorIngredients(
+        fridgeId,
+        { page: 0, size: 100 },
       );
 
-      return fridgeItems;
+      const ingredients: FridgeIngredient[] = response.content.map(item => ({
+        id: item.id,
+        ingredientId: item.ingredientId,
+        categoryId: item.categoryId,
+        name: item.ingredientName,
+        ingredientName: item.ingredientName,
+        quantity: item.quantity,
+        unit: item.unit || '개',
+        expirationDate: item.expirationDate,
+        expiryDate: item.expirationDate,
+      }));
+
+      console.log(
+        `✅ 냉장고 ${fridgeId} 식재료 ${ingredients.length}개 로드 성공`,
+      );
+
+      return ingredients;
     } catch (error) {
       console.error(`❌ 냉장고 ${fridgeId} 식재료 로드 실패:`, error);
       return [];
-    }
-  };
-
-  // 공유 레시피를 냉장고별로 분류
-  const getSharedRecipesByFridge = async (): Promise<{
-    [fridgeId: string]: Recipe[];
-  }> => {
-    try {
-      const allSharedRecipes = await SharedRecipeStorage.getSharedRecipes();
-      const recipesByFridge: { [fridgeId: string]: Recipe[] } = {};
-
-      console.log('모든 공유 레시피:', allSharedRecipes);
-
-      allSharedRecipes.forEach(recipe => {
-        const idParts = recipe.id.split('-');
-        if (idParts.length >= 3 && idParts[0] === 'shared') {
-          const fridgeId = idParts[1];
-          if (!recipesByFridge[fridgeId]) {
-            recipesByFridge[fridgeId] = [];
-          }
-          recipesByFridge[fridgeId].push(recipe);
-        }
-      });
-
-      console.log('냉장고별 레시피 분류 결과:', recipesByFridge);
-      return recipesByFridge;
-    } catch (error) {
-      console.error('공유 레시피 조회 실패:', error);
-      return {};
     }
   };
 
@@ -515,51 +580,41 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   const loadUserFridgesWithRecipes = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      console.log('=== 냉장고 데이터 로드 시작 ===');
+      console.log('=== 냉장고 데이터 로드 시작 (API) ===');
 
-      // 현재 사용자 ID 조회
       const currentUserId = await AsyncStorageService.getCurrentUserId();
       if (!currentUserId) {
         throw new Error('현재 사용자 ID를 찾을 수 없습니다.');
       }
 
-      // 사용자 정보 조회
       const user = await AsyncStorageService.getUserById(currentUserId);
       setCurrentUser(user);
-      console.log('현재 사용자:', user);
 
       if (!user) {
         throw new Error('사용자 정보를 찾을 수 없습니다.');
       }
 
-      // 사용자가 참여한 냉장고 목록 조회
-      const userFridges = await AsyncStorageService.getUserRefrigerators(
-        parseInt(user.id, 10),
-      );
-      console.log('사용자 냉장고 목록:', userFridges);
+      const userFridgesResponse = await ApiService.getUserFridges();
+      console.log('사용자 냉장고 목록 (API):', userFridgesResponse);
 
-      // 공유 레시피를 냉장고별로 분류
-      const sharedRecipesByFridge = await getSharedRecipesByFridge();
-      console.log('냉장고별 공유 레시피:', sharedRecipesByFridge);
-
-      // 각 냉장고의 식재료 정보 로드 및 결합
       const fridgesWithRecipes: UserFridge[] = await Promise.all(
-        userFridges.map(async fridge => {
-          // 냉장고 식재료 로드
+        userFridgesResponse.map(async fridge => {
+          const sharedRecipes = await RecipeAPI.getSharedRecipes(fridge.id);
           const fridgeIngredients = await loadFridgeIngredients(fridge.id);
 
           return {
             fridge: {
               id: fridge.id,
               name: fridge.name,
-              ownerId: fridge.isOwner ? parseInt(user.id, 10) : 0,
-              inviteCode: fridge.inviteCode || '',
+              description: fridge.description,
+              ownerId: fridge.userRole === 'owner' ? user.id : '',
+              inviteCode: '',
               memberCount: fridge.memberCount,
             },
-            role: fridge.role,
+            role: fridge.userRole,
             joinedAt: fridge.createdAt,
-            recipes: sharedRecipesByFridge[fridge.id] || [],
-            ingredients: fridgeIngredients, // 실제 냉장고 식재료
+            recipes: sharedRecipes,
+            ingredients: fridgeIngredients,
           };
         }),
       );
@@ -577,15 +632,59 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
     }
   };
 
-  // 레시피 카드 클릭 핸들러 - 향상된 데이터 전달
+  // ✅ 선택된 냉장고의 레시피 조리 가능성 계산
+  const calculateRecipeAvailabilities = async () => {
+    if (!selectedFridge || selectedFridge.recipes.length === 0) {
+      return;
+    }
+
+    try {
+      console.log('🔍 레시피 조리 가능성 계산 시작...');
+
+      const availabilities = new Map<string, RecipeAvailabilityStatus>();
+      const details = new Map<string, RecipeDetailResponse>();
+
+      // ✅ 각 레시피의 상세 정보 가져오기 (instead 포함)
+      for (const recipe of selectedFridge.recipes) {
+        const recipeDetail = await fetchRecipeDetailWithAlternatives(recipe.id);
+
+        if (recipeDetail) {
+          details.set(recipe.id, recipeDetail);
+        }
+
+        // 조리 가능성 계산
+        const status = calculateIngredientStatus(
+          recipe,
+          selectedFridge.ingredients,
+          recipeDetail,
+        );
+
+        availabilities.set(recipe.id, status);
+      }
+
+      setRecipeDetails(details);
+      setRecipeAvailabilities(availabilities);
+      console.log('✅ 조리 가능성 계산 완료');
+    } catch (error) {
+      console.error('❌ 조리 가능성 계산 실패:', error);
+    }
+  };
+
+  // ✅ 냉장고 선택 시 조리 가능성 계산
+  useEffect(() => {
+    if (selectedFridge) {
+      calculateRecipeAvailabilities();
+    }
+  }, [selectedFridge]);
+
+  // 레시피 카드 클릭 핸들러
   const handleRecipePress = (recipe: Recipe) => {
-    console.log('레시피 선택:', recipe);
     if (!selectedFridge) return;
 
-    // RecipeDetail 화면으로 이동하면서 냉장고 ID와 실제 식재료 정보 전달
     navigation.navigate('RecipeDetail', {
       recipe,
       fridgeId: selectedFridge.fridge.id,
+      fridgeName: selectedFridge.fridge.name,
       fridgeIngredients: selectedFridge.ingredients,
       fromSharedFolder: true,
     });
@@ -600,8 +699,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
         style: 'destructive',
         onPress: async () => {
           try {
-            await SharedRecipeStorage.deleteSharedRecipe(recipe.id);
-            // 데이터 새로고침
+            await RecipeAPI.deleteRecipe(recipe.id);
             await loadUserFridgesWithRecipes();
             Alert.alert('성공', '레시피가 삭제되었습니다.');
           } catch (error) {
@@ -610,13 +708,6 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           }
         },
       },
-    ]);
-  };
-
-  // 즐겨찾기 토글 핸들러 (공유 레시피는 즐겨찾기 기능 제한)
-  const handleToggleFavorite = (recipe: Recipe) => {
-    Alert.alert('알림', '공유 레시피는 즐겨찾기 기능을 사용할 수 없습니다.', [
-      { text: '확인' },
     ]);
   };
 
@@ -700,14 +791,12 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           {!selectedFridge ? (
             // 냉장고 목록 보기
             <>
-              {/* 안내 메시지 */}
               <View style={styles.infoContainer}>
                 <View style={styles.infoIcon}>
                   <Icon name="info" size={20} color="#888" />
                 </View>
                 <Text style={styles.infoText}>
                   참여 중인 냉장고별 공유 레시피를 확인해 보세요!
-                  {'\n'}길게 눌러서 냉장고 설정을 변경할 수 있습니다.
                 </Text>
               </View>
 
@@ -727,13 +816,13 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
                     key={userFridge.fridge.id}
                     userFridge={userFridge}
                     onPress={handleFridgePress}
-                    onLongPress={() => {}} // 길게 누르기 기능 일시 제거
+                    onLongPress={() => {}}
                   />
                 ))
               )}
             </>
           ) : (
-            // 선택된 냉장고의 레시피 목록 보기
+            // 선택된 냉장고의 레시피 목록 보기// 선택된 냉장고의 레시피 목록 보기
             <>
               {selectedFridge.recipes.length === 0 ? (
                 <View style={styles.emptyContainer}>
@@ -745,23 +834,23 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
                 </View>
               ) : (
                 <>
-                  {/* 레시피 목록 - 실제 냉장고 식재료와 비교하여 상태 계산 */}
+                  {/* ✅ 레시피 목록 - 대체재 정보 포함 */}
                   {selectedFridge.recipes.map(recipe => {
-                    const ingredientStatus = calculateIngredientStatus(
-                      recipe,
-                      selectedFridge.ingredients,
-                    );
+                    const availabilityStatus = recipeAvailabilities.get(
+                      recipe.id,
+                    ) || {
+                      availableCount: 0,
+                      totalCount: recipe.ingredients?.length || 0,
+                      canMakeWithFridge: false,
+                      matchResults: [],
+                    };
 
                     return (
                       <SharedRecipeCard
                         key={recipe.id}
                         recipe={recipe}
                         onPress={() => handleRecipePress(recipe)}
-                        availableIngredientsCount={
-                          ingredientStatus.availableCount
-                        }
-                        totalIngredientsCount={ingredientStatus.totalCount}
-                        canMakeWithFridge={ingredientStatus.canMakeWithFridge}
+                        availabilityStatus={availabilityStatus}
                       />
                     );
                   })}

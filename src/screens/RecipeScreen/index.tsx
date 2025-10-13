@@ -12,7 +12,7 @@ import { Recipe, RecipeStackParamList } from './RecipeNavigator';
 
 // API 서비스 import
 import RecipeAPI from '../../services/API/RecipeAPI';
-import ingredientControllerAPI from '../../services/API/ingredientControllerAPI';
+import { IngredientControllerAPI } from '../../services/API/ingredientControllerAPI';
 
 // 조리 가능성 계산 유틸리티 import
 import {
@@ -69,9 +69,8 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     try {
       if (personalRecipes.length > 0 && fridgeId) {
         // 냉장고 재료를 API에서 가져오기
-        const fridgeItems = await ingredientControllerAPI.getIngredients(
-          fridgeId,
-        );
+        const fridgeItems =
+          await IngredientControllerAPI.getRefrigeratorIngredients(fridgeId);
 
         // 기존 로직 재활용 (recipeAvailabilityUtils 사용)
         const availabilities = await calculateMultipleRecipeAvailability(
@@ -88,6 +87,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
 
   // 초기 데이터 로드 (API 기반)
   // 초기 데이터 로드 (API 기반) - 권한 에러 처리 추가
+  /*
   const loadInitialData = async () => {
     try {
       setIsLoading(true);
@@ -139,6 +139,49 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
       setPersonalRecipes([]);
       setSharedRecipes([]);
       setFavoriteRecipeIds([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  */
+
+  // RecipeScreen/index.tsx 에서 임시로 교체
+
+  const loadInitialData = async () => {
+    try {
+      setIsLoading(true);
+
+      // 🔥 임시 Mock 데이터
+      const mockRecipes: Recipe[] = [
+        {
+          id: '1',
+          title: '김치찌개',
+          ingredients: [
+            { id: '1', name: '김치', quantity: 200, unit: 'g' },
+            { id: '2', name: '돼지고기', quantity: 150, unit: 'g' },
+            { id: '3', name: '두부', quantity: 1, unit: '모' },
+          ],
+          steps: ['김치를 썬다', '고기를 볶는다', '물을 붓고 끓인다'],
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: '2',
+          title: '된장찌개',
+          ingredients: [
+            { id: '4', name: '된장', quantity: 2, unit: '스푼' },
+            { id: '5', name: '두부', quantity: 1, unit: '모' },
+          ],
+          steps: ['물을 끓인다', '된장을 푼다'],
+          createdAt: new Date().toISOString(),
+        },
+      ];
+
+      setPersonalRecipes(mockRecipes);
+      setFavoriteRecipeIds(['1']); // 김치찌개만 즐겨찾기
+      setSharedRecipes([]);
+
+      // 실제 API 호출은 주석 처리
+      // const [personalResult, ...] = await Promise.allSettled([...]);
     } finally {
       setIsLoading(false);
     }

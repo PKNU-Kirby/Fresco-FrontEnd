@@ -202,7 +202,7 @@ const PhotoPreviewScreen: React.FC = () => {
       recognizedData: {
         photo: photo.uri,
         name: '',
-        quantity: '1',
+        quantity: 1,
         unit: '개',
         expiryDate: '',
         itemCategory: '기타',
