@@ -60,7 +60,7 @@ export const fridgeHeaderStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#444',
     padding: scale(8),
-    backgroundColor: 'lightgray',
+    backgroundColor: '#d8d8d8',
     borderRadius: scale(8),
   },
   saveButton: {
@@ -188,7 +188,7 @@ export const fridgeTileStyles = StyleSheet.create({
     borderRadius: scale(12),
   },
   editModeTile: {
-    backgroundColor: '#9c9c9cff',
+    backgroundColor: '#00000061',
   },
 
   /** 아이콘 컨테이너 */
@@ -218,7 +218,7 @@ export const fridgeTileStyles = StyleSheet.create({
     color: '#444',
     textAlign: 'center',
     marginTop: scale(12),
-    maxWidth: scale(100),
+    maxWidth: scale(130),
     lineHeight: Platform.OS === 'android' ? scale(17) : scale(16),
   },
   smallFridgeName: {
@@ -236,11 +236,14 @@ export const fridgeTileStyles = StyleSheet.create({
   quickActionsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
     marginTop: scale(6),
     gap: scale(8),
     position: 'absolute',
     top: scale(60),
-    right: scale(22),
+    // right: scale(22),
+    left: 0,
+    right: 0,
   },
   quickActionButton: {
     width: scale(36),
@@ -256,6 +259,10 @@ export const fridgeTileStyles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: scale(3.84),
     elevation: 50,
+  },
+  quickActionButtonDisabled: {
+    opacity: 0.5,
+    shadowOpacity: 0.3,
   },
 
   /** Plus 타일 */

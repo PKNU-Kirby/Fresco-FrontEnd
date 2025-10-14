@@ -5,7 +5,7 @@ import { User, SocialProvider, UserId } from '../types/auth';
 
 // 타입 정의
 export type Refrigerator = {
-  id: string;
+  id: number;
   name: string;
   inviteCode?: string;
   createdAt: string;
@@ -13,10 +13,10 @@ export type Refrigerator = {
 };
 
 export type RefrigeratorUser = {
-  id: string;
-  refrigeratorId: string;
-  inviterId: string;
-  inviteeId: string;
+  id: number;
+  refrigeratorId: number;
+  inviterId: number;
+  inviteeId: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -41,9 +41,9 @@ export type FridgeItem = {
 };
 
 export interface StoredUserInfo {
-  userId: string;
+  userId: number;
   provider: SocialProvider;
-  providerId: string;
+  providerId: number;
   name: string;
   email?: string;
   profileImage?: string;
@@ -51,6 +51,15 @@ export interface StoredUserInfo {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export type GroceryItem = {
+  id: number;
+  name: string;
+  quantity: number;
+  unit: string | null;
+  purchased: boolean;
+  groceryListId?: number;
+};
 
 // AsyncStorage 키 상수
 const STORAGE_KEYS = {
@@ -73,6 +82,8 @@ const STORAGE_KEYS = {
   SEARCH_HISTORY: 'search_history',
   SHARED_RECIPES: 'shared_recipes',
 
+  // 장바구니 관련
+  GROCERY_LIST: 'grocery_list',
   // 기타
   AUTO_INCREMENT: 'autoIncrement',
 } as const;
@@ -603,6 +614,99 @@ export class AsyncStorageService {
       await AsyncStorage.setItem(initKey, 'true');
     } catch (error) {
       console.error('Initialize default fridge error:', error);
+    }
+  }
+
+  // ============================================================================
+  // 장바구니(Grocery) 관련 메서드들
+  // ============================================================================
+
+  /**
+   * 장바구니 전체 조회
+   */
+  static async getGroceryList(): Promise<GroceryItem[]> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.GROCERY_LIST);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error('장바구니 조회 실패:', error);
+      return [];
+    }
+  }
+
+  /**
+   * 장바구니 전체 저장
+   */
+  static async saveGroceryList(items: GroceryItem[]): Promise<void> {
+    try {
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.GROCERY_LIST,
+        JSON.stringify(items),
+      );
+    } catch (error) {
+      console.error('장바구니 저장 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 장바구니에 아이템 추가
+   */
+  static async addToGroceryList(item: GroceryItem): Promise<void> {
+    try {
+      const items = await this.getGroceryList();
+      items.push(item);
+      await this.saveGroceryList(items);
+    } catch (error) {
+      console.error('장바구니 아이템 추가 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 장바구니 아이템 업데이트
+   */
+  static async updateGroceryItem(
+    itemId: number,
+    updates: Partial<GroceryItem>,
+  ): Promise<void> {
+    try {
+      const items = await this.getGroceryList();
+      const index = items.findIndex(item => item.id === itemId);
+
+      if (index !== -1) {
+        items[index] = { ...items[index], ...updates };
+        await this.saveGroceryList(items);
+      }
+    } catch (error) {
+      console.error('장바구니 아이템 업데이트 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 장바구니에서 아이템 삭제
+   */
+  static async removeFromGroceryList(itemId: number): Promise<void> {
+    try {
+      const items = await this.getGroceryList();
+      const filtered = items.filter(item => item.id !== itemId);
+      await this.saveGroceryList(filtered);
+    } catch (error) {
+      console.error('장바구니 아이템 삭제 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 장바구니 전체 비우기
+   */
+  static async clearGroceryList(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(STORAGE_KEYS.GROCERY_LIST);
+    } catch (error) {
+      console.error('장바구니 비우기 실패:', error);
+      throw error;
     }
   }
 

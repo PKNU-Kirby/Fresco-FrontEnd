@@ -1,6 +1,6 @@
 export interface CartItem {
-  id: string;
-  groceryListId: string;
+  id: number;
+  groceryListId: number;
   name: string;
   quantity: number;
   purchased: boolean;

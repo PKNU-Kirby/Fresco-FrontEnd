@@ -3,7 +3,7 @@ import { FridgeItem } from '../hooks/useFridgeData';
 
 // Recipe 타입 정의
 export interface Recipe {
-  id: string;
+  id: number;
   title: string;
   createdAt: string;
   updatedAt?: string;
@@ -12,13 +12,13 @@ export interface Recipe {
   referenceUrl?: string;
   isShared?: boolean;
   sharedBy?: string;
-  sharedById?: string; // 공유한 사용자의 실제 ID
-  originalRecipeId?: string; // 원본 개인 레시피 ID
-  fridgeIds?: string[]; // 공유된 냉장고 ID 목록
+  sharedById?: number; // 공유한 사용자의 실제 ID
+  originalRecipeId?: number; // 원본 개인 레시피 ID
+  fridgeIds?: number[]; // 공유된 냉장고 ID 목록
 }
 
 export interface RecipeIngredient {
-  id: string;
+  id: number;
   name: string;
   quantity: number;
   unit: string;
@@ -64,7 +64,7 @@ export const FridgeStorage = {
   async getFridgeItemsByFridgeId(fridgeId: number): Promise<FridgeItem[]> {
     try {
       const allItems = await this.getAllFridgeItems();
-      return allItems.filter(item => parseInt(item.fridgeId, 10) === fridgeId);
+      return allItems.filter(item => item.fridgeId === fridgeId);
     } catch (error) {
       console.error('특정 냉장고 아이템 조회 실패:', error);
       return [];
@@ -77,13 +77,10 @@ export const FridgeStorage = {
       const allItems = await this.getAllFridgeItems();
 
       // 새 ID 생성 (기존 ID 중 최대값 + 1)
-      const maxId = allItems.reduce(
-        (max, item) => Math.max(max, parseInt(item.id, 10)),
-        0,
-      );
+      const maxId = allItems.reduce((max, item) => Math.max(max, item.id), 0);
       const itemWithId: FridgeItem = {
         ...newItem,
-        id: (maxId + 1).toString(),
+        id: maxId + 1,
       };
 
       const updatedItems = [...allItems, itemWithId];
@@ -114,9 +111,7 @@ export const FridgeStorage = {
   async deleteFridgeItem(itemId: number): Promise<void> {
     try {
       const allItems = await this.getAllFridgeItems();
-      const filteredItems = allItems.filter(
-        item => parseInt(item.id, 10) !== itemId,
-      );
+      const filteredItems = allItems.filter(item => item.id !== itemId);
       await this.saveFridgeItems(filteredItems);
     } catch (error) {
       console.error('냉장고 아이템 삭제 실패:', error);
@@ -128,9 +123,7 @@ export const FridgeStorage = {
   async deleteFridgeItemsByFridgeId(fridgeId: number): Promise<void> {
     try {
       const allItems = await this.getAllFridgeItems();
-      const filteredItems = allItems.filter(
-        item => parseInt(item.fridgeId, 10) !== fridgeId,
-      );
+      const filteredItems = allItems.filter(item => item.fridgeId !== fridgeId);
       await this.saveFridgeItems(filteredItems);
     } catch (error) {
       console.error('냉장고별 아이템 삭제 실패:', error);
@@ -143,9 +136,7 @@ export const FridgeStorage = {
     try {
       const allItems = await this.getAllFridgeItems();
       const updatedItems = allItems.map(item =>
-        parseInt(item.id, 10) === itemId
-          ? { ...item, quantity: newQuantity }
-          : item,
+        item.id === itemId ? { ...item, quantity: newQuantity } : item,
       );
       await this.saveFridgeItems(updatedItems);
     } catch (error) {
@@ -159,7 +150,7 @@ export const FridgeStorage = {
     try {
       const allItems = await this.getAllFridgeItems();
       const updatedItems = allItems.map(item =>
-        parseInt(item.id, 10) === itemId ? { ...item, unit: newUnit } : item,
+        item.id === itemId ? { ...item, unit: newUnit } : item,
       );
       await this.saveFridgeItems(updatedItems);
     } catch (error) {
@@ -173,9 +164,7 @@ export const FridgeStorage = {
     try {
       const allItems = await this.getAllFridgeItems();
       const updatedItems = allItems.map(item =>
-        parseInt(item.id, 10) === itemId
-          ? { ...item, expiryDate: newDate }
-          : item,
+        item.id === itemId ? { ...item, expiryDate: newDate } : item,
       );
       await this.saveFridgeItems(updatedItems);
     } catch (error) {
@@ -311,8 +300,8 @@ export const RecipeStorage = {
 
   // 개인 레시피 삭제 (공유된 레시피도 함께 삭제)
   async deletePersonalRecipe(
-    recipeId: string,
-    currentUserId?: string,
+    recipeId: number,
+    currentUserId?: number,
   ): Promise<void> {
     try {
       // 1. 개인 레시피 삭제
@@ -341,7 +330,7 @@ export const RecipeStorage = {
 // 🔧 즐겨찾기 관련 함수들
 export const FavoriteStorage = {
   // 즐겨찾기 목록 저장
-  async saveFavoriteIds(favoriteIds: string[]): Promise<void> {
+  async saveFavoriteIds(favoriteIds: (number | string)[]): Promise<void> {
     try {
       await AsyncStorage.setItem(
         STORAGE_KEYS.FAVORITE_RECIPE_IDS,
@@ -367,10 +356,10 @@ export const FavoriteStorage = {
   },
 
   // 즐겨찾기 추가
-  async addFavorite(recipeId: string): Promise<void> {
+  async addFavorite(recipeId: number): Promise<void> {
     try {
       const currentFavorites = await this.getFavoriteIds();
-      if (!currentFavorites.includes(recipeId)) {
+      if (!currentFavorites.includes(recipeId.toString())) {
         const updatedFavorites = [...currentFavorites, recipeId];
         await this.saveFavoriteIds(updatedFavorites);
       }
@@ -381,7 +370,7 @@ export const FavoriteStorage = {
   },
 
   // 즐겨찾기 제거
-  async removeFavorite(recipeId: string): Promise<void> {
+  async removeFavorite(recipeId: number | string): Promise<void> {
     try {
       const currentFavorites = await this.getFavoriteIds();
       const updatedFavorites = currentFavorites.filter(id => id !== recipeId);
@@ -393,10 +382,10 @@ export const FavoriteStorage = {
   },
 
   // 즐겨찾기 토글
-  async toggleFavorite(recipeId: string): Promise<boolean> {
+  async toggleFavorite(recipeId: number): Promise<boolean> {
     try {
       const currentFavorites = await this.getFavoriteIds();
-      const isFavorite = currentFavorites.includes(recipeId);
+      const isFavorite = currentFavorites.includes(recipeId.toString());
       if (isFavorite) {
         await this.removeFavorite(recipeId);
         return false;
@@ -453,8 +442,8 @@ export const SharedRecipeStorage = {
 
   // 공유 레시피 삭제 (권한 확인)
   async deleteSharedRecipe(
-    recipeId: string,
-    currentUserId: string,
+    recipeId: number,
+    currentUserId: number,
   ): Promise<boolean> {
     try {
       const currentRecipes = await this.getSharedRecipes();
@@ -488,8 +477,8 @@ export const SharedRecipeStorage = {
 
   // 원본 레시피 ID로 공유된 모든 레시피 삭제 (개인 레시피 삭제 시 사용)
   async deleteSharedRecipesByOriginalId(
-    originalRecipeId: string,
-    userId: string,
+    originalRecipeId: number,
+    userId: number,
   ): Promise<void> {
     try {
       const currentRecipes = await this.getSharedRecipes();
@@ -512,7 +501,7 @@ export const SharedRecipeStorage = {
   },
 
   // 특정 사용자가 공유한 레시피 목록 조회
-  async getSharedRecipesByUser(userId: string): Promise<Recipe[]> {
+  async getSharedRecipesByUser(userId: number): Promise<Recipe[]> {
     try {
       const allSharedRecipes = await this.getSharedRecipes();
       return allSharedRecipes.filter(recipe => recipe.sharedById === userId);
@@ -524,8 +513,8 @@ export const SharedRecipeStorage = {
 
   // 공유 권한 확인
   async canDeleteSharedRecipe(
-    recipeId: string,
-    currentUserId: string,
+    recipeId: number,
+    currentUserId: number,
   ): Promise<boolean> {
     try {
       const currentRecipes = await this.getSharedRecipes();
@@ -613,7 +602,7 @@ export const FridgeInitializer = {
     try {
       // 기존 데이터가 있는지 확인
       const existingItems = await FridgeStorage.getAllFridgeItems();
-      const existingCategories = await ItemCategoryStorage.getItemCategories();
+      // const existingCategories = await ItemCategoryStorage.getItemCategories();
 
       // 아이템이 없다면 초기 데이터 설정
       if (existingItems.length === 0) {

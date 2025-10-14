@@ -2,6 +2,14 @@ import { ApiService } from '../apiServices';
 import { Recipe } from '../../utils/AsyncStorageUtils';
 import { AsyncStorageService } from '../AsyncStorageService';
 
+interface RecipeIngredient {
+  id: string;
+  ingredientId?: number;
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
 // API 응답의 Recipe 타입
 
 interface ApiRecipe {
@@ -98,41 +106,33 @@ interface SaveAIRecipeResponse {
 // ============ 타입 변환 유틸리티 ============
 
 class RecipeTypeConverter {
-  // API 응답 → 프론트엔드 Recipe 타입 변환
-  static apiToFrontend(apiRecipe: ApiRecipe): Recipe {
-    return {
-      id: apiRecipe.recipeId.toString(),
-      recipeId: apiRecipe.recipeId,
-      title: apiRecipe.title,
-      createdAt: apiRecipe.createdAt || new Date().toISOString(),
-      updatedAt: apiRecipe.updatedAt,
-      ingredients: apiRecipe.ingredients?.map(ing => ({
-        id: ing.ingredientId?.toString() || Date.now().toString(),
-        ingredientId: ing.ingredientId,
-        name: ing.name,
-        quantity: ing.quantity,
-        unit: ing.unit,
-        // ✅ instead는 RecipeIngredient에 없으므로 여기서 제외
-        // instead 정보는 getRecipeDetail에서만 사용
-      })),
-      steps: apiRecipe.steps?.join('\n') || '', // ✅ string으로 변환
-      referenceUrl: apiRecipe.referenceUrl,
-      isFavorite: apiRecipe.favorite,
-    };
-  }
+  static apiToFrontend(apiRecipe: any): Recipe {
+    console.log('🔥 API 원본 데이터:', apiRecipe);
 
-  // 프론트엔드 Recipe → API 요청 형식 변환
-  static frontendToApi(recipe: Recipe): CreateRecipeRequest {
-    return {
-      title: recipe.title,
+    const converted = {
+      id: apiRecipe.recipeId,
+      title: apiRecipe.title,
       ingredients:
-        recipe.ingredients?.map(ing => ({
-          ingredientName: ing.name,
+        apiRecipe.ingredients?.map((ing: any) => ({
+          id: ing.recipeIngredientId || Date.now(),
+          name: ing.name,
           quantity: ing.quantity,
+          unit: ing.unit,
         })) || [],
-      steps: recipe.steps || '',
-      url: recipe.referenceUrl,
+      // ✅ steps 처리 - 문자열을 배열로 변환
+      steps:
+        typeof apiRecipe.steps === 'string'
+          ? apiRecipe.steps
+              .split('\n')
+              .filter((step: string) => step.trim().length > 0)
+          : Array.isArray(apiRecipe.steps)
+          ? apiRecipe.steps
+          : [],
+      // ✅ url 필드명 수정
+      referenceUrl: apiRecipe.url || apiRecipe.referenceUrl || '',
+      createdAt: apiRecipe.createdAt || new Date().toISOString(),
     };
+    return converted;
   }
 }
 
@@ -183,7 +183,7 @@ export class RecipeAPI {
   }
 
   // 공유된 레시피 목록 조회
-  static async getSharedRecipes(refrigeratorId: string): Promise<Recipe[]> {
+  static async getSharedRecipes(refrigeratorId: number): Promise<Recipe[]> {
     try {
       const token = await AsyncStorageService.getAuthToken();
       console.log('-> 공유 레시피 조회 시작:', {
@@ -217,7 +217,7 @@ export class RecipeAPI {
   }
 
   // 레시피 상세 조회
-  static async getRecipeDetail(recipeId: string): Promise<
+  static async getRecipeDetail(recipeId: number): Promise<
     Recipe & {
       ingredients?: Array<RecipeIngredient & { instead?: string }>;
     }
@@ -229,19 +229,17 @@ export class RecipeAPI {
         `/recipe/detail/${recipeId}`,
       );
 
-      // ✅ instead 정보를 포함한 변환
       const recipe = RecipeTypeConverter.apiToFrontend(apiRecipe);
 
-      // instead 정보를 추가로 포함
       return {
         ...recipe,
         ingredients: apiRecipe.ingredients?.map(ing => ({
-          id: ing.ingredientId?.toString() || Date.now().toString(),
+          id: ing.ingredientId || Date.now(),
           ingredientId: ing.ingredientId,
           name: ing.name,
           quantity: ing.quantity,
           unit: ing.unit,
-          instead: ing.instead, // ✅ 대체재 정보 포함
+          instead: ing.instead,
         })),
       };
     } catch (error) {
@@ -286,20 +284,26 @@ export class RecipeAPI {
   }
   // 레시피 수정
   static async updateRecipe(
-    recipeId: string,
+    recipeId: number, // ← string으로 변경
     updates: Partial<Recipe>,
   ): Promise<Recipe> {
     try {
+      console.log('🔥 RecipeAPI.updateRecipe 시작:', { recipeId, updates });
+
       const requestData: UpdateRecipeRequest = {
         title: updates.title,
         ingredients: updates.ingredients?.map(ing => ({
-          ingredientName: ing.name, // ← name을 ingredientName으로!
-          quantity: ing.quantity,
-          unit: ing.unit,
+          ingredientName: ing.name || ing.ingredientName || '',
+          quantity: ing.quantity || 0,
+          unit: ing.unit || '',
         })),
-        steps: updates.steps,
-        url: updates.referenceUrl, // ← referenceUrl을 url로!
+        steps: Array.isArray(updates.steps)
+          ? updates.steps.join('\n')
+          : updates.steps || '',
+        url: updates.referenceUrl,
       };
+
+      console.log('🔥 요청 데이터:', requestData);
 
       const apiRecipe = await ApiService.apiCall<ApiRecipe>(
         `/recipe/replace/${recipeId}`,
@@ -309,15 +313,18 @@ export class RecipeAPI {
         },
       );
 
-      return RecipeTypeConverter.apiToFrontend(apiRecipe);
+      console.log('🔥 API 응답:', apiRecipe);
+      const convertedRecipe = RecipeTypeConverter.apiToFrontend(apiRecipe);
+      console.log('🔥 변환된 레시피:', convertedRecipe);
+
+      return convertedRecipe;
     } catch (error) {
       console.error('레시피 수정 실패:', error);
       throw error;
     }
   }
-
   // 레시피 삭제
-  static async deleteRecipe(recipeId: string): Promise<void> {
+  static async deleteRecipe(recipeId: number): Promise<void> {
     try {
       await ApiService.apiCall<void>(`/recipe/delete/${recipeId}`, {
         method: 'DELETE',
@@ -330,7 +337,7 @@ export class RecipeAPI {
 
   // 즐겨찾기 토글
   static async toggleFavorite(
-    recipeId: string,
+    recipeId: number,
   ): Promise<{ favorite: boolean }> {
     try {
       const result = await ApiService.apiCall<{ favorite: boolean }>(
@@ -349,13 +356,13 @@ export class RecipeAPI {
 
   // 레시피 공유 (특정 냉장고에)
   static async shareRecipe(
-    refrigeratorId: string,
-    recipeId: string,
+    recipeId: number,
+    refrigeratorId: number,
   ): Promise<void> {
     try {
       const requestData: ShareRecipeRequest = {
-        refrigeratorId: parseInt(refrigeratorId, 10),
-        recipeId: parseInt(recipeId, 10),
+        refrigeratorId: refrigeratorId,
+        recipeId: recipeId,
       };
 
       await ApiService.apiCall<void>(
@@ -389,7 +396,7 @@ export class RecipeAPI {
   }
 
   // 소비기한 임박 재료 기반 레시피 조회
-  static async getExpiryRecipes(refrigeratorId: string): Promise<{
+  static async getExpiryRecipes(refrigeratorId: number): Promise<{
     refrigeratorId: number;
     day1: string[];
     day2: string[];
@@ -419,8 +426,9 @@ export class RecipeAPI {
       throw error;
     }
   }
+
   // 조리 단계별 재고 조회 (특정 냉장고)
-  static async getCookStocks(refrigeratorId: string): Promise<any> {
+  static async getCookStocks(refrigeratorId: number): Promise<any> {
     try {
       return await ApiService.apiCall(`/recipe/cook/stocks/${refrigeratorId}`);
     } catch (error) {

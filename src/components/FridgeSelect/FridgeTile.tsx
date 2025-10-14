@@ -1,11 +1,12 @@
-import React from 'react';
-import { TouchableOpacity, View, Alert, Text } from 'react-native';
+import React, { useState } from 'react';
+import { TouchableOpacity, View, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { FridgeWithRole } from '../../types/permission';
 import { fridgeTileStyles as styles } from './styles';
+import ConfirmModal from '../modals/ConfirmModal';
 
 type RootStackParamList = {
   MainTabs: { fridgeId: number; fridgeName: string };
@@ -16,7 +17,6 @@ interface FridgeTileProps {
   isEditMode: boolean;
   onEdit?: (fridge: FridgeWithRole) => void;
   onLeave?: (fridge: FridgeWithRole) => void;
-  onToggleHidden?: (fridge: FridgeWithRole) => void;
   isSmall?: boolean;
 }
 
@@ -25,17 +25,20 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
   isEditMode,
   onEdit,
   onLeave,
-  onToggleHidden,
   isSmall,
 }) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
+  // 모달 상태 관리
+  const [modals, setModals] = useState({
+    editConfirmVisible: false,
+    leaveConfirmVisible: false,
+    deleteConfirmVisible: false,
+  });
+
   const handlePress = () => {
     if (isEditMode && onEdit) {
-      console.log(
-        `냉장고 ${fridge.name} 편집 시도 - isOwner: ${fridge.isOwner}, canEdit: ${fridge.canEdit}`,
-      );
       onEdit(fridge);
     } else if (!isEditMode) {
       navigation.navigate('MainTabs', {
@@ -48,71 +51,38 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
   const handleLongPress = () => {
     if (!isEditMode) return;
 
-    console.log(`냉장고 ${fridge.name} 롱프레스 - 권한 체크 시작`);
-    console.log(
-      'isOwner:',
-      fridge.isOwner,
-      'canEdit:',
-      fridge.canEdit,
-      'canDelete:',
-      fridge.canDelete,
-    );
-
-    const options = [];
-
-    // 편집 옵션 (canEdit 권한도 함께 체크)
+    // 편집 권한이 있으면 편집 확인 모달
     if ((fridge.isOwner || fridge.canEdit) && onEdit) {
-      console.log('편집 옵션 추가됨');
-      options.push({
-        text: '편집',
-        onPress: () => {
-          console.log('편집 버튼 클릭');
-          onEdit(fridge);
-        },
-      });
-    } else {
-      console.log(
-        '편집 옵션 추가 안됨 - isOwner:',
-        fridge.isOwner,
-        'canEdit:',
-        fridge.canEdit,
-        'onEdit:',
-        !!onEdit,
-      );
+      setModals(prev => ({ ...prev, editConfirmVisible: true }));
     }
-
-    // 숨김/표시 옵션
-    if (onToggleHidden) {
-      options.push({
-        text: fridge.isHidden ? '표시하기' : '숨기기',
-        onPress: () => onToggleHidden(fridge),
-      });
-    }
-
-    // 나가기/삭제 옵션 (canDelete 권한도 함께 체크)
-    if (onLeave) {
+    // 아니면 나가기/삭제 확인 모달
+    else if (onLeave) {
       const canDelete = fridge.isOwner || fridge.canDelete;
-      options.push({
-        text: canDelete ? '삭제하기' : '나가기',
-        style: 'destructive' as const,
-        onPress: () => onLeave(fridge),
-      });
-    }
-
-    console.log('최종 옵션 개수:', options.length);
-
-    if (options.length > 0) {
-      Alert.alert(fridge.name, '어떤 작업을 하시겠습니까?', [
-        ...options,
-        { text: '취소', style: 'cancel' },
-      ]);
+      if (canDelete) {
+        setModals(prev => ({ ...prev, deleteConfirmVisible: true }));
+      } else {
+        setModals(prev => ({ ...prev, leaveConfirmVisible: true }));
+      }
     }
   };
+  // 🔍 디버깅 로그 추가
+  console.log('🔍 [FridgeTile] 냉장고 정보:', {
+    id: fridge.id,
+    name: fridge.name,
+    isOwner: fridge.isOwner,
+    canEdit: fridge.canEdit,
+    canDelete: fridge.canDelete,
+    role: fridge.role,
+  });
 
-  // 편집 버튼 조건 (canEdit 권한 포함)
-  const canEditFridge = fridge.isOwner || fridge.canEdit;
-  const canDeleteFridge = fridge.isOwner || fridge.canDelete;
+  const canEditFridge = fridge.canEdit ?? fridge.isOwner;
+  const canDeleteFridge = fridge.canDelete ?? fridge.isOwner;
 
+  console.log('🔍 [FridgeTile] 계산된 권한:', {
+    canEditFridge,
+    canDeleteFridge,
+    onEdit존재: !!onEdit,
+  });
   const containerStyle = [
     styles.tileContainer,
     isEditMode && styles.editModeContainer,
@@ -128,6 +98,68 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
     return '#999';
   };
 
+  // 표시할 버튼 리스트 생성
+  const renderQuickActions = () => {
+    const buttons = [];
+
+    // Button 1 : 수정하기 버튼
+    const canEdit = canEditFridge && onEdit;
+    buttons.push(
+      <TouchableOpacity
+        key="edit"
+        style={[
+          styles.quickActionButton,
+          !canEdit && styles.quickActionButtonDisabled,
+          { backgroundColor: canEdit ? 'limegreen' : '#ccc' },
+        ]}
+        onPress={() => {
+          if (canEdit) {
+            // console.log('퀵 편집 버튼 클릭');
+            onEdit(fridge);
+          }
+        }}
+        disabled={!canEdit}
+        accessible={true}
+        accessibilityLabel={canEdit ? '냉장고 편집하기' : '편집 권한 없음'}
+      >
+        <FontAwesome5
+          name="edit"
+          size={16}
+          color={canEdit ? '#f8f8f8' : '#999'}
+        />
+      </TouchableOpacity>,
+    );
+
+    // Button 2 : 나가기/삭제 버튼
+    if (onLeave) {
+      const canDelete = canDeleteFridge;
+      buttons.push(
+        <TouchableOpacity
+          key="leave"
+          style={[styles.quickActionButton, { backgroundColor: 'tomato' }]}
+          onPress={() => {
+            // 삭제 또는 나가기 모달 표시
+            if (canDelete) {
+              setModals(prev => ({ ...prev, deleteConfirmVisible: true }));
+            } else {
+              setModals(prev => ({ ...prev, leaveConfirmVisible: true }));
+            }
+          }}
+          accessible={true}
+          accessibilityLabel={canDelete ? '냉장고 삭제하기' : '냉장고 나가기'}
+        >
+          <FontAwesome5
+            name={canDelete ? 'trash' : 'sign-out-alt'}
+            size={16}
+            color="#f8f8f8"
+          />
+        </TouchableOpacity>,
+      );
+    }
+
+    return buttons;
+  };
+
   const accessibilityState = {
     selected: isEditMode,
   };
@@ -137,105 +169,115 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
     : '탭하여 냉장고를 열어보세요';
 
   return (
-    <View style={containerStyle}>
-      {/* 메인 타일 */}
-      <TouchableOpacity
-        style={tileStyle}
-        onPress={handlePress}
-        onLongPress={handleLongPress}
-        accessible={true}
-        accessibilityHint={accessibilityHint}
-        accessibilityRole="button"
-        accessibilityState={accessibilityState}
-        activeOpacity={0.7}
-        delayLongPress={500}
-      >
-        {/* 냉장고 아이콘 */}
-        <View style={styles.iconContainer}>
-          <Icon
-            name="kitchen"
-            size={isSmall ? 32 : 64}
-            color={getIconColor()}
-          />
-        </View>
-
-        {/* Edit mode : quick action buttons */}
-        {isEditMode && (
-          <View style={styles.quickActionsContainer}>
-            {/* 숨김/표시 토글 버튼 */}
-            {onToggleHidden && (
-              <TouchableOpacity
-                style={[
-                  styles.quickActionButton,
-                  { backgroundColor: fridge.isHidden ? '#333' : '#666' },
-                ]}
-                onPress={() => onToggleHidden(fridge)}
-                accessible={true}
-                accessibilityLabel={
-                  fridge.isHidden ? '냉장고 표시하기' : '냉장고 숨기기'
-                }
-              >
-                <FontAwesome5
-                  name={fridge.isHidden ? 'eye' : 'eye-slash'}
-                  size={16}
-                  color="#f8f8f8"
-                />
-              </TouchableOpacity>
-            )}
-
-            {/* 편집 버튼 - 권한 조건 수정 */}
-            {canEditFridge && onEdit && (
-              <TouchableOpacity
-                style={[
-                  styles.quickActionButton,
-                  { backgroundColor: 'limegreen' },
-                ]}
-                onPress={() => {
-                  console.log('퀵 편집 버튼 클릭');
-                  onEdit(fridge);
-                }}
-                accessible={true}
-                accessibilityLabel="냉장고 편집하기"
-              >
-                <FontAwesome5 name="edit" size={16} color="#f8f8f8" />
-              </TouchableOpacity>
-            )}
-
-            {/* 나가기/삭제 버튼 */}
-            {onLeave && (
-              <TouchableOpacity
-                style={[
-                  styles.quickActionButton,
-                  { backgroundColor: 'tomato' },
-                ]}
-                onPress={() => onLeave(fridge)}
-                accessible={true}
-                accessibilityLabel={
-                  canDeleteFridge ? '냉장고 삭제하기' : '냉장고 나가기'
-                }
-              >
-                <FontAwesome5
-                  name={canDeleteFridge ? 'trash' : 'sign-out-alt'}
-                  size={16}
-                  color="#f8f8f8"
-                />
-              </TouchableOpacity>
-            )}
+    <>
+      <View style={containerStyle}>
+        {/* 메인 타일 */}
+        <TouchableOpacity
+          style={tileStyle}
+          onPress={handlePress}
+          onLongPress={handleLongPress}
+          accessible={true}
+          accessibilityHint={accessibilityHint}
+          accessibilityRole="button"
+          accessibilityState={accessibilityState}
+          activeOpacity={0.7}
+          delayLongPress={500}
+        >
+          {/* 냉장고 아이콘 */}
+          <View style={styles.iconContainer}>
+            <Icon
+              name="kitchen"
+              size={isSmall ? 32 : 64}
+              color={getIconColor()}
+            />
           </View>
-        )}
-      </TouchableOpacity>
 
-      {/* 냉장고 이름*/}
-      <Text
-        style={[
-          styles.fridgeName,
-          isSmall && styles.smallFridgeName,
-          isEditMode && styles.editFridgeName,
-        ]}
-        numberOfLines={1}
-      >
-        {fridge.name}
-      </Text>
-    </View>
+          {/* Edit mode : quick action buttons */}
+          {isEditMode && (
+            <View style={styles.quickActionsContainer}>
+              {renderQuickActions()}
+            </View>
+          )}
+        </TouchableOpacity>
+
+        {/* 냉장고 이름 */}
+        <Text
+          style={[
+            styles.fridgeName,
+            isSmall && styles.smallFridgeName,
+            isEditMode && styles.editFridgeName,
+          ]}
+          numberOfLines={1}
+        >
+          {fridge.name}
+        </Text>
+      </View>
+
+      {/* 편집 확인 모달 */}
+      <ConfirmModal
+        isAlert={true}
+        visible={modals.editConfirmVisible}
+        title={fridge.name}
+        message="냉장고를 편집하시겠습니까?"
+        iconContainer={{ backgroundColor: '#d3f0d3' }}
+        icon={{ name: 'edit', color: 'limegreen', size: 48 }}
+        confirmText="편집"
+        cancelText="취소"
+        confirmButtonStyle="primary"
+        onConfirm={() => {
+          setModals(prev => ({ ...prev, editConfirmVisible: false }));
+          if (onEdit) {
+            onEdit(fridge);
+          }
+        }}
+        onCancel={() =>
+          setModals(prev => ({ ...prev, editConfirmVisible: false }))
+        }
+      />
+
+      {/* 나가기 확인 모달 */}
+      <ConfirmModal
+        isAlert={true}
+        visible={modals.leaveConfirmVisible}
+        title={fridge.name}
+        message="정말 이 냉장고에서 나가시겠습니까?"
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'logout', color: 'tomato', size: 48 }}
+        confirmText="나가기"
+        cancelText="취소"
+        confirmButtonStyle="danger"
+        onConfirm={() => {
+          setModals(prev => ({ ...prev, leaveConfirmVisible: false }));
+          if (onLeave) {
+            onLeave(fridge);
+          }
+        }}
+        onCancel={() =>
+          setModals(prev => ({ ...prev, leaveConfirmVisible: false }))
+        }
+      />
+
+      {/* 삭제 확인 모달 */}
+      <ConfirmModal
+        isAlert={true}
+        visible={modals.deleteConfirmVisible}
+        title={fridge.name}
+        message="냉장고를 삭제하시겠습니까? 삭제된 냉장고는 복구할 수 없습니다."
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'delete-forever', color: 'tomato', size: 48 }}
+        confirmText="삭제"
+        cancelText="취소"
+        confirmButtonStyle="danger"
+        onConfirm={() => {
+          setModals(prev => ({ ...prev, deleteConfirmVisible: false }));
+          if (onLeave) {
+            onLeave(fridge);
+          }
+        }}
+        onCancel={() =>
+          setModals(prev => ({ ...prev, deleteConfirmVisible: false }))
+        }
+      />
+    </>
   );
 };

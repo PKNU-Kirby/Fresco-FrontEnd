@@ -32,11 +32,6 @@ export class ApiService {
       endpoint.includes('/api/v1/auth/refresh')
     );
   }
-
-  private static isRecipeEndpoint(endpoint: string): boolean {
-    return endpoint.startsWith('/recipe/');
-  }
-
   // 공통 헤더 생성
   private static async getHeaders(): Promise<HeadersInit_> {
     const token = await AsyncStorageService.getAuthToken();
@@ -166,6 +161,10 @@ export class ApiService {
     return await refreshPromise;
   }
 
+  private static isSpecialEndpoint(endpoint: string): boolean {
+    return endpoint.startsWith('/grocery/');
+  }
+
   // 공통 API 호출 메서드
   public static async apiCall<T>(
     endpoint: string,
@@ -173,10 +172,10 @@ export class ApiService {
     retryCount: number = 0,
   ): Promise<T> {
     try {
-      const normalizedEndpoint = this.isRecipeEndpoint(endpoint)
-        ? endpoint // /recipe로 시작하는 경우, endpoint에 /api/v1 포함 안 함
+      const normalizedEndpoint = this.isSpecialEndpoint(endpoint)
+        ? endpoint
         : endpoint.startsWith('/api/v1')
-        ? endpoint // 이미 /api/v1 있는 경우
+        ? endpoint
         : `/api/v1${endpoint}`;
 
       const url = `${Config.API_BASE_URL}${normalizedEndpoint}`;
@@ -283,7 +282,8 @@ export class ApiService {
           responseData.code.includes('OK') ||
           responseData.code.startsWith('RECIPE_') ||
           responseData.code.startsWith('INGREDIENT_') ||
-          responseData.code.startsWith('REFRIGERATOR_')
+          responseData.code.startsWith('REFRIGERATOR_') ||
+          responseData.code.startsWith('GROCEREY_')
         ) {
           return responseData.result as T;
         } else {

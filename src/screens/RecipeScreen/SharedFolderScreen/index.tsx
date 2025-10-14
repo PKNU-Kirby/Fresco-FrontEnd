@@ -25,7 +25,7 @@ import {
 } from '../../../types/Recipe';
 import { RecipeStackParamList } from '../RecipeNavigator';
 import { AsyncStorageService } from '../../../services/AsyncStorageService';
-import ingredientControllerAPI from '../../../services/API/ingredientControllerAPI';
+import IngredientControllerAPI from '../../../services/API/ingredientControllerAPI';
 import { styles } from './styles';
 
 // 냉장고 식재료 타입 정의
@@ -548,7 +548,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
     try {
       console.log(`🔍 냉장고 ${fridgeId} 식재료 API 로드 시도`);
 
-      const response = await ingredientControllerAPI.getRefrigeratorIngredients(
+      const response = await IngredientControllerAPI.getRefrigeratorIngredients(
         fridgeId,
         { page: 0, size: 100 },
       );

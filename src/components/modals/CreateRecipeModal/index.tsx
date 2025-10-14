@@ -120,14 +120,13 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
     const newRecipe: Recipe = {
       id: Date.now().toString(),
       title: title.trim(),
-      ingredients: filteredIngredients,
+      ingredients: filteredIngredients.map(ing => ({
+        id: Date.now().toString(),
+        name: ing,
+        quantity: 1,
+        unit: '',
+      })),
       instructions: filteredInstructions,
-      cookingTime: parseInt(cookingTime, 10) || 30,
-      difficulty,
-      link: link.trim() || undefined,
-      isAIGenerated: false,
-      folderId: selectedFolderId,
-      createdAt: new Date(),
     };
 
     onSave(newRecipe);

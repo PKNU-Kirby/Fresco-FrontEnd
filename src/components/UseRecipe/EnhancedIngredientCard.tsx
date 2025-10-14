@@ -10,6 +10,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SliderQuantityInput from './SliderQuantityInput';
 import { ingredientCardStyles as styles, unavailableStyles } from './styles';
+import { GroceryListAPI } from '../../services/API/GroceryListAPI'; // 👈 추가
 
 interface EnhancedMatchedIngredientSeparate {
   recipeIngredient: {
@@ -29,7 +30,7 @@ interface EnhancedMatchedIngredientSeparate {
 }
 
 interface CartItem {
-  id: string;
+  id: number;
   groceryListId: string;
   name: string;
   quantity: number;
@@ -47,6 +48,7 @@ interface IngredientCardProps {
   index: number;
   onQuantityChange: (index: number, quantity: number) => void;
   onMaxQuantityChange: (index: number, maxQuantity: number) => void;
+  fridgeId: number; // 👈 추가
 }
 
 const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
@@ -54,11 +56,12 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
   index,
   onQuantityChange,
   onMaxQuantityChange,
+  fridgeId, // 👈 추가
 }) => {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  // 장바구니 추가 함수
-  const addToExistingCart = async (itemData: {
+  // AsyncStorage에 저장 (백업용)
+  const addToLocalCart = async (itemData: {
     name: string;
     quantity: number;
     unit?: string;
@@ -122,42 +125,100 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
 
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(finalItems));
       }
+
+      console.log('✅ 로컬 저장 성공');
     } catch (error) {
-      console.error('장바구니 추가 실패:', error);
+      console.error('❌ 로컬 저장 실패:', error);
       throw error;
     }
   };
 
+  // 장바구니 추가 메인 함수
   const handleAddToShoppingList = async () => {
     setIsAddingToCart(true);
     try {
-      // 원래 레시피 재료명 사용 (대체재인 경우)
+      // 재료 정보 파싱
       const itemName = item.originalRecipeName || item.recipeIngredient.name;
 
       const quantityMatch = item.recipeIngredient.quantity
         .toString()
         .match(/[\d.]+/);
-      const quantity = quantityMatch ? quantityMatch[0] : 1;
+      const quantity = quantityMatch ? parseFloat(quantityMatch[0]) : 1;
 
       const unit = item.recipeIngredient.quantity
         .toString()
         .replace(/[\d.\s]+/g, '')
         .trim();
 
-      await addToExistingCart({
-        name: itemName,
-        quantity: parseFloat(quantity.toString()),
-        unit: unit || '개',
+      console.log('🛒 장바구니 추가 시작:', {
+        itemName,
+        quantity,
+        unit,
+        fridgeId,
       });
 
-      Alert.alert(
-        '장바구니 추가 완료!',
-        `${itemName} ${item.recipeIngredient.quantity}이(가) 장바구니에 추가되었습니다.`,
-        [{ text: '확인' }],
-      );
+      let groceryListId: number;
+      try {
+        groceryListId = await GroceryListAPI.getGroceryListIdByFridge(fridgeId);
+        console.log('✅ 장바구니 ID 조회 성공:', groceryListId);
+      } catch (error) {
+        console.error('❌ 장바구니 ID 조회 실패:', error);
+        throw new Error('장바구니 정보를 가져올 수 없습니다.');
+      }
+
+      // 2️⃣ 서버에 아이템 추가
+      try {
+        await GroceryListAPI.createItem({
+          name: itemName,
+          quantity: quantity,
+          unit: unit || '개',
+          purchased: false,
+          groceryListId: groceryListId,
+        });
+        console.log('✅ 서버 추가 성공');
+
+        // 3️⃣ 로컬에도 백업 저장
+        try {
+          await addToLocalCart({
+            name: itemName,
+            quantity: quantity,
+            unit: unit || '개',
+          });
+        } catch (localError) {
+          console.warn('⚠️ 로컬 저장 실패 (무시):', localError);
+        }
+
+        // 성공 알림
+        Alert.alert(
+          '장바구니 추가 완료!',
+          `${itemName} ${item.recipeIngredient.quantity}이(가) 장바구니에 추가되었습니다.`,
+          [{ text: '확인' }],
+        );
+      } catch (serverError) {
+        console.error('❌ 서버 추가 실패:', serverError);
+
+        // 서버 실패 시 로컬만 저장 (오프라인 모드)
+        console.log('📱 오프라인 모드: 로컬에만 저장');
+        await addToLocalCart({
+          name: itemName,
+          quantity: quantity,
+          unit: unit || '개',
+        });
+
+        Alert.alert(
+          '장바구니 추가 완료',
+          `${itemName}이(가) 장바구니에 추가되었습니다.\n(오프라인 상태)`,
+          [{ text: '확인' }],
+        );
+      }
     } catch (error) {
-      console.error('장바구니 추가 실패:', error);
-      Alert.alert('오류', '장바구니 추가에 실패했습니다.');
+      console.error('❌ 장바구니 추가 실패:', error);
+      Alert.alert(
+        '오류',
+        error instanceof Error
+          ? error.message
+          : '장바구니 추가에 실패했습니다.',
+      );
     } finally {
       setIsAddingToCart(false);
     }

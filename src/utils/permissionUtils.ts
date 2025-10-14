@@ -151,7 +151,7 @@ export class PermissionUtils {
       // console.log(`역할 권한:`, rolePermissions);
 
       const fridgeWithRole: FridgeWithRole = {
-        id: fridge.id.toString(),
+        id: fridge.id,
         name: fridge.name,
         createdAt: fridge.createdAt || new Date().toISOString(),
         updatedAt: fridge.updatedAt || new Date().toISOString(),

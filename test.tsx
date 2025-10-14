@@ -1,14 +1,5 @@
-static frontendToApi(recipe: Recipe): CreateRecipeRequest {
-    return {
-      title: recipe.title,
-      ingredients:
-        recipe.ingredients?.map(ing => ({
-          name: ing.name,
-          quantity: ing.quantity,
-          unit: ing.unit,
-        })) || [],
-      steps: recipe.steps || [],
-      referenceUrl: recipe.referenceUrl,
-    };
-  }
-}
+// RecipeAPI.ts - 수정된 부분들
+
+// ✅ updateRecipe 함수 수정 - string recipeId 받도록
+
+// RecipeDetailScreen의 handleSave에서도 수정

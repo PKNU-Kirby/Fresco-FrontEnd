@@ -331,6 +331,7 @@ const UseRecipeScreen: React.FC = () => {
                   index={index}
                   onQuantityChange={updateUserQuantity}
                   onMaxQuantityChange={updateMaxUserQuantity}
+                  fridgeId={numericFridgeId}
                 />
               )}
               keyExtractor={(_, index) => index.toString()}

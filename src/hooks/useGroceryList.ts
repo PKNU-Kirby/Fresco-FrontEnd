@@ -1,304 +1,166 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  GroceryListAPI,
-  GroceryItem,
-  UpdateItemRequest,
-} from '../services/API/GroceryListAPI';
-import { CartItem } from '../screens/ShoppingListScreen';
-
-const STORAGE_KEY = '@shopping_cart_items';
+import { useState, useCallback, useEffect } from 'react';
+import { GroceryListAPI, GroceryItem } from '../services/API/GroceryListAPI';
 
 export const useGroceryList = (groceryListId: number | null) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<GroceryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // 서버에서 데이터 로드
-  const loadFromServer = useCallback(async () => {
+  // 데이터 로드
+  const loadItems = useCallback(async () => {
     if (!groceryListId) return;
 
     try {
       setIsLoading(true);
-      console.log('[useGroceryList] 서버에서 데이터 로드:', groceryListId);
-
       const response = await GroceryListAPI.getGroceryList(groceryListId);
-
-      // ✅ 실제 응답 확인
-      console.log(
-        '[useGroceryList] 서버 응답 전체:',
-        JSON.stringify(response, null, 2),
-      );
-
-      const rawItems = response.result?.items || response.items || [];
-      console.log(
-        '[useGroceryList] 첫 번째 아이템:',
-        JSON.stringify(rawItems[0], null, 2),
-      );
-
-      const items: CartItem[] = rawItems.map((item, index) => {
-        console.log(`[useGroceryList] 아이템 ${item.id} unit:`, item.unit); // ← 추가
-
-        return {
-          id: item.id.toString(),
-          groceryListId: groceryListId.toString(),
-          name: item.name,
-          quantity: item.quantity || 1,
-          purchased: item.purchased,
-          unit: item.unit || 'g', // ← 여기서 null이면 'g'로 대체됨
-          order: index,
-        };
-      });
-
-      console.log('[useGroceryList] 변환된 아이템들:', items);
-
-      // 정렬: 구매하지 않은 항목이 먼저
-      const sortedItems = items.sort((a, b) => {
-        if (a.purchased !== b.purchased) {
-          return a.purchased ? 1 : -1;
-        }
-        return a.order - b.order;
-      });
-
-      setCartItems(sortedItems);
-
-      // 로컬 스토리지에도 저장
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(sortedItems));
-
-      console.log('[useGroceryList] 데이터 로드 완료:', sortedItems.length);
+      setCartItems(response.items || []);
     } catch (error) {
-      console.error('[useGroceryList] 서버 데이터 로드 실패:', error);
-      // 실패 시 로컬 스토리지에서 로드
-      await loadFromLocal();
-      Alert.alert('알림', '서버와 연결할 수 없어 로컬 데이터를 불러왔습니다.');
+      console.error('[useGroceryList] 로드 실패:', error);
     } finally {
       setIsLoading(false);
     }
   }, [groceryListId]);
 
-  // 로컬 스토리지에서 데이터 로드
-  const loadFromLocal = useCallback(async () => {
+  useEffect(() => {
+    loadItems();
+  }, [loadItems]);
+
+  // 아이템 추가
+  const addItem = useCallback(
+    async (name: string, quantity: number, unit: string) => {
+      if (!groceryListId) return;
+
+      try {
+        setIsSyncing(true);
+        await GroceryListAPI.createItem({
+          name,
+          quantity,
+          unit,
+          purchased: false,
+          groceryListId,
+        });
+        await loadItems();
+      } catch (error) {
+        console.error('[useGroceryList] 추가 실패:', error);
+        throw error;
+      } finally {
+        setIsSyncing(false);
+      }
+    },
+    [groceryListId, loadItems],
+  );
+
+  // 단일 아이템 업데이트
+  const updateSingleItem = useCallback(
+    async (itemId: number, updates: Partial<GroceryItem>) => {
+      if (!groceryListId) return;
+
+      try {
+        setIsSyncing(true);
+        const item = cartItems.find(i => i.id === itemId);
+        if (!item) return;
+
+        await GroceryListAPI.updateSingleItem(groceryListId, {
+          id: item.id,
+          name: updates.name ?? item.name,
+          quantity: updates.quantity ?? item.quantity,
+          unit: updates.unit ?? item.unit ?? '',
+          purchased: updates.purchased ?? item.purchased,
+        });
+        await loadItems();
+      } catch (error) {
+        console.error('[useGroceryList] 업데이트 실패:', error);
+        throw error;
+      } finally {
+        setIsSyncing(false);
+      }
+    },
+    [groceryListId, cartItems, loadItems],
+  );
+
+  // 🔥 여러 아이템 일괄 업데이트
+  const updateMultipleItems = useCallback(
+    async (updates: Array<{ id: number; updates: Partial<GroceryItem> }>) => {
+      if (!groceryListId) return;
+
+      try {
+        setIsSyncing(true);
+        console.log(
+          '[useGroceryList] 일괄 업데이트 시작:',
+          updates.length,
+          '개',
+        );
+
+        // 각 아이템을 순차적으로 업데이트
+        for (const { id, updates: itemUpdates } of updates) {
+          const item = cartItems.find(i => i.id === id);
+          if (!item) continue;
+
+          await GroceryListAPI.updateSingleItem(groceryListId, {
+            id: item.id,
+            name: itemUpdates.name ?? item.name,
+            quantity: itemUpdates.quantity ?? item.quantity,
+            unit: itemUpdates.unit ?? item.unit ?? '',
+            purchased: itemUpdates.purchased ?? item.purchased,
+          });
+        }
+
+        console.log('[useGroceryList] ✅ 일괄 업데이트 완료');
+        await loadItems();
+      } catch (error) {
+        console.error('[useGroceryList] ❌ 일괄 업데이트 실패:', error);
+        throw error;
+      } finally {
+        setIsSyncing(false);
+      }
+    },
+    [groceryListId, cartItems, loadItems],
+  );
+
+  // 아이템 삭제
+  const deleteItem = useCallback(
+    async (itemId: number) => {
+      if (!groceryListId) return;
+
+      try {
+        setIsSyncing(true);
+        await GroceryListAPI.deleteSingleItem(groceryListId, itemId);
+        await loadItems();
+      } catch (error) {
+        console.error('[useGroceryList] 삭제 실패:', error);
+        throw error;
+      } finally {
+        setIsSyncing(false);
+      }
+    },
+    [groceryListId, loadItems],
+  );
+
+  // 체크된 아이템 삭제
+  const deleteCheckedItems = useCallback(async () => {
+    if (!groceryListId) return;
+
     try {
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const items: CartItem[] = JSON.parse(stored);
-        setCartItems(items);
+      setIsSyncing(true);
+      const checkedIds = cartItems
+        .filter(item => item.purchased)
+        .map(item => item.id);
+
+      if (checkedIds.length > 0) {
+        await GroceryListAPI.deleteItems(groceryListId, checkedIds);
+        await loadItems();
       }
     } catch (error) {
-      console.error('[useGroceryList] 로컬 데이터 로드 실패:', error);
-    }
-  }, []);
-
-  // 로컬 스토리지에 저장
-  const saveToLocal = async (items: CartItem[]) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch (error) {
-      console.error('[useGroceryList] 로컬 저장 실패:', error);
-    }
-  };
-
-  // 초기 로드
-  useEffect(() => {
-    if (groceryListId) {
-      loadFromServer();
-    } else {
-      loadFromLocal();
-    }
-  }, [groceryListId, loadFromServer, loadFromLocal]);
-
-  // 아이템 추가 (즉시 서버 동기화)
-  const addItem = async (name: string, quantity: number, unit: string) => {
-    if (!groceryListId) {
-      Alert.alert('오류', '장바구니 정보를 찾을 수 없습니다.');
-      return;
-    }
-
-    try {
-      setIsSyncing(true);
-
-      const newItem = await GroceryListAPI.createItem({
-        name: name.trim(),
-        quantity,
-        unit, // ← 서버에 전송
-        purchased: false,
-        groceryListId,
-      });
-
-      // 로컬 상태 업데이트
-      const cartItem: CartItem = {
-        id: newItem.id.toString(),
-        groceryListId: newItem.groceryListId.toString(),
-        name: newItem.name,
-        quantity: newItem.quantity,
-        purchased: newItem.purchased,
-        unit,
-        order: cartItems.filter(item => !item.purchased).length,
-      };
-
-      const updatedItems = [...cartItems, cartItem].sort((a, b) => {
-        if (a.purchased !== b.purchased) {
-          return a.purchased ? 1 : -1;
-        }
-        return a.order - b.order;
-      });
-
-      setCartItems(updatedItems);
-      await saveToLocal(updatedItems);
-
-      console.log('[useGroceryList] 아이템 추가 완료:', newItem);
-    } catch (error) {
-      console.error('[useGroceryList] 아이템 추가 실패:', error);
-      Alert.alert('오류', '아이템 추가에 실패했습니다.');
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  // 단일 아이템 업데이트 (즉시 서버 동기화)
-
-  // updateSingleItem 함수
-  const updateSingleItem = async (
-    itemId: string,
-    updates: Partial<CartItem>,
-  ) => {
-    if (!groceryListId) return;
-
-    try {
-      setIsSyncing(true);
-
-      const item = cartItems.find(i => i.id === itemId);
-      if (!item) return;
-
-      const updatedItem: UpdateItemRequest = {
-        id: Number(itemId),
-        name: updates.name ?? item.name,
-        quantity: updates.quantity ?? item.quantity,
-        unit: updates.unit ?? item.unit, // ← 추가
-        purchased: updates.purchased ?? item.purchased,
-      };
-
-      await GroceryListAPI.updateSingleItem(groceryListId, updatedItem);
-
-      // 로컬 상태 업데이트
-      const updatedItems = cartItems.map(i =>
-        i.id === itemId ? { ...i, ...updates } : i,
-      );
-
-      const sortedItems = updatedItems.sort((a, b) => {
-        if (a.purchased !== b.purchased) {
-          return a.purchased ? 1 : -1;
-        }
-        return a.order - b.order;
-      });
-
-      setCartItems(sortedItems);
-      await saveToLocal(sortedItems);
-
-      console.log('[useGroceryList] 아이템 업데이트 완료:', itemId);
-    } catch (error) {
-      console.error('[useGroceryList] 아이템 업데이트 실패:', error);
-      Alert.alert('오류', '아이템 수정에 실패했습니다.');
-      // 실패 시 서버에서 다시 로드
-      await loadFromServer();
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  // 여러 아이템 일괄 업데이트 (편집 모드 완료 시)
-  const updateMultipleItems = async (
-    updates: Array<{ id: string; updates: Partial<CartItem> }>,
-  ) => {
-    if (!groceryListId) return;
-
-    try {
-      setIsSyncing(true);
-
-      const updateRequests: UpdateItemRequest[] = updates.map(
-        ({ id, updates }) => {
-          const item = cartItems.find(i => i.id === id)!;
-          return {
-            id: Number(id),
-            name: updates.name ?? item.name,
-            quantity: updates.quantity ?? item.quantity,
-            unit: updates.unit ?? item.unit, // ← 추가
-            purchased: updates.purchased ?? item.purchased,
-          };
-        },
-      );
-
-      await GroceryListAPI.updateItems(groceryListId, updateRequests);
-
-      // 로컬 상태 업데이트
-      const updatedItems = cartItems.map(item => {
-        const update = updates.find(u => u.id === item.id);
-        return update ? { ...item, ...update.updates } : item;
-      });
-
-      setCartItems(updatedItems);
-      await saveToLocal(updatedItems);
-
-      console.log('[useGroceryList] 일괄 업데이트 완료:', updates.length);
-    } catch (error) {
-      console.error('[useGroceryList] 일괄 업데이트 실패:', error);
-      Alert.alert('오류', '아이템 수정에 실패했습니다.');
-      await loadFromServer();
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  // 아이템 삭제 (즉시 서버 동기화)
-  const deleteItem = async (itemId: string) => {
-    if (!groceryListId) return;
-
-    try {
-      setIsSyncing(true);
-
-      await GroceryListAPI.deleteSingleItem(groceryListId, Number(itemId));
-
-      const updatedItems = cartItems.filter(item => item.id !== itemId);
-      setCartItems(updatedItems);
-      await saveToLocal(updatedItems);
-
-      console.log('[useGroceryList] 아이템 삭제 완료:', itemId);
-    } catch (error) {
-      console.error('[useGroceryList] 아이템 삭제 실패:', error);
-      Alert.alert('오류', '아이템 삭제에 실패했습니다.');
-      await loadFromServer();
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  // 체크된 아이템 일괄 삭제
-  const deleteCheckedItems = async () => {
-    if (!groceryListId) return;
-
-    const checkedItems = cartItems.filter(item => item.purchased);
-    if (checkedItems.length === 0) return;
-
-    try {
-      setIsSyncing(true);
-
-      const itemIds = checkedItems.map(item => Number(item.id));
-      await GroceryListAPI.deleteItems(groceryListId, itemIds);
-
-      const updatedItems = cartItems.filter(item => !item.purchased);
-      setCartItems(updatedItems);
-      await saveToLocal(updatedItems);
-
-      console.log('[useGroceryList] 체크된 아이템 삭제 완료:', itemIds.length);
-    } catch (error) {
       console.error('[useGroceryList] 체크된 아이템 삭제 실패:', error);
-      Alert.alert('오류', '아이템 삭제에 실패했습니다.');
-      await loadFromServer();
+      throw error;
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, [groceryListId, cartItems, loadItems]);
+
+  const refresh = useCallback(() => {
+    loadItems();
+  }, [loadItems]);
 
   return {
     cartItems,
@@ -306,9 +168,9 @@ export const useGroceryList = (groceryListId: number | null) => {
     isSyncing,
     addItem,
     updateSingleItem,
-    updateMultipleItems,
+    updateMultipleItems, // 👈 추가
     deleteItem,
     deleteCheckedItems,
-    refresh: loadFromServer,
+    refresh,
   };
 };
