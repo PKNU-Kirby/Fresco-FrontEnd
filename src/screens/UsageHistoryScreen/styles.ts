@@ -1,4 +1,15 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+// const baseHeight = 874;
+
+// 반응형 함수
+// const wp = (percentage: number) => (width * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
   container: {
@@ -11,40 +22,40 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(16),
     backgroundColor: '#fff',
-    borderBottomWidth: 1,
+    borderBottomWidth: scale(1),
     borderBottomColor: '#e0e0e0',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '600',
     color: '#000',
   },
   headerRight: {
-    width: 40,
+    width: scale(40),
   },
 
   // 필터 바 (홈 화면 스타일)
   filterBar: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    gap: 10,
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(12),
+    gap: scale(10),
   },
   filterButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(8),
     backgroundColor: 'lightgray',
-    borderRadius: 16,
-    minWidth: 80,
+    borderRadius: scale(16),
+    minWidth: scale(80),
   },
   filterButtonActive: {
     backgroundColor: 'limegreen',
   },
   filterButtonText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#666',
     fontWeight: '500',
     textAlign: 'center',
@@ -59,18 +70,18 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    padding: 16,
+    padding: scale(16),
   },
 
   // 섹션 헤더 (날짜)
   sectionHeader: {
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    marginTop: 16,
-    marginBottom: 8,
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(4),
+    marginTop: scale(16),
+    marginBottom: scale(8),
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '600',
     color: '#333',
   },
@@ -78,13 +89,13 @@ export const styles = StyleSheet.create({
   // 사용 기록 카드 (넷플릭스 스타일)
   usageCard: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
+    borderRadius: scale(12),
+    padding: scale(16),
+    marginBottom: scale(8),
     shadowColor: '#000',
     shadowOffset: {
-      width: 0,
-      height: 2,
+      width: scale(0),
+      height: scale(2),
     },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -95,17 +106,17 @@ export const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   usageAvatar: {
-    fontSize: 24,
-    marginRight: 12,
+    fontSize: scale(24),
+    marginRight: scale(12),
   },
   usageInfo: {
     flex: 1,
   },
   usageText: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#333',
-    lineHeight: 22,
-    marginBottom: 6,
+    lineHeight: scale(22),
+    marginBottom: scale(6),
   },
   userName: {
     fontWeight: '600',
@@ -120,7 +131,7 @@ export const styles = StyleSheet.create({
     color: 'tomato',
   },
   usageTime: {
-    fontSize: 13,
+    fontSize: scale(13),
     color: '#999',
     fontStyle: 'italic',
   },

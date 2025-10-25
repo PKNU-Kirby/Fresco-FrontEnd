@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     fontSize: 16,
     padding: 8,
-    backgroundColor: 'lightgray',
+    backgroundColor: '#d8d8d8',
     borderRadius: 8,
   },
   actionButtonText: {

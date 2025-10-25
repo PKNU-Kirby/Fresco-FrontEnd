@@ -1,4 +1,15 @@
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+// const baseHeight = 874;
+
+// 반응형 함수
+// const wp = (percentage: number) => (width * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
   container: {
@@ -10,12 +21,12 @@ export const styles = StyleSheet.create({
   searchHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(12),
     backgroundColor: '#e8f5e8',
   },
   backButton: {
-    marginRight: 8,
+    marginRight: scale(8),
   },
   // search container
   searchInputContainer: {
@@ -23,38 +34,38 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 25,
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === 'android' ? 4 : 12,
+    borderRadius: scale(25),
+    paddingHorizontal: scale(16),
+    paddingVertical: Platform.OS === 'android' ? scale(4) : scale(12),
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: scale(8),
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#444',
   },
 
   // Recent Search
   recentSearchContainer: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 24,
+    paddingHorizontal: scale(16),
+    paddingTop: scale(24),
   },
   recentSearchHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: scale(16),
   },
   recentSearchTitle: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '600',
     color: '#444',
   },
   deleteAllText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#666',
   },
 
@@ -62,32 +73,32 @@ export const styles = StyleSheet.create({
   historyContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: scale(8),
   },
   historyItem: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'lightgray',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginBottom: 8,
+    borderRadius: scale(20),
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(8),
+    marginBottom: scale(8),
   },
   historyText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#333',
-    marginRight: 8,
+    marginRight: scale(8),
   },
   removeHistoryButton: {
-    padding: 2,
+    padding: scale(2),
   },
   // when there's no history exist
   emptyHistoryContainer: {
     alignItems: 'center',
-    paddingTop: 40,
+    paddingTop: scale(40),
   },
   emptyHistoryText: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#666',
   },
 });

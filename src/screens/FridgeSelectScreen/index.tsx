@@ -1,5 +1,3 @@
-// 컨펌모달 적용해야함
-
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -10,13 +8,10 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
-import { usePermissions } from '../../hooks/usePermissions';
 import { useFridgeSelect } from '../../hooks/useFridgeSelect';
 import { useFridgeActions } from '../../hooks/useFridgeActions';
 import { useOptimisticEdit } from '../../hooks/useOptimisticEdit';
 import { FridgeControllerAPI } from '../../services/API/fridgeControllerAPI';
-
 import { FridgeWithRole } from '../../types/permission';
 import { validateUserTokenMatch } from '../../utils/authUtils';
 import { FridgeModals } from '../../components/FridgeSelect/FridgeModal';
@@ -32,20 +27,9 @@ const FridgeSelectScreen = () => {
     currentUser,
     fridges: serverFridges,
     loading,
-    // error,
     initializeData,
     loadUserFridges,
-    // retryLoad,
   } = useFridgeSelect(navigation);
-
-  // 권한 관리
-  const {
-    permissions,
-    permissionLoading,
-    // permissionError,
-    hasPermission,
-    getPermission,
-  } = usePermissions(currentUser);
 
   // Optimistic Update 관리
   const {
@@ -63,6 +47,32 @@ const FridgeSelectScreen = () => {
 
   // 화면에 실제로 표시할 냉장고 목록
   const displayFridges = isEditMode ? editableFridges : serverFridges;
+
+  // ✅ 권한 체크 헬퍼 함수들 (여기로 이동)
+  const hasPermission = (
+    fridgeId: number,
+    action: 'edit' | 'delete' | 'view',
+  ) => {
+    const fridge = displayFridges.find(f => f.id === fridgeId);
+    if (!fridge) return false;
+
+    if (action === 'view') return true;
+    if (action === 'edit') return fridge.canEdit ?? fridge.isOwner;
+    if (action === 'delete') return fridge.canDelete ?? fridge.isOwner;
+    return false;
+  };
+
+  const getPermission = (fridgeId: number) => {
+    const fridge = displayFridges.find(f => f.id === fridgeId);
+    if (!fridge) return null;
+
+    return {
+      fridgeId: fridge.id,
+      role: fridge.role === 'owner' ? 'OWNER' : 'MEMBER',
+      canEdit: fridge.canEdit ?? fridge.isOwner,
+      canDelete: fridge.canDelete ?? fridge.isOwner,
+    };
+  };
 
   // UI 상태
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
@@ -277,7 +287,6 @@ const FridgeSelectScreen = () => {
       Alert.alert('성공', '모든 변경사항이 저장되었습니다.');
     } catch (error) {
       console.error('변경사항 저장 실패:', error);
-
       if (error.message.includes('403')) {
         console.log('403 에러 발생 - 사용자 ID 불일치 또는 권한 부족');
         Alert.alert(
@@ -314,7 +323,6 @@ const FridgeSelectScreen = () => {
       <SafeAreaView style={styles.center}>
         <ActivityIndicator size="large" />
         <Text>냉장고 목록을 불러오는 중...</Text>
-        {permissionLoading && <Text>권한 정보 확인 중...</Text>}
       </SafeAreaView>
     );
   }
@@ -338,7 +346,7 @@ const FridgeSelectScreen = () => {
           onEditFridge={handleEditFridge}
           onLeaveFridge={handleLeaveFridge}
           onToggleHidden={toggleHiddenLocally}
-          permissions={permissions}
+          permissions={[]} // ❌ 이제 필요 없어요! FridgeList에서도 제거해야 함
         />
 
         <FridgeModals

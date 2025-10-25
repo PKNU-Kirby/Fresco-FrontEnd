@@ -1,4 +1,15 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+// const baseHeight = 874;
+
+// 반응형 함수
+// const wp = (percentage: number) => (width * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
   overlay: {
@@ -6,50 +17,50 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: scale(20),
   },
   modalContainer: {
     backgroundColor: '#f8f8f8',
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: scale(16),
+    padding: scale(24),
     alignItems: 'center',
-    maxWidth: 320,
+    maxWidth: scale(320),
     width: '100%',
     shadowColor: '#000',
     shadowOffset: {
-      width: 0,
-      height: 10,
+      width: scale(0),
+      height: scale(10),
     },
     shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowRadius: scale(20),
+    elevation: scale(10),
   },
   iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: scale(80),
+    height: scale(80),
+    borderRadius: scale(40),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: scale(16),
   },
   title: {
-    fontSize: 21,
+    fontSize: scale(21),
     fontWeight: '600',
     color: '#333',
-    marginBottom: 8,
-    marginTop: 4,
+    marginBottom: scale(8),
+    marginTop: scale(4),
   },
   messageContainer: {
-    marginBottom: 16,
-    marginTop: 8,
+    marginBottom: scale(16),
+    marginTop: scale(8),
   },
   message: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#666',
     fontWeight: '700',
     textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 8,
+    lineHeight: scale(24),
+    marginBottom: scale(8),
   },
   itemName: {
     fontWeight: '600',
@@ -57,21 +68,21 @@ export const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    gap: 12,
+    gap: scale(12),
     width: '100%',
   },
   button: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(20),
+    borderRadius: scale(8),
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 44,
+    minHeight: scale(44),
   },
   cancelButton: {
     backgroundColor: '#F5F5F5',
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: '#E0E0E0',
   },
   successButton: {
@@ -81,17 +92,17 @@ export const styles = StyleSheet.create({
     backgroundColor: 'tomato',
   },
   cancelButtonText: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '500',
     color: '#666',
   },
   successButtonText: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '600',
     color: '#f8f8f8',
   },
   dangerButtonText: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '500',
     color: '#f8f8f8',
   },

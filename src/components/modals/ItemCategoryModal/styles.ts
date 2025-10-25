@@ -1,4 +1,15 @@
-import { StyleSheet, Platform, StatusBar } from 'react-native';
+import { StyleSheet, Platform, StatusBar, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+// const baseHeight = 874;
+
+// 반응형 함수
+// const wp = (percentage: number) => (width * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
   // 모달 기본 스타일
@@ -8,67 +19,69 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop:
-      Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 8 : 8,
+      Platform.OS === 'android'
+        ? (StatusBar.currentHeight || scale(0)) + scale(8)
+        : scale(8),
   },
   modalContent: {
     backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 20,
+    borderRadius: scale(14),
+    padding: scale(20),
     width: '85%',
     maxHeight: '80%',
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: scale(20),
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: scale(20),
     color: '#333',
   },
   modalItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    borderBottomWidth: 1,
+    paddingVertical: scale(15),
+    paddingHorizontal: scale(10),
+    borderBottomWidth: scale(1),
     borderBottomColor: '#f0f0f0',
   },
   modalItemText: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#333',
   },
   checkMark: {
-    fontSize: 18,
+    fontSize: scale(18),
     color: '#333',
     fontWeight: 'bold',
   },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
-    gap: 10,
+    marginTop: scale(20),
+    gap: scale(10),
   },
   editCategoryButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: scale(12),
     backgroundColor: '#333',
-    borderRadius: 8,
-    marginRight: 8,
+    borderRadius: scale(8),
+    marginRight: scale(8),
   },
   editCategoryButtonText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
   },
   closeButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: scale(12),
     backgroundColor: 'lightgray',
     borderRadius: 8,
   },
   closeButtonText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: 'black',
     fontWeight: 'bold',
     textAlign: 'center',
@@ -78,12 +91,12 @@ export const styles = StyleSheet.create({
   editModeItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
+    paddingVertical: scale(12),
+    borderBottomWidth: scale(1),
     borderBottomColor: '#f0f0f0',
   },
   dragHandleText: {
-    fontSize: 18,
+    fontSize: scale(18),
     color: '#999',
     fontWeight: 'bold',
   },
@@ -92,32 +105,32 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 10,
+    paddingHorizontal: scale(10),
   },
   deleteItemText: {
     fontSize: 16,
   },
   addCategoryButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: scale(12),
     backgroundColor: '#333',
-    borderRadius: 8,
-    marginRight: 8,
+    borderRadius: scale(8),
+    marginRight: scale(8),
   },
   addCategoryButtonText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
   },
   confirmButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: scale(12),
     backgroundColor: 'lightgray',
-    borderRadius: 8,
+    borderRadius: scale(8),
   },
   confirmButtonText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#333',
     fontWeight: 'bold',
     textAlign: 'center',
@@ -127,37 +140,37 @@ export const styles = StyleSheet.create({
   addCategorySection: {},
   addModalContent: {
     backgroundColor: '#fff',
-    padding: 20,
+    padding: scale(20),
     width: '80%',
   },
   addModalTitle: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 16,
     color: '#333',
   },
   addModalInput: {
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    marginVertical: 16,
+    borderRadius: scale(8),
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(10),
+    fontSize: scale(16),
+    marginVertical: scale(16),
   },
   addModalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
-    gap: 10,
+    marginTop: scale(20),
+    gap: scale(10),
   },
   addModalCancelButton: {
     flex: 1,
     paddingVertical: 13.5,
     backgroundColor: 'lightgray',
-    borderRadius: 8,
-    marginRight: 8,
+    borderRadius: scale(8),
+    marginRight: scale(8),
   },
   addModalButtonTextCancel: {
     fontSize: 14,
@@ -169,10 +182,10 @@ export const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 13.5,
     backgroundColor: '#333',
-    borderRadius: 8,
+    borderRadius: scale(8),
   },
   addModalButtonTextAdd: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',

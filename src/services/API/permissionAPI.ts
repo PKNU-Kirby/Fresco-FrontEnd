@@ -6,27 +6,38 @@ export class PermissionAPIService {
   /**
    * 특정 냉장고의 권한 조회
    */
+  // permissionAPI.ts
   static async getFridgePermissions(fridgeId: number): Promise<{
     canEdit: boolean;
     canDelete: boolean;
   }> {
     try {
-      // 전체 권한 목록 조회
       const response = await ApiService.apiCall<Record<string, boolean>>(
         `/api/v1/refrigerator/permissions`,
       );
 
-      console.log(`🔍 냉장고 ${fridgeId} 권한 응답:`, response);
+      console.log('=== 권한 디버깅 시작 ===');
+      console.log(`🔍 요청한 fridgeId:`, fridgeId, typeof fridgeId);
+      console.log(`🔍 전체 응답:`, JSON.stringify(response));
+      console.log(`🔍 응답의 키들:`, Object.keys(response || {}));
 
-      // 해당 냉장고의 권한 추출 (숫자/문자열 둘 다 대응)
-      const hasPermission =
-        response?.[fridgeId] ?? response?.[String(fridgeId)] ?? false;
+      // 여러 방법으로 시도
+      const method1 = response?.[fridgeId];
+      const method2 = response?.[String(fridgeId)];
+      const method3 = response?.[Number(fridgeId)];
 
-      console.log(`🔍 냉장고 ${fridgeId} 권한 값:`, hasPermission);
+      console.log(`🔍 method1 [${fridgeId}]:`, method1);
+      console.log(`🔍 method2 ["${fridgeId}"]:`, method2);
+      console.log(`🔍 method3 [Number]:`, method3);
+
+      const hasPermission = method1 ?? method2 ?? method3 ?? false;
+
+      console.log(`🔍 최종 hasPermission:`, hasPermission);
+      console.log('=== 권한 디버깅 끝 ===');
 
       return {
         canEdit: hasPermission,
-        canDelete: hasPermission, // 서버에서 단일 boolean으로 보내는 것 같아요
+        canDelete: hasPermission,
       };
     } catch (error) {
       console.error(`냉장고 ${fridgeId} 권한 조회 실패:`, error);

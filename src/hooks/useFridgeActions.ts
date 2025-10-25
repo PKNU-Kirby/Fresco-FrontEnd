@@ -135,6 +135,7 @@ UseFridgeActionsParams) => {
   };
 
   // 냉장고 수정
+  // 냉장고 수정
   const handleUpdateFridge = async (updatedData: { name: string }) => {
     if (!currentUser || !editingFridge || isUpdatingFridge) return;
 
@@ -149,7 +150,7 @@ UseFridgeActionsParams) => {
 
     try {
       FridgeUtils.debugLog('냉장고 수정 시작', {
-        fridgeId: editingFridge.id,
+        fridgeId: String(editingFridge.id), // ✅ 명시적으로 문자열 변환
         updatedData,
       });
 
@@ -198,7 +199,10 @@ UseFridgeActionsParams) => {
       // 2. 응답 검증 (DELETE는 string 응답)
       if (FridgeControllerAPI.isSuccessResponse(response, 'delete')) {
         // 3. 로컬 동기화 (선택사항)
-        await FridgeUtils.syncDeleteToLocal(selectedFridge.id, currentUser.id);
+        await FridgeUtils.syncDeleteToLocal(
+          selectedFridge.id.toString(),
+          currentUser.id,
+        );
 
         // 4. 성공 알림
         showSuccessModal(
@@ -227,7 +231,7 @@ UseFridgeActionsParams) => {
     try {
       // 현재는 로컬 로직만 사용 (서버 API 추가 시 수정 필요)
       const success = await FridgeUtils.syncDeleteToLocal(
-        selectedFridge.id,
+        selectedFridge.id.toString(),
         currentUser.id,
       );
 
@@ -244,39 +248,11 @@ UseFridgeActionsParams) => {
     setSelectedFridge(null);
   };
 
-  // 냉장고 숨김 토글 (로컬 설정)
-  const handleToggleHidden = async (fridge: FridgeWithRole) => {
-    if (!currentUser) return;
-
-    try {
-      const AsyncStorageService =
-        require('../services/AsyncStorageService').AsyncStorageService;
-
-      await AsyncStorageService.setFridgeHidden(
-        parseInt(currentUser.id, 10),
-        parseInt(fridge.id, 10),
-        !fridge.isHidden,
-      );
-
-      await loadUserFridges();
-
-      const message = fridge.isHidden
-        ? '냉장고를 표시했습니다.'
-        : '냉장고를 숨겼습니다.';
-
-      showSuccessModal('성공', message);
-    } catch (error) {
-      console.error('냉장고 숨김 토글 실패:', error);
-      showErrorModal('오류', '냉장고 숨김 설정에 실패했습니다.');
-    }
-  };
-
   return {
     // 액션 핸들러들
     handleLogout,
     handleEditFridge,
     handleLeaveFridge,
-    handleToggleHidden,
     handleAddFridge,
     handleUpdateFridge,
 

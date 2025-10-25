@@ -1,4 +1,15 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+// const baseHeight = 874;
+
+// 반응형 함수
+// const wp = (percentage: number) => (width * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
   container: {
@@ -9,21 +20,21 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(16),
+    borderBottomWidth: scale(1),
     borderBottomColor: '#eee',
-    paddingTop: 50, // Safe area
+    paddingTop: scale(50), // Safe area
   },
   closeButton: {
-    padding: 4,
+    padding: scale(4),
   },
   generateButton: {
     backgroundColor: '#4A90E2',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    minWidth: 60,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(8),
+    borderRadius: scale(20),
+    minWidth: scale(60),
     alignItems: 'center',
   },
   disabledButton: {
@@ -31,52 +42,52 @@ export const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: scale(20),
   },
   section: {
-    marginVertical: 16,
+    marginVertical: scale(16),
   },
   sectionTitle: {
-    marginBottom: 12,
+    marginBottom: scale(12),
     color: '#333',
   },
   promptInput: {
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: '#ddd',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    minHeight: 100,
+    borderRadius: scale(12),
+    padding: scale(16),
+    fontSize: scale(16),
+    minHeight: scale(100),
     backgroundColor: '#f9f9f9',
   },
   charCount: {
     textAlign: 'right',
-    marginTop: 4,
+    marginTop: scale(4),
   },
   quickPromptsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: scale(8),
   },
   quickPromptButton: {
     backgroundColor: '#f0f7ff',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-    borderWidth: 1,
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(8),
+    borderRadius: scale(16),
+    borderWidth: scale(1),
     borderColor: '#4A90E2',
   },
   optionRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: scale(8),
   },
   optionButton: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    padding: 12,
-    borderRadius: 8,
+    padding: scale(12),
+    borderRadius: scale(8),
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: '#ddd',
   },
   selectedOption: {
@@ -87,32 +98,32 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 20,
+    gap: scale(20),
   },
   servingsButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(20),
     backgroundColor: '#f0f7ff',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: '#4A90E2',
   },
   servingsText: {
-    minWidth: 60,
+    minWidth: scale(60),
     textAlign: 'center',
   },
   cuisineRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: scale(8),
   },
   cuisineButton: {
     backgroundColor: '#f5f5f5',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
-    borderWidth: 1,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(8),
+    borderRadius: scale(16),
+    borderWidth: scale(1),
     borderColor: '#ddd',
   },
   selectedCuisine: {
@@ -122,14 +133,14 @@ export const styles = StyleSheet.create({
   dietaryContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: scale(8),
   },
   dietaryButton: {
     backgroundColor: '#f5f5f5',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(6),
+    borderRadius: scale(12),
+    borderWidth: scale(1),
     borderColor: '#ddd',
   },
   selectedDietary: {
@@ -139,15 +150,15 @@ export const styles = StyleSheet.create({
   ingredientsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: scale(6),
     alignItems: 'center',
   },
   ingredientTag: {
     backgroundColor: '#f0f7ff',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-    borderWidth: 1,
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
+    borderRadius: scale(10),
+    borderWidth: scale(1),
     borderColor: '#4A90E2',
   },
 });

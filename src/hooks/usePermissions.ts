@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FridgePermission, FridgeRole } from '../types/permission';
-import { PermissionUtils } from '../utils/permissionUtils';
-import { PermissionAPIService } from '../services/API/permissionAPI';
 import { ApiErrorHandler } from '../utils/errorHandler';
+import { PermissionUtils } from '../utils/permissionUtils';
+import { FridgePermission, FridgeRole } from '../types/permission';
 import { User } from '../types/auth';
 
 export const usePermissions = (currentUser: User | null) => {
@@ -20,11 +19,9 @@ export const usePermissions = (currentUser: User | null) => {
     setPermissionError(null);
 
     try {
-      const userPermissions = await PermissionAPIService.getUserPermissions();
-      setPermissions(userPermissions);
-      //console.log('사용자 권한 로드 완료:', userPermissions);
+      setPermissions([]);
     } catch (error: any) {
-      console.error('권한 로드 실패:', error);
+      // console.error('권한 로드 실패:', error);
       const errorMessage = ApiErrorHandler.getErrorMessage(error);
       setPermissionError(errorMessage);
       setPermissions([]);
@@ -35,7 +32,11 @@ export const usePermissions = (currentUser: User | null) => {
 
   const hasPermission = useCallback(
     (fridgeId: number, action: 'edit' | 'delete' | 'view') => {
-      return PermissionUtils.hasPermission(permissions, fridgeId, action);
+      return PermissionUtils.hasPermission(
+        permissions,
+        fridgeId.toString(),
+        action,
+      );
     },
     [permissions],
   );
@@ -44,16 +45,15 @@ export const usePermissions = (currentUser: User | null) => {
     (fridgeId: number) => {
       const permission = permissions.find(p => p.fridgeId === fridgeId);
 
-      // 삭제 권한 관련 로그만 출력
       if (permission) {
-        console.log(`🔍 권한 조회 - 냉장고 ${fridgeId}:`, {
+        console.log(`>> 권한 조회 - 냉장고 ${fridgeId}:`, {
           role: permission.role,
           canDelete: permission.canDelete,
           canEdit: permission.canEdit,
           fridgeId: permission.fridgeId,
         });
       } else {
-        console.log(`🔍 권한 없음 - 냉장고 ${fridgeId}`);
+        console.log(`>> 권한 없음 - 냉장고 ${fridgeId}`);
       }
 
       return permission;

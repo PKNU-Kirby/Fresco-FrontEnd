@@ -75,14 +75,17 @@ export class FridgeUtils {
   /**
    * 로컬 냉장고 수정 동기화
    */
+  /**
+   * 로컬 냉장고 수정 동기화
+   */
   static async syncUpdateToLocal(
-    fridgeId: string,
+    fridgeId: string | number, // ✅ 타입 수정
     updateData: { name: string },
   ): Promise<boolean> {
     try {
       if (AsyncStorageService.updateRefrigerator) {
         await AsyncStorageService.updateRefrigerator(
-          parseInt(fridgeId, 10),
+          typeof fridgeId === 'string' ? parseInt(fridgeId, 10) : fridgeId, // ✅ 안전한 변환
           updateData,
         );
         console.log('냉장고 로컬 수정 동기화 완료');
@@ -260,7 +263,9 @@ export class FridgeUtils {
    */
   static debugLog(operation: string, data: any): void {
     if (__DEV__) {
-      console.log(`[FridgeUtils] ${operation}:`, data);
+      // data 객체를 안전하게 변환
+      const safeData = data ? JSON.parse(JSON.stringify(data)) : data;
+      console.log(`[FridgeUtils] ${operation}:`, safeData);
     }
   }
 }

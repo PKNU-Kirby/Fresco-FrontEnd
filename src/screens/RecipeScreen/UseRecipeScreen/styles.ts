@@ -64,8 +64,15 @@ export const ingredientCardStyles = StyleSheet.create({
   needtext: {
     color: '#444',
   },
-  quantityEditorContainer: {},
-  quantityLabel: {},
+  quantityEditorContainer: {
+    marginBottom: 16,
+  },
+  quantityLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 8,
+  },
   deductionRow: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
@@ -324,15 +331,6 @@ export const styles = StyleSheet.create({
     color: '#666',
     marginTop: 2,
   },
-  quantityEditorContainer: {
-    marginBottom: 16,
-  },
-  quantityLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 8,
-  },
 });
 
 // Slider Quantity Editor Style : './SliderQuantityEditor.tsx'
@@ -440,42 +438,6 @@ export const sliderQuantityStyles = StyleSheet.create({
     fontSize: scale(14),
     color: '#666',
     fontWeight: '800',
-  },
-  availableQuantityInfo: {
-    marginBottom: 8,
-    paddingHorizontal: 4,
-  },
-  availableQuantityText: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'right',
-    fontWeight: '500',
-  },
-  quantityInputError: {
-    borderColor: '#ff4444',
-    borderWidth: 2,
-    backgroundColor: '#fff5f5',
-  },
-  quantityButtonDisabled: {
-    opacity: 0.5,
-  },
-  availableQuantityInfo: {
-    marginBottom: 8,
-    paddingHorizontal: 4,
-  },
-  availableQuantityText: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'right',
-    fontWeight: '500',
-  },
-  quantityInputError: {
-    borderColor: '#ff4444',
-    borderWidth: 2,
-    backgroundColor: '#fff5f5',
-  },
-  quantityButtonDisabled: {
-    opacity: 0.5,
   },
   availableQuantityInfo: {
     marginBottom: 8,

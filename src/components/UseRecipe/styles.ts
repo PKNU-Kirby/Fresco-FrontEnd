@@ -15,43 +15,43 @@ export const ingredientCardStyles = StyleSheet.create({
   alternativeInfoBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 24,
-    marginBottom: 4,
+    height: scale(24),
+    marginBottom: scale(4),
   },
   alternativeInfoText: {
-    marginLeft: 4,
-    fontSize: 15,
+    marginLeft: scale(4),
+    fontSize: scale(15),
     color: '#666',
     fontWeight: '800',
   },
   ingredientCard: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: scale(12),
+    padding: scale(16),
+    marginBottom: scale(12),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 5,
+      height: scale(5),
     },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: scale(4),
+    elevation: scale(3),
   },
   ingredientHeader: {
     flexDirection: 'row' as const,
     justifyContent: 'space-between' as const,
     alignItems: 'center' as const,
-    marginBottom: 8,
+    marginBottom: scale(8),
   },
   ingredientNameContainer: {},
   ingredientName: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '800' as const,
     color: '#444',
   },
   optionBadge: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '600',
     color: 'limegreen',
   },
@@ -67,30 +67,37 @@ export const ingredientCardStyles = StyleSheet.create({
     alignItems: 'center',
   },
   availableIcon: {
-    marginRight: 2,
+    marginRight: scale(2),
   },
   alternativeOne: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#FF9800',
     fontWeight: '500' as const,
   },
   haveOne: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: 'limegreen',
     fontWeight: '500' as const,
   },
   needtext: {
     color: '#444',
   },
-  quantityEditorContainer: {},
-  quantityLabel: {},
+  quantityEditorContainer: {
+    marginBottom: scale(16),
+  },
+  quantityLabel: {
+    fontSize: scale(14),
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: scale(8),
+  },
   deductionRow: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    gap: 12,
+    gap: scale(12),
   },
   deductButton: {
-    padding: 8,
+    padding: scale(8),
   },
   deductButtonCompleted: {
     opacity: 0.5,
@@ -98,17 +105,17 @@ export const ingredientCardStyles = StyleSheet.create({
   deductButtonText: {},
   deductButtonTextCompleted: {},
   deductedText: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#4CAF50',
     fontStyle: 'italic' as const,
   },
   unavailableIngredient: {
-    padding: 8,
+    padding: scale(8),
     backgroundColor: '#FFEBEE',
-    borderRadius: 8,
+    borderRadius: scale(8),
   },
   unavailableText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#F44336',
     fontWeight: '500' as const,
   },
@@ -119,16 +126,16 @@ export const unavailableStyles = StyleSheet.create({
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     justifyContent: 'space-between' as const,
-    paddingTop: 4,
+    paddingTop: scale(4),
   },
   unavailableInfo: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     flex: 1,
-    gap: 6,
+    gap: scale(6),
   },
   unavailableText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: 'tomato',
     fontWeight: '500' as const,
   },
@@ -136,16 +143,16 @@ export const unavailableStyles = StyleSheet.create({
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     backgroundColor: 'tomato',
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    borderRadius: 6,
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(8),
+    borderRadius: scale(6),
   },
   addToCartButtonDisabled: {
     opacity: 0.6,
   },
   addToCartText: {
     color: 'white',
-    fontSize: 13,
+    fontSize: scale(13),
     fontWeight: '600' as const,
   },
 });
@@ -165,9 +172,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#e8f5e8',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
+    paddingHorizontal: scale(16),
+    paddingTop: scale(8),
+    paddingBottom: scale(8),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -176,10 +183,10 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
-    minHeight: 60,
+    minHeight: scale(60),
   },
   leftHeader: {
-    width: 88,
+    width: scale(88),
     alignItems: 'flex-start',
   },
   centerHeader: {
@@ -187,19 +194,19 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rightHeader: {
-    width: 88,
+    width: scale(88),
     alignItems: 'flex-end',
   },
   closeButton: {
-    padding: 8,
+    padding: scale(8),
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: scale(20),
     fontWeight: '600',
     color: '#333',
   },
   menuButton: {
-    padding: 8,
+    padding: scale(8),
   },
   content: {
     flex: 1,
@@ -207,12 +214,12 @@ export const styles = StyleSheet.create({
   },
 
   recipeTitle: {
-    fontSize: 24,
+    fontSize: scale(24),
     fontWeight: '700' as const,
     color: '#212529',
-    margin: 32,
+    margin: scale(32),
     textAlign: 'center' as const,
-    marginVertical: 16,
+    marginVertical: scale(16),
     backgroundColor: 'black',
   },
 
@@ -221,65 +228,65 @@ export const styles = StyleSheet.create({
   noticeHeader: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    marginBottom: 8,
+    marginBottom: scale(8),
   },
 
   noticeTitle: {
-    fontSize: 14,
+    fontSize: scale(14),
     fontWeight: '600' as const,
     color: 'limegreen',
-    marginLeft: 8,
+    marginLeft: scale(8),
   },
 
   noticeText: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#444',
-    lineHeight: 16,
+    lineHeight: scale(16),
   },
 
   section: {
-    margin: 16,
+    margin: scale(16),
   },
 
   sectionTitle: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '600' as const,
     color: '#212529',
-    marginBottom: 12,
+    marginBottom: scale(12),
   },
 
   // 재료 카드 스타일
   recipeQuantity: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#666',
   },
 
   quantityInput: {
     flex: 1,
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 14,
+    borderRadius: scale(8),
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(8),
+    fontSize: scale(14),
   },
 
   // Steps 스타일 (이전과 동일)
   stepsContainer: {
-    gap: 12,
+    gap: scale(12),
   },
 
   stepCard: {
     flexDirection: 'row' as const,
     backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 16,
-    borderLeftWidth: 4,
+    borderRadius: scale(12),
+    padding: scale(16),
+    borderLeftWidth: scale(4),
     borderLeftColor: '#29a448ff',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: scale(2) },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowRadius: scale(3),
     elevation: 2,
   },
 
@@ -290,13 +297,13 @@ export const styles = StyleSheet.create({
   },
 
   stepCheckbox: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: scale(32),
+    height: scale(32),
+    borderRadius: scale(16),
     backgroundColor: '#29a448ff',
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
-    marginRight: 12,
+    marginRight: scale(12),
     flexShrink: 0,
   },
 
@@ -305,7 +312,7 @@ export const styles = StyleSheet.create({
   },
 
   stepNumber: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '700' as const,
     color: '#fff',
   },
@@ -316,9 +323,9 @@ export const styles = StyleSheet.create({
   },
 
   stepText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#333',
-    lineHeight: 20,
+    lineHeight: scale(20),
   },
 
   stepTextCompleted: {
@@ -327,33 +334,33 @@ export const styles = StyleSheet.create({
   },
 
   progressContainer: {
-    marginTop: 16,
-    padding: 12,
+    marginTop: scale(16),
+    padding: scale(12),
     backgroundColor: '#f0f8ff',
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: scale(8),
+    borderWidth: scale(1),
     borderColor: '#e3f2fd',
   },
 
   progressText: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#1976d2',
     fontWeight: '600' as const,
-    marginBottom: 8,
+    marginBottom: scale(8),
     textAlign: 'center' as const,
   },
 
   progressBar: {
-    height: 6,
+    height: scale(6),
     backgroundColor: '#e3f2fd',
-    borderRadius: 3,
+    borderRadius: scale(3),
     overflow: 'hidden' as const,
   },
 
   progressFill: {
     height: '100%',
     backgroundColor: '#1976d2',
-    borderRadius: 3,
+    borderRadius: scale(3),
   },
 
   // 완료 버튼
@@ -362,61 +369,61 @@ export const styles = StyleSheet.create({
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
     backgroundColor: '#4CAF50',
-    margin: 16,
-    padding: 16,
-    borderRadius: 12,
-    gap: 8,
+    margin: scale(16),
+    padding: scale(16),
+    borderRadius: scale(12),
+    gap: scale(8),
   },
 
   completeButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '600' as const,
   },
 
   bottomSpacer: {
-    height: 20,
+    height: scale(20),
   },
   /////////////////////////////////////////////////////////////////////////////////////
 
   // 슬라이더 수량 조절기 관련 스타일
   quantityEditorContainer: {
-    marginBottom: 16,
+    marginBottom: scale(16),
   },
   quantityLabel: {
-    fontSize: 14,
+    fontSize: scale(14),
     fontWeight: '500',
     color: '#333',
-    marginBottom: 8,
+    marginBottom: scale(8),
   },
   deductButtonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: scale(14),
     fontWeight: 'bold',
-    marginLeft: 8,
+    marginLeft: scale(8),
   },
   deductButtonTextCompleted: {
     color: '#fff',
   },
   debugButton: {
     backgroundColor: '#f0f0f0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(6),
+    borderRadius: scale(6),
   },
   debugButtonText: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#666',
   },
   multipleOptionsContainer: {
-    marginBottom: 12,
+    marginBottom: scale(12),
   },
   selectedOptionButton: {
     backgroundColor: '#f0f8ff',
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 8,
-    borderWidth: 1,
+    borderRadius: scale(8),
+    padding: scale(12),
+    marginTop: scale(8),
+    borderWidth: scale(1),
     borderColor: '#007AFF',
   },
   selectedOptionInfo: {
@@ -425,7 +432,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selectedOptionText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#007AFF',
     fontWeight: '500',
     flex: 1,
@@ -437,29 +444,29 @@ export const styles = StyleSheet.create({
   },
   optionsModal: {
     backgroundColor: '#fff',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderTopLeftRadius: scale(16),
+    borderTopRightRadius: scale(16),
     maxHeight: '70%',
-    paddingBottom: 20,
+    paddingBottom: scale(20),
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
+    padding: scale(16),
+    borderBottomWidth: scale(1),
     borderBottomColor: '#e9ecef',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: 'bold',
     color: '#333',
   },
   optionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
+    padding: scale(16),
+    borderBottomWidth: scale(1),
     borderBottomColor: '#f0f0f0',
   },
   selectedOptionItem: {
@@ -469,36 +476,27 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   optionName: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '600',
     color: '#333',
-    marginBottom: 4,
+    marginBottom: scale(4),
   },
   optionDetails: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#666',
   },
   ingredientNameContainer: {
     flex: 1,
   },
   optionBadge: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#007AFF',
     fontWeight: 'bold',
   },
   optionDescription: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#666',
-    marginTop: 2,
-  },
-  quantityEditorContainer: {
-    marginBottom: 16,
-  },
-  quantityLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 8,
+    marginTop: scale(2),
   },
 });
 
@@ -512,9 +510,9 @@ export const sliderQuantityStyles = StyleSheet.create({
   },
   inputText: {
     color: '#444',
-    fontSize: 15,
+    fontSize: scale(15),
     fontWeight: '600',
-    marginRight: 8,
+    marginRight: scale(8),
   },
   stepper: {
     flex: 0.7,
@@ -609,54 +607,18 @@ export const sliderQuantityStyles = StyleSheet.create({
     fontWeight: '800',
   },
   availableQuantityInfo: {
-    marginBottom: 8,
-    paddingHorizontal: 4,
+    marginBottom: scale(8),
+    paddingHorizontal: scale(4),
   },
   availableQuantityText: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#666',
     textAlign: 'right',
     fontWeight: '500',
   },
   quantityInputError: {
     borderColor: '#ff4444',
-    borderWidth: 2,
-    backgroundColor: '#fff5f5',
-  },
-  quantityButtonDisabled: {
-    opacity: 0.5,
-  },
-  availableQuantityInfo: {
-    marginBottom: 8,
-    paddingHorizontal: 4,
-  },
-  availableQuantityText: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'right',
-    fontWeight: '500',
-  },
-  quantityInputError: {
-    borderColor: '#ff4444',
-    borderWidth: 2,
-    backgroundColor: '#fff5f5',
-  },
-  quantityButtonDisabled: {
-    opacity: 0.5,
-  },
-  availableQuantityInfo: {
-    marginBottom: 8,
-    paddingHorizontal: 4,
-  },
-  availableQuantityText: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'right',
-    fontWeight: '500',
-  },
-  quantityInputError: {
-    borderColor: '#ff4444',
-    borderWidth: 2,
+    borderWidth: scale(2),
     backgroundColor: '#fff5f5',
   },
   quantityButtonDisabled: {
@@ -671,43 +633,43 @@ export const infoModalStyles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: scale(20),
   },
   modalContainer: {
     backgroundColor: '#f8f8f8',
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: scale(16),
+    padding: scale(24),
     alignItems: 'center',
-    maxWidth: 320,
+    maxWidth: scale(320),
     width: '100%',
     shadowColor: '#000',
     shadowOffset: {
-      width: 0,
+      width: scale(0),
       height: 10,
     },
     shadowOpacity: 0.25,
-    shadowRadius: 20,
+    shadowRadius: scale(20),
     elevation: 10,
   },
   iconContainer: {
-    width: 80,
-    height: 80,
+    width: scale(80),
+    height: scale(80),
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: scale(16),
     backgroundColor: '#E8F5E8',
   },
   title: {
-    fontSize: 21,
+    fontSize: scale(21),
     fontWeight: '600',
     color: '#333',
-    marginBottom: 8,
-    marginTop: 4,
+    marginBottom: scale(8),
+    marginTop: scale(4),
   },
   messageContainer: {
-    marginBottom: 16,
-    marginTop: 8,
+    marginBottom: scale(16),
+    marginTop: scale(8),
     width: '100%',
   },
 
@@ -718,46 +680,46 @@ export const infoModalStyles = StyleSheet.create({
   infoItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 12,
-    paddingHorizontal: 0, // ConfirmModal에 맞춰 패딩 제거
+    marginBottom: scale(12),
+    paddingHorizontal: scale(0), // ConfirmModal에 맞춰 패딩 제거
   },
   bullet: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: scale(6),
+    height: scale(6),
+    borderRadius: scale(3),
     backgroundColor: '#4CAF50',
-    marginTop: 9,
-    marginRight: 12,
+    marginTop: scale(9),
+    marginRight: scale(12),
     flexShrink: 0,
   },
   infoText: {
-    fontSize: 16, // ConfirmModal message와 동일한 크기
+    fontSize: scale(16), // ConfirmModal message와 동일한 크기
     color: '#666', // ConfirmModal message와 동일한 색상
     fontWeight: '700', // ConfirmModal message와 동일한 굵기
-    lineHeight: 24, // ConfirmModal message와 동일한 줄간격
+    lineHeight: scale(24), // ConfirmModal message와 동일한 줄간격
     flex: 1,
   },
 
   // ConfirmModal과 완전히 동일한 버튼 스타일
   buttonContainer: {
     flexDirection: 'row',
-    gap: 12,
+    gap: scale(12),
     width: '100%',
   },
   button: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(20),
+    borderRadius: scale(8),
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 44,
+    minHeight: scale(44),
   },
   confirmButton: {
     backgroundColor: 'limegreen', // ConfirmModal successButton와 완전히 동일
   },
   confirmButtonText: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '600',
     color: '#f8f8f8', // ConfirmModal successButtonText와 완전히 동일
   },

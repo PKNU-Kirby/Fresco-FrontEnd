@@ -101,35 +101,34 @@ export const useOptimisticEdit = () => {
   );
 
   // 로컬에서 냉장고 삭제 (즉시 UI 반영)
-  const deleteFridgeLocally = useCallback(
-    (fridgeId: number) => {
+  // useOptimisticEdit.ts 110번 줄 근처
+
+  const deleteFridgeLocally = (fridgeId: number) => {
+    const fridgeIdStr = String(fridgeId);
+
+    if (fridgeIdStr.startsWith('temp_')) {
+      // 임시 냉장고는 바로 제거
+      setEditableFridges(prev =>
+        prev.filter(f => String(f.id) !== fridgeIdStr),
+      );
+      setPendingChanges(prev =>
+        prev.filter(change => change.id !== fridgeIdStr),
+      );
+    } else {
+      // 서버 냉장고는 삭제 대기열에 추가
       const fridgeToDelete = editableFridges.find(f => f.id === fridgeId);
-      if (!fridgeToDelete) return;
 
-      // 임시로 생성된 냉장고라면 그냥 목록에서 제거
-      if (fridgeId.startsWith('temp_')) {
-        setEditableFridges(prev => prev.filter(f => f.id !== fridgeId));
-        setPendingChanges(prev =>
-          prev.filter(change => change.id !== fridgeId),
-        );
-        return;
-      }
-
-      // UI에서 즉시 제거
       setEditableFridges(prev => prev.filter(f => f.id !== fridgeId));
-
-      // 변경사항 기록
       setPendingChanges(prev => [
-        ...prev,
+        ...prev.filter(change => change.id !== fridgeIdStr), // 기존 변경사항 제거
         {
-          id: fridgeId,
-          type: 'delete',
-          originalData: fridgeToDelete,
+          type: 'delete' as const,
+          id: fridgeIdStr,
+          data: fridgeToDelete, // ✅ 올바른 데이터
         },
       ]);
-    },
-    [editableFridges],
-  );
+    }
+  };
 
   // 로컬에서 냉장고 숨김 토글 (즉시 UI 반영)
   const toggleHiddenLocally = useCallback((fridge: FridgeWithRole) => {

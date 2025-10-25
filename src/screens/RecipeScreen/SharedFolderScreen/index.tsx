@@ -26,7 +26,7 @@ import {
 import { RecipeStackParamList } from '../RecipeNavigator';
 import { AsyncStorageService } from '../../../services/AsyncStorageService';
 import IngredientControllerAPI from '../../../services/API/ingredientControllerAPI';
-import { styles } from './styles';
+import { styles, sharedRecipeStyles } from './styles';
 
 // 냉장고 식재료 타입 정의
 interface FridgeIngredient {
@@ -378,119 +378,6 @@ const SharedRecipeCard: React.FC<{
     </View>
   );
 };
-
-const sharedRecipeStyles = StyleSheet.create({
-  recipeCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    marginBottom: 12,
-    marginHorizontal: 16,
-    shadowColor: '#333',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3.84,
-    elevation: 3,
-  },
-  canMakeCard: {
-    borderWidth: 2,
-    borderColor: '#4CAF50',
-  },
-  recipeCardContent: {
-    flexDirection: 'row',
-    padding: 16,
-    alignItems: 'center',
-  },
-  recipeIcon: {
-    width: 30,
-    height: 30,
-    marginRight: 16,
-  },
-  recipeInfo: {
-    flex: 1,
-  },
-  recipeTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  ingredientStatus: {
-    marginTop: 4,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusIndicator: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  canMakeIndicator: {
-    backgroundColor: '#E8F5E8',
-    borderColor: 'limegreen',
-  },
-  cannotMakeIndicator: {
-    backgroundColor: '#eee',
-    borderColor: '#aaa',
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  canMakeText: {
-    color: '#2E7D32',
-  },
-  cannotMakeText: {
-    color: '#aaa',
-  },
-  detailButton: {
-    marginLeft: 8,
-    padding: 4,
-  },
-  missingIngredientsContainer: {
-    backgroundColor: '#FFF8E1',
-    borderRadius: 12,
-    padding: 12,
-    marginHorizontal: 16,
-    marginTop: -8,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#FFE082',
-  },
-  missingTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#F57C00',
-    marginBottom: 8,
-  },
-  missingItem: {
-    marginBottom: 8,
-  },
-  missingName: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
-  },
-  alternativeText: {
-    fontSize: 11,
-    color: '#2E7D32',
-    fontStyle: 'italic',
-    marginLeft: 12,
-    marginTop: 2,
-  },
-  notFoundText: {
-    fontSize: 11,
-    color: '#D32F2F',
-    marginLeft: 12,
-    marginTop: 2,
-  },
-  insufficientText: {
-    fontSize: 11,
-    color: '#FF9800',
-    marginLeft: 12,
-    marginTop: 2,
-  },
-});
 
 // 냉장고 폴더 카드 컴포넌트
 const FridgeFolderCard: React.FC<{

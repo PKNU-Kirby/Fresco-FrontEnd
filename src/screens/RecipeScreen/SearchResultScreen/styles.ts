@@ -1,4 +1,15 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+// const baseHeight = 874;
+
+// 반응형 함수
+// const wp = (percentage: number) => (width * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -13,47 +24,47 @@ export const styles = StyleSheet.create({
   searchResultHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(12),
     backgroundColor: '#e8f5e8',
   },
   backButton: {
-    marginRight: 8,
+    marginRight: scale(8),
   },
   searchBarContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    borderRadius: 25,
-    paddingHorizontal: 16,
-    marginHorizontal: 8,
-    marginRight: 0,
+    borderRadius: scale(25),
+    paddingHorizontal: scale(16),
+    marginHorizontal: scale(8),
+    marginRight: scale(0),
     position: 'relative',
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: scale(8),
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#444',
-    paddingLeft: 8,
-    paddingRight: 40,
-    height: 40,
+    paddingLeft: scale(8),
+    paddingRight: scale(40),
+    height: scale(40),
   },
 
   clearButton: {
     position: 'absolute',
-    right: 12,
+    right: scale(12),
     top: '50%',
     transform: [{ translateY: -10 }],
   },
 
   clearButtonCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: scale(20),
+    height: scale(20),
+    borderRadius: scale(10),
     backgroundColor: '#999',
     alignItems: 'center',
     justifyContent: 'center',
@@ -62,49 +73,49 @@ export const styles = StyleSheet.create({
 
   content: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: scale(16),
     backgroundColor: '#e8f5e8',
   },
   resultHeader: {
-    paddingVertical: 16,
+    paddingVertical: scale(16),
   },
   resultCount: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '500',
     color: '#333',
   },
   loadingContainer: {
-    paddingVertical: 40,
+    paddingVertical: scale(40),
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#666',
   },
   noResultContainer: {
-    paddingVertical: 60,
+    paddingVertical: scale(60),
     alignItems: 'center',
   },
   noResultText: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '500',
     color: '#666',
-    marginTop: 16,
+    marginTop: scale(16),
   },
   noResultSubText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#999',
-    marginTop: 8,
+    marginTop: scale(8),
   },
   // 레시피 카드 스타일들
   recipeCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 16,
-    marginBottom: 12,
+    borderRadius: scale(16),
+    marginBottom: scale(12),
     shadowColor: '#333',
     shadowOffset: {
-      width: 0,
-      height: 5,
+      width: scale(0),
+      height: scale(5),
     },
     shadowOpacity: 0.15,
     shadowRadius: 3.84,
@@ -112,22 +123,22 @@ export const styles = StyleSheet.create({
   },
   recipeCardContent: {
     flexDirection: 'row',
-    padding: 16,
+    padding: scale(16),
     alignItems: 'center',
   },
   recipeIcon: {
-    width: 30,
-    height: 30,
-    marginRight: 16,
+    width: scale(30),
+    height: scale(30),
+    marginRight: scale(16),
   },
   recipeInfo: {
     flex: 1,
   },
   recipeTitle: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '600',
     color: '#333',
-    marginBottom: 4,
+    marginBottom: scale(4),
   },
   cardActions: {
     flexDirection: 'row',
@@ -135,41 +146,41 @@ export const styles = StyleSheet.create({
   },
   // favorite Button
   favoriteButton: {
-    padding: 8,
-    marginLeft: 8,
+    padding: scale(8),
+    marginLeft: scale(8),
   },
   scrollToTopButton: {
     position: 'absolute',
-    bottom: 30,
-    right: 30,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    bottom: scale(30),
+    right: scale(30),
+    width: scale(56),
+    height: scale(56),
+    borderRadius: scale(28),
     backgroundColor: '#666',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#333',
     shadowOffset: {
-      width: 0,
-      height: 4,
+      width: scale(0),
+      height: scale(4),
     },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 8,
   },
   loadMoreContainer: {
-    paddingVertical: 20,
+    paddingVertical: scale(20),
     alignItems: 'center',
   },
   loadMoreButton: {
     backgroundColor: '#29a448ff',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingHorizontal: scale(24),
+    paddingVertical: scale(12),
+    borderRadius: scale(8),
   },
   loadMoreText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '500',
   },
 });

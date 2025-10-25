@@ -104,38 +104,6 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#E8F5E8',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(12),
-  },
-  headerTitle: {
-    fontSize: scale(20),
-    fontWeight: '600',
-    color: '#444',
-  },
-  headerRight: {
-    width: scale(40),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  settingsContainer: {
-    flex: 1,
-    paddingTop: scale(16),
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingText: {
-    marginTop: scale(12),
-    fontSize: scale(16),
-    color: '#6B7280',
-  },
-
   // header style
   header: {
     flexDirection: 'row',
@@ -151,13 +119,15 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#2D2D2D',
   },
-
-  // content style
-  content: {
-    flex: 1,
-    paddingTop: scale(8),
+  headerRight: {
+    width: scale(40),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-
+  settingsContainer: {
+    flex: 1,
+    paddingTop: scale(16),
+  },
   // Loading style
   loadingContainer: {
     flex: 1,
@@ -171,8 +141,10 @@ export const styles = StyleSheet.create({
     color: '#6B7280',
   },
 
-  settingsContainer: {
+  // content style
+  content: {
     flex: 1,
+    paddingTop: scale(8),
   },
 
   // Settings Item style

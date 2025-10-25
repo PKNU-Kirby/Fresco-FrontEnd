@@ -1,4 +1,15 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+// const baseHeight = 874;
+
+// 반응형 함수
+// const wp = (percentage: number) => (width * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 export const createModalStyles = StyleSheet.create({
   container: {
@@ -9,75 +20,75 @@ export const createModalStyles = StyleSheet.create({
     flexDirection: 'row' as const,
     justifyContent: 'space-between' as const,
     alignItems: 'center' as const,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(12),
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
   },
   title: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '600',
     color: '#333',
   },
   cancelButton: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#666',
   },
   saveButton: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#007AFF',
     fontWeight: '600',
   },
   content: {
     flex: 1,
-    padding: 16,
+    padding: scale(16),
   },
   section: {
-    marginBottom: 24,
+    marginBottom: scale(24),
   },
   halfSection: {
     flex: 1,
-    marginRight: 8,
+    marginRight: scale(8),
   },
   row: {
     flexDirection: 'row' as const,
-    marginBottom: 24,
+    marginBottom: scale(24),
   },
   label: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '600',
     color: '#333',
-    marginBottom: 8,
+    marginBottom: scale(8),
   },
   labelRow: {
     flexDirection: 'row' as const,
     justifyContent: 'space-between' as const,
     alignItems: 'center' as const,
-    marginBottom: 8,
+    marginBottom: scale(8),
   },
   input: {
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: '#E0E0E0',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 16,
+    borderRadius: scale(8),
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(12),
+    fontSize: scale(16),
     backgroundColor: '#FFFFFF',
     color: '#333',
   },
   folderChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(6),
     backgroundColor: '#F0F0F0',
-    borderRadius: 16,
-    marginRight: 8,
+    borderRadius: scale(16),
+    marginRight: scale(8),
   },
   folderChipSelected: {
     backgroundColor: '#007AFF',
   },
   folderChipText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#666',
   },
   folderChipTextSelected: {
@@ -86,34 +97,34 @@ export const createModalStyles = StyleSheet.create({
   listItem: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    marginBottom: 8,
+    marginBottom: scale(8),
   },
   listNumber: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#666',
-    width: 20,
+    width: scale(20),
     textAlign: 'center' as const,
   },
   listInput: {
     flex: 1,
-    borderWidth: 1,
+    borderWidth: scale(1),
     borderColor: '#E0E0E0',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 14,
+    borderRadius: scale(8),
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(8),
+    fontSize: scale(14),
     backgroundColor: '#FFFFFF',
     color: '#333',
-    marginHorizontal: 8,
+    marginHorizontal: scale(8),
   },
   difficultyRow: {
     flexDirection: 'row' as const,
   },
   difficultyButton: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: scale(8),
     backgroundColor: '#F0F0F0',
-    borderRadius: 6,
+    borderRadius: scale(6),
     alignItems: 'center' as const,
     marginRight: 4,
   },
@@ -121,13 +132,13 @@ export const createModalStyles = StyleSheet.create({
     backgroundColor: '#007AFF',
   },
   difficultyText: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#666',
   },
   difficultyTextSelected: {
     color: '#FFFFFF',
   },
   bottomPadding: {
-    height: 50,
+    height: scale(50),
   },
 });

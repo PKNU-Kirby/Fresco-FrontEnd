@@ -1,4 +1,15 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+// const baseHeight = 874;
+
+// 반응형 함수
+// const wp = (percentage: number) => (width * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
   modalOverlay: {
@@ -9,37 +20,37 @@ export const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: scale(16),
     width: '80%',
-    maxWidth: 300,
-    minHeight: 100,
+    maxWidth: scale(300),
+    minHeight: scale(100),
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(16),
+    borderBottomWidth: scale(1),
     borderBottomColor: '#e0e0e0',
   },
   title: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '600',
     color: '#000',
   },
   cancelButton: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#333',
     fontWeight: '400',
   },
   confirmButton: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: 'limegreen',
     fontWeight: '600',
   },
   pickerContainer: {
     alignItems: 'center',
-    minHeight: 250,
+    minHeight: scale(250),
   },
 });

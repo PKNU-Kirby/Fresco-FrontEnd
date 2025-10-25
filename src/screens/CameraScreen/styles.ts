@@ -1,19 +1,29 @@
-// screens/CameraScreen/styles.ts
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+// const baseHeight = 874;
+
+// 반응형 함수
+// const wp = (percentage: number) => (width * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 const shadows = {
   small: {
     shadowColor: '#222222',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: scale(4),
     elevation: 3,
   },
   medium: {
     shadowColor: '#222222',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
-    shadowRadius: 8,
+    shadowRadius: scale(8),
     elevation: 5,
   },
 };
@@ -32,26 +42,26 @@ export const cameraStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(12),
     backgroundColor: '#222222',
   },
   closeButton: {
-    width: 44,
-    height: 44,
+    width: scale(44),
+    height: scale(44),
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 22,
+    borderRadius: scale(22),
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '600',
     color: '#f8f8f8',
     textAlign: 'center',
   },
   rightHeader: {
-    width: 44,
-    height: 44,
+    width: scale(44),
+    height: scale(44),
   },
 
   // 모드 선택 화면
@@ -67,29 +77,29 @@ export const cameraStyles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 40,
+    paddingBottom: scale(40),
   },
 
   modeOptions: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingHorizontal: scale(20),
+    paddingTop: scale(20),
   },
 
   modeButton: {
     width: '100%',
-    maxWidth: 320,
+    maxWidth: scale(320),
     backgroundColor: '#333333',
-    borderRadius: 16,
-    padding: 24,
-    marginVertical: 12,
+    borderRadius: scale(16),
+    padding: scale(24),
+    marginVertical: scale(12),
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: scale(2),
     },
     shadowOpacity: 0.3,
     shadowRadius: 3.84,
@@ -97,44 +107,44 @@ export const cameraStyles = StyleSheet.create({
   },
 
   modeIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: scale(80),
+    height: scale(80),
+    borderRadius: scale(40),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: scale(16),
   },
 
   modeTitle: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '700',
     color: '#f8f8f8',
-    marginBottom: 8,
+    marginBottom: scale(8),
     textAlign: 'center',
   },
 
   modeDescription: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#cccccc',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: scale(20),
   },
 
   // 개발자 도구 구분선 (추가)
   divider: {
     width: '100%',
     alignItems: 'center',
-    marginVertical: 20,
-    paddingVertical: 10,
+    marginVertical: scale(20),
+    paddingVertical: scale(10),
   },
   dividerText: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '600',
     color: '#666',
     backgroundColor: '#444',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(8),
+    borderRadius: scale(20),
   },
 
   // 카메라 실행 화면
@@ -150,17 +160,17 @@ export const cameraStyles = StyleSheet.create({
   },
 
   cameraButton: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: scale(100),
+    height: scale(100),
+    borderRadius: scale(50),
     backgroundColor: '#555555',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: scale(20),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: scale(2),
     },
     shadowOpacity: 0.3,
     shadowRadius: 3.84,
@@ -168,22 +178,22 @@ export const cameraStyles = StyleSheet.create({
   },
 
   cameraButtonText: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#f8f8f8',
     fontWeight: '500',
   },
 
   bottomGuide: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingHorizontal: scale(20),
+    paddingBottom: scale(40),
     alignItems: 'center',
   },
 
   guideText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#cccccc',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: scale(20),
   },
 
   // 로딩 오버레이 (추가)
@@ -200,9 +210,9 @@ export const cameraStyles = StyleSheet.create({
   },
   loadingText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '500',
-    marginTop: 12,
+    marginTop: scale(12),
   },
 
   // 비활성화된 버튼 (추가)
@@ -223,7 +233,7 @@ export const previewStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: 12,
+    borderRadius: scale(12),
   },
 
   scanningOverlay: {
@@ -235,71 +245,80 @@ export const previewStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    borderRadius: 12,
+    borderRadius: scale(12),
   },
 
   loadingText: {
     color: '#f8f8f8',
-    fontSize: 16,
-    marginTop: 16,
+    fontSize: scale(16),
+    marginTop: scale(16),
     textAlign: 'center',
   },
 
   scanningText: {
     color: '#f8f8f8',
-    fontSize: 16,
-    marginTop: 16,
+    fontSize: scale(16),
+    marginTop: scale(16),
     textAlign: 'center',
     fontWeight: '500',
   },
 
   bottomInfo: {
-    paddingHorizontal: 20,
-    paddingVertical: 30,
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(30),
     alignItems: 'center',
   },
 
   infoText: {
     color: '#f8f8f8',
-    fontSize: 16,
+    fontSize: scale(16),
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: scale(8),
     fontWeight: '500',
   },
 
   subInfoText: {
     color: '#cccccc',
-    fontSize: 14,
+    fontSize: scale(14),
     textAlign: 'center',
   },
-
   imagePlace: {
-    position: 'relative',
-    alignItems: 'center',
+    borderRadius: scale(16),
+    marginTop: scale(15),
+    borderCurve: 'continuous',
+    overflow: 'hidden',
+    alignSelf: 'center',
   },
-
   previewImage: {
-    borderRadius: 12,
+    borderRadius: scale(16),
   },
+  // Buttons
   bottomButtons: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-
-  retakeButton: {
-    flex: 1,
-    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(20),
+    backgroundColor: '#222222',
+    gap: scale(12),
+  },
+  // Retake Button
+  retakeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: scale(14),
     backgroundColor: '#f8f8f8',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    gap: 4,
-    minHeight: 60,
+    borderRadius: scale(8),
+    gap: scale(8),
+    minHeight: scale(48),
+  },
+  retakeButtonText: {
+    color: '#333',
+    fontSize: scale(11),
+    fontWeight: '600',
+    textAlign: 'center',
   },
 
   ingredientButton: {
@@ -308,11 +327,11 @@ export const previewStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#4CAF50', // 초록색
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    gap: 4,
-    minHeight: 60,
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(8),
+    borderRadius: scale(8),
+    gap: scale(4),
+    minHeight: scale(60),
   },
 
   receiptButton: {
@@ -321,11 +340,11 @@ export const previewStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#2196F3', // 파란색
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    gap: 4,
-    minHeight: 60,
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(8),
+    borderRadius: scale(8),
+    gap: scale(4),
+    minHeight: scale(60),
   },
 
   manualButton: {
@@ -334,22 +353,15 @@ export const previewStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FF9800', // 주황색
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    gap: 4,
-    minHeight: 60,
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(8),
+    borderRadius: scale(8),
+    gap: scale(4),
+    minHeight: scale(60),
   },
 
   buttonDisabled: {
     opacity: 0.5,
-  },
-
-  retakeButtonText: {
-    color: '#333',
-    fontSize: 11,
-    fontWeight: '600',
-    textAlign: 'center',
   },
 
   ingredientButtonText: {
@@ -361,24 +373,18 @@ export const previewStyles = StyleSheet.create({
 
   receiptButtonText: {
     color: '#f8f8f8',
-    fontSize: 11,
+    fontSize: scale(11),
     fontWeight: '600',
     textAlign: 'center',
   },
 
   manualButtonText: {
     color: '#f8f8f8',
-    fontSize: 11,
+    fontSize: scale(11),
     fontWeight: '600',
     textAlign: 'center',
   },
 
-  scanningText: {
-    color: '#f8f8f8',
-    fontSize: 14,
-    marginTop: 12,
-    textAlign: 'center',
-  },
   /////////////////////////////////////////
 
   previewContainer: {
@@ -391,93 +397,56 @@ export const previewStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    paddingVertical: scale(12),
     backgroundColor: '#222222',
   },
   closeButton: {
-    width: 56,
-    padding: 8,
-    paddingLeft: 0,
-    marginLeft: 10,
+    width: scale(56),
+    padding: scale(8),
+    paddingLeft: scale(0),
+    marginLeft: scale(10),
   },
   headerTitle: { fontWeight: '600', fontSize: 18, color: '#f8f8f8' },
   rightSection: {
-    width: 60,
+    width: scale(60),
   },
 
   // Image Preview Styles
   imageContainer: {
     flex: 1,
     alignItems: 'center',
-    paddingHorizontal: 10,
-  },
-  imagePlace: {
-    borderRadius: 16,
-    marginTop: 15,
-    borderCurve: 'continuous',
-    overflow: 'hidden',
-    alignSelf: 'center',
-  },
-  previewImage: {
-    borderRadius: 16,
+    paddingHorizontal: scale(10),
   },
 
   // Photo Info Styles
   photoInfoContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(12),
     backgroundColor: '#222222',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   photoSizeText: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#CCCCCC',
   },
 
-  // Buttons
-  bottomButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-    backgroundColor: '#222222',
-    gap: 12,
-  },
-  // Retake Button
-  retakeButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    gap: 8,
-    minHeight: 48,
-  },
-  retakeButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333333',
-  },
   // Use Button
   useButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: scale(14),
     backgroundColor: '#73d144ff',
-    borderRadius: 8,
-    gap: 8,
-    minHeight: 48,
+    borderRadius: scale(8),
+    gap: scale(8),
+    minHeight: scale(48),
     ...shadows.small,
   },
   useButtonText: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '600',
     color: '#f8f8f8',
   },

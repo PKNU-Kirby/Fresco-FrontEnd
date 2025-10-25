@@ -1,4 +1,15 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+// iPhone 16 Pro
+const baseWidth = 402;
+//const baseHeight = 874;
+
+// 반응형 함수
+//const wp = (percentage: number) => (width * percentage) / 100;
+//const hp = (percentage: number) => (height * percentage) / 100;
+const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -14,13 +25,13 @@ export const styles = StyleSheet.create({
   // 헤더 영역
   header: {
     backgroundColor: '#e8f5e8',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingHorizontal: scale(16),
+    paddingTop: scale(16),
+    paddingBottom: scale(8),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 5,
+      height: scale(5),
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
@@ -32,33 +43,33 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#e8f5e8',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    marginBottom: 16,
+    borderRadius: scale(12),
+    paddingHorizontal: scale(12),
+    marginBottom: scale(16),
   },
   searchInput: {
     flex: 1,
-    height: 44,
-    fontSize: 16,
+    height: scale(44),
+    fontSize: scale(16),
     color: '#333',
-    paddingHorizontal: 8,
+    paddingHorizontal: scale(8),
   },
   searchButton: {
-    padding: 8,
+    padding: scale(8),
   },
 
   searchHistoryContainer: {
     position: 'absolute',
-    top: 76,
-    left: 16,
-    right: 16,
+    top: scale(76),
+    left: scale(16),
+    right: scale(16),
     backgroundColor: 'white',
-    borderRadius: 12,
-    paddingVertical: 8,
+    borderRadius: scale(12),
+    paddingVertical: scale(8),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: scale(2),
     },
     shadowOpacity: 0.15,
     shadowRadius: 3.84,
@@ -68,12 +79,12 @@ export const styles = StyleSheet.create({
   searchHistoryItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(12),
   },
   searchHistoryText: {
-    marginLeft: 8,
-    fontSize: 16,
+    marginLeft: scale(8),
+    fontSize: scale(16),
     color: '#333',
   },
 
@@ -81,25 +92,25 @@ export const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: '#f8f8f8',
-    marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 8,
-    borderRadius: 12,
-    padding: 4,
+    marginHorizontal: scale(16),
+    marginTop: scale(16),
+    marginBottom: scale(8),
+    borderRadius: scale(12),
+    padding: scale(4),
     shadowColor: '#333',
     shadowOffset: {
       width: 0,
-      height: 5,
+      height: scale(5),
     },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowRadius: scale(8),
     elevation: 3,
   },
   tab: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(16),
+    borderRadius: scale(8),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -108,14 +119,14 @@ export const styles = StyleSheet.create({
     shadowColor: '#333',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: scale(2),
     },
     shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowRadius: scale(4),
     elevation: 3,
   },
   tabText: {
-    fontSize: 15,
+    fontSize: scale(15),
     fontWeight: '600',
     color: '#444',
   },
@@ -126,25 +137,25 @@ export const styles = StyleSheet.create({
   // 콘텐츠 영역
   content: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: scale(16),
+    paddingTop: scale(16),
   },
 
   // 공동 레시피 폴더 카드
   sharedFolderCard: {
     backgroundColor: 'white',
-    borderRadius: 16,
-    marginBottom: 20,
-    padding: 20,
+    borderRadius: scale(16),
+    marginBottom: scale(20),
+    padding: scale(20),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 3,
+      height: scale(3),
     },
     shadowOpacity: 0.15,
     shadowRadius: 4.65,
     elevation: 6,
-    borderLeftWidth: 4,
+    borderLeftWidth: scale(4),
     borderLeftColor: '#34C759',
   },
 
@@ -155,26 +166,26 @@ export const styles = StyleSheet.create({
 
   folderIconContainer: {
     position: 'relative',
-    marginRight: 16,
+    marginRight: scale(16),
   },
 
   folderBadge: {
     position: 'absolute',
-    top: -8,
-    right: -8,
+    top: scale(-8),
+    right: scale(-8),
     backgroundColor: '#FF6B6B',
-    borderRadius: 12,
-    minWidth: 24,
-    height: 24,
+    borderRadius: scale(12),
+    minWidth: scale(24),
+    height: scale(24),
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: scale(2),
     borderColor: 'white',
   },
 
   folderBadgeText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: scale(12),
     fontWeight: '700',
   },
 
@@ -183,21 +194,21 @@ export const styles = StyleSheet.create({
   },
 
   folderTitle: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '700',
     color: '#333',
-    marginBottom: 4,
+    marginBottom: scale(4),
   },
 
   folderDescription: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#666',
-    marginBottom: 6,
-    lineHeight: 20,
+    marginBottom: scale(6),
+    lineHeight: scale(20),
   },
 
   folderSubInfo: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#34C759',
     fontWeight: '500',
   },
@@ -205,12 +216,12 @@ export const styles = StyleSheet.create({
   // 레시피 카드
   recipeCard: {
     backgroundColor: 'white',
-    borderRadius: 16,
-    marginBottom: 12,
+    borderRadius: scale(16),
+    marginBottom: scale(12),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: scale(2),
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
@@ -219,7 +230,7 @@ export const styles = StyleSheet.create({
 
   recipeCardContent: {
     flexDirection: 'row',
-    padding: 16,
+    padding: scale(16),
     alignItems: 'center',
   },
 
@@ -233,28 +244,28 @@ export const styles = StyleSheet.create({
   },
 
   dragHandle: {
-    padding: 12,
-    marginLeft: 4,
+    padding: scale(12),
+    marginLeft: scale(4),
     backgroundColor: '#f5f5f5',
-    borderRadius: 8,
+    borderRadius: scale(8),
     justifyContent: 'center',
     alignItems: 'center',
-    minWidth: 60,
+    minWidth: scale(60),
   },
 
   dragHint: {
-    fontSize: 10,
+    fontSize: scale(10),
     color: '#999',
-    marginTop: 2,
+    marginTop: scale(2),
   },
 
   // 드래그 관련 스타일
   draggingItem: {
-    elevation: 8,
+    elevation: scale(8),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: scale(4),
     },
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
@@ -263,7 +274,7 @@ export const styles = StyleSheet.create({
   draggingCard: {
     backgroundColor: '#f0f8ff',
     borderColor: '#007AFF',
-    borderWidth: 2,
+    borderWidth: scale(2),
   },
 
   noDragCard: {
@@ -271,27 +282,27 @@ export const styles = StyleSheet.create({
   },
 
   recipeTitle: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '600',
     color: '#333',
-    marginBottom: 4,
+    marginBottom: scale(4),
   },
 
   recipeDescription: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#666',
-    marginBottom: 8,
-    lineHeight: 20,
+    marginBottom: scale(8),
+    lineHeight: scale(20),
   },
 
   recipeDate: {
-    fontSize: 12,
+    fontSize: scale(12),
     color: '#999',
   },
 
   favoriteButton: {
-    padding: 8,
-    marginLeft: 12,
+    padding: scale(8),
+    marginLeft: scale(12),
   },
 
   // 삭제 버튼 (스와이프 시 나타남)
@@ -299,17 +310,17 @@ export const styles = StyleSheet.create({
     backgroundColor: '#FF3B30',
     justifyContent: 'center',
     alignItems: 'center',
-    width: 80,
-    marginBottom: 12,
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
+    width: scale(80),
+    marginBottom: scale(12),
+    borderTopRightRadius: scale(16),
+    borderBottomRightRadius: scale(16),
   },
 
   deleteButtonText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: scale(12),
     fontWeight: '500',
-    marginTop: 4,
+    marginTop: scale(4),
   },
 
   // 더보기 버튼
@@ -317,36 +328,36 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 20,
-    marginBottom: 100, // 플로팅 버튼과 겹치지 않도록
+    paddingVertical: scale(20),
+    marginBottom: scale(100), // 플로팅 버튼과 겹치지 않도록
   },
 
   loadMoreText: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: '#666',
-    marginRight: 4,
+    marginRight: scale(4),
   },
 
   // 플로팅 버튼들
   floatingButtonContainer: {
     position: 'absolute',
-    bottom: 30,
-    right: 20,
+    bottom: scale(30),
+    right: scale(20),
     alignItems: 'center',
   },
 
   scrollToTopButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: scale(48),
+    height: scale(48),
+    borderRadius: scale(24),
     backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: scale(12),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: scale(2),
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -354,7 +365,7 @@ export const styles = StyleSheet.create({
   },
 
   floatingMenu: {
-    marginBottom: 12,
+    marginBottom: scale(12),
     alignItems: 'center',
   },
 
@@ -362,14 +373,14 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#34C759',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 24,
-    marginBottom: 8,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(12),
+    borderRadius: scale(24),
+    marginBottom: scale(8),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: scale(2),
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -378,45 +389,45 @@ export const styles = StyleSheet.create({
 
   menuText: {
     color: 'white',
-    fontSize: 14,
+    fontSize: scale(14),
     fontWeight: '500',
-    marginLeft: 8,
+    marginLeft: scale(8),
   },
 
   // 빈 상태 (empty state)
   emptyContainer: {
-    paddingVertical: 60,
+    paddingVertical: scale(60),
     alignItems: 'center',
   },
 
   emptyText: {
-    fontSize: 18,
+    fontSize: scale(18),
     fontWeight: '500',
     color: '#666',
-    marginTop: 16,
+    marginTop: scale(16),
     textAlign: 'center',
   },
 
   emptySubText: {
-    fontSize: 14,
+    fontSize: scale(14),
     color: '#999',
-    marginTop: 8,
+    marginTop: scale(8),
     textAlign: 'center',
-    paddingHorizontal: 32,
-    lineHeight: 20,
+    paddingHorizontal: scale(32),
+    lineHeight: scale(20),
   },
 
   plusButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: scale(56),
+    height: scale(56),
+    borderRadius: scale(28),
     backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: scale(2),
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
