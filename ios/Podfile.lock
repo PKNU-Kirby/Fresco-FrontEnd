@@ -2448,7 +2448,7 @@ PODS:
     - FirebaseCoreExtension
     - React-Core
     - RNFBApp
-  - RNGestureHandler (2.28.0):
+  - RNGestureHandler (2.29.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -3295,7 +3295,7 @@ SPEC CHECKSUMS:
   RNDateTimePicker: 87557c780a44cd2ba53e485898c0dc1cb7abd744
   RNFBApp: 801ac9162b2a7f518bcd7057c37db8b6d7ac77d7
   RNFBMessaging: 28e23e0c21cc2f88f2904888134f291bdeacf10d
-  RNGestureHandler: a52292df4f8fc7daab354ad2c37be401d4c3bed8
+  RNGestureHandler: 10c7673aa2ac512fe9e397f762b42be4bdca1fd3
   RNImageCropPicker: c83c85012d3d860e1fb40f21bd185e7c95a03506
   RNNaverLogin: cb552dbbeb0bc5307dbfce905b7fa3b92691802f
   RNReanimated: 79f7013af18614d4bda402ef9cd157f28d3a1ff1

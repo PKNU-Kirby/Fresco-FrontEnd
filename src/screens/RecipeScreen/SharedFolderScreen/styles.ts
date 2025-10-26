@@ -20,12 +20,12 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: scale(16),
+    // gap: scale(16),
   },
   loadingText: {
     fontSize: scale(16),
     color: '#666',
-    textAlign: 'center',
+    // textAlign: 'center',
   },
   container: {
     flex: 1,
@@ -243,26 +243,11 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: scale(8),
+    //
+
+    borderRadius: scale(6),
+    backgroundColor: '#ffebee',
   },
-
-  // 기존 fridgeRecipeCard 수정
-
-  // 레시피 정보 스타일 조정
-
-  // 빈 상태 컨테이너 스타일 개선
-
-  // 로딩 컨테이너
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  loadingText: {
-    fontSize: scale(16),
-    color: '#666',
-  }, /////
-  // styles.ts에 추가할 스타일들
 
   // 헤더 액션 버튼들
   headerActions: {
@@ -313,43 +298,6 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
     color: 'white',
   },
-
-  // 레시피 카드 개선
-  recipeMainContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    paddingRight: scale(8),
-  },
-
-  deleteButton: {
-    padding: scale(8),
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: scale(8),
-    borderRadius: scale(6),
-    backgroundColor: '#ffebee',
-  },
-
-  fridgeRecipeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    marginHorizontal: scale(16),
-    marginVertical: scale(6),
-    paddingVertical: scale(16),
-    paddingHorizontal: scale(16),
-    borderRadius: scale(12),
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: scale(2),
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-
   // 레시피 카드 관련 스타일
   recipeCard: {
     flexDirection: 'row',

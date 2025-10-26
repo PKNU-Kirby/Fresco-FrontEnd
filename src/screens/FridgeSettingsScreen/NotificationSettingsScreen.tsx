@@ -1,4 +1,4 @@
-// screens/settings/NotificationSettingsScreen.tsx - iOS 스타일로 완전히 변경된 버전
+// screens/settings/NotificationSettingsScreen.tsx
 import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
@@ -13,9 +13,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import BackButton from '../../components/_common/BackButton';
-import NotificationService, {
-  NotificationSettings,
-} from '../../services/NotificationService';
+import UnifiedNotificationService from '../../services/UnifiedNotificationService';
+import { NotificationSettings } from '../../services/LocalNotificationService';
 import { styles } from './styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -38,7 +37,8 @@ const NotificationSettingsScreen = () => {
 
   const loadSettings = async () => {
     try {
-      const savedSettings = await NotificationService.getNotificationSettings();
+      const savedSettings =
+        await UnifiedNotificationService.getNotificationSettings();
       setSettings(savedSettings);
     } catch (error) {
       console.error('설정 불러오기 실패:', error);
@@ -48,14 +48,22 @@ const NotificationSettingsScreen = () => {
   };
 
   const checkPermission = async () => {
-    const status = await NotificationService.checkNotificationStatus();
+    const status = await UnifiedNotificationService.checkNotificationStatus();
     setHasPermission(status.hasPermission);
+
+    // 디버깅용 상세 상태 출력
+    console.log('📊 알림 상태:', {
+      전체: status.hasPermission,
+      FCM: status.fcmStatus,
+      로컬: status.localStatus,
+    });
   };
 
   const saveSettings = async (newSettings: NotificationSettings) => {
     try {
-      await NotificationService.saveNotificationSettings(newSettings);
+      await UnifiedNotificationService.saveNotificationSettings(newSettings);
       setSettings(newSettings);
+      console.log('✅ 설정 저장 완료');
     } catch (error) {
       Alert.alert('오류', '설정 저장 중 문제가 발생했습니다.');
     }
@@ -63,7 +71,7 @@ const NotificationSettingsScreen = () => {
 
   const handleNotificationToggle = async (enabled: boolean) => {
     if (enabled && !hasPermission) {
-      const granted = await NotificationService.requestPermission();
+      const granted = await UnifiedNotificationService.requestPermission();
       if (!granted) {
         Alert.alert(
           '알림 권한 필요',
@@ -71,10 +79,8 @@ const NotificationSettingsScreen = () => {
           [
             { text: '취소', style: 'cancel' },
             {
-              text: '설정으로 이동',
-              onPress: () => {
-                // 설정 앱으로 이동하는 로직 추가 가능
-              },
+              text: '확인',
+              onPress: () => {},
             },
           ],
         );
@@ -104,8 +110,30 @@ const NotificationSettingsScreen = () => {
   };
 
   const testNotification = async () => {
-    await NotificationService.printTokenForTesting();
-    Alert.alert('테스트', 'Firebase 토큰이 콘솔에 출력되었습니다.');
+    await UnifiedNotificationService.sendTestNotifications();
+    Alert.alert(
+      '테스트 알림',
+      'FCM 토큰이 콘솔에 출력되고,\n로컬 테스트 알림이 전송되었습니다.',
+    );
+  };
+
+  const testDemoNotifications = async () => {
+    await UnifiedNotificationService.createDemoNotifications();
+    Alert.alert(
+      '데모 알림 생성',
+      '가상의 식재료 알림들이 스케줄되었습니다.\n콘솔에서 확인하세요.',
+    );
+  };
+
+  const viewScheduledNotifications = async () => {
+    const notifications =
+      await UnifiedNotificationService.getScheduledNotifications();
+    Alert.alert(
+      '스케줄된 알림',
+      notifications.length > 0
+        ? `총 ${notifications.length}개의 알림이 예약되어 있습니다.\n콘솔에서 상세 내용을 확인하세요.`
+        : '예약된 알림이 없습니다.',
+    );
   };
 
   const getTimeFromString = (timeString: string): Date => {
@@ -331,14 +359,32 @@ const NotificationSettingsScreen = () => {
 
         {/* 개발자 도구 */}
         <View style={styles.settingsGroup}>
-          <GroupHeader title="개발자" />
+          <GroupHeader title="개발자 도구" />
 
           <SettingsItem
             title="테스트 알림"
-            subtitle="Firebase 토큰을 확인합니다"
+            subtitle="FCM 토큰 확인 및 로컬 알림 테스트"
             icon="bug-outline"
             iconColor="#8B5CF6"
             onPress={testNotification}
+            showArrow={false}
+          />
+
+          <SettingsItem
+            title="데모 알림 생성"
+            subtitle="가상 식재료 알림 스케줄 테스트"
+            icon="flask-outline"
+            iconColor="#F59E0B"
+            onPress={testDemoNotifications}
+            showArrow={false}
+          />
+
+          <SettingsItem
+            title="예약된 알림 보기"
+            subtitle="스케줄된 알림 목록 확인"
+            icon="list-outline"
+            iconColor="#10B981"
+            onPress={viewScheduledNotifications}
             showArrow={false}
             isLast
           />

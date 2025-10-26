@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  StyleSheet,
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "767992474172",
+    "project_id": "fresco-kirby",
+    "storage_bucket": "fresco-kirby.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:767992474172:android:2b476aa81c4fe1f90df139",
+        "android_client_info": {
+          "package_name": "com.fresco"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBULr1a4UudFJdt6rpbIuPRwSylqwwF6iA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

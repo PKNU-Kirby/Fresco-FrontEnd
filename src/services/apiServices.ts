@@ -20,6 +20,11 @@ type FridgeMember = {
   role: 'owner' | 'member';
 };
 
+type FCMTokenRequest = {
+  title: string;
+  body: string;
+};
+
 // 토큰 갱신 상태 관리
 let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
@@ -404,6 +409,84 @@ export class ApiService {
     await AsyncStorageService.setCurrentUserId(response.user.id);
 
     return response;
+  }
+
+  // FCM 토큰 등록/업데이트
+  static async registerFCMToken(fcmToken: string): Promise<boolean> {
+    try {
+      console.log('=> FCM 토큰 등록 시작:', fcmToken.substring(0, 30) + '...');
+
+      await this.apiCall<void>('/notification', {
+        method: 'POST',
+        headers: {
+          'X-FCM-Token': fcmToken,
+        },
+        body: JSON.stringify({
+          title: '알림 설정 완료',
+          body: 'FCM 토큰이 등록되었습니다.',
+        }),
+      });
+
+      console.log('O FCM 토큰 등록 성공');
+      return true;
+    } catch (error) {
+      console.error('X FCM 토큰 등록 실패:', error);
+      return false;
+    }
+  }
+
+  // 알림 설정 업데이트 (소비기한 알림 설정)
+  static async updateNotificationSettings(
+    fcmToken: string,
+    settings: {
+      expiryDaysBefore: number;
+      notificationTime: string;
+    },
+  ): Promise<boolean> {
+    try {
+      console.log('=> 알림 설정 업데이트:', settings);
+
+      await this.apiCall<void>('/notification', {
+        method: 'POST',
+        headers: {
+          'X-FCM-Token': fcmToken,
+        },
+        body: JSON.stringify({
+          title: '알림 설정 업데이트',
+          body: `소비기한 ${settings.expiryDaysBefore}일 전, ${settings.notificationTime}에 알림 받기`,
+        }),
+      });
+
+      console.log('O 알림 설정 업데이트 성공');
+      return true;
+    } catch (error) {
+      console.error('X 알림 설정 업데이트 실패:', error);
+      return false;
+    }
+  }
+
+  // 테스트 푸시 알림 전송
+  static async sendTestNotification(fcmToken: string): Promise<boolean> {
+    try {
+      console.log('=> 테스트 알림 전송');
+
+      await this.apiCall<void>('/notification', {
+        method: 'POST',
+        headers: {
+          'X-FCM-Token': fcmToken,
+        },
+        body: JSON.stringify({
+          title: '테스트 알림',
+          body: '푸시 알림이 정상적으로 작동합니다! 🎉',
+        }),
+      });
+
+      console.log('O 테스트 알림 전송 성공');
+      return true;
+    } catch (error) {
+      console.error('X 테스트 알림 전송 실패:', error);
+      return false;
+    }
   }
 
   // 냉장고 목록 조회
