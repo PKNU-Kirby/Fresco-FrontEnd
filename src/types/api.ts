@@ -1,4 +1,4 @@
-import Config from 'react-native-config';
+import Config from './config';
 import { AsyncStorageService } from '../services/AsyncStorageService';
 import type { SocialProvider } from '../types/auth';
 import { clearTokens } from '../utils/authUtils';
@@ -217,6 +217,11 @@ export const loginAPI = async (
   provider: SocialProvider,
   accessToken: string,
 ): Promise<LoginResponse> => {
+  console.log('🔍 Config.API_BASE_URL:', Config.API_BASE_URL);
+  console.log(
+    '🔍 전체 URL:',
+    `${Config.API_BASE_URL}${API_ENDPOINTS.AUTH.LOGIN}`,
+  );
   const response = await fetch(
     `${Config.API_BASE_URL}${API_ENDPOINTS.AUTH.LOGIN}`,
     {

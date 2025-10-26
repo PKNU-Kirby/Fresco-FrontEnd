@@ -90,7 +90,6 @@ configurations.all {
     exclude group: 'com.android.support', module: 'support-compat'
     exclude group: 'com.android.support', module: 'support-v4'
     exclude group: 'com.android.support', module: 'support-core-utils'
-    exclude group: 'com.lugg.ReactNativeConfig', module: 'react-native-config'
     
     // UMP 충돌 해결
     resolutionStrategy {
@@ -111,12 +110,15 @@ android {
         versionCode 1
         versionName "1.0"
 
+       buildConfigField "String", "API_BASE_URL", "\"${project.env.get("API_BASE_URL") ?: "http://43.203.174.184:8080"}\""
         buildConfigField "String", "NAVER_CLIENT_ID", "\"${project.env.get("NAVER_CLIENT_ID") ?: ""}\""
         buildConfigField "String", "NAVER_CLIENT_SECRET", "\"${project.env.get("NAVER_CLIENT_SECRET") ?: ""}\""
-
+        
         resValue "string", "naver_client_id", project.env.get("NAVER_CLIENT_ID") ?: ""
         resValue "string", "naver_client_secret", project.env.get("NAVER_CLIENT_SECRET") ?: ""
     }
+   
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
