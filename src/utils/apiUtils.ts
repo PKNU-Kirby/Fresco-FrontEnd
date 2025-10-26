@@ -1,4 +1,4 @@
-import Config from 'react-native-config';
+import Config from '../types/config';
 import { getAccessToken, isTokenExpired } from './authUtils';
 import { AuthAPIService } from '../services/API/authAPI';
 import { ApiErrorHandler } from './errorHandler';

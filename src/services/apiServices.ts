@@ -1,5 +1,5 @@
 import { AsyncStorageService } from './AsyncStorageService';
-import Config from 'react-native-config';
+import Config from '../types/config';
 import { CommonActions } from '@react-navigation/native';
 
 // API 응답 타입 정의

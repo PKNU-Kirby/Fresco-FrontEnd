@@ -1,5 +1,5 @@
 // utils/apiClient.ts - 통합 API 클라이언트
-import Config from 'react-native-config';
+import Config from '../types/config';
 
 export class ApiClient {
   private static baseURL = Config.API_BASE_URL;

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Config from 'react-native-config';
+import Config from '../types/config';
 import { getTokenUserId } from '../utils/authUtils';
 import { User, SocialProvider, UserId } from '../types/auth';
 

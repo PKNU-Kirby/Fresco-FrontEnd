@@ -1,7 +1,7 @@
 import { ApiService } from '../apiServices';
 import { Platform } from 'react-native';
 import { launchImageLibrary, MediaType } from 'react-native-image-picker';
-import Config from 'react-native-config';
+import Config from '../../types/config';
 
 // 식재료 관련 타입
 export type AutoCompleteSearchResponse = {

@@ -1,5 +1,5 @@
 // services/API/authAPI.ts
-import Config from 'react-native-config';
+import Config from '../../types/config';
 import {
   getRefreshToken,
   saveTokens,

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
+import Config from '../types/config';
 import { ApiService } from '../services/apiServices';
 import { getTokenUserId } from '../utils/authUtils';
 import { PermissionAPIService } from '../services/API/permissionAPI';
@@ -73,6 +74,7 @@ export const useFridgeSelect = (navigation: any) => {
       const fridgeData = await ApiService.apiCall<any[]>(
         '/api/v1/refrigerator',
       );
+      console.log('🔍 API URL:', `${Config.API_BASE_URL}/api/v1/refrigerator`); // 추가
 
       console.log(
         '🔍 [loadUserFridges] 서버에서 받은 냉장고 목록:',

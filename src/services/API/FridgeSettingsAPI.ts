@@ -1,4 +1,4 @@
-import Config from 'react-native-config';
+import Config from '../../types/config';
 import { getValidAccessToken } from '../../utils/authUtils';
 import { ApiErrorHandler } from '../../utils/errorHandler';
 

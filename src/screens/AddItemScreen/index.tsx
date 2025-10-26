@@ -17,7 +17,7 @@ import ConfirmModal from '../../components/modals/ConfirmModal';
 import { addItemStyles as styles } from './styles';
 import { RootStackParamList } from '../../../App';
 
-import Config from 'react-native-config';
+import Config from '../../types/config';
 import { AsyncStorageService } from '../../services/AsyncStorageService';
 
 export interface ItemFormData {

@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Config from 'react-native-config';
+import Config from './src/types/config';
 import NaverLogin from '@react-native-seoul/naver-login';
 
 // Fonts
