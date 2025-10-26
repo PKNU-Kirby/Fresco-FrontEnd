@@ -63,7 +63,7 @@ PODS:
   - hermes-engine (0.80.2):
     - hermes-engine/Pre-built (= 0.80.2)
   - hermes-engine/Pre-built (0.80.2)
-  - kakao-login (5.4.1):
+  - kakao-login (5.4.2):
     - KakaoSDKAuth (= 2.22.0)
     - KakaoSDKCommon (= 2.22.0)
     - KakaoSDKUser (= 2.22.0)
@@ -125,7 +125,6 @@ PODS:
     - React-RCTText (= 0.80.2)
     - React-RCTVibration (= 0.80.2)
   - React-callinvoker (0.80.2)
-  - React-Codegen (0.1.0)
   - React-Core (0.80.2):
     - boost
     - DoubleConversion
@@ -1727,9 +1726,9 @@ PODS:
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
     - SocketRocket
-  - react-native-config (1.5.6):
-    - react-native-config/App (= 1.5.6)
-  - react-native-config/App (1.5.6):
+  - react-native-config (1.5.9):
+    - react-native-config/App (= 1.5.9)
+  - react-native-config/App (1.5.9):
     - React-Core
   - react-native-image-picker (8.2.1):
     - boost
@@ -1760,7 +1759,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-safe-area-context (5.6.0):
+  - react-native-safe-area-context (5.6.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -1779,8 +1778,8 @@ PODS:
     - React-hermes
     - React-ImageManager
     - React-jsi
-    - react-native-safe-area-context/common (= 5.6.0)
-    - react-native-safe-area-context/fabric (= 5.6.0)
+    - react-native-safe-area-context/common (= 5.6.1)
+    - react-native-safe-area-context/fabric (= 5.6.1)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -1791,7 +1790,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-safe-area-context/common (5.6.0):
+  - react-native-safe-area-context/common (5.6.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -1820,7 +1819,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-safe-area-context/fabric (5.6.0):
+  - react-native-safe-area-context/fabric (5.6.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -1850,7 +1849,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-slider (5.0.1):
+  - react-native-slider (5.1.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -1869,7 +1868,7 @@ PODS:
     - React-hermes
     - React-ImageManager
     - React-jsi
-    - react-native-slider/common (= 5.0.1)
+    - react-native-slider/common (= 5.1.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -1880,7 +1879,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-slider/common (5.0.1):
+  - react-native-slider/common (5.1.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -1909,13 +1908,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-worklets-core (0.5.0):
-    - RCT-Folly
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Codegen
-    - React-Core
-    - ReactCommon/turbomodule/core
   - React-NativeModulesApple (0.80.2):
     - boost
     - DoubleConversion
@@ -2419,7 +2411,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNDateTimePicker (8.4.4):
+  - RNDateTimePicker (8.4.5):
     - boost
     - DoubleConversion
     - fast_float
@@ -2549,7 +2541,7 @@ PODS:
     - SocketRocket
     - TOCropViewController (~> 2.7.4)
     - Yoga
-  - RNNaverLogin (4.2.1):
+  - RNNaverLogin (4.2.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -2584,7 +2576,7 @@ PODS:
     - RNNotifee/NotifeeCore (= 9.1.8)
   - RNNotifee/NotifeeCore (9.1.8):
     - React-Core
-  - RNReanimated (4.0.2):
+  - RNReanimated (4.1.3):
     - boost
     - DoubleConversion
     - fast_float
@@ -2611,11 +2603,11 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated (= 4.0.2)
+    - RNReanimated/reanimated (= 4.1.3)
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNReanimated/reanimated (4.0.2):
+  - RNReanimated/reanimated (4.1.3):
     - boost
     - DoubleConversion
     - fast_float
@@ -2642,11 +2634,11 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated/apple (= 4.0.2)
+    - RNReanimated/reanimated/apple (= 4.1.3)
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNReanimated/reanimated/apple (4.0.2):
+  - RNReanimated/reanimated/apple (4.1.3):
     - boost
     - DoubleConversion
     - fast_float
@@ -2676,7 +2668,7 @@ PODS:
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNScreens (4.14.1):
+  - RNScreens (4.18.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2704,10 +2696,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNScreens/common (= 4.14.1)
+    - RNScreens/common (= 4.18.0)
     - SocketRocket
     - Yoga
-  - RNScreens/common (4.14.1):
+  - RNScreens/common (4.18.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2737,7 +2729,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNSVG (15.12.1):
+  - RNSVG (15.14.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2764,10 +2756,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNSVG/common (= 15.12.1)
+    - RNSVG/common (= 15.14.0)
     - SocketRocket
     - Yoga
-  - RNSVG/common (15.12.1):
+  - RNSVG/common (15.14.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2825,7 +2817,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNWorklets (0.4.1):
+  - RNWorklets (0.6.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2852,10 +2844,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNWorklets/worklets (= 0.4.1)
+    - RNWorklets/worklets (= 0.6.1)
     - SocketRocket
     - Yoga
-  - RNWorklets/worklets (0.4.1):
+  - RNWorklets/worklets (0.6.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2882,10 +2874,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNWorklets/worklets/apple (= 0.4.1)
+    - RNWorklets/worklets/apple (= 0.6.1)
     - SocketRocket
     - Yoga
-  - RNWorklets/worklets/apple (0.4.1):
+  - RNWorklets/worklets/apple (0.6.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2965,7 +2957,6 @@ DEPENDENCIES:
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
-  - react-native-worklets-core (from `../node_modules/react-native-worklets-core`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -3030,7 +3021,6 @@ SPEC REPOS:
     - nanopb
     - naveridlogin-sdk-ios
     - PromisesObjC
-    - React-Codegen
     - SocketRocket
     - TOCropViewController
 
@@ -3126,8 +3116,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
-  react-native-worklets-core:
-    :path: "../node_modules/react-native-worklets-core"
   React-NativeModulesApple:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios"
   React-oscompat:
@@ -3236,7 +3224,7 @@ SPEC CHECKSUMS:
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   hermes-engine: bbc1152da7d2d40f9e59c28acc6576fcf5d28e2a
-  kakao-login: 39d7c13140ad97c54f9d42893d32ab4a1476420a
+  kakao-login: c7b882cd279ca11f5b3abd15d0e0fcb41a427108
   KakaoSDKAuth: 569b377eda622d93d4575240b8031cd658163eef
   KakaoSDKCommon: d57127c339fc79e73aa8b236a4c77211c29924f1
   KakaoSDKUser: 043bcd7e91454ebf3bf64f150c430e6f65f0a08d
@@ -3249,7 +3237,6 @@ SPEC CHECKSUMS:
   RCTTypeSafety: cb974efcdc6695deedf7bf1eb942f2a0603a063f
   React: e7a4655b09d0e17e54be188cc34c2f3e2087318a
   React-callinvoker: 62192daaa2f30c3321fc531e4f776f7b09cf892b
-  React-Codegen: 4b8b4817cea7a54b83851d4c1f91f79aa73de30a
   React-Core: b23cdaaa9d76389d958c06af3c57aa6ad611c542
   React-CoreModules: 8e0f562e5695991e455abbebe1e968af71d52553
   React-cxxreact: 6ccbe0cc2c652b29409b14b23cfb3cd74e084691
@@ -3277,11 +3264,10 @@ SPEC CHECKSUMS:
   React-logger: 7cfc7b1ae1f8e5fe5097f9c746137cc3a8fad4ce
   React-Mapbuffer: 8f620d1794c6b59a8c3862c3ae820a2e9e6c9bb0
   React-microtasksnativemodule: dcf5321c9a41659a6718df8a5f202af1577c6825
-  react-native-config: f1dde39f8468ad922fc7e8bd4308c8e6223d5ee8
+  react-native-config: d08b60865268872495a43e211059b4606131fe01
   react-native-image-picker: 9bceb747cd6cde22a3416ffdc819d11b5b11f156
-  react-native-safe-area-context: b99449a99a0e45c09050d8557c153ad63492e306
-  react-native-slider: e005853a9391f5f0cacb9e957453bca982608eb9
-  react-native-worklets-core: 0d4e6ce037c51ed554e971d7ba17b3f47bb8497e
+  react-native-safe-area-context: 4df6c897ab5bd841a5bba6f734785c0c9ef4c206
+  react-native-slider: a2e99f1873551d7a15fc5e3e0b8630a8a9693530
   React-NativeModulesApple: 342e280bb9fc2aa5f61f6c257b309a86b995e12d
   React-oscompat: 56d6de59f9ae95cd006a1c40be2cde83bc06a4e1
   React-perflogger: 4008bd05a8b6c157b06608c0ea0b8bd5d9c5e6c9
@@ -3314,22 +3300,22 @@ SPEC CHECKSUMS:
   ReactCodegen: 4928682e20747464165effacc170019a18da953c
   ReactCommon: ec1cdf708729338070f8c4ad746768a782fd9eb1
   RNCAsyncStorage: f30b3a83064e28b0fc46f1fbd3834589ed64c7b9
-  RNDateTimePicker: 87557c780a44cd2ba53e485898c0dc1cb7abd744
+  RNDateTimePicker: 378d4e05d927f6c5618319eec48a33dd0e8ce8fb
   RNFBApp: d1f587866b6e188d95c5f541abedd8e4ce167bbe
   RNFBMessaging: 81842deb236bfd87d8e49f22ce7acf05d1eea04b
   RNGestureHandler: 10c7673aa2ac512fe9e397f762b42be4bdca1fd3
   RNImageCropPicker: c83c85012d3d860e1fb40f21bd185e7c95a03506
-  RNNaverLogin: cb552dbbeb0bc5307dbfce905b7fa3b92691802f
+  RNNaverLogin: 6bc5ce97fe91a622dc0bec301a873c0995095fcb
   RNNotifee: 5e3b271e8ea7456a36eec994085543c9adca9168
-  RNReanimated: 79f7013af18614d4bda402ef9cd157f28d3a1ff1
-  RNScreens: 563778e390e5e229b17f4cb1f8c78e549eadd36f
-  RNSVG: 05951f386c4b23c484335dab2346f53e6210e8dc
+  RNReanimated: 41edc68a22b9d652a0666a9c0c8e135e7794fe99
+  RNScreens: 3a4adfb50193d3353332caff8a186d67db75e367
+  RNSVG: 05138c285c3a8b54fc01061fb1438385832fe7f7
   RNVectorIcons: 0567525e0a344458329daa09068cf9e8090ec791
-  RNWorklets: 18d2a9a10588e4d51f42116f19e650d296ab8dbc
+  RNWorklets: 7fb44cd32a491df4a4832cce2f3b0aaaf813956d
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
   Yoga: ce248fb32065c9b00451491b06607f1c25b2f1ed
 
 PODFILE CHECKSUM: 902fffba5476a52a90cd6af0795951c5eef04c4f
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

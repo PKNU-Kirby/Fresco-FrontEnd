@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import firebase from '@react-native-firebase/app';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -228,6 +229,8 @@ function App(): React.JSX.Element {
     DeepLinkHandler.setNavigationRef(navigationRef.current);
     const subscription = DeepLinkHandler.initialize();
 
+    console.log('🔥 Firebase App Name:', firebase.app().name);
+    console.log('🔥 Firebase initialized:', firebase.apps.length > 0);
     return () => {
       subscription?.remove();
     };
