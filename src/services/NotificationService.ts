@@ -28,8 +28,15 @@ class NotificationService {
 
       if (enabled) {
         console.log('✅ 푸시 알림 권한 허용됨');
-        await this.getFCMToken();
-        this.setupMessageHandlers();
+
+        // 중요! 여기서 바로 토큰 가져오기
+        try {
+          await this.getFCMToken();
+          this.setupMessageHandlers();
+        } catch (tokenError) {
+          console.error('❌ FCM 토큰 가져오기 실패:', tokenError);
+          // 토큰 실패해도 권한은 허용된 것으로 처리
+        }
       } else {
         console.log('❌ 푸시 알림 권한 거부됨');
       }
@@ -44,26 +51,37 @@ class NotificationService {
   // FCM 토큰 가져오기
   async getFCMToken(): Promise<string | null> {
     try {
-      if (!this.fcmToken) {
-        // iOS에서 원격 메시지 등록
-        if (Platform.OS === 'ios') {
-          await messaging().registerDeviceForRemoteMessages();
-        }
+      console.log('=> FCM 토큰 가져오기 시작...');
 
-        this.fcmToken = await messaging().getToken();
-        console.log('📱 FCM Token:', this.fcmToken);
-
-        // 서버에 토큰 저장
-        await this.saveTokenToServer(this.fcmToken);
+      // iOS에서 원격 메시지 등록
+      if (Platform.OS === 'ios') {
+        await messaging().registerDeviceForRemoteMessages();
       }
+
+      this.fcmToken = await messaging().getToken();
+      console.log('📱 FCM Token:', this.fcmToken);
+
+      // 서버에 토큰 저장
+      await this.saveTokenToServer(this.fcmToken);
+
       return this.fcmToken;
     } catch (error) {
-      console.error('FCM 토큰 가져오기 실패:', error);
-      return null;
+      console.error('❌ FCM 토큰 가져오기 실패:', error);
+      throw error; // 에러를 throw해서 상위에서 처리
     }
   }
 
-  // 서버에 FCM 토큰 저장 (ApiService 사용)
+  // FCM 토큰 출력 (디버깅용)
+  async printFCMToken(): Promise<void> {
+    try {
+      await this.printTokenForTesting();
+    } catch (error) {
+      console.error('FCM 토큰 출력 실패:', error);
+      throw error;
+    }
+  }
+
+  // 서버에 FCM 토큰 저장
   private async saveTokenToServer(token: string): Promise<void> {
     try {
       console.log('=> 서버에 FCM 토큰 저장 시도');
@@ -86,6 +104,8 @@ class NotificationService {
 
   // 메시지 핸들러들 설정
   setupMessageHandlers(): void {
+    console.log('=> 메시지 핸들러 설정 중...');
+
     // 포그라운드 메시지 리스너
     messaging().onMessage(async remoteMessage => {
       console.log('📨 포그라운드에서 메시지 수신:', remoteMessage);
@@ -99,7 +119,6 @@ class NotificationService {
     // 백그라운드/종료 상태에서 알림 클릭으로 앱 열림
     messaging().onNotificationOpenedApp(remoteMessage => {
       console.log('🔔 백그라운드 알림 클릭으로 앱 열림:', remoteMessage);
-      // TODO: 특정 화면으로 네비게이션
     });
 
     // 앱이 종료된 상태에서 알림 클릭으로 앱 시작
@@ -111,7 +130,6 @@ class NotificationService {
             '🚀 앱 종료 상태에서 알림 클릭으로 앱 시작:',
             remoteMessage,
           );
-          // TODO: 특정 화면으로 네비게이션
         }
       });
 
@@ -128,12 +146,14 @@ class NotificationService {
     settings: NotificationSettings,
   ): Promise<void> {
     try {
+      console.log('💾 알림 설정 저장 시작:', settings);
+
       // 1. 로컬에 저장
       await AsyncStorage.setItem(
         'notification_settings',
         JSON.stringify(settings),
       );
-      console.log('💾 알림 설정 로컬 저장됨:', settings);
+      console.log('💾 알림 설정 로컬 저장됨');
 
       // 2. 서버에도 알림 설정 전송
       if (settings.enabled && this.fcmToken) {
@@ -178,27 +198,40 @@ class NotificationService {
 
   // 테스트용: FCM 토큰 출력 및 테스트 알림 전송
   async printTokenForTesting(): Promise<void> {
-    const token = await this.getFCMToken();
-    if (token) {
-      console.log('=== 테스트용 FCM 토큰 ===');
-      console.log(token);
-      console.log(
-        '=== Firebase 콘솔에서 이 토큰으로 테스트 메시지를 보내세요 ===',
-      );
+    try {
+      // 토큰이 없으면 가져오기
+      if (!this.fcmToken) {
+        await this.getFCMToken();
+      }
 
-      // 테스트 알림 전송
-      const success = await ApiService.sendTestNotification(token);
+      const token = this.fcmToken;
 
-      Alert.alert(
-        'FCM 토큰 (테스트용)',
-        success
-          ? `테스트 알림이 전송되었습니다!\n\n토큰: ${token.substring(
-              0,
-              50,
-            )}...`
-          : `토큰: ${token.substring(0, 50)}...\n\n테스트 알림 전송 실패`,
-        [{ text: '확인' }],
-      );
+      if (token) {
+        console.log('=== 테스트용 FCM 토큰 ===');
+        console.log(token);
+        console.log(
+          '=== Firebase 콘솔에서 이 토큰으로 테스트 메시지를 보내세요 ===',
+        );
+
+        // 테스트 알림 전송 시도
+        const success = await ApiService.sendTestNotification(token);
+
+        Alert.alert(
+          'FCM 토큰 (테스트용)',
+          success
+            ? `테스트 알림이 전송되었습니다!\n\n토큰: ${token.substring(
+                0,
+                50,
+              )}...`
+            : `토큰: ${token.substring(0, 50)}...\n\n테스트 알림 전송 실패`,
+          [{ text: '확인' }],
+        );
+      } else {
+        Alert.alert('오류', 'FCM 토큰을 가져올 수 없습니다.');
+      }
+    } catch (error) {
+      console.error('❌ printTokenForTesting 실패:', error);
+      Alert.alert('오류', 'FCM 토큰을 가져오는 중 오류가 발생했습니다.');
     }
   }
 
