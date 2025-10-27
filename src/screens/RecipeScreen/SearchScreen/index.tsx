@@ -116,7 +116,7 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Search header */}
       <View style={styles.searchHeader}>
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>

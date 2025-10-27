@@ -101,7 +101,7 @@ export const getFridgeItemsByFridgeId = async (
   const response = await IngredientControllerAPI.getRefrigeratorIngredients(
     fridgeId,
     {
-      categoryIds: finalCategoryIds, // ← 수정
+      categoryIds: finalCategoryIds,
       page,
       size,
       sort: 'expirationDate',

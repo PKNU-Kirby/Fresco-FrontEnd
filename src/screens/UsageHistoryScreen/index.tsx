@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
-  SafeAreaView,
   View,
   TouchableOpacity,
   SectionList,
   Text,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import BackButton from '../../components/_common/BackButton';
@@ -213,7 +213,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
           <BackButton onPress={handleBack} />
           <Text style={styles.headerTitle}>식재료 사용 기록</Text>
@@ -228,7 +228,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* 헤더 */}
       <View style={styles.header}>
         <BackButton onPress={handleBack} />

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  SafeAreaView,
   View,
   TouchableOpacity,
   Switch,
@@ -10,6 +9,7 @@ import {
   Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import BackButton from '../../components/_common/BackButton';
 import UnifiedNotificationService from '../../services/UnifiedNotificationService';
@@ -375,7 +375,7 @@ const NotificationSettingsScreen = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
           <BackButton onPress={() => navigation.goBack()} />
           <Text style={styles.headerTitle}>알림 설정</Text>
@@ -389,7 +389,7 @@ const NotificationSettingsScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* 헤더 */}
       <View style={styles.header}>
         <BackButton onPress={() => navigation.goBack()} />

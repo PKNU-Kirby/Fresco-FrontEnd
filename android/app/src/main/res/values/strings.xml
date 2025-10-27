@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">fresco</string>
     <string name="kakao_app_key">41edbaecf10803a6983b70346aca3eea</string>
+    <string name="naver_client_id">veFZeOEWZDxbR0JzucSH</string>
+    <string name="naver_client_secret">o1a3B6QVcs</string>
 </resources>

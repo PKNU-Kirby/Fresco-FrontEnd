@@ -276,7 +276,7 @@ const UseRecipeScreen: React.FC = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.loadingContainer}>
           <Text>냉장고 정보를 불러오는 중...</Text>
         </View>

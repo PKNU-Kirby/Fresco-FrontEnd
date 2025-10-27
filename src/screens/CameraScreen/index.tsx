@@ -3,7 +3,6 @@ import {
   View,
   TouchableOpacity,
   Text,
-  SafeAreaView,
   PermissionsAndroid,
   Platform,
   ActivityIndicator,
@@ -14,6 +13,7 @@ import {
   MediaType,
   PhotoQuality,
 } from 'react-native-image-picker';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../../../App';
 import ConfirmModal from '../../components/modals/ConfirmModal';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -198,7 +198,7 @@ const CameraScreen: React.FC = () => {
 
   if (!scanMode) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View
           style={styles.scrollContainer}
           contentContainerStyle={styles.scrollContent}
@@ -327,7 +327,7 @@ const CameraScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.cameraLaunchContainer}>
         <View style={styles.header}>
           <TouchableOpacity

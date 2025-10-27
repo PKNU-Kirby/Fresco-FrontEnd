@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { SafeAreaView, View, Alert } from 'react-native';
+import { View, Alert } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../App';
 import { styles } from './styles';
@@ -262,7 +263,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* 헤더 */}
       <FridgeHeader
         fridgeName={fridgeName}

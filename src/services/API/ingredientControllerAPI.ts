@@ -831,7 +831,7 @@ export class IngredientControllerAPI {
    * 냉장고의 모든 식재료 가져오기 (레시피 계산용)
    */
   static async getIngredients(
-    refrigeratorId: string,
+    refrigeratorId: number,
   ): Promise<RefrigeratorIngredientResponse[]> {
     try {
       console.log(`냉장고 ${refrigeratorId}의 식재료 조회 (레시피용)`);

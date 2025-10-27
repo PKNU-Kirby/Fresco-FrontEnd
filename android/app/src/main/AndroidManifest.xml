@@ -45,7 +45,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="naverlogin" />
+                <data android:scheme="naverlogin" android:host="oauth" />
             </intent-filter>
             
             <!-- 카카오톡 URL 스킴 처리 -->
@@ -69,10 +69,20 @@
 
                 <!-- Redirect URI: "kakao{NATIVE_APP_KEY}://oauth“ -->
                 <data android:host="oauth"
-                    android:scheme="kakao41edbaecf10803a6983b70346aca3eea" />
+                    android:scheme="kakao@string/kakao_app_key" />
             </intent-filter>
         </activity>
 
+        <!-- 네이버 로그인 -->
+        <meta-data
+            android:name="com.naver.sdk.ClientId"
+            android:value="@string/naver_client_id" />
+        <meta-data
+            android:name="com.naver.sdk.ClientSecret"
+            android:value="@string/naver_client_secret" />
+        <meta-data
+            android:name="com.naver.sdk.ClientName"
+            android:value="@string/app_name" />
 
         <!-- react-native-push-notification 설정 -->
         <meta-data

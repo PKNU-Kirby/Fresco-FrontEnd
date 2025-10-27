@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
-import {
-  SafeAreaView,
-  View,
-  ScrollView,
-  Text,
-  ActivityIndicator,
-} from 'react-native';
+import { View, ScrollView, Text, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import BackButton from '../../components/_common/BackButton';
 import InviteMemberModal from '../../components/FridgeSettings/InviteMemberModal';
@@ -64,7 +59,7 @@ const FridgeSettingsScreen = ({ route }: Props) => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
           <BackButton onPress={handleBack} />
           <Text style={styles.headerTitle}>냉장고 설정</Text>
@@ -79,7 +74,7 @@ const FridgeSettingsScreen = ({ route }: Props) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <BackButton onPress={handleBack} />

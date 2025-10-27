@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Config from './src/types/config';
 import NaverLogin from '@react-native-seoul/naver-login';
 
@@ -237,61 +238,63 @@ function App(): React.JSX.Element {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer ref={navigationRef}>
-        <Stack.Navigator
-          initialRouteName="Splash"
-          screenOptions={{ headerShown: false }}
-        >
-          <Stack.Screen name="Splash" component={SplashScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="FridgeSelect" component={FridgeSelectScreen} />
-          <Stack.Screen
-            name="InviteConfirm"
-            component={InviteConfirmScreen}
-            options={{
-              title: '냉장고 초대',
-              headerShown: true,
-              presentation: 'modal',
-              animation: 'slide_from_bottom',
-            }}
-          />
-          <Stack.Screen name="MainTabs" component={MainTabNavigator} />
-          <Stack.Screen
-            name="FridgeSettings"
-            component={FridgeSettingsScreen}
-          />
-          <Stack.Screen name="MembersScreen" component={MembersScreen} />
-          <Stack.Screen
-            name="UsageHistoryScreen"
-            component={UsageHistoryScreen}
-            options={{
-              presentation: 'modal',
-              animation: 'slide_from_right',
-            }}
-          />
-          <Stack.Screen
-            name="NotificationSettingsScreen"
-            component={NotificationSettingsScreen}
-            options={{
-              presentation: 'modal',
-              animation: 'slide_from_right',
-            }}
-          />
-          <Stack.Screen name="CameraScreen" component={CameraScreen} />
-          <Stack.Screen
-            name="PhotoPreview"
-            component={PhotoPreview}
-            options={{
-              title: '미리보기',
-              presentation: 'modal',
-              animation: 'slide_from_right',
-            }}
-          />
-          <Stack.Screen name="AddItemScreen" component={AddItemScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <NavigationContainer ref={navigationRef}>
+          <Stack.Navigator
+            initialRouteName="Splash"
+            screenOptions={{ headerShown: false }}
+          >
+            <Stack.Screen name="Splash" component={SplashScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="FridgeSelect" component={FridgeSelectScreen} />
+            <Stack.Screen
+              name="InviteConfirm"
+              component={InviteConfirmScreen}
+              options={{
+                title: '냉장고 초대',
+                headerShown: true,
+                presentation: 'modal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+            <Stack.Screen
+              name="FridgeSettings"
+              component={FridgeSettingsScreen}
+            />
+            <Stack.Screen name="MembersScreen" component={MembersScreen} />
+            <Stack.Screen
+              name="UsageHistoryScreen"
+              component={UsageHistoryScreen}
+              options={{
+                presentation: 'modal',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="NotificationSettingsScreen"
+              component={NotificationSettingsScreen}
+              options={{
+                presentation: 'modal',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen name="CameraScreen" component={CameraScreen} />
+            <Stack.Screen
+              name="PhotoPreview"
+              component={PhotoPreview}
+              options={{
+                title: '미리보기',
+                presentation: 'modal',
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen name="AddItemScreen" component={AddItemScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
 

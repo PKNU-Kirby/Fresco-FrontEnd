@@ -24,7 +24,7 @@ import {
 } from '../../../types/Recipe';
 import { RecipeStackParamList } from '../RecipeNavigator';
 import { AsyncStorageService } from '../../../services/AsyncStorageService';
-import IngredientControllerAPI from '../../../services/API/ingredientControllerAPI';
+import { IngredientControllerAPI } from '../../../services/API/ingredientControllerAPI';
 import { styles, sharedRecipeStyles } from './styles';
 
 // 냉장고 식재료 타입 정의
@@ -428,34 +428,17 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   const scrollViewRef = useRef<ScrollView>(null);
 
   // 냉장고 식재료 로드 함수
-  const loadFridgeIngredients = async (
-    fridgeId: string,
-  ): Promise<FridgeIngredient[]> => {
+  const loadFridgeIngredients = async (fridgeId: number) => {
     try {
       console.log(`🔍 냉장고 ${fridgeId} 식재료 API 로드 시도`);
 
+      // RefrigeratorAPI의 static 메서드 사용
       const response = await IngredientControllerAPI.getRefrigeratorIngredients(
         fridgeId,
-        { page: 0, size: 100 },
       );
 
-      const ingredients: FridgeIngredient[] = response.content.map(item => ({
-        id: item.id,
-        ingredientId: item.ingredientId,
-        categoryId: item.categoryId,
-        name: item.ingredientName,
-        ingredientName: item.ingredientName,
-        quantity: item.quantity,
-        unit: item.unit || '개',
-        expirationDate: item.expirationDate,
-        expiryDate: item.expirationDate,
-      }));
-
-      console.log(
-        `✅ 냉장고 ${fridgeId} 식재료 ${ingredients.length}개 로드 성공`,
-      );
-
-      return ingredients;
+      // PageResponse에서 content 배열 반환
+      return response.content || [];
     } catch (error) {
       console.error(`❌ 냉장고 ${fridgeId} 식재료 로드 실패:`, error);
       return [];
@@ -485,8 +468,12 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
 
       const fridgesWithRecipes: UserFridge[] = await Promise.all(
         userFridgesResponse.map(async fridge => {
-          const sharedRecipes = await RecipeAPI.getSharedRecipes(fridge.id);
-          const fridgeIngredients = await loadFridgeIngredients(fridge.id);
+          const sharedRecipes = await RecipeAPI.getSharedRecipes(
+            Number(fridge.id),
+          );
+          const fridgeIngredients = await loadFridgeIngredients(
+            Number(fridge.id),
+          );
 
           return {
             fridge: {

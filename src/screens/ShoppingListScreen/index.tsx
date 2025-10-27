@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import {
-  SafeAreaView,
   Alert,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -11,6 +10,7 @@ import {
   Text,
   Keyboard,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import CartItemCard from '../../components/ShoppingList/CartItemCard';
@@ -360,7 +360,7 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
   // 초기화 중일 때 로딩 화면
   if (isInitializing) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <ShoppingListHeader listName={fridgeName} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="limegreen" />
@@ -371,7 +371,7 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <ShoppingListHeader listName={fridgeName} />
 
       {/* 서버 동기화 중 표시 */}

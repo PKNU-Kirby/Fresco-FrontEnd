@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
   View,
   TouchableOpacity,
   ScrollView,
@@ -8,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import BackButton from '../../../components/_common/BackButton';
@@ -69,7 +69,7 @@ const MembersScreen = ({ route }: Props) => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
           <BackButton onPress={handleBack} />
           <Text style={styles.headerTitle}>구성원</Text>
@@ -84,7 +84,7 @@ const MembersScreen = ({ route }: Props) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <BackButton onPress={handleBack} />

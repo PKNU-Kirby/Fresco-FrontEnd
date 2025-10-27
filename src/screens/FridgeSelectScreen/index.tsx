@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  SafeAreaView,
-  Text,
-  Animated,
-  Alert,
-} from 'react-native';
+import { ActivityIndicator, Text, Animated, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFridgeSelect } from '../../hooks/useFridgeSelect';
@@ -320,7 +315,7 @@ const FridgeSelectScreen = () => {
   // 로딩 상태
   if (loading || !currentUser) {
     return (
-      <SafeAreaView style={styles.center}>
+      <SafeAreaView style={styles.center} edges={['top']}>
         <ActivityIndicator size="large" />
         <Text>냉장고 목록을 불러오는 중...</Text>
       </SafeAreaView>
@@ -329,7 +324,7 @@ const FridgeSelectScreen = () => {
 
   return (
     <GestureHandlerRootView>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <FridgeHeader
           currentUser={currentUser}
           isEditMode={isEditMode}
