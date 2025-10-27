@@ -73,12 +73,15 @@ const AddItemScreen: React.FC = () => {
   const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
   const [showGoBackConfirmModal, setShowGoBackConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false); // 새로 추가: 완료 확인 모달
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [savedItemsCount, setSavedItemsCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
 
   // 백엔드 응답 저장용 state
   const [savedItemsResponse, setSavedItemsResponse] = useState<any[]>([]);
+  // 누적된 모든 등록 아이템 (여러 번 등록할 수 있으므로)
+  const [allSavedItems, setAllSavedItems] = useState<any[]>([]);
 
   // 확인된 식재료 정보 상태
   const [confirmedIngredients, setConfirmedIngredients] = useState<
@@ -120,7 +123,8 @@ const AddItemScreen: React.FC = () => {
     ];
   }, [recognizedData, scanResults]);
 
-  const [isEditMode, setIsEditMode] = useState(!scanResults);
+  // 항상 편집 모드로 시작 (변경)
+  const [isEditMode, setIsEditMode] = useState(true);
 
   const {
     items,
@@ -220,7 +224,7 @@ const AddItemScreen: React.FC = () => {
     }
   }, [items, scanResults, setIsEditMode, setIsLoading]);
 
-  // ========== 저장 로직 ==========
+  // ========== 저장 로직 (수정됨) ==========
   const handleSaveItems = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -288,9 +292,32 @@ const AddItemScreen: React.FC = () => {
       console.log('=== API 호출 성공 ===');
       console.log('응답:', JSON.stringify(response, null, 2));
 
-      // 백엔드 응답 저장
+      // 저장 응답과 개수 저장
       setSavedItemsResponse(response.result || []);
       setSavedItemsCount(confirmedIngredients.length);
+
+      // 누적 저장 (여러 번 등록 가능)
+      const newSavedItems = (response.result || []).map(
+        (responseItem, index) => {
+          const confirmedIngredient = confirmedIngredients[index];
+          return {
+            id: `new_${Date.now()}_${index}`,
+            ingredientId: responseItem.ingredientId,
+            categoryId: responseItem.categoryId,
+            ingredientName: responseItem.ingredientName,
+            quantity: responseItem.quantity,
+            unit: confirmedIngredient?.userInput.unit || '개',
+            expirationDate: responseItem.expirationDate,
+            categoryName:
+              confirmedIngredient?.apiResult?.categoryName || '기타',
+            createdAt: new Date().toISOString(),
+          };
+        },
+      );
+
+      setAllSavedItems(prev => [...prev, ...newSavedItems]);
+
+      // 성공 메시지 표시 후 편집 모드로 돌아가기
       setShowSuccessModal(true);
     } catch (error) {
       console.log('=== API 호출 실패 ===');
@@ -314,12 +341,12 @@ const AddItemScreen: React.FC = () => {
     }
   }, [confirmedIngredients, fridgeId, setIsLoading]);
 
-  // 헤더 로직
+  // 헤더 로직 (수정됨)
   const headerButtonText = useMemo(() => {
     if (isEditMode) {
       return '확인';
     } else {
-      return '저장';
+      return '등록';
     }
   }, [isEditMode]);
 
@@ -354,7 +381,8 @@ const AddItemScreen: React.FC = () => {
           item.expirationDate !== '',
       );
 
-      if (hasChanges) {
+      if (hasChanges || allSavedItems.length > 0) {
+        // 저장된 아이템이 있거나 변경사항이 있으면 확인
         setShowGoBackConfirmModal(true);
       } else {
         navigation.goBack();
@@ -363,7 +391,7 @@ const AddItemScreen: React.FC = () => {
       // 확인 모드에서는 편집으로 돌아가기
       handleBackToEdit();
     }
-  }, [isEditMode, items, navigation]);
+  }, [isEditMode, items, navigation, allSavedItems.length]);
 
   // ========== Actions 관련 로직 ==========
   const handleBackToEdit = useCallback(() => {
@@ -379,7 +407,7 @@ const AddItemScreen: React.FC = () => {
     setFocusedItemId(null);
   }, [setFocusedItemId]);
 
-  // ========== 모달 핸들러들 ==========
+  // ========== 모달 핸들러들 (수정됨) ==========
   const handleFinalConfirmModalConfirm = useCallback(() => {
     setShowFinalConfirmModal(false);
     handleSaveItems();
@@ -391,36 +419,59 @@ const AddItemScreen: React.FC = () => {
 
   const handleGoBackConfirmModalConfirm = useCallback(() => {
     setShowGoBackConfirmModal(false);
-    navigation.goBack();
-  }, [navigation]);
+
+    // 저장된 아이템이 있으면 홈으로 전달
+    if (allSavedItems.length > 0) {
+      console.log('홈으로 전달하는 allSavedItems:', allSavedItems);
+      navigation.navigate('MainTabs', {
+        fridgeId,
+        fridgeName: '냉장고',
+        screen: 'FridgeHomeScreen',
+        params: {
+          fridgeId,
+          fridgeName: '냉장고',
+          newItems: allSavedItems,
+          refreshKey: Date.now(),
+        },
+      });
+    } else {
+      navigation.goBack();
+    }
+  }, [navigation, allSavedItems, fridgeId]);
 
   const handleGoBackConfirmModalCancel = useCallback(() => {
     setShowGoBackConfirmModal(false);
   }, []);
 
+  // 등록 성공 후 편집 화면으로 돌아가기 (수정됨)
   const handleSuccessConfirm = useCallback(() => {
     setShowSuccessModal(false);
 
-    // 백엔드 응답 데이터를 사용해서 newItems 생성
-    const newItems = savedItemsResponse.map((responseItem, index) => {
-      // 해당하는 confirmedIngredient 찾기
-      const confirmedIngredient = confirmedIngredients[index];
+    // 편집 모드로 전환하고 폼 초기화
+    setIsEditMode(true);
+    setConfirmedIngredients([]);
 
-      return {
-        id: `new_${Date.now()}_${index}`,
-        ingredientId: responseItem.ingredientId,
-        categoryId: responseItem.categoryId,
-        ingredientName: responseItem.ingredientName,
-        quantity: responseItem.quantity, // 백엔드 응답값 사용
-        unit: confirmedIngredient?.userInput.unit || '개', // 단위는 프론트에서만 관리
-        expirationDate: responseItem.expirationDate, // 백엔드에서 계산된 날짜 사용
-        categoryName: confirmedIngredient?.apiResult?.categoryName || '기타',
-        createdAt: new Date().toISOString(),
-      };
-    });
+    // 새로운 빈 아이템으로 초기화
+    setItems([
+      {
+        id: `${Date.now()}`,
+        name: '',
+        quantity: 1,
+        unit: '개',
+        expirationDate: '',
+        itemCategory: '채소 / 과일',
+      },
+    ]);
+  }, [setIsEditMode, setItems]);
 
-    console.log('홈으로 전달하는 newItems (백엔드 응답 기반):', newItems);
+  // 완료 버튼 - 홈으로 이동 (새로 추가)
+  const handleComplete = useCallback(() => {
+    if (allSavedItems.length === 0) {
+      navigation.goBack();
+      return;
+    }
 
+    console.log('홈으로 전달하는 allSavedItems:', allSavedItems);
     navigation.navigate('MainTabs', {
       fridgeId,
       fridgeName: '냉장고',
@@ -428,11 +479,11 @@ const AddItemScreen: React.FC = () => {
       params: {
         fridgeId,
         fridgeName: '냉장고',
-        newItems,
+        newItems: allSavedItems,
         refreshKey: Date.now(),
       },
     });
-  }, [navigation, savedItemsResponse, confirmedIngredients, fridgeId]);
+  }, [navigation, allSavedItems, fridgeId]);
 
   const handleErrorConfirm = useCallback(() => {
     setShowErrorModal(false);
@@ -479,20 +530,31 @@ const AddItemScreen: React.FC = () => {
           isEditMode={isEditMode}
           onAddNewItem={addNewItem}
           onBackToEdit={handleBackToEdit}
+          onComplete={allSavedItems.length > 0 ? handleComplete : undefined}
         />
       </KeyboardAvoidingView>
 
-      {/* 뒤로가기 확인 모달 */}
+      {/* 뒤로가기 확인 모달 (메시지 수정) */}
       <ConfirmModal
         isAlert={true}
         visible={showGoBackConfirmModal}
-        title="식재료 추가 중단"
-        message="지금 나가면 작성 중인 내용이 사라집니다. 정말 나가시겠습니까?"
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
-        confirmText="나가기"
+        title={allSavedItems.length > 0 ? '등록 완료' : '식재료 추가 중단'}
+        message={
+          allSavedItems.length > 0
+            ? `${allSavedItems.length}개의 식재료가 등록되었습니다.\n홈 화면으로 이동하시겠습니까?`
+            : '지금 나가면 작성 중인 내용이 사라집니다. 정말 나가시겠습니까?'
+        }
+        iconContainer={{
+          backgroundColor: allSavedItems.length > 0 ? '#d3f0d3' : '#fae1dd',
+        }}
+        icon={{
+          name: allSavedItems.length > 0 ? 'check-circle' : 'error-outline',
+          color: allSavedItems.length > 0 ? 'limegreen' : 'tomato',
+          size: 48,
+        }}
+        confirmText={allSavedItems.length > 0 ? '홈으로 이동' : '나가기'}
         cancelText="계속 작성"
-        confirmButtonStyle="danger"
+        confirmButtonStyle={allSavedItems.length > 0 ? 'primary' : 'danger'}
         onConfirm={handleGoBackConfirmModalConfirm}
         onCancel={handleGoBackConfirmModalCancel}
       />
@@ -512,15 +574,15 @@ const AddItemScreen: React.FC = () => {
         onCancel={handleFinalConfirmModalCancel}
       />
 
-      {/* 성공 모달 */}
+      {/* 등록 성공 모달 (수정됨) */}
       <ConfirmModal
         isAlert={false}
         visible={showSuccessModal}
-        title="추가 완료!"
-        message={`${savedItemsCount}개의 식재료가 성공적으로 냉장고에 추가되었습니다.\n\n이제 홈 화면에서 확인할 수 있습니다.`}
+        title="등록 완료!"
+        message={`${savedItemsCount}개의 식재료가 냉장고에 추가되었습니다.\n\n추가로 등록하시겠습니까?`}
         iconContainer={{ backgroundColor: '#d3f0d3' }}
         icon={{ name: 'check-circle', color: 'limegreen', size: 48 }}
-        confirmText="확인"
+        confirmText="계속 등록"
         cancelText=""
         confirmButtonStyle="primary"
         onConfirm={handleSuccessConfirm}
