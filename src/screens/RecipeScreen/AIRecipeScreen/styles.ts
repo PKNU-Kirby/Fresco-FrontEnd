@@ -12,6 +12,10 @@ const baseWidth = 402;
 const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
   safeArea: {
     flex: 1,
     backgroundColor: '#f8f9fa',

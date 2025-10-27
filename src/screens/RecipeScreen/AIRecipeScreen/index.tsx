@@ -52,6 +52,13 @@ const AIRecipeScreen: React.FC = () => {
     '10분 안에 만들 수 있는 요리',
   ]);
 
+  console.log('🔍 렌더링 상태:', {
+    isLoading,
+    hasGeneratedRecipe: !!generatedRecipe,
+    generatedRecipe,
+    prompt,
+  });
+
   // ✅ AI 레시피 생성 (실제 API 호출)
   const generateRecipe = async () => {
     if (!prompt.trim()) {
