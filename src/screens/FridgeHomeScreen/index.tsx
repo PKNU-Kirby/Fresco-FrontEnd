@@ -11,6 +11,7 @@ import FridgeHeader from '../../components/FridgeHome/FridgeHeader';
 import FridgeItemList from '../../components/FridgeHome/FridgeItemList';
 import ItemCategoryModal from '../../components/modals/ItemCategoryModal';
 import AddItemModal from '../../components/modals/AddItemModal';
+import ConfirmModal from '../../components/modals/ConfirmModal';
 
 // Hooks
 import { useFridgeData } from '../../hooks/useFridgeData';
@@ -36,6 +37,15 @@ const FridgeHomeScreen = ({ route }: Props) => {
     route.params;
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [saveSuccessModalVisible, setSaveSuccessModalVisible] = useState(false);
+  const [saveSuccessCount, setSaveSuccessCount] = useState(0);
+  const [saveErrorModalVisible, setSaveErrorModalVisible] = useState(false);
+  const [deleteConfirmModalVisible, setDeleteConfirmModalVisible] =
+    useState(false);
+  const [deleteSuccessModalVisible, setDeleteSuccessModalVisible] =
+    useState(false);
+  const [deleteErrorModalVisible, setDeleteErrorModalVisible] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   // useFridgeData hook
   const {
@@ -148,7 +158,6 @@ const FridgeHomeScreen = ({ route }: Props) => {
     });
   };
 
-  // ✅ 수정된 편집 모드 토글
   const handleEditModeToggle = useCallback(async () => {
     if (!isEditMode) {
       console.log('편집 모드 진입');
@@ -162,10 +171,9 @@ const FridgeHomeScreen = ({ route }: Props) => {
 
         if (changedCount > 0) {
           console.log(`${changedCount}개 아이템 변경사항 저장 완료`);
-          Alert.alert(
-            '저장 완료',
-            `${changedCount}개 아이템의 변경사항이 저장되었습니다.`,
-          );
+          // 🔥 Alert 대신 모달 표시
+          setSaveSuccessCount(changedCount);
+          setSaveSuccessModalVisible(true);
         } else {
           console.log('변경사항 없음');
         }
@@ -182,10 +190,8 @@ const FridgeHomeScreen = ({ route }: Props) => {
         // 실패하면 서버에서 최신 데이터 다시 불러오기
         await refreshWithCategory(activeItemCategory);
 
-        Alert.alert(
-          '오류',
-          '일부 항목을 저장할 수 없습니다. 삭제 권한이 없거나 이미 삭제된 항목일 수 있습니다.',
-        );
+        // 🔥 Alert 대신 모달 표시
+        setSaveErrorModalVisible(true);
 
         // 편집 모드는 종료하되, 실패한 내용 반영
         setEditModeStartState([]);
@@ -231,7 +237,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
   );
 
   const handleExpiryDateChange = useCallback(
-    async (itemId: string, newDate: string) => {
+    async (itemId: number, newDate: string) => {
       if (isEditMode) {
         // 편집 모드에서는 로컬 상태만 변경
         console.log(`로컬 날짜 변경: ${itemId} -> ${newDate}`);
@@ -245,18 +251,28 @@ const FridgeHomeScreen = ({ route }: Props) => {
   );
 
   // 아이템 삭제
-  const handleDeleteItem = useCallback(
-    async (itemId: string) => {
-      try {
-        await deleteItem(itemId);
-        Alert.alert('삭제 완료', '아이템이 삭제되었습니다.');
-      } catch (error) {
-        console.error('아이템 삭제 실패:', error);
-        Alert.alert('오류', '아이템 삭제에 실패했습니다. 다시 시도해주세요.');
-      }
-    },
-    [deleteItem],
-  );
+  const handleDeleteItem = useCallback(async (itemId: number) => {
+    // 삭제 확인 모달 표시
+    setItemToDelete(itemId);
+    setDeleteConfirmModalVisible(true);
+  }, []);
+
+  const confirmDeleteItem = useCallback(async () => {
+    if (!itemToDelete) return;
+
+    try {
+      setDeleteConfirmModalVisible(false);
+      await deleteItem(itemToDelete);
+      // 🔥 Alert 대신 모달 표시
+      setDeleteSuccessModalVisible(true);
+    } catch (error) {
+      console.error('아이템 삭제 실패:', error);
+      // 🔥 Alert 대신 모달 표시
+      setDeleteErrorModalVisible(true);
+    } finally {
+      setItemToDelete(null);
+    }
+  }, [itemToDelete, deleteItem]);
 
   const handleItemCategorySelect = (category: string) => {
     setActiveItemCategory(category);
@@ -310,6 +326,84 @@ const FridgeHomeScreen = ({ route }: Props) => {
         onClose={() => setIsAddItemModalVisible(false)}
         onDirectAdd={handleDirectAdd}
         onCameraAdd={handleCameraAdd}
+      />
+
+      {/* 저장 성공 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={saveSuccessModalVisible}
+        title="저장 완료"
+        message={`${saveSuccessCount}개 아이템의 변경사항이 저장되었습니다.`}
+        iconContainer={{ backgroundColor: '#d3f0d3' }}
+        icon={{ name: 'check-circle', color: 'limegreen', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setSaveSuccessModalVisible(false)}
+        onCancel={() => setSaveSuccessModalVisible(false)}
+      />
+
+      {/* 저장 실패 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={saveErrorModalVisible}
+        title="저장 오류"
+        message="일부 항목을 저장할 수 없습니다. 삭제 권한이 없거나 이미 삭제된 항목일 수 있습니다."
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setSaveErrorModalVisible(false)}
+        onCancel={() => setSaveErrorModalVisible(false)}
+      />
+
+      {/* 삭제 확인 모달 */}
+      <ConfirmModal
+        isAlert={true}
+        visible={deleteConfirmModalVisible}
+        title="아이템 삭제"
+        message="정말 이 아이템을 삭제하시겠습니까?"
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'delete-outline', color: 'tomato', size: 48 }}
+        confirmText="삭제"
+        cancelText="취소"
+        confirmButtonStyle="danger"
+        onConfirm={confirmDeleteItem}
+        onCancel={() => {
+          setDeleteConfirmModalVisible(false);
+          setItemToDelete(null);
+        }}
+      />
+
+      {/* 삭제 성공 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={deleteSuccessModalVisible}
+        title="삭제 완료"
+        message="아이템이 삭제되었습니다."
+        iconContainer={{ backgroundColor: '#d3f0d3' }}
+        icon={{ name: 'check-circle', color: 'limegreen', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setDeleteSuccessModalVisible(false)}
+        onCancel={() => setDeleteSuccessModalVisible(false)}
+      />
+
+      {/* 삭제 실패 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={deleteErrorModalVisible}
+        title="삭제 오류"
+        message="아이템 삭제에 실패했습니다. 다시 시도해주세요."
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setDeleteErrorModalVisible(false)}
+        onCancel={() => setDeleteErrorModalVisible(false)}
       />
     </SafeAreaView>
   );

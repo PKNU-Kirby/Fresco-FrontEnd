@@ -22,7 +22,7 @@ import Config from '../../types/config';
 import { AsyncStorageService } from '../../services/AsyncStorageService';
 
 export interface ItemFormData {
-  id: string;
+  id: number;
   name: string;
   quantity: number;
   unit: string;
@@ -50,7 +50,8 @@ const AddItemScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<AddItemScreenRouteProp>();
   const insets = useSafeAreaInsets();
-  const { fridgeId, recognizedData, scanResults, scanMode } = route.params;
+  const { fridgeId, recognizedData, scanResults, scanMode, fridgeName } =
+    route.params;
 
   const getCategoryByName = (categoryName: string) => {
     const categoryMap: { [key: string]: { id: number; name: string } } = {
@@ -73,14 +74,13 @@ const AddItemScreen: React.FC = () => {
   const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
   const [showGoBackConfirmModal, setShowGoBackConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showCompleteModal, setShowCompleteModal] = useState(false); // 새로 추가: 완료 확인 모달
+  //  const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [savedItemsCount, setSavedItemsCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
 
   // 백엔드 응답 저장용 state
   const [savedItemsResponse, setSavedItemsResponse] = useState<any[]>([]);
-  // 누적된 모든 등록 아이템 (여러 번 등록할 수 있으므로)
   const [allSavedItems, setAllSavedItems] = useState<any[]>([]);
 
   // 확인된 식재료 정보 상태
@@ -88,14 +88,14 @@ const AddItemScreen: React.FC = () => {
     ConfirmedIngredient[]
   >(scanResults || []);
 
-  // init item
+  // 아이템 초기화
   const initialItems = useMemo(() => {
-    // 스캔 결과가 있는 경우 (카메라 → 스캔)
+    // 카메라 -> 스캔 결과
     if (scanResults && scanResults.length > 0) {
       return scanResults.map(result => result.userInput);
     }
 
-    // 카메라에서 수동 입력 선택한 경우
+    // 카메라 -> 수동 입력
     if (recognizedData) {
       return [
         {
@@ -109,8 +109,6 @@ const AddItemScreen: React.FC = () => {
         },
       ];
     }
-
-    // 직접 추가
     return [
       {
         id: '1',
@@ -123,7 +121,7 @@ const AddItemScreen: React.FC = () => {
     ];
   }, [recognizedData, scanResults]);
 
-  // 항상 편집 모드로 시작 (변경)
+  // 항상 편집 모드로 시작하기
   const [isEditMode, setIsEditMode] = useState(true);
 
   const {
@@ -140,28 +138,66 @@ const AddItemScreen: React.FC = () => {
   } = useAddItemLogic(initialItems);
 
   // 식재료 확인 로직
+  // AddItemScreen.tsx의 confirmIngredients 함수 수정
+
   const confirmIngredients = useCallback(async () => {
     // 스캔 결과가 있으면 그대로 사용
     if (scanResults && scanResults.length > 0) {
-      setConfirmedIngredients(scanResults);
+      console.log('scanResults 사용 (스캔 결과) - items 반영 필요');
+
+      // scanResults를 사용하되 items의 수정사항을 반영
+      const updatedConfirmed = scanResults.map(scanResult => {
+        const correspondingItem = items.find(
+          item => item.id === scanResult.userInput.id,
+        );
+
+        if (correspondingItem) {
+          return {
+            ...scanResult,
+            userInput: {
+              ...scanResult.userInput,
+              quantity: Number(correspondingItem.quantity), // 수정된 값 반영
+              unit: correspondingItem.unit, // 수정된 값 반영
+              expirationDate: correspondingItem.expirationDate,
+              name: correspondingItem.name,
+            },
+          };
+        }
+        return scanResult;
+      });
+
+      console.log('수정사항 반영된 confirmedIngredients:', updatedConfirmed);
+      setConfirmedIngredients(updatedConfirmed);
       setIsEditMode(false);
       return;
     }
 
     try {
       setIsLoading(true);
-      console.log('식재료 확인 시작:', items);
+      console.log('\n ===== 식재료 확인 시작 =====');
+      console.log('현재 items 배열 전체:', JSON.stringify(items, null, 2));
 
       const confirmedList: ConfirmedIngredient[] = [];
 
-      for (const item of items) {
-        // 사용자가 이미 식재료를 선택한 경우, API 호출 없이 그 정보 사용
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+
+        console.log(`\n🔍 [${i}] 아이템 처리 시작 --------`);
+        console.log('  name:', item.name);
+        console.log('  quantity:', item.quantity, typeof item.quantity);
+        console.log('  unit:', item.unit);
+        console.log('  expirationDate:', item.expirationDate);
+        console.log('  selectedIngredient:', !!item.selectedIngredient);
+
+        // 사용자가 이미 식재료를 선택한 경우
         if (item.selectedIngredient) {
-          // selectedIngredient가 문자열인 경우 파싱
+          console.log('selectedIngredient 존재 - API 호출 스킵');
+
           let selectedIngredient = item.selectedIngredient;
           if (typeof selectedIngredient === 'string') {
             try {
               selectedIngredient = JSON.parse(selectedIngredient);
+              console.log('selectedIngredient 파싱 완료');
             } catch (error) {
               console.error('selectedIngredient 파싱 실패:', error);
               selectedIngredient = null;
@@ -169,23 +205,56 @@ const AddItemScreen: React.FC = () => {
           }
 
           if (selectedIngredient) {
+            // 현재 items[i]의 값을 직접 사용
+            const userInput = {
+              id: item.id,
+              name: item.name,
+              quantity: Number(item.quantity), // 명시적 Number 변환
+              unit: item.unit, // items[i]의 unit 사용
+              expirationDate: item.expirationDate,
+              itemCategory: item.itemCategory,
+              photo: item.photo,
+            };
+
+            console.log('userInput 생성:', {
+              quantity: userInput.quantity,
+              unit: userInput.unit,
+            });
+
             confirmedList.push({
-              userInput: item,
+              userInput,
               apiResult: selectedIngredient,
             });
+
+            console.log(`[${i}] confirmedList에 추가 완료`);
           }
         } else {
-          // 사용자가 선택하지 않은 경우에만 API 호출
+          console.log('selectedIngredient 없음 - API 호출 필요');
+
           try {
             console.log(`"${item.name}" 검색 중...`);
             const foundIngredient =
               await IngredientControllerAPI.findIngredientByName(item.name);
 
             if (foundIngredient) {
+              console.log(`"${item.name}" 검색 성공`);
+
+              const userInput = {
+                id: item.id,
+                name: item.name,
+                quantity: Number(item.quantity),
+                unit: item.unit,
+                expirationDate: item.expirationDate,
+                itemCategory: item.itemCategory,
+                photo: item.photo,
+              };
+
               confirmedList.push({
-                userInput: item,
+                userInput,
                 apiResult: foundIngredient,
               });
+
+              console.log(`[${i}] confirmedList에 추가 완료 (API 결과)`);
             } else {
               throw new Error(
                 `"${item.name}"에 대한 식재료를 찾을 수 없습니다.`,
@@ -195,8 +264,18 @@ const AddItemScreen: React.FC = () => {
             console.error(`"${item.name}" 검색 실패:`, error);
 
             const defaultCategory = getCategoryByName(item.itemCategory);
+            const userInput = {
+              id: item.id,
+              name: item.name,
+              quantity: Number(item.quantity),
+              unit: item.unit,
+              expirationDate: item.expirationDate,
+              itemCategory: item.itemCategory,
+              photo: item.photo,
+            };
+
             confirmedList.push({
-              userInput: item,
+              userInput,
               apiResult: {
                 ingredientId: -1,
                 ingredientName: item.name,
@@ -204,10 +283,17 @@ const AddItemScreen: React.FC = () => {
                 categoryName: defaultCategory.name,
               },
             });
-            console.log(`"${item.name}" - API 실패로 사용자 입력 그대로 사용`);
+            console.log(`[${i}] 기본값으로 추가 (API 실패)`);
           }
         }
       }
+
+      console.log('\n===== 최종 confirmedList =====');
+      confirmedList.forEach((confirmed, index) => {
+        console.log(`[${index}] ${confirmed.userInput.name}:`);
+        console.log(`  quantity: ${confirmed.userInput.quantity}`);
+        console.log(`  unit: ${confirmed.userInput.unit}`);
+      });
 
       setConfirmedIngredients(confirmedList);
       setIsEditMode(false);
@@ -259,7 +345,7 @@ const AddItemScreen: React.FC = () => {
             apiResult = JSON.parse(apiResult);
           } catch (error) {
             console.error('저장 시 apiResult 파싱 실패:', error);
-            apiResult = { ingredientId: -1, categoryId: 11 }; // 기본값 (기타 카테고리)
+            apiResult = { ingredientId: -1, categoryId: 11 };
           }
         }
 
@@ -423,16 +509,26 @@ const AddItemScreen: React.FC = () => {
     // 저장된 아이템이 있으면 홈으로 전달
     if (allSavedItems.length > 0) {
       console.log('홈으로 전달하는 allSavedItems:', allSavedItems);
-      navigation.navigate('MainTabs', {
-        fridgeId,
-        fridgeName: '냉장고',
-        screen: 'FridgeHomeScreen',
-        params: {
-          fridgeId,
-          fridgeName: '냉장고',
-          newItems: allSavedItems,
-          refreshKey: Date.now(),
-        },
+
+      // 🔥 네비게이션 스택 초기화
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'MainTabs',
+            params: {
+              fridgeId,
+              fridgeName: fridgeName || '내 냉장고',
+              screen: 'FridgeHomeScreen',
+              params: {
+                fridgeId,
+                fridgeName: fridgeName || '내 냉장고',
+                newItems: allSavedItems,
+                refreshKey: Date.now(),
+              },
+            },
+          },
+        ],
       });
     } else {
       navigation.goBack();
@@ -447,22 +543,29 @@ const AddItemScreen: React.FC = () => {
   const handleSuccessConfirm = useCallback(() => {
     setShowSuccessModal(false);
 
-    // 편집 모드로 전환하고 폼 초기화
-    setIsEditMode(true);
-    setConfirmedIngredients([]);
+    console.log('홈으로 전달하는 allSavedItems:', allSavedItems);
 
-    // 새로운 빈 아이템으로 초기화
-    setItems([
-      {
-        id: `${Date.now()}`,
-        name: '',
-        quantity: 1,
-        unit: '개',
-        expirationDate: '',
-        itemCategory: '채소 / 과일',
-      },
-    ]);
-  }, [setIsEditMode, setItems]);
+    // 🔥 네비게이션 스택 초기화 후 홈으로 이동
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: 'MainTabs',
+          params: {
+            fridgeId,
+            fridgeName: fridgeName || '내 냉장고',
+            screen: 'FridgeHomeScreen',
+            params: {
+              fridgeId,
+              fridgeName: fridgeName || '내 냉장고',
+              newItems: allSavedItems,
+              refreshKey: Date.now(),
+            },
+          },
+        },
+      ],
+    });
+  }, [navigation, allSavedItems, fridgeId]);
 
   // 완료 버튼 - 홈으로 이동 (새로 추가)
   const handleComplete = useCallback(() => {
@@ -472,16 +575,26 @@ const AddItemScreen: React.FC = () => {
     }
 
     console.log('홈으로 전달하는 allSavedItems:', allSavedItems);
-    navigation.navigate('MainTabs', {
-      fridgeId,
-      fridgeName: '냉장고',
-      screen: 'FridgeHomeScreen',
-      params: {
-        fridgeId,
-        fridgeName: '냉장고',
-        newItems: allSavedItems,
-        refreshKey: Date.now(),
-      },
+
+    // 네비게이션 스택 초기화
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: 'MainTabs',
+          params: {
+            fridgeId,
+            fridgeName: fridgeName || '내 냉장고',
+            screen: 'FridgeHomeScreen',
+            params: {
+              fridgeId,
+              fridgeName: fridgeName || '내 냉장고',
+              newItems: allSavedItems,
+              refreshKey: Date.now(),
+            },
+          },
+        },
+      ],
     });
   }, [navigation, allSavedItems, fridgeId]);
 
@@ -493,7 +606,7 @@ const AddItemScreen: React.FC = () => {
     }
   }, [isEditMode]);
 
-  // 확인 메시지 생성
+  // 확인 메시지
   const confirmationMessage = useMemo(() => {
     if (confirmedIngredients.length === 0) return '';
 
@@ -507,7 +620,6 @@ const AddItemScreen: React.FC = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={insets.top}
       >
-        {/* 기존 컴포넌트와 맞는 props 전달 */}
         <AddItemHeader
           onGoBack={handleGoBack}
           onHeaderButtonPress={handleHeaderButtonPress}
@@ -534,7 +646,7 @@ const AddItemScreen: React.FC = () => {
         />
       </KeyboardAvoidingView>
 
-      {/* 뒤로가기 확인 모달 (메시지 수정) */}
+      {/* 뒤로가기 확인 모달 */}
       <ConfirmModal
         isAlert={true}
         visible={showGoBackConfirmModal}
@@ -574,15 +686,15 @@ const AddItemScreen: React.FC = () => {
         onCancel={handleFinalConfirmModalCancel}
       />
 
-      {/* 등록 성공 모달 (수정됨) */}
+      {/* 등록 성공 모달 */}
       <ConfirmModal
         isAlert={false}
         visible={showSuccessModal}
-        title="등록 완료!"
-        message={`${savedItemsCount}개의 식재료가 냉장고에 추가되었습니다.\n\n추가로 등록하시겠습니까?`}
+        title="등록 완료"
+        message={`${savedItemsCount}개의 식재료가 냉장고에 추가되었습니다.`}
         iconContainer={{ backgroundColor: '#d3f0d3' }}
         icon={{ name: 'check-circle', color: 'limegreen', size: 48 }}
-        confirmText="계속 등록"
+        confirmText="홈으로 이동"
         cancelText=""
         confirmButtonStyle="primary"
         onConfirm={handleSuccessConfirm}

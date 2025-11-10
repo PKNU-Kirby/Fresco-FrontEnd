@@ -93,6 +93,7 @@ export type RootStackParamList = {
 
   AddItemScreen: {
     fridgeId: number;
+    fridgeName?: string;
     recognizedData?: {
       photo?: string;
       name?: string;
@@ -102,7 +103,7 @@ export type RootStackParamList = {
       itemCategory?: string;
     };
     scanResults?: ConfirmedIngredient[];
-    scanMode?: 'ingredient' | 'receipt';
+    scanMode?: 'camera' | 'receipt';
   };
 
   FridgeSettings: {
