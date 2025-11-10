@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Alert,
   StyleSheet,
   ActivityIndicator,
   Image,
@@ -14,7 +13,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { RootStackParamList } from '../../../App';
 import { AsyncStorageService } from '../../services/AsyncStorageService';
-
+import ConfirmModal from '../../components/modals/ConfirmModal';
 type InviteConfirmRouteProp = RouteProp<RootStackParamList, 'InviteConfirm'>;
 
 const InviteConfirmScreen = (): React.JSX.Element => {
@@ -25,6 +24,12 @@ const InviteConfirmScreen = (): React.JSX.Element => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Modal 상태 관리
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showDeclineModal, setShowDeclineModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleAcceptInvite = async () => {
     setIsProcessing(true);
@@ -37,47 +42,47 @@ const InviteConfirmScreen = (): React.JSX.Element => {
       const result = await AsyncStorageService.joinFridgeByCode(token);
 
       if (result.success) {
-        Alert.alert(
-          '참여 완료',
-          `'${fridgeInfo.name}' 냉장고에 참여했습니다!`,
-          [
-            {
-              text: '확인',
-              onPress: () => {
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'FridgeSelect' }],
-                });
-              },
-            },
-          ],
-        );
+        setShowSuccessModal(true);
       } else {
-        Alert.alert('오류', result.message);
+        setErrorMessage(result.message);
+        setShowErrorModal(true);
       }
     } catch (error) {
       console.error('초대 수락 실패:', error);
-      Alert.alert('오류', '초대 수락 중 문제가 발생했습니다.');
+      setErrorMessage('초대 수락 중 문제가 발생했습니다.');
+      setShowErrorModal(true);
     } finally {
       setIsProcessing(false);
     }
   };
 
+  const handleSuccessConfirm = () => {
+    setShowSuccessModal(false);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'FridgeSelect' }],
+    });
+  };
+
   const handleDeclineInvite = () => {
-    Alert.alert('초대 거절', '정말로 초대를 거절하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '거절',
-        style: 'destructive',
-        onPress: () => {
-          // TODO: 백엔드에 거절 알림
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'FridgeSelect' }],
-          });
-        },
-      },
-    ]);
+    setShowDeclineModal(true);
+  };
+
+  const handleConfirmDecline = () => {
+    setShowDeclineModal(false);
+    // TODO: 백엔드에 거절 알림
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'FridgeSelect' }],
+    });
+  };
+
+  const handleCancelDecline = () => {
+    setShowDeclineModal(false);
+  };
+
+  const handleErrorConfirm = () => {
+    setShowErrorModal(false);
   };
 
   return (
@@ -144,6 +149,46 @@ const InviteConfirmScreen = (): React.JSX.Element => {
           참여하시면 냉장고의 모든 식재료를 함께 관리할 수 있습니다
         </Text>
       </View>
+
+      {/* 참여 완료 모달 */}
+      <ConfirmModal
+        visible={showSuccessModal}
+        title="참여 완료"
+        message={`'${fridgeInfo.name}' 냉장고에 참여했습니다!`}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
+        icon={{ name: 'check-circle-outline', color: 'limegreen', size: 48 }}
+        confirmText="확인"
+        confirmButtonStyle="primary"
+        onConfirm={handleSuccessConfirm}
+        showCancelButton={false}
+      />
+
+      {/* 초대 거절 확인 모달 */}
+      <ConfirmModal
+        visible={showDeclineModal}
+        title="초대 거절"
+        message="정말로 초대를 거절하시겠습니까?"
+        iconContainer={{ backgroundColor: '#fff3e0' }}
+        icon={{ name: 'alert-circle-outline', color: '#FF9800', size: 48 }}
+        confirmText="거절"
+        cancelText="취소"
+        confirmButtonStyle="danger"
+        onConfirm={handleConfirmDecline}
+        onCancel={handleCancelDecline}
+      />
+
+      {/* 에러 모달 */}
+      <ConfirmModal
+        visible={showErrorModal}
+        title="오류"
+        message={errorMessage}
+        iconContainer={{ backgroundColor: '#ffebee' }}
+        icon={{ name: 'alert-circle-outline', color: '#f44336', size: 48 }}
+        confirmText="확인"
+        confirmButtonStyle="danger"
+        onConfirm={handleErrorConfirm}
+        showCancelButton={false}
+      />
     </SafeAreaView>
   );
 };

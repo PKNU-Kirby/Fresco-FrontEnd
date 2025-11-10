@@ -332,14 +332,14 @@ export class ApiService {
   }
 
   // 냉장고 멤버 목록 조회
-  static async getFridgeMembers(fridgeId: string): Promise<FridgeMember[]> {
+  static async getFridgeMembers(fridgeId: number): Promise<FridgeMember[]> {
     return this.apiCall<FridgeMember[]>(
       `/api/v1/refrigerator/users/${fridgeId}`,
     );
   }
 
   // 냉장고 나가기
-  static async leaveFridge(fridgeId: string, userId: string): Promise<void> {
+  static async leaveFridge(fridgeId: number, userId: number): Promise<void> {
     await this.apiCall<void>(
       `/api/v1/refrigerator/users/${fridgeId}/${userId}?ids=${userId}`,
       {

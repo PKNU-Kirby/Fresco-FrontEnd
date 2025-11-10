@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Alert } from 'react-native';
 import Config from '../types/config';
 import { ApiService } from '../services/apiServices';
 import { getTokenUserId } from '../utils/authUtils';
@@ -9,11 +8,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FridgeWithRole } from '../types/permission';
 import { User } from '../types/auth';
 
+// 에러 타입 정의
+export type FridgeSelectError = {
+  type: 'load_failed' | 'network_error' | 'local_fallback';
+  message: string;
+  shouldShowModal?: boolean;
+};
+
 export const useFridgeSelect = (navigation: any) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [fridges, setFridges] = useState<FridgeWithRole[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<FridgeSelectError | null>(null);
 
   const initializeData = async () => {
     try {
@@ -74,7 +80,7 @@ export const useFridgeSelect = (navigation: any) => {
       const fridgeData = await ApiService.apiCall<any[]>(
         '/api/v1/refrigerator',
       );
-      console.log('🔍 API URL:', `${Config.API_BASE_URL}/api/v1/refrigerator`); // 추가
+      console.log('🔍 API URL:', `${Config.API_BASE_URL}/api/v1/refrigerator`);
 
       console.log(
         '🔍 [loadUserFridges] 서버에서 받은 냉장고 목록:',
@@ -95,22 +101,32 @@ export const useFridgeSelect = (navigation: any) => {
               permissions,
             );
 
+            // 권한 기반으로 방장 여부 판단
+            // canEdit과 canDelete 둘 다 true면 방장
+            const isOwnerByPermission =
+              permissions.canEdit && permissions.canDelete;
+
+            // fridge.userRole과 권한 정보를 모두 고려
+            const isOwner = fridge.userRole === 'owner' || isOwnerByPermission;
+
             const result = {
               id: fridge.id,
               name: fridge.name,
               createdAt: fridge.createdAt || new Date().toISOString(),
               updatedAt: fridge.updatedAt || new Date().toISOString(),
               groceryListId: fridge.groceryListId,
-              isOwner: fridge.userRole === 'owner',
-              role:
-                fridge.userRole === 'owner'
-                  ? ('owner' as const)
-                  : ('member' as const),
+              isOwner: isOwner,
+              role: isOwner ? ('owner' as const) : ('member' as const),
               memberCount: fridge.memberCount || 1,
               isHidden: false,
               canEdit: permissions.canEdit,
               canDelete: permissions.canDelete,
             } as FridgeWithRole;
+
+            console.log(
+              `🔍 [권한 판단] 냉장고 ${fridge.id}:`,
+              `userRole=${fridge.userRole}, canEdit=${permissions.canEdit}, canDelete=${permissions.canDelete}, 최종isOwner=${isOwner}`,
+            );
 
             console.log(
               `🔍 [loadUserFridges] 냉장고 ${fridge.id} 최종 객체:`,
@@ -159,7 +175,16 @@ export const useFridgeSelect = (navigation: any) => {
       syncWithLocalStorage(fridgesWithHiddenStatus, targetUser);
     } catch (error: any) {
       console.error('냉장고 목록 로딩 실패:', error);
-      // ...
+
+      // 로컬 데이터 시도
+      await loadLocalFridges(targetUser);
+
+      // 에러 상태 설정 (부모 컴포넌트에서 모달 표시)
+      setError({
+        type: 'network_error',
+        message: '네트워크 연결을 확인해주세요. 로컬 데이터를 표시합니다.',
+        shouldShowModal: false, // 토스트나 배너로 표시
+      });
     }
   };
 
@@ -191,12 +216,15 @@ export const useFridgeSelect = (navigation: any) => {
       );
       setFridges(localFridges);
       console.log('로컬 데이터 로딩 완료:', localFridges);
-
-      setError('네트워크 연결을 확인해주세요. 로컬 데이터를 표시합니다.');
     } catch (localError) {
       console.error('로컬 데이터 로딩도 실패:', localError);
-      setError('냉장고 목록을 불러올 수 없습니다.');
-      Alert.alert('오류', '냉장고 목록을 불러올 수 없습니다.');
+
+      // 심각한 에러 - 모달 표시 필요
+      setError({
+        type: 'load_failed',
+        message: '냉장고 목록을 불러올 수 없습니다.',
+        shouldShowModal: true,
+      });
     }
   };
 
@@ -207,12 +235,8 @@ export const useFridgeSelect = (navigation: any) => {
     try {
       console.log('❌ 서버에서 삭제된 냉장고 정리:', removedFridges);
 
-      // 🔥 서버에서 이미 삭제된 냉장고들이므로
-      // 로컬에서만 제거 (서버 API 호출 불필요)
-
       for (const removedFridge of removedFridges) {
         try {
-          // AsyncStorage에서만 제거
           const userKey = `user_${targetUser.id}_refrigerators`;
           const userFridges = await AsyncStorage.getItem(userKey);
 
@@ -277,6 +301,11 @@ export const useFridgeSelect = (navigation: any) => {
     }
   };
 
+  // 에러 클리어 함수 추가
+  const clearError = () => {
+    setError(null);
+  };
+
   return {
     currentUser,
     fridges,
@@ -286,5 +315,6 @@ export const useFridgeSelect = (navigation: any) => {
     loadUserFridges,
     refreshFridgeList,
     retryLoad,
+    clearError,
   };
 };

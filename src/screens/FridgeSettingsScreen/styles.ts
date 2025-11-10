@@ -14,33 +14,30 @@ const scale = (size: number) => (width / baseWidth) * size;
 export const styles = StyleSheet.create({
   fridgeInfoHeader: {
     alignItems: 'center',
-    paddingVertical: scale(20),
-    backgroundColor: '#F9FAFB',
+    paddingVertical: scale(24),
     borderRadius: scale(12),
     marginHorizontal: scale(16),
-    marginBottom: scale(16),
   },
   fridgeTitle: {
     fontSize: scale(20),
     fontWeight: '700',
     color: '#1F2937',
-    marginBottom: scale(4),
+    marginBottom: scale(8),
   },
   memberCount: {
     fontSize: scale(14),
-    color: '#6B7280',
+    color: '#666',
   },
 
   // 그룹 헤더
   groupHeader: {
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(12),
-    backgroundColor: '#F9FAFB',
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(16),
   },
   groupTitle: {
     fontSize: scale(16),
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#333',
   },
 
   // 설정 그룹
@@ -48,6 +45,7 @@ export const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginBottom: scale(16),
     borderRadius: scale(12),
+    marginHorizontal: scale(16),
     overflow: 'hidden',
   },
 

@@ -21,8 +21,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 type Props = {
   route: {
     params: {
-      fridgeId: string;
-      fridgeName: string;
+      fridgeId: number;
+      fridgeName: number;
       userRole?: 'owner' | 'member';
     };
   };
@@ -88,7 +88,7 @@ const MembersScreen = ({ route }: Props) => {
       {/* Header */}
       <View style={styles.header}>
         <BackButton onPress={handleBack} />
-        <Text style={styles.headerTitle}>구성원</Text>
+        <Text style={styles.headerTitle}>멤버</Text>
         <TouchableOpacity
           onPress={handleMemberInvite}
           style={styles.headerRight}
@@ -131,10 +131,7 @@ const MembersScreen = ({ route }: Props) => {
         {/* 구성원 섹션 */}
         <View style={styles.settingsGroup}>
           <View style={styles.groupHeader}>
-            <Text style={styles.groupTitle}>
-              구성원{' '}
-              {regularMembers.length > 0 && `(${regularMembers.length}명)`}
-            </Text>
+            <Text style={styles.groupTitle}>멤버</Text>
           </View>
 
           {regularMembers.length > 0 ? (
