@@ -25,11 +25,34 @@ export const styles = StyleSheet.create({
     paddingTop: scale(56),
     paddingBottom: scale(20),
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: scale(12),
+    fontSize: scale(16),
+    color: '#666',
+  },
+  syncIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: scale(8),
+    backgroundColor: '#f0f9f0',
+    gap: scale(8),
+  },
+  syncText: {
+    fontSize: scale(14),
+    color: '#4fbb53',
+  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: scale(40),
+    paddingHorizontal: scale(40),
+    paddingBottom: scale(100), // ✅ 버튼 자리 확보
   },
   emptyTitle: {
     fontSize: scale(20),
@@ -41,6 +64,12 @@ export const styles = StyleSheet.create({
     fontSize: scale(16),
     color: '#666',
     marginTop: scale(8),
+  },
+  emptyButtonContainer: {
+    position: 'absolute', // ✅ 절대 위치
+    bottom: scale(460), // ✅ 하단에서 100 위로
+    left: scale(16),
+    right: scale(16),
   },
 });
 
@@ -378,6 +407,7 @@ export const itemDeleteConfirmModalStyles = StyleSheet.create({
     color: '#fff',
   },
 });
+
 export const flushConfirmModalStyles = StyleSheet.create({
   overlay: {
     flex: 1,

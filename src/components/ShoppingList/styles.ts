@@ -25,6 +25,49 @@ export const styles = StyleSheet.create({
     paddingTop: scale(56),
     paddingBottom: scale(20),
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: scale(12),
+    fontSize: scale(16),
+    color: '#666',
+  },
+  syncIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: scale(8),
+    backgroundColor: '#f0f9f0',
+    gap: scale(8),
+  },
+  syncText: {
+    fontSize: scale(14),
+    color: '#4fbb53',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: scale(40),
+  },
+  emptyTitle: {
+    fontSize: scale(20),
+    fontWeight: '600',
+    color: '#333',
+    marginTop: scale(20),
+  },
+  emptySubtitle: {
+    fontSize: scale(16),
+    color: '#666',
+    marginTop: scale(8),
+  },
+  emptyButtonContainer: {
+    marginTop: scale(24),
+    width: '100%',
+  },
 });
 
 export const buttonsStyles = StyleSheet.create({
@@ -101,7 +144,7 @@ export const cardStyles = StyleSheet.create({
   itemCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: scale(12),
+    borderRadius: scale(16), // 12 → 16
     padding: scale(16),
     marginBottom: scale(12),
     shadowColor: '#000',
@@ -110,7 +153,7 @@ export const cardStyles = StyleSheet.create({
       height: scale(2),
     },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: scale(4),
     elevation: 3,
     alignItems: 'center',
   },
@@ -119,9 +162,9 @@ export const cardStyles = StyleSheet.create({
     opacity: 0.7,
   },
   activeItemCard: {
-    shadowOpacity: scale(0.3),
+    shadowOpacity: 0.3,
     shadowRadius: scale(8),
-    elevation: scale(8),
+    elevation: 8, // scale 제거
     transform: [{ scale: 1.02 }],
   },
 
@@ -150,7 +193,7 @@ export const cardStyles = StyleSheet.create({
     fontSize: scale(18),
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 8,
+    marginBottom: scale(8),
   },
   nameInput: {
     fontSize: scale(18),
@@ -180,7 +223,7 @@ export const cardStyles = StyleSheet.create({
 
   // 일반 모드 - 간단한 수량 표시
   simpleQuantityText: {
-    fontSize: scale(16),
+    fontSize: scale(14), // 16 → 14
     fontWeight: 'bold',
     color: '#333',
     marginRight: scale(8),
@@ -198,14 +241,14 @@ export const cardStyles = StyleSheet.create({
     paddingVertical: scale(4),
   },
   unitText: {
-    fontSize: scale(14),
+    fontSize: scale(12), // 14 → 12
     color: '#666',
     marginRight: scale(2),
   },
 
   // Show Unit
   simpleUnitText: {
-    fontSize: scale(16),
+    fontSize: scale(14), // 16 → 14
     color: '#666',
     fontWeight: '500',
   },
@@ -224,7 +267,7 @@ export const newItemCardStyles = StyleSheet.create({
   itemCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: scale(12),
+    borderRadius: scale(16), // 12 → 16
     padding: scale(16),
     marginBottom: scale(12),
     shadowColor: '#000',
@@ -239,43 +282,45 @@ export const newItemCardStyles = StyleSheet.create({
   },
   newItemCard: {
     borderColor: '#4fbb53',
-    borderWidth: scale(1),
+    borderWidth: scale(2), // 1 → 2
     backgroundColor: '#f9fff9',
   },
   itemInfo: {
     flex: 1,
+    marginRight: scale(8), // 추가
   },
   nameInput: {
-    fontSize: scale(16),
+    fontSize: scale(18), // 16 → 18
     fontWeight: '600',
     color: '#333',
     borderBottomWidth: scale(1),
     borderBottomColor: '#4fbb53',
-    paddingVertical: scale(4),
-    marginBottom: scale(8),
-    marginLeft: scale(8),
-    width: 200,
+    paddingVertical: scale(8), // 4 → 8
+    paddingHorizontal: scale(4),
+    marginBottom: scale(12), // 8 → 12
+    // width 제거 - flex로 자동 조정
   },
   itemDetails: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: scale(8),
-    marginLeft: scale(8),
+    // marginLeft 제거
   },
 
   // New item actions
   newItemActions: {
     flexDirection: 'row',
     gap: scale(8),
-    marginLeft: scale(12),
+    alignItems: 'center', // 추가
+    // marginLeft 제거
   },
   cancelButton: {
-    padding: scale(8),
+    padding: scale(10), // 8 → 10
     borderRadius: scale(8),
     backgroundColor: '#d5d5d5',
   },
   saveButton: {
-    padding: scale(8),
+    padding: scale(10), // 8 → 10
     borderRadius: scale(8),
     backgroundColor: '#cbe8cb',
   },

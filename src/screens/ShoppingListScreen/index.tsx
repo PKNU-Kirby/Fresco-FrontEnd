@@ -69,6 +69,7 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
   const [isAddingNewItem, setIsAddingNewItem] = useState(false);
 
   // 🔥 변경사항 추적 (이름만)
+
   const [pendingNameChanges, setPendingNameChanges] = useState<
     Map<number, string>
   >(new Map());
@@ -314,11 +315,13 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
   ) => {
     if (!name.trim()) {
       Alert.alert('식재료 이름을 입력해주세요.', '');
+      setIsAddingNewItem(false);
       return;
     }
 
     if (quantity <= 0) {
       Alert.alert('올바른 수량을 입력해주세요.', '');
+      setIsAddingNewItem(false);
       return;
     }
 
@@ -327,6 +330,8 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
       setIsAddingNewItem(false);
     } catch (error) {
       console.error('[ShoppingList] 아이템 추가 실패:', error);
+      Alert.alert('오류', '아이템 추가에 실패했습니다.');
+      setIsAddingNewItem(false);
     }
   };
 
@@ -400,11 +405,21 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
             <Text style={styles.loadingText}>데이터 불러오는 중...</Text>
           </View>
         ) : cartItems.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <MaterialIcons name="shopping-cart" size={80} color="#ccc" />
-            <Text style={styles.emptyTitle}>장바구니가 비어있어요</Text>
-            <Text style={styles.emptySubtitle}>식재료를 추가해 보세요!</Text>
+          <>
+            {/* ✅ emptyContainer와 버튼을 분리 */}
+            <View style={styles.emptyContainer}>
+              {!isAddingNewItem && (
+                <>
+                  <MaterialIcons name="shopping-cart" size={80} color="#ccc" />
+                  <Text style={styles.emptyTitle}>장바구니가 비어있어요</Text>
+                  <Text style={styles.emptySubtitle}>
+                    식재료를 추가해 보세요!
+                  </Text>
+                </>
+              )}
+            </View>
 
+            {/* ✅ 버튼 컨테이너를 밖으로 */}
             <View style={styles.emptyButtonContainer}>
               {isAddingNewItem ? (
                 <NewItemCard
@@ -421,7 +436,7 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
                 </TouchableOpacity>
               )}
             </View>
-          </View>
+          </>
         ) : (
           <DraggableFlatList
             data={cartItems}
