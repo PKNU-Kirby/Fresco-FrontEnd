@@ -84,15 +84,13 @@ const FridgeItemList: React.FC<FridgeItemListProps> = ({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        {/* FilterBar */}
-        <>
-          <FilterBar
-            activeItemCategory={activeItemCategory}
-            isListEditMode={isEditMode}
-            onItemCategoryPress={onItemCategoryPress}
-            onEditModeToggle={onEditModeToggle}
-          />
-        </>
+        {/* Filter Bar */}
+        <FilterBar
+          activeItemCategory={activeItemCategory}
+          isListEditMode={isEditMode}
+          onItemCategoryPress={onItemCategoryPress}
+          onEditModeToggle={onEditModeToggle}
+        />
         <DraggableFlatList
           data={items}
           renderItem={renderItem}

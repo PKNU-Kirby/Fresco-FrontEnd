@@ -17,7 +17,7 @@ import { useFridgeData } from '../../hooks/useFridgeData';
 import { useModalState } from '../../hooks/useModalState';
 
 // Usage tracking
-import { UsageTrackingService } from '../../services/UseageTrackingService';
+// import { UsageTrackingService } from '../../services/UseageTrackingService';
 
 type Props = {
   route: {
@@ -37,7 +37,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  // useFridgeData 훅 사용
+  // useFridgeData hook
   const {
     fridgeItems,
     itemCategories,
@@ -48,7 +48,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
     updateItemQuantity,
     updateItemUnit,
     updateItemExpiryDate,
-    // ✅ 새로 추가된 편집 모드용 함수들
+    // 편집 모드용 함수
     updateItemQuantityLocal,
     updateItemUnitLocal,
     updateItemExpiryDateLocal,
@@ -173,13 +173,13 @@ const FridgeHomeScreen = ({ route }: Props) => {
         // 최신 데이터 다시 로드
         await refreshWithCategory(activeItemCategory);
 
-        // ✅ 성공했을 때만 편집 모드 종료 및 상태 초기화
+        // 성공했을 때만 편집 모드 종료 및 상태 초기화
         setEditModeStartState([]);
         setIsEditMode(false);
       } catch (error) {
         console.error('편집 모드 종료 중 오류:', error);
 
-        // ✅ 실패하면 서버에서 최신 데이터 다시 불러오기
+        // 실패하면 서버에서 최신 데이터 다시 불러오기
         await refreshWithCategory(activeItemCategory);
 
         Alert.alert(
@@ -187,7 +187,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
           '일부 항목을 저장할 수 없습니다. 삭제 권한이 없거나 이미 삭제된 항목일 수 있습니다.',
         );
 
-        // ✅ 편집 모드는 종료하되, 실패한 내용 반영
+        // 편집 모드는 종료하되, 실패한 내용 반영
         setEditModeStartState([]);
         setIsEditMode(false);
       }
@@ -201,7 +201,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
     activeItemCategory,
   ]);
 
-  // ✅ 수정된 로컬 상태 변경 핸들러들
+  // 수정된 로컬 상태 변경 핸들러들
   const handleQuantityChange = useCallback(
     async (itemId: string, newQuantity: number) => {
       if (isEditMode) {

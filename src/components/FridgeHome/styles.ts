@@ -20,10 +20,9 @@ export const listStyles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: scale(16),
-    paddingTop: scale(16),
   },
   listContainer: {
-    paddingTop: scale(56),
+    marginTop: scale(72),
     paddingBottom: scale(88),
   },
   floatingContainer: {},
@@ -32,13 +31,14 @@ export const listStyles = StyleSheet.create({
 export const filterBarStyles = StyleSheet.create({
   tabContainer: {
     position: 'absolute',
-    top: scale(16),
+    top: 0,
     left: 0,
     right: 0,
     zIndex: 1000,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingTop: scale(16),
     paddingHorizontal: scale(20),
     paddingBottom: scale(10),
     backgroundColor: '#e8f5e875',
