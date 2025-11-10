@@ -23,7 +23,6 @@ const getCategoryIcon = (category: string) => {
     '장 / 양념 / 소스': { name: 'bottle-tonic', color: '#999' },
     기타: { name: 'food', color: '#999' },
   };
-
   return iconMap[category] || iconMap['기타'];
 };
 
@@ -97,10 +96,21 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
 
   // 소비기한 경고 텍스트
   const getExpiryWarningText = (): string => {
-    if (isExpired) return '기한 만료';
+    if (isExpired) return '기한만료';
     if (daysLeft === 0) return '오늘까지';
     if (daysLeft === 1) return '내일까지';
     return `${daysLeft}일 남음`;
+  };
+
+  // 편집 모드 소비기한 버튼 스타일 결정
+  const getEditExpiryStyle = () => {
+    if (isExpired) {
+      return styles.editableExpiryExpired;
+    }
+    if (isExpiringSoon) {
+      return styles.editableExpirySoon;
+    }
+    return styles.editableExpiry;
   };
 
   // 수량 포맷 -> 정수면 소수점 없이, 소수면 둘째자리까지
@@ -240,7 +250,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
                 style={styles.expiaryContainer}
                 onPress={() => setShowDatePicker(true)}
               >
-                <Text style={[styles.itemExpiry, styles.editableExpiry]}>
+                <Text style={[styles.itemExpiry, getEditExpiryStyle()]}>
                   [{localExpiryDate}]
                 </Text>
               </TouchableOpacity>

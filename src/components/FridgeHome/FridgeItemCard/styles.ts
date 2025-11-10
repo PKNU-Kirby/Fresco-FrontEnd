@@ -54,13 +54,14 @@ export const cardStyles = StyleSheet.create({
 
   // 소비기한 별 카드 스타일
   cardExpiringSoon: {
-    borderWidth: scale(2),
-    borderColor: '#999',
+    borderWidth: scale(1),
+    borderColor: '#ffc8aaff',
+    backgroundColor: '#fbe5d9ff',
   },
   cardExpired: {
-    borderWidth: scale(2),
-    borderColor: 'tomato',
-    backgroundColor: '#FFEBEE',
+    borderWidth: scale(1),
+    borderColor: '#ff7b82ff',
+    backgroundColor: '#ffc7c7ff',
     opacity: 0.85,
   },
 
@@ -69,7 +70,7 @@ export const cardStyles = StyleSheet.create({
     position: 'absolute',
     top: scale(8),
     right: scale(8),
-    backgroundColor: '#999',
+    backgroundColor: '#ffc8aaff',
     paddingHorizontal: scale(8),
     paddingVertical: scale(4),
     borderRadius: scale(10),
@@ -77,22 +78,22 @@ export const cardStyles = StyleSheet.create({
   },
   // 만료 배지
   expiredBadge: {
-    backgroundColor: 'tomato',
+    backgroundColor: '#ff7b82ff',
   },
   // 배지 텍스트
   expiryBadgeText: {
-    color: '#f8f8f8',
-    fontSize: scale(11),
+    color: '#222',
+    fontSize: scale(13),
     fontWeight: 'bold',
   },
 
   // 소비기한 텍스트 스타일
   expiryTextSoon: {
-    color: '#666',
+    color: '#39252A',
     fontWeight: 'bold',
   },
   expiryTextExpired: {
-    color: 'tomato',
+    color: '#39252A',
     fontWeight: 'bold',
     textDecorationLine: 'line-through',
   },
@@ -138,11 +139,27 @@ export const cardStyles = StyleSheet.create({
     flex: 1.05,
     marginBottom: 4,
   },
+  // 편집 모드 소비기한
   editableExpiry: {
     marginLeft: scale(10),
     fontWeight: '500',
     marginRight: scale(24),
-    color: 'limegreen',
+    color: '#32CD32',
+  },
+  // 편집 모드 소비기한 - 임박
+  editableExpirySoon: {
+    marginLeft: scale(10),
+    fontWeight: '700',
+    marginRight: scale(24),
+    color: '#ff762dff',
+  },
+  // 편집 모드 소비기한 - 만료 상태
+  editableExpiryExpired: {
+    marginLeft: scale(10),
+    fontWeight: '700',
+    marginRight: scale(24),
+    color: '#ff3a44ff',
+    textDecorationLine: 'line-through',
   },
   itemStatus: {
     fontSize: scale(12),
