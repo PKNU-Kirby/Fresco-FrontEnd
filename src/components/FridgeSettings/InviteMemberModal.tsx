@@ -18,8 +18,8 @@ import { styles } from './styles';
 type InviteMemberModalProps = {
   visible: boolean;
   onClose: () => void;
-  fridgeId: string;
-  fridgeName: string;
+  fridgeId: number;
+  fridgeName: number;
   onInviteSuccess?: () => void;
 };
 

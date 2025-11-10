@@ -22,7 +22,7 @@ type Props = {
   route: {
     params: {
       fridgeId: number;
-      fridgeName: number;
+      fridgeName: string;
       userRole?: 'owner' | 'member';
     };
   };
@@ -44,16 +44,30 @@ const MembersScreen = ({ route }: Props) => {
     canRemoveMember,
   } = useApiMembers(fridgeId, fridgeName);
 
+  // 권한 계산 : owner (canEdit 기반)
+  const isOwner = currentUser?.role === 'owner';
+  const canManageMembers = currentUser?.canEdit ?? isOwner;
+  const canInviteMembers = currentUser?.canEdit ?? isOwner;
+
   const handleBack = () => {
     navigation.goBack();
   };
 
   const handleMemberInvite = () => {
+    if (!canInviteMembers) {
+      Alert.alert('권한 없음', '구성원을 초대할 권한이 없습니다.');
+      return;
+    }
     setShowInviteModal(true);
   };
 
   // 구성원 삭제 핸들러
-  const handleMemberRemove = async (memberId: string) => {
+  const handleMemberRemove = async (memberId: number) => {
+    if (!canManageMembers) {
+      Alert.alert('권한 없음', '구성원을 삭제할 권한이 없습니다.');
+      return;
+    }
+
     try {
       await removeMember(memberId);
       Alert.alert('완료', '구성원이 삭제되었습니다.');
@@ -87,13 +101,20 @@ const MembersScreen = ({ route }: Props) => {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <BackButton onPress={handleBack} />
+        <View style={styles.headerLeft}>
+          <BackButton onPress={handleBack} />
+        </View>
         <Text style={styles.headerTitle}>멤버</Text>
         <TouchableOpacity
           onPress={handleMemberInvite}
-          style={styles.headerRight}
+          style={[styles.headerRight, !canInviteMembers && { opacity: 0.5 }]}
+          disabled={!canInviteMembers}
         >
-          <Ionicons name="add" size={24} color="limegreen" />
+          <Ionicons
+            name="add-outline"
+            size={28}
+            color={canInviteMembers ? 'ccc' : '#999'}
+          />
         </TouchableOpacity>
       </View>
 
@@ -128,7 +149,7 @@ const MembersScreen = ({ route }: Props) => {
           </View>
         )}
 
-        {/* 구성원 섹션 */}
+        {/* 멤버 섹션 */}
         <View style={styles.settingsGroup}>
           <View style={styles.groupHeader}>
             <Text style={styles.groupTitle}>멤버</Text>
@@ -152,29 +173,13 @@ const MembersScreen = ({ route }: Props) => {
           )}
         </View>
 
-        {/* 초대하기 버튼 */}
-        <View style={styles.inviteButtonContainer}>
-          <TouchableOpacity
-            style={styles.inviteButton}
-            onPress={handleMemberInvite}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="person-add" size={20} color="#6366F1" />
-            <Text style={styles.inviteButtonText}>구성원 초대하기</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* 안내사항 */}
         <View style={styles.settingsGroup}>
           <View style={styles.groupHeader}>
             <Text style={styles.groupTitle}>안내사항</Text>
           </View>
           <View style={styles.infoContainer}>
-            <Text style={styles.infoText}>
-              • 방장은 구성원을 관리하고 냉장고를 삭제할 수 있습니다{'\n'}•
-              구성원은 냉장고의 식재료를 함께 관리할 수 있습니다{'\n'}• 초대
-              코드를 통해 새로운 구성원을 추가할 수 있습니다
-            </Text>
+            <Text style={styles.infoText}>(안내사항 추가할 거리 있으면,,)</Text>
           </View>
         </View>
       </ScrollView>

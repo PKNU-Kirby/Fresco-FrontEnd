@@ -46,6 +46,7 @@ export const styles = StyleSheet.create({
     marginBottom: scale(16),
     borderRadius: scale(12),
     marginHorizontal: scale(16),
+    paddingVertical: scale(8),
     overflow: 'hidden',
   },
 
@@ -86,7 +87,6 @@ export const styles = StyleSheet.create({
 
   // 안내사항
   infoContainer: {
-    backgroundColor: '#F9FAFB',
     borderRadius: scale(8),
     padding: scale(16),
     margin: scale(16),
@@ -113,14 +113,18 @@ export const styles = StyleSheet.create({
     borderBottomWidth: scale(0),
   },
   headerTitle: {
-    fontSize: scale(18),
+    fontSize: scale(20),
     fontWeight: '600',
     color: '#2D2D2D',
+  },
+  headerLeft: {
+    width: scale(40),
   },
   headerRight: {
     width: scale(40),
     alignItems: 'center',
     justifyContent: 'center',
+    paddingRight: scale(12),
   },
   settingsContainer: {
     flex: 1,

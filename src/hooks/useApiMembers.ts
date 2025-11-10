@@ -5,9 +5,10 @@ import React from 'react';
 import { ApiService } from '../services/apiServices';
 import { AsyncStorageService } from '../services/AsyncStorageService';
 import { PermissionAPIService } from '../services/API/permissionAPI';
+import { isOwner } from '../types';
 
 export type Member = {
-  id: string;
+  id: number;
   name: string;
   role: 'owner' | 'member';
   joinDate: string;
@@ -15,10 +16,19 @@ export type Member = {
   avatar?: string;
 };
 
-export const useApiMembers = (fridgeId: string, _fridgeName: string) => {
+export type CurrentUser = {
+  id: number;
+  name: string;
+  role: 'owner' | 'member';
+  isOwner: boolean;
+  canEdit?: boolean;
+  canDelete?: boolean;
+};
+
+export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
 
   // 멤버 목록 로드 (기존 useFridgeSettings와 동일한 방식)
   const loadMembers = async () => {
@@ -27,22 +37,14 @@ export const useApiMembers = (fridgeId: string, _fridgeName: string) => {
       console.log('=== 냉장고 멤버 목록 로드 ===');
       console.log('냉장고 ID:', fridgeId);
 
-      // 기존 useFridgeSettings와 동일한 방식으로 데이터 가져오기
-      const [fridgeMembers, userPermissions] = await Promise.all([
+      const [fridgeMembers, fridgePermissions] = await Promise.all([
         ApiService.getFridgeMembers(fridgeId),
-        PermissionAPIService.getUserPermissions(),
+        PermissionAPIService.getFridgePermissions(fridgeId), // 이걸로 변경!
       ]);
 
       console.log('=== 디버깅 정보 ===');
       console.log('membersResponse:', fridgeMembers);
-      console.log('permissionsResponse:', userPermissions);
-
-      // 현재 냉장고에 대한 권한 정보 찾기
-      const currentFridgePermission = userPermissions.find(
-        (perm: any) => perm.fridgeId === fridgeId.toString(),
-      );
-
-      console.log('현재 냉장고 권한 정보:', currentFridgePermission);
+      console.log('permissionsResponse:', fridgePermissions);
 
       // 현재 사용자 정보 가져오기 (토큰에서 추출된 정보 사용)
       const userId = await AsyncStorageService.getCurrentUserId();
@@ -53,45 +55,44 @@ export const useApiMembers = (fridgeId: string, _fridgeName: string) => {
         return;
       }
 
-      // 중요: 권한 정보 확인
-      console.log('currentFridgePermission:', currentFridgePermission);
-      console.log(
-        'currentFridgePermission?.role:',
-        currentFridgePermission?.role,
-      );
+      console.log('🔍 fridgePermissions:', fridgePermissions);
 
-      // currentUser 설정 - role 포함!!
-      const userRole =
-        currentFridgePermission?.role === 'OWNER' ? 'owner' : 'member';
-      console.log('결정된 userRole:', userRole);
+      // 권한 기반으로 역할 결정
+      const isOwner = fridgePermissions.canEdit && fridgePermissions.canDelete;
+      const userRole = isOwner ? 'owner' : 'member';
 
+      console.log('🔍 결정된 userRole:', userRole);
+      console.log('🔍 canEdit:', fridgePermissions.canEdit);
+      console.log('🔍 canDelete:', fridgePermissions.canDelete);
+
+      // currentUser 설정 - 권한 정보 포함
       const user = {
         id: userId.toString(),
         name: 'Current User',
-        role: userRole, // 이 부분이 중요!
+        role: userRole,
+        isOwner: isOwner,
+        canEdit: fridgePermissions.canEdit,
+        canDelete: fridgePermissions.canDelete,
       };
 
       console.log('최종 설정된 currentUser:', user);
       setCurrentUser(user);
 
-      // 각 멤버의 권한 확인하여 역할 결정
+      // 각 멤버의 역할 결정 (간단하게)
       const memberList: Member[] = fridgeMembers.map((member: any) => {
-        // 각 멤버의 권한 찾기 (현재는 모든 멤버가 OWNER로 나오고 있음)
-        const memberPermission = userPermissions.find(
-          (perm: any) => perm.fridgeId === fridgeId.toString(),
-        );
-
-        const role = memberPermission?.role === 'OWNER' ? 'owner' : 'member';
+        // 현재 사용자면 owner, 아니면 member로 설정
+        const isSelf = member.userId.toString() === userId.toString();
+        const memberRole = isSelf ? userRole : 'member';
 
         console.log(
-          `멤버 ${member.userName}(${member.userId}): 권한기반역할=${memberPermission?.role}`,
+          `멤버 ${member.userName}(${member.userId}): isSelf=${isSelf}, role=${memberRole}`,
         );
 
         return {
           id: member.userId.toString(),
           name: member.userName || `사용자 ${member.userId}`,
-          role: role,
-          joinDate: new Date().toISOString().split('T')[0], // 임시 가입일
+          role: memberRole,
+          joinDate: new Date().toISOString().split('T')[0],
           email: member.email,
         };
       });
@@ -122,7 +123,7 @@ export const useApiMembers = (fridgeId: string, _fridgeName: string) => {
   };
 
   // 멤버 삭제 기능 (새로운 deleteFridgeMember API 사용)
-  const removeMember = async (memberId: string) => {
+  const removeMember = async (memberId: number) => {
     try {
       setIsLoading(true);
 

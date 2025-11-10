@@ -486,3 +486,86 @@ export const styles = StyleSheet.create({
     lineHeight: scale(16),
   },
 });
+
+export const memberCardStyles = StyleSheet.create({
+  memberCard: {
+    backgroundColor: '#FFF5F5',
+    borderRadius: 12,
+    marginBottom: 8,
+    marginHorizontal: 16,
+    shadowColor: '#442121ff',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  memberCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  memberLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  memberIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  memberInfo: {
+    flex: 1,
+  },
+  memberNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  memberName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginRight: 8,
+  },
+  roleContainer: {
+    backgroundColor: '#FFE4E6',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  roleText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: 'tomato',
+  },
+  joinDate: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  memberRight: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  removeButton: {
+    padding: 4,
+  },
+  // 모달 메시지 스타일
+  modalMessage: {
+    fontSize: 15,
+    color: '#666',
+    textAlign: 'center',
+  },
+  modalMemberName: {
+    fontSize: 16,
+    color: 'tomato',
+    fontWeight: '700',
+  },
+});

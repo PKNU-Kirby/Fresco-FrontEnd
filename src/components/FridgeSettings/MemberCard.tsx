@@ -1,15 +1,16 @@
-// components/FridgeSettings/MemberCard.tsx
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { Member } from '../../hooks/useApiMembers';
 import ConfirmModal from '../modals/ConfirmModal';
+import { memberCardStyles as styles } from './styles';
 
 interface MemberCardProps {
   member: Member;
   currentUser: any;
   canRemoveMember: (member: Member) => boolean;
-  onMemberRemove?: (memberId: string) => void;
+  onMemberRemove?: (memberId: number) => void;
   onMemberPress?: (member: Member) => void;
 }
 
@@ -36,14 +37,17 @@ const MemberCard: React.FC<MemberCardProps> = ({
     return role === 'OWNER' || role === 'owner' ? '방장' : '멤버';
   };
 
-  // 역할 아이콘
-  const getRoleIcon = (role: 'OWNER' | 'MEMBER' | 'owner' | 'member') => {
-    return role === 'OWNER' || role === 'owner' ? 'crown' : 'person';
-  };
+  // 역할에 따른 아이콘 렌더링
+  const renderRoleIcon = (role: 'OWNER' | 'MEMBER' | 'owner' | 'member') => {
+    const isOwner = role === 'OWNER' || role === 'owner';
 
-  // 역할 아이콘 색상
-  const getRoleIconColor = (role: 'OWNER' | 'MEMBER' | 'owner' | 'member') => {
-    return role === 'OWNER' || role === 'owner' ? '#FFD700' : '#6B7280';
+    if (isOwner) {
+      // 방장: FontAwesome5 왕관
+      return <FontAwesome5 name="crown" size={22} color="#FC3964" />;
+    } else {
+      // 멤버: Ionicons person
+      return <Ionicons name="person" size={22} color="#865A68" />;
+    }
   };
 
   // 삭제 권한 확인
@@ -75,11 +79,7 @@ const MemberCard: React.FC<MemberCardProps> = ({
           <View style={styles.memberLeft}>
             {/* 멤버 아이콘 */}
             <View style={styles.memberIconContainer}>
-              <Ionicons
-                name={getRoleIcon(member.role)}
-                size={24}
-                color={getRoleIconColor(member.role)}
-              />
+              {renderRoleIcon(member.role)}
             </View>
 
             {/* 멤버 정보 */}
@@ -123,8 +123,8 @@ const MemberCard: React.FC<MemberCardProps> = ({
             냉장고에서 내보내시겠습니까?
           </Text>
         }
-        iconContainer={{ backgroundColor: '#fee2e2' }}
-        icon={{ name: 'person-remove-outline', color: '#EF4444', size: 48 }}
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'person-remove-outline', color: 'tomato', size: 48 }}
         confirmText="삭제"
         cancelText="취소"
         confirmButtonStyle="danger"
@@ -134,89 +134,5 @@ const MemberCard: React.FC<MemberCardProps> = ({
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  memberCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    marginBottom: 8,
-    marginHorizontal: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  memberCardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-  },
-  memberLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  memberIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  memberInfo: {
-    flex: 1,
-  },
-  memberNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  memberName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginRight: 8,
-  },
-  roleContainer: {
-    backgroundColor: '#EEF2FF',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  roleText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#6366F1',
-  },
-  joinDate: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  memberRight: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  removeButton: {
-    padding: 4,
-  },
-  // 모달 메시지 스타일
-  modalMessage: {
-    fontSize: 15,
-    color: '#666',
-    textAlign: 'center',
-  },
-  modalMemberName: {
-    fontSize: 16,
-    color: '#EF4444',
-    fontWeight: '700',
-  },
-});
 
 export default MemberCard;
