@@ -55,14 +55,14 @@ const verifyNaverToken = async (accessToken: string) => {
     console.log('🔍 네이버 토큰 검증 응답:', result);
 
     if (result.resultcode === '00') {
-      console.log('✅ 네이버 토큰 유효함');
+      console.log('>> 네이버 토큰 유효함');
       return { valid: true, data: result };
     } else {
-      console.log('❌ 네이버 토큰 무효:', result.message);
+      console.log('>> 네이버 토큰 무효:', result.message);
       return { valid: false, error: result.message };
     }
   } catch (error) {
-    console.error('❌ 네이버 토큰 검증 실패:', error);
+    console.error('>> 네이버 토큰 검증 실패:', error);
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error occurred';
     return { valid: false, error: errorMessage };
