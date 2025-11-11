@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AsyncStorageService } from '../../../services/AsyncStorageService';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { RecipeStackParamList } from '../RecipeNavigator';
 import RecipeAPI from '../../../services/API/RecipeAPI'; // ✅ 추가
@@ -59,7 +60,7 @@ const AIRecipeScreen: React.FC = () => {
     prompt,
   });
 
-  // ✅ AI 레시피 생성 (실제 API 호출)
+  // AI 레시피 생성
   const generateRecipe = async () => {
     if (!prompt.trim()) {
       Alert.alert('알림', '요청 내용을 입력해주세요.');
@@ -78,18 +79,16 @@ const AIRecipeScreen: React.FC = () => {
     try {
       console.log('📤 AI 레시피 요청:', prompt);
 
-      // ✅ 실제 API 호출
+      // AIRecipeScreen.tsx
       const aiRecipeData = await RecipeAPI.getAIRecipe(prompt);
+      // 이제 aiRecipeData는 AIRecipeResponse 타입이에요!
 
-      console.log('📥 AI 레시피 응답:', aiRecipeData);
-
-      // ✅ 백엔드 응답을 프론트엔드 형식으로 변환
       const mappedRecipe: AIGeneratedRecipe = {
-        title: aiRecipeData.title,
+        title: aiRecipeData.title, // ✅ 타입 안전
         description: `AI가 추천하는 "${prompt}" 레시피입니다.`,
         ingredients: aiRecipeData.ingredients.map((ing, index) => ({
-          id: `${Date.now()}_${index}`,
-          name: ing.ingredientName,
+          id: `${Date.now()}_${Math.random()}_${index}`,
+          name: ing.ingredientName, // ✅ 자동완성 됨
           quantity: ing.quantity,
           unit: ing.unit,
         })),
@@ -110,7 +109,7 @@ const AIRecipeScreen: React.FC = () => {
     }
   };
 
-  // ✅ 레시피 저장 - AI 생성 데이터를 /recipe/ai/save로 저장
+  // 레시피 저장
   const handleSaveRecipe = async () => {
     if (!generatedRecipe) return;
 
@@ -122,7 +121,6 @@ const AIRecipeScreen: React.FC = () => {
           try {
             setIsLoading(true);
 
-            // ✅ AI 레시피 저장 API 호출
             const saveData = {
               title: generatedRecipe.title,
               ingredients: generatedRecipe.ingredients.map(ing => ({
@@ -135,36 +133,31 @@ const AIRecipeScreen: React.FC = () => {
             };
 
             console.log('📤 AI 레시피 저장 요청:', saveData);
-
             const savedRecipe = await RecipeAPI.saveAIRecipe(saveData);
-
             console.log('✅ AI 레시피 저장 성공:', savedRecipe);
 
-            Alert.alert('성공', '레시피가 저장되었습니다.', [
-              {
-                text: '확인',
-                onPress: () => {
-                  // ✅ 저장된 레시피 상세 화면으로 이동
-                  navigation.replace('RecipeDetail', {
-                    recipe: {
-                      id: savedRecipe.recipeId.toString(),
-                      title: savedRecipe.title,
-                      createdAt: new Date().toISOString().split('T')[0],
-                      ingredients: savedRecipe.ingredients.map(ing => ({
-                        id: ing.recipeIngredientId.toString(),
-                        name: ing.name,
-                        quantity: ing.quantity,
-                        unit: ing.unit,
-                      })),
-                      steps: savedRecipe.steps.split('\n'),
-                      referenceUrl: savedRecipe.url || '',
-                    },
-                    isNewRecipe: false,
-                    isEditing: false,
-                  });
+            // ✅ 현재 선택된 냉장고 ID 가져오기
+            const currentFridgeId =
+              await AsyncStorageService.getSelectedFridgeId();
+            console.log('📦 현재 냉장고 ID:', currentFridgeId);
+
+            Alert.alert(
+              '성공',
+              '레시피가 저장되었습니다.\n레시피 탭에서 확인하세요!',
+              [
+                {
+                  text: '확인',
+                  onPress: () => {
+                    // ✅ AI 화면 초기화
+                    setGeneratedRecipe(null);
+                    setPrompt('');
+
+                    // RecipeHome으로 이동
+                    navigation.navigate('RecipeHome' as any);
+                  },
                 },
-              },
-            ]);
+              ],
+            );
           } catch (error: any) {
             console.error('❌ AI 레시피 저장 실패:', error);
             Alert.alert('오류', error.message || '레시피 저장에 실패했습니다.');
@@ -272,7 +265,7 @@ const AIRecipeScreen: React.FC = () => {
                     style={styles.historyItem}
                     onPress={() => setPrompt(item)}
                   >
-                    <Icon name="history" size={20} color="#666" />
+                    <Icon name="history" size={20} color="#2F4858" />
                     <Text style={styles.historyText}>{item}</Text>
                   </TouchableOpacity>
                 ))}
@@ -285,7 +278,7 @@ const AIRecipeScreen: React.FC = () => {
                 <Icon
                   name="lightbulb"
                   size={20}
-                  color="limegreen"
+                  color="#2F4858"
                   style={styles.tipIcon}
                 />
                 <Text style={styles.tipSectionTitle}>사용 팁</Text>
@@ -312,7 +305,7 @@ const AIRecipeScreen: React.FC = () => {
         {/* Loading */}
         {isLoading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="limegreen" />
+            <ActivityIndicator size="large" color="#5F7F96" />
             <Text style={styles.loadingTitle}>
               AI가 레시피를 생성하고 있습니다
             </Text>
@@ -340,7 +333,7 @@ const AIRecipeScreen: React.FC = () => {
                     <Icon
                       name="fiber-manual-record"
                       size={18}
-                      color="limegreen"
+                      color="#2F4858"
                     />
                     <Text style={styles.ingredientText}>
                       {ingredient.name} {ingredient.quantity}
@@ -360,13 +353,15 @@ const AIRecipeScreen: React.FC = () => {
                     <Text style={styles.stepNumberText}>{index + 1}</Text>
                   </View>
                   <View style={styles.stepTextContainer}>
-                    <Text style={styles.stepText}>{step}</Text>
+                    <Text style={styles.stepText}>
+                      {step.replace(/^\d+\.\s*/, '').trim()}
+                    </Text>
                   </View>
                 </View>
               ))}
             </View>
 
-            {/* ✅ Substitutions 섹션 추가 */}
+            {/* Substitutions */}
             {generatedRecipe.substitutions &&
               generatedRecipe.substitutions.length > 0 && (
                 <View style={styles.section}>

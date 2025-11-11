@@ -66,23 +66,19 @@ interface UseIngredientsRequest {
     usedQuantity: number;
   }>;
 }
-
+// RecipeAPI.ts 상단에 타입 추가
 interface AIRecipeResponse {
-  code: string;
-  message: string;
-  result: {
-    title: string;
-    ingredients: Array<{
-      ingredientName: string;
-      quantity: number;
-      unit: string;
-    }>;
-    steps: string[];
-    substitutions: Array<{
-      original: string;
-      substitute: string;
-    }>;
-  };
+  title: string;
+  ingredients: Array<{
+    ingredientName: string;
+    quantity: number;
+    unit: string;
+  }>;
+  steps: string[];
+  substitutions?: Array<{
+    original: string;
+    substitute: string;
+  }>;
 }
 
 interface SaveAIRecipeResponse {
@@ -224,17 +220,14 @@ export class RecipeAPI {
   > {
     try {
       console.log('🔍 레시피 상세 조회:', recipeId);
-
       const apiRecipe = await ApiService.apiCall<ApiRecipe>(
         `/recipe/detail/${recipeId}`,
       );
-
       const recipe = RecipeTypeConverter.apiToFrontend(apiRecipe);
-
       return {
         ...recipe,
-        ingredients: apiRecipe.ingredients?.map(ing => ({
-          id: ing.ingredientId || Date.now(),
+        ingredients: apiRecipe.ingredients?.map((ing, index) => ({
+          id: String(ing.ingredientId || `temp_${recipeId}_${index}`),
           ingredientId: ing.ingredientId,
           name: ing.name,
           quantity: ing.quantity,
@@ -440,15 +433,13 @@ export class RecipeAPI {
   /**
    * AI 레시피 추천
    */
-  static async getAIRecipe(prompt: string) {
+  static async getAIRecipe(prompt: string): Promise<AIRecipeResponse> {
     try {
       console.log('📤 AI 레시피 요청:', prompt);
-
-      const result = await ApiService.apiCall(
+      const result = await ApiService.apiCall<AIRecipeResponse>(
         `/recipe/ai?prompt=${encodeURIComponent(prompt)}`,
         { method: 'GET' },
       );
-
       console.log('✅ AI 레시피 추천 성공:', result);
       return result;
     } catch (error: any) {

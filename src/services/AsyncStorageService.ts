@@ -616,6 +616,25 @@ export class AsyncStorageService {
     }
   }
 
+  static async getSelectedFridgeId(): Promise<number | null> {
+    try {
+      const fridgeId = await AsyncStorage.getItem('selectedFridgeId');
+      return fridgeId ? parseInt(fridgeId, 10) : null;
+    } catch (error) {
+      console.error('선택된 냉장고 ID 조회 실패:', error);
+      return null;
+    }
+  }
+
+  static async setSelectedFridgeId(fridgeId: number): Promise<void> {
+    try {
+      await AsyncStorage.setItem('selectedFridgeId', fridgeId.toString());
+    } catch (error) {
+      console.error('선택된 냉장고 ID 저장 실패:', error);
+      throw error;
+    }
+  }
+
   // ============================================================================
   // 장바구니(Grocery) 관련 메서드들
   // ============================================================================

@@ -60,7 +60,7 @@ export const IngredientItemRendering: React.FC<IngredientItemProps> = ({
       };
     }
     // 숫자가 없으면 전체를 단위로
-    return { quantity: '0', unit: text.trim() };
+    return { quantity: '1', unit: text.trim() };
   };
 
   // 수량 & 단위 업데이트
@@ -203,7 +203,7 @@ export const IngredientItemRendering: React.FC<IngredientItemProps> = ({
                       )}
                   </View>
                   <Text style={styles.alternativeReason}>
-                    유통기한:{' '}
+                    소비기한:{' '}
                     <Text style={styles.alternativeReasonExpiaryDate}>
                       {alternative.fridgeItem.expiryDate}
                     </Text>

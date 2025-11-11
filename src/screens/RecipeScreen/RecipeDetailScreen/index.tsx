@@ -71,7 +71,14 @@ const RecipeDetailScreen: React.FC = () => {
         referenceUrl: aiGeneratedData.referenceUrl || '',
       };
     } else if (recipe) {
-      return recipe;
+      return {
+        ...recipe,
+        ingredients:
+          recipe.ingredients?.map((ing, index) => ({
+            ...ing,
+            id: `init_${recipe.id}_${index}`,
+          })) || [],
+      };
     } else {
       // ✅ 새 레시피일 때 빈 재료 1개, 빈 단계 1개 추가
       return {
@@ -80,7 +87,7 @@ const RecipeDetailScreen: React.FC = () => {
         createdAt: new Date().toISOString().split('T')[0],
         ingredients: [
           {
-            id: Date.now(),
+            id: `new_${Math.random().toString(36).substr(2, 9)}`,
             name: '',
             quantity: 0,
             unit: '',
@@ -161,7 +168,7 @@ const RecipeDetailScreen: React.FC = () => {
           console.log('상세 레시피 로드:', currentRecipe.id);
 
           const detailRecipe = await RecipeAPI.getRecipeDetail(
-            parseInt(currentRecipe.id),
+            parseInt(currentRecipe.id, 10),
           );
           setCurrentRecipe(detailRecipe);
 
@@ -199,8 +206,6 @@ const RecipeDetailScreen: React.FC = () => {
     return ingredients;
   };
 
-  // ✅ handleSave 함수 (API 연동)
-  // RecipeDetailScreen의 handleSave 함수만 수정
   const handleSave = async () => {
     if (!currentRecipe.title.trim()) {
       Alert.alert('오류', '레시피 제목을 입력해주세요.');
@@ -210,9 +215,44 @@ const RecipeDetailScreen: React.FC = () => {
     setIsLoading(true);
     try {
       if (isNewRecipe) {
-        // ... 새 레시피 생성 로직 동일
+        const createData = {
+          title: currentRecipe.title,
+          ingredients: getIngredientsArray(currentRecipe.ingredients).map(
+            ing => ({
+              ingredientName: ing.name || '',
+              quantity: ing.quantity || 0,
+              unit: ing.unit || '',
+            }),
+          ),
+          steps: currentRecipe.steps, // 배열 그대로
+          referenceUrl: currentRecipe.referenceUrl || '',
+        };
+
+        console.log('🔥 새 레시피 생성 데이터:', createData);
+
+        // ✅ AIRecipeScreen과 동일한 API 사용
+        const savedRecipe = await RecipeAPI.saveAIRecipe(createData);
+
+        console.log('✅ 저장된 레시피:', savedRecipe);
+
+        // ✅ 저장 후 상태 업데이트 (AIRecipeScreen의 매핑 방식 참고)
+        setCurrentRecipe({
+          id: savedRecipe.recipeId.toString(),
+          title: savedRecipe.title,
+          createdAt: new Date().toISOString().split('T')[0],
+          ingredients: savedRecipe.ingredients.map(ing => ({
+            id: ing.recipeIngredientId.toString(),
+            name: ing.name,
+            quantity: ing.quantity,
+            unit: ing.unit,
+          })),
+          steps: savedRecipe.steps.split('\n'), // ← 백엔드가 string으로 주면 배열로 변환
+          referenceUrl: savedRecipe.url || '',
+        });
+
+        Alert.alert('성공', '레시피가 저장되었습니다.');
       } else {
-        // 기존 레시피 수정
+        // 기존 레시피 수정 (기존 로직 유지)
         const updateData = {
           title: currentRecipe.title,
           ingredients: getIngredientsArray(currentRecipe.ingredients).map(
@@ -222,23 +262,15 @@ const RecipeDetailScreen: React.FC = () => {
               unit: ing.unit || '',
             }),
           ),
-          steps: currentRecipe.steps, // 배열 그대로 전달
+          steps: currentRecipe.steps,
           referenceUrl: currentRecipe.referenceUrl || '',
         };
 
-        console.log('🔥 레시피 수정 데이터:', updateData);
-        console.log(
-          '🔥 현재 레시피 ID 타입:',
-          typeof currentRecipe.id,
-          currentRecipe.id,
-        );
-
         const updatedRecipe = await RecipeAPI.updateRecipe(
-          currentRecipe.id, // string으로 전달
+          currentRecipe.id,
           updateData,
         );
 
-        console.log('🔥 업데이트된 레시피:', updatedRecipe);
         setCurrentRecipe(updatedRecipe);
         Alert.alert('성공', '레시피가 업데이트되었습니다.');
       }

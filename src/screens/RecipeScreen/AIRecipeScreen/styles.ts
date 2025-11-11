@@ -14,29 +14,31 @@ const scale = (size: number) => (width / baseWidth) * size;
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#e8f5e8',
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#e8f5e8',
   },
 
   // Header Section /////////////////////////////////////////////////////////////////
   header: {
-    backgroundColor: 'white',
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(12),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    backgroundColor: '#e8f5e8',
+    paddingHorizontal: scale(16),
+    paddingTop: scale(8),
+    paddingBottom: scale(8),
     shadowColor: '#000',
     shadowOffset: {
       width: scale(0),
-      height: scale(2),
+      height: scale(5),
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
+    minHeight: scale(60),
   },
   leftSection: {
     width: scale(56),
@@ -75,11 +77,11 @@ export const styles = StyleSheet.create({
 
   // Prompt Input Section ///////////////////////////////////////////////////////////
   promptSection: {
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#fff',
     borderRadius: scale(16),
     padding: scale(20),
     marginBottom: scale(16),
-    shadowColor: '#333',
+    shadowColor: '#444',
     shadowOffset: {
       width: scale(0),
       height: scale(2),
@@ -90,13 +92,13 @@ export const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: scale(18),
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: scale(8),
+    fontWeight: '700',
+    color: '#2F4858',
+    marginBottom: scale(14),
   },
   sectionSubtitle: {
     fontSize: scale(14),
-    color: '#666',
+    color: '#2F4858',
     marginBottom: scale(16),
     lineHeight: scale(20),
   },
@@ -145,6 +147,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: scale(16),
     padding: scale(20),
+    paddingVertical: scale(16),
     marginBottom: scale(16),
     shadowColor: '#333',
     shadowOffset: {
@@ -162,12 +165,14 @@ export const styles = StyleSheet.create({
     paddingHorizontal: scale(16),
     backgroundColor: '#eaeaeaff',
     borderRadius: scale(8),
-    marginBottom: scale(8),
+    marginTop: scale(6),
+    marginBottom: scale(6),
   },
   historyText: {
     fontSize: scale(14),
-    color: '#333',
+    color: '#2F4858',
     marginLeft: scale(8),
+    fontWeight: '600',
     flex: 1,
   },
 
@@ -196,15 +201,15 @@ export const styles = StyleSheet.create({
   },
   tipSectionTitle: {
     fontSize: scale(18),
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: '700',
+    color: '#2F4858',
   },
   tipItem: {
     paddingVertical: scale(4),
   },
   tipText: {
     fontSize: scale(14),
-    color: '#666',
+    color: '#2F4858',
     lineHeight: scale(20),
   },
 
@@ -270,7 +275,7 @@ export const styles = StyleSheet.create({
   },
   // Ingredients ////////////////////////////////////////////////////////////////////
   section: {
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     borderRadius: scale(16),
     padding: scale(20),
     marginBottom: scale(16),
@@ -286,21 +291,20 @@ export const styles = StyleSheet.create({
   ingredientItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: scale(8),
+    paddingVertical: scale(10),
   },
   ingredientText: {
     paddingLeft: scale(10),
     fontSize: scale(16),
     fontWeight: '500',
-    color: '#333',
+    color: '#2F4858',
   },
 
   // Steps //////////////////////////////////////////////////////////////////////////
   stepItem: {
     flexDirection: 'row',
-    marginBottom: scale(16),
+    marginBottom: scale(20),
     alignItems: 'flex-start',
-    paddingVertical: scale(8),
   },
   stepNumber: {
     width: scale(28),
@@ -309,26 +313,23 @@ export const styles = StyleSheet.create({
     backgroundColor: '#999',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: scale(14),
+    marginRight: scale(12),
     marginTop: scale(2),
   },
   stepNumberText: {
-    color: '#f8f8f8',
+    color: '#fff',
     fontSize: scale(14),
-    fontWeight: '600',
+    fontWeight: '700',
   },
   stepTextContainer: {
     flex: 1,
-    borderBottomWidth: scale(0.2),
-    paddingBottom: scale(10),
-    borderColor: '#999',
+    marginTop: scale(4),
   },
   stepText: {
-    paddingLeft: '5%',
-    width: '90%',
     fontSize: scale(16),
-    color: '#333',
-    lineHeight: scale(22),
+    color: '#2F4858',
+    fontWeight: '500',
+    lineHeight: scale(26),
   },
 
   // Buttons ////////////////////////////////////////////////////////////////////////
