@@ -121,14 +121,20 @@ export const styles = StyleSheet.create({
   },
 
   // Recipe Title /////////////////////////////////////////
+  titleInputContainer: {
+    backgroundColor: '#fff',
+    borderRadius: scale(14),
+    borderWidth: scale(1),
+    borderColor: '#f8f8f8',
+    marginHorizontal: scale(8),
+    marginTop: scale(16),
+  },
   titleInput: {
-    fontSize: scale(24),
+    fontSize: scale(20),
     fontWeight: '700',
     color: '#333',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    paddingVertical: scale(8),
-    margin: scale(8),
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(12),
   },
   title: {
     fontSize: scale(24),
@@ -156,53 +162,134 @@ export const styles = StyleSheet.create({
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E8F5E8',
+    justifyContent: 'center',
+    backgroundColor: '#7FD1AE',
     paddingHorizontal: scale(12),
-    paddingVertical: scale(6),
-    borderRadius: scale(6),
-    borderWidth: scale(1),
-    borderColor: '#b9edb9ff',
-    gap: scale(4),
+    paddingVertical: scale(8),
+    borderRadius: scale(10),
+    gap: scale(2),
+    marginHorizontal: scale(130),
+    marginTop: scale(8),
   },
   addButtonText: {
     fontSize: scale(14),
-    color: '#29a448ff',
-    fontWeight: '500',
+    color: '#2F4858',
+    fontWeight: '700',
   },
   ingredientItem: {
+    marginHorizontal: scale(8),
     marginBottom: scale(8),
   },
   ingredientEditRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: scale(8),
+    backgroundColor: '#F3FBF3',
+    padding: scale(12),
+    borderRadius: scale(12),
+    borderWidth: scale(1),
+    borderColor: '#D9F9DA',
   },
   ingredientInput: {
     borderWidth: scale(1),
     borderColor: '#ddd',
-    backgroundColor: '#f2f2f2ff',
-    borderRadius: scale(6),
+    backgroundColor: '#fff',
+    borderRadius: scale(10),
     padding: scale(10),
     fontSize: scale(14),
+    color: '#444',
   },
   ingredientName: {
+    flex: 4,
+  },
+  ingredientQuantityUnit: {
     flex: 2,
   },
-  ingredientQuantity: {
-    flex: 1,
-  },
-  ingredientUnit: {
-    flex: 1,
-  },
   removeButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: scale(4),
+    width: scale(44),
+    height: scale(44),
+  },
+
+  // 조회 모드
+  ingredientRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(12),
+    backgroundColor: '#fff',
+    borderRadius: scale(8),
+    borderWidth: scale(1),
+    borderColor: '#f0f0f0',
+  },
+  ingredientMainInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   ingredientText: {
-    fontSize: scale(17),
-    color: '#555',
-    lineHeight: scale(24),
+    fontSize: scale(15),
+    color: '#333',
+    lineHeight: scale(22),
     marginLeft: scale(8),
+    fontWeight: '500',
+  },
+  availableIngredient: {
     fontWeight: '600',
+    color: '#29a448ff',
+  },
+
+  // 대체재 섹션
+  alternativesContainer: {
+    marginTop: scale(8),
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(12),
+    backgroundColor: '#f8f9fa',
+    borderRadius: scale(8),
+  },
+  alternativesTitle: {
+    fontSize: scale(14),
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: scale(8),
+  },
+  selectedAlternativeItem: {
+    backgroundColor: '#E8F5E8',
+    borderRadius: scale(6),
+    marginBottom: scale(8),
+  },
+  alternativeInfo: {
+    paddingVertical: scale(8),
+    paddingHorizontal: scale(12),
+  },
+  alternativeTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: scale(4),
+  },
+  alternativeName: {
+    fontSize: scale(14),
+    color: '#333',
+    flex: 1,
+  },
+  selectedAlternativeText: {
+    fontWeight: '600',
+    color: '#29a448ff',
+  },
+  selectedIcon: {
+    marginLeft: scale(8),
+  },
+  alternativeReason: {
+    fontSize: scale(12),
+    color: '#666',
+  },
+  alternativeReasonExpiaryDate: {
+    color: '#29a448ff',
+    fontWeight: '500',
   },
 
   // Steps ////////////////////////////////////////////////
@@ -258,19 +345,35 @@ export const styles = StyleSheet.create({
   },
 
   // URL //////////////////////////////////////////////////
+  // styles.ts
+  urlContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: scale(8),
+  },
+  urlIcon: {
+    marginLeft: scale(8),
+    marginRight: scale(8),
+  },
+  urlInputContainer: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+    borderRadius: scale(8),
+    borderWidth: scale(1),
+    borderColor: '#ddd',
+    marginRight: scale(8),
+  },
   urlInput: {
     fontSize: scale(14),
     color: 'limegreen',
-    borderBottomWidth: scale(1),
-    borderBottomColor: '#ddd',
     paddingVertical: scale(8),
-    marginHorizontal: scale(8),
+    paddingHorizontal: scale(12),
   },
   url: {
+    flex: 1,
     fontSize: scale(14),
     color: 'limegreen',
-    paddingVertical: scale(8),
-    marginHorizontal: scale(8),
+    marginRight: scale(8),
   },
 
   // Action Buttons ///////////////////////////////////////

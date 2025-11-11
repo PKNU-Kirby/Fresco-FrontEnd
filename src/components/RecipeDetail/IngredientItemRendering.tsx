@@ -37,17 +37,38 @@ export const IngredientItemRendering: React.FC<IngredientItemProps> = ({
   onUpdateIngredient,
   onFridgeItemSelection,
 }) => {
-  // 로컬 state
+  // 로컬 state - 수량과 단위를 합친 문자열
   const [localName, setLocalName] = React.useState(ingredient.name);
-  const [localQuantity, setLocalQuantity] = React.useState(ingredient.quantity);
-  const [localUnit, setLocalUnit] = React.useState(ingredient.unit);
+  const [localQuantityUnit, setLocalQuantityUnit] = React.useState(
+    `${ingredient.quantity}${ingredient.unit}`,
+  );
 
   // ingredient가 변경 -> state도 업데이트
   React.useEffect(() => {
     setLocalName(ingredient.name);
-    setLocalQuantity(ingredient.quantity);
-    setLocalUnit(ingredient.unit);
+    setLocalQuantityUnit(`${ingredient.quantity}${ingredient.unit}`);
   }, [ingredient.name, ingredient.quantity, ingredient.unit]);
+
+  // 수량 & 단위 파싱
+  const parseQuantityUnit = (text: string) => {
+    // "1개", "200g", "2큰술", "1.5컵" 등을 파싱
+    const match = text.match(/^(\d+\.?\d*)\s*(.*)$/);
+    if (match) {
+      return {
+        quantity: match[1],
+        unit: match[2].trim(),
+      };
+    }
+    // 숫자가 없으면 전체를 단위로
+    return { quantity: '0', unit: text.trim() };
+  };
+
+  // 수량 & 단위 업데이트
+  const handleQuantityUnitBlur = () => {
+    const parsed = parseQuantityUnit(localQuantityUnit);
+    onUpdateIngredient(ingredient.id, 'quantity', parsed.quantity);
+    onUpdateIngredient(ingredient.id, 'unit', parsed.unit);
+  };
 
   // 재료 상태 동그라미
   const getStatusCircle = () => {
@@ -62,10 +83,9 @@ export const IngredientItemRendering: React.FC<IngredientItemProps> = ({
   // 유통기한으로 정렬하는 함수
   const sortByExpiryDate = (items: FridgeItem[]) => {
     return items.sort((a, b) => {
-      // 날짜 문자열을 Date 객체로 변환해서 비교
       const dateA = new Date(a.expiryDate);
       const dateB = new Date(b.expiryDate);
-      return dateA.getTime() - dateB.getTime(); // 오름차순 (임박한 순)
+      return dateA.getTime() - dateB.getTime();
     });
   };
 
@@ -125,7 +145,7 @@ export const IngredientItemRendering: React.FC<IngredientItemProps> = ({
                         )}
                     </View>
                     <Text style={styles.alternativeReason}>
-                      유통기한:{' '}
+                      소비기한:{' '}
                       <Text style={styles.alternativeReasonExpiaryDate}>
                         {item.expiryDate}
                       </Text>
@@ -198,40 +218,29 @@ export const IngredientItemRendering: React.FC<IngredientItemProps> = ({
   };
 
   if (isEditMode) {
-    // 편집 모드
     return (
       <View style={styles.ingredientEditRow}>
         <TextInput
           style={[styles.ingredientInput, styles.ingredientName]}
           value={localName}
           onChangeText={setLocalName}
-          onBlur={() => onUpdateIngredient(ingredient.id, 'name', localName)} // 포커스 벗어날 때 업데이트
+          onBlur={() => onUpdateIngredient(ingredient.id, 'name', localName)}
           placeholder="재료명"
           placeholderTextColor="#999"
         />
         <TextInput
-          style={[styles.ingredientInput, styles.ingredientQuantity]}
-          value={localQuantity}
-          onChangeText={setLocalQuantity}
-          onBlur={() =>
-            onUpdateIngredient(ingredient.id, 'quantity', localQuantity)
-          }
-          placeholder="양"
-          placeholderTextColor="#999"
-        />
-        <TextInput
-          style={[styles.ingredientInput, styles.ingredientUnit]}
-          value={localUnit}
-          onChangeText={setLocalUnit}
-          onBlur={() => onUpdateIngredient(ingredient.id, 'unit', localUnit)}
-          placeholder="단위"
+          style={[styles.ingredientInput, styles.ingredientQuantityUnit]}
+          value={localQuantityUnit}
+          onChangeText={setLocalQuantityUnit}
+          onBlur={handleQuantityUnitBlur}
+          placeholder="예: 1개, 200g"
           placeholderTextColor="#999"
         />
         <TouchableOpacity
           style={styles.removeButton}
           onPress={() => onRemoveIngredient(ingredient.id)}
         >
-          <Icon name="remove" size={20} color="tomato" />
+          <Icon name="remove-circle-outline" size={26} color="#666" />
         </TouchableOpacity>
       </View>
     );

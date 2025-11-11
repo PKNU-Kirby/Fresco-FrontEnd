@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
               onPress={onSave}
               disabled={isLoading}
             >
-              <FontAwesome6 name="circle-check" size={24} color="limegreen" />
+              <FontAwesome6 name="circle-check" size={24} color="#444" />
             </TouchableOpacity>
           </View>
         </View>

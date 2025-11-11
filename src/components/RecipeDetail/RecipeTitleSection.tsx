@@ -16,13 +16,15 @@ export const RecipeTitleSection: React.FC<RecipeTitleSectionProps> = ({
   return (
     <View style={styles.section}>
       {isEditMode ? (
-        <TextInput
-          style={styles.titleInput}
-          value={title}
-          onChangeText={onTitleChange}
-          placeholder="레시피 제목을 입력하세요"
-          placeholderTextColor="#999"
-        />
+        <View style={styles.titleInputContainer}>
+          <TextInput
+            style={styles.titleInput}
+            value={title}
+            onChangeText={onTitleChange}
+            placeholder="레시피 제목을 입력하세요"
+            placeholderTextColor="#999"
+          />
+        </View>
       ) : (
         <Text style={styles.title}>{title}</Text>
       )}

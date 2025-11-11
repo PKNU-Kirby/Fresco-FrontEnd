@@ -59,6 +59,7 @@ const RecipeDetailScreen: React.FC = () => {
   } = route.params;
 
   // 초기 레시피 데이터 생성
+  // getInitialRecipe 함수 수정
   const getInitialRecipe = () => {
     if (aiGeneratedData) {
       return {
@@ -72,12 +73,20 @@ const RecipeDetailScreen: React.FC = () => {
     } else if (recipe) {
       return recipe;
     } else {
+      // ✅ 새 레시피일 때 빈 재료 1개, 빈 단계 1개 추가
       return {
         id: 0,
         title: '',
         createdAt: new Date().toISOString().split('T')[0],
-        ingredients: [],
-        steps: [],
+        ingredients: [
+          {
+            id: Date.now(),
+            name: '',
+            quantity: 0,
+            unit: '',
+          },
+        ],
+        steps: [''],
         referenceUrl: '',
       };
     }
@@ -560,6 +569,7 @@ const RecipeDetailScreen: React.FC = () => {
           <IngredientsSection
             ingredients={getIngredientsArray(currentRecipe.ingredients)}
             isEditMode={isEditMode}
+            isNewRecipe={isNewRecipe}
             fridgeId={fridgeId}
             onAddIngredient={addIngredient}
             onRemoveIngredient={removeIngredient}

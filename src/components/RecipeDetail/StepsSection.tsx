@@ -60,12 +60,6 @@ export const StepsSection: React.FC<StepsSectionProps> = ({
       </View>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>조리법</Text>
-        {isEditMode && (
-          <TouchableOpacity style={styles.addButton} onPress={onAddStep}>
-            <Icon name="add" size={20} color="#29a448ff" />
-            <Text style={styles.addButtonText}>단계 추가</Text>
-          </TouchableOpacity>
-        )}
       </View>
       {steps.map((step, index) => (
         <View key={index} style={styles.stepItem}>
@@ -89,6 +83,12 @@ export const StepsSection: React.FC<StepsSectionProps> = ({
           )}
         </View>
       ))}
+      {isEditMode && (
+        <TouchableOpacity style={styles.addButton} onPress={onAddStep}>
+          <Icon name="add" size={22} color="#2F4858" />
+          <Text style={styles.addButtonText}>단계 추가</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

@@ -13,6 +13,7 @@ import { styles } from './styles';
 interface IngredientsSectionProps {
   ingredients: RecipeIngredient[];
   isEditMode: boolean;
+  isNewRecipe?: boolean;
   fridgeId?: number;
   onAddIngredient: () => void;
   onRemoveIngredient: (id: string) => void;
@@ -27,6 +28,7 @@ interface IngredientsSectionProps {
 export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
   ingredients,
   isEditMode,
+  isNewRecipe = false,
   fridgeId,
   onAddIngredient,
   onRemoveIngredient,
@@ -62,16 +64,12 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>재료</Text>
-        <TouchableOpacity
-          style={styles.ingredientInfo}
-          onPress={() => setShowInfoModal(true)}
-        >
-          <Icon name={'info-outline'} size={24} color={'#444'} />
-        </TouchableOpacity>
-        {isEditMode && (
-          <TouchableOpacity style={styles.addButton} onPress={onAddIngredient}>
-            <Icon name="add" size={20} color="#29a448ff" />
-            <Text style={styles.addButtonText}>재료 추가</Text>
+        {!isNewRecipe && (
+          <TouchableOpacity
+            style={styles.ingredientInfo}
+            onPress={() => setShowInfoModal(true)}
+          >
+            <Icon name={'info-outline'} size={24} color={'#444'} />
           </TouchableOpacity>
         )}
       </View>
@@ -91,7 +89,12 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
           />
         </View>
       ))}
-
+      {isEditMode && (
+        <TouchableOpacity style={styles.addButton} onPress={onAddIngredient}>
+          <Icon name="add" size={22} color="#2F4858" />
+          <Text style={styles.addButtonText}>재료 추가</Text>
+        </TouchableOpacity>
+      )}
       <IngredientInfoModal
         visible={showInfoModal}
         onClose={() => setShowInfoModal(false)}
