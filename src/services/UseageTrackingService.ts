@@ -6,15 +6,15 @@ import {
 } from '../services/API/usageHistoryAPI';
 
 export interface UsageRecord {
-  id: string;
-  userId: string;
+  id: number;
+  userId: number;
   userName: string;
   userAvatar: string;
-  itemId: string;
+  itemId: number;
   itemName: string;
   quantity: number;
   unit: string;
-  fridgeId: string;
+  fridgeId: number;
   usageType: 'consume' | 'modify' | 'delete' | 'recipe_use'; // 사용 유형
   usedAt: string; // ISO string
   time: string; // "오후 2:30"
@@ -38,13 +38,13 @@ export class UsageTrackingService {
 
       const newRecord: UsageRecord = {
         ...record,
-        id: `usage_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: Date.now(),
         usedAt: now.toISOString(),
         time: timeString,
       };
 
       const existingRecords = await this.getUsageRecords();
-      existingRecords.unshift(newRecord); // 최신 기록을 앞에 추가
+      existingRecords.unshift(newRecord);
 
       await AsyncStorage.setItem(
         USAGE_RECORDS_KEY,
@@ -68,31 +68,46 @@ export class UsageTrackingService {
   }
 
   // 특정 냉장고의 사용 기록 조회
-  static async getFridgeUsageRecords(fridgeId: string): Promise<UsageRecord[]> {
+  static async getFridgeUsageRecords(fridgeId: number): Promise<UsageRecord[]> {
     try {
       const records = await UsageHistoryAPI.getAllUsageHistory(fridgeId);
 
-      return records.map((item: HistoryRecord) => ({
-        id: item.refrigeratorIngredientId.toString(),
-        userId: item.consumerId.toString(),
-        userName: item.consumerName,
-        userAvatar: item.consumerName.charAt(0),
-        itemId: item.refrigeratorIngredientId.toString(),
-        itemName: item.ingredientName,
-        quantity: item.usedQuantity,
-        unit: item.unit,
-        fridgeId: fridgeId,
-        usageType: 'consume',
-        usedAt: item.usedAt,
-        time: UsageHistoryAPI.formatTime(item.usedAt), // ← 이렇게
-      }));
+      // 🔍 서버 응답 상세 로깅
+      console.log('📦 전체 레코드 수:', records.length);
+      if (records.length > 0) {
+        console.log('📦 첫 번째 레코드:', JSON.stringify(records[0], null, 2));
+      }
+
+      return records.map((item: HistoryRecord, index: number) => {
+        // 🔍 각 항목의 consumerName 확인
+        console.log(
+          `👤 [${index}] consumerId: ${item.consumerId}, consumerName: "${item.consumerName}"`,
+        );
+
+        const timestamp = new Date(item.usedAt).getTime();
+
+        return {
+          id: timestamp + index,
+          userId: item.consumerId,
+          userName: item.consumerName || '알 수 없음',
+          userAvatar: item.consumerName ? item.consumerName.charAt(0) : '👤',
+          itemId: item.refrigeratorIngredientId,
+          itemName: item.ingredientName,
+          quantity: item.usedQuantity,
+          unit: item.unit,
+          fridgeId: fridgeId,
+          usageType: 'consume' as const,
+          usedAt: item.usedAt,
+          time: UsageHistoryAPI.formatTime(item.usedAt),
+        };
+      });
     } catch (error) {
       console.error('서버 사용 기록 조회 실패:', error);
       return [];
     }
   }
   // 특정 사용자의 사용 기록 조회
-  static async getUserUsageRecords(userId: string): Promise<UsageRecord[]> {
+  static async getUserUsageRecords(userId: number): Promise<UsageRecord[]> {
     try {
       const allRecords = await this.getUsageRecords();
       return allRecords.filter(record => record.userId === userId);
@@ -104,7 +119,7 @@ export class UsageTrackingService {
 
   // 현재 사용자 정보 가져오기
   static async getCurrentUserInfo(): Promise<{
-    id: string;
+    id: number;
     name: string;
     avatar: string;
   } | null> {
@@ -131,11 +146,11 @@ export class UsageTrackingService {
 
   // 편의 함수들
   static async trackItemConsumption(
-    itemId: string,
+    itemId: number,
     itemName: string,
     quantity: number,
     unit: string,
-    fridgeId: string,
+    fridgeId: number,
     details?: string,
   ): Promise<void> {
     const userInfo = await this.getCurrentUserInfo();
@@ -161,11 +176,11 @@ export class UsageTrackingService {
   }
 
   static async trackItemModification(
-    itemId: string,
+    itemId: number,
     itemName: string,
     quantity: number,
     unit: string,
-    fridgeId: string,
+    fridgeId: number,
     details?: string,
   ): Promise<void> {
     const userInfo = await this.getCurrentUserInfo();
@@ -186,11 +201,11 @@ export class UsageTrackingService {
   }
 
   static async trackItemDeletion(
-    itemId: string,
+    itemId: number,
     itemName: string,
     quantity: number,
     unit: string,
-    fridgeId: string,
+    fridgeId: number,
     details?: string,
   ): Promise<void> {
     const userInfo = await this.getCurrentUserInfo();
@@ -211,11 +226,11 @@ export class UsageTrackingService {
   }
 
   static async trackRecipeUsage(
-    itemId: string,
+    itemId: number,
     itemName: string,
     quantity: number,
     unit: string,
-    fridgeId: string,
+    fridgeId: number,
     recipeName: string,
   ): Promise<void> {
     const userInfo = await this.getCurrentUserInfo();

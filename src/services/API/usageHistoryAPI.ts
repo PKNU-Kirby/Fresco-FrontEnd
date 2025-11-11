@@ -40,7 +40,7 @@ export class UsageHistoryAPI {
    * 냉장고 사용 기록 조회
    */
   static async getUsageHistory(
-    fridgeId: string,
+    fridgeId: number,
     options?: {
       page?: number;
       size?: number;
@@ -53,7 +53,7 @@ export class UsageHistoryAPI {
       console.log(`냉장고 ${fridgeId} 사용 기록 조회 중...`);
 
       const response = await ApiService.apiCall<HistoryResponse>(
-        `/api/v1/history?refrigeratorId=${fridgeId}&page=${page}&size=${size}`,
+        `/api/v1/history`,
         {
           method: 'GET',
         },
@@ -71,7 +71,7 @@ export class UsageHistoryAPI {
    * 페이지네이션을 사용한 전체 사용 기록 조회
    */
   static async getAllUsageHistory(
-    fridgeId: string,
+    fridgeId: number,
     maxPages: number = 10,
   ): Promise<HistoryRecord[]> {
     const allRecords: HistoryRecord[] = [];

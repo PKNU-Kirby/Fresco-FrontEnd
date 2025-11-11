@@ -21,7 +21,7 @@ import { styles } from './styles';
 type Props = {
   route: {
     params: {
-      fridgeId: string; // string으로 변경
+      fridgeId: number;
     };
   };
 };
@@ -65,7 +65,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
   };
 
   const handleFilterPress = (filter: string) => {
-    if (filter === '원하는 기간') {
+    if (filter === '기간 선택') {
       setShowDateRangePicker(true);
     } else {
       setActiveFilter(filter);
@@ -75,7 +75,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
 
   const handleDateRangeSelect = (startDate: string, endDate: string) => {
     setCustomDateRange({ start: startDate, end: endDate });
-    setActiveFilter('원하는 기간');
+    setActiveFilter('기간 선택');
   };
 
   const formatDate = (dateString: string) => {

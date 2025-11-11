@@ -355,7 +355,7 @@ export class AsyncStorageService {
       return [];
     }
   }
-  static async getUserById(id: string): Promise<User | null> {
+  static async getUserById(id: number): Promise<User | null> {
     try {
       const usersJson = await AsyncStorage.getItem(this.KEYS.USERS);
 
@@ -372,7 +372,7 @@ export class AsyncStorageService {
             }
 
             const users: User[] = JSON.parse(retryUsersJson);
-            return users.find(user => user.id === id) || null;
+            return users.find(user => user.id === id.toString()) || null;
           }
         }
 
@@ -380,7 +380,7 @@ export class AsyncStorageService {
       }
 
       const users: User[] = JSON.parse(usersJson);
-      return users.find(user => user.id === id) || null;
+      return users.find(user => user.id === id.toString()) || null;
     } catch (error) {
       console.error('X Get user by ID error:', error);
       return null;
@@ -416,7 +416,7 @@ export class AsyncStorageService {
         .toUpperCase();
 
       const newRefrigerator: Refrigerator = {
-        id: (await this.getNextId('refrigerators')).toString(),
+        id: await this.getNextId('refrigerators'),
         name,
         inviteCode,
         createdAt: new Date().toISOString(),
@@ -431,10 +431,10 @@ export class AsyncStorageService {
 
       const refrigeratorUsers = await this.getRefrigeratorUsers();
       const newRefrigeratorUser: RefrigeratorUser = {
-        id: (await this.getNextId('refrigeratorUsers')).toString(),
+        id: await this.getNextId('refrigeratorUsers'),
         refrigeratorId: newRefrigerator.id,
-        inviterId: creatorId.toString(),
-        inviteeId: creatorId.toString(),
+        inviterId: creatorId,
+        inviteeId: creatorId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -475,10 +475,10 @@ export class AsyncStorageService {
     try {
       const refrigeratorUsers = await this.getRefrigeratorUsers();
       const newRefrigeratorUser: RefrigeratorUser = {
-        id: (await this.getNextId('refrigeratorUsers')).toString(),
-        refrigeratorId: refrigeratorId.toString(),
-        inviterId: inviterId.toString(),
-        inviteeId: inviteeId.toString(),
+        id: await this.getNextId('refrigeratorUsers'),
+        refrigeratorId: refrigeratorId,
+        inviterId: inviterId,
+        inviteeId: inviteeId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -507,19 +507,18 @@ export class AsyncStorageService {
         ]);
 
       const userRefrigeratorRelations = refrigeratorUsers.filter(
-        ru => parseInt(ru.inviteeId, 10) === userId,
+        ru => ru.inviteeId === userId,
       );
 
       const fridgesWithRole: FridgeWithRole[] = userRefrigeratorRelations
         .map(relation => {
           const refrigerator = refrigerators.find(
-            r => parseInt(r.id, 10) === parseInt(relation.refrigeratorId, 10),
+            r => r.id === relation.refrigeratorId,
           );
           if (!refrigerator) return null;
 
           const memberCount = refrigeratorUsers.filter(
-            ru =>
-              parseInt(ru.refrigeratorId, 10) === parseInt(refrigerator.id, 10),
+            ru => ru.refrigeratorId === refrigerator.id,
           ).length;
           const isOwner = relation.inviterId === relation.inviteeId;
 
@@ -528,7 +527,7 @@ export class AsyncStorageService {
             isOwner,
             role: isOwner ? ('owner' as const) : ('member' as const),
             memberCount,
-            isHidden: hiddenFridges.includes(parseInt(refrigerator.id, 10)),
+            isHidden: hiddenFridges.includes(refrigerator.id),
           };
         })
         .filter(Boolean) as FridgeWithRole[];
@@ -726,9 +725,9 @@ export class AsyncStorageService {
 
   static async saveUserInfo(userInfo: StoredUserInfo): Promise<void> {
     const userDataArray: [string, string][] = [
-      ['userId', userInfo.userId],
+      ['userId', userInfo.userId.toString()],
       ['userProvider', userInfo.provider],
-      ['userProviderId', userInfo.providerId],
+      ['userProviderId', userInfo.providerId.toString()],
       ['userName', userInfo.name],
       ['userProfile', JSON.stringify(userInfo)],
     ];

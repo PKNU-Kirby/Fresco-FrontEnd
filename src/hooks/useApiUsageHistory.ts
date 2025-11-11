@@ -4,15 +4,15 @@ import { Alert } from 'react-native';
 import ApiService from '../services/ApiService';
 
 export type UsageRecord = {
-  id: string;
+  id: number;
   itemName: string;
-  itemId: string;
+  itemId: number;
   action: 'used' | 'discarded';
   quantity?: number;
   userName: string;
-  userId: string;
+  userId: number;
   timestamp: string;
-  fridgeId: string;
+  fridgeId: number;
   fridgeName: string;
 };
 

@@ -19,7 +19,7 @@ type InviteMemberModalProps = {
   visible: boolean;
   onClose: () => void;
   fridgeId: number;
-  fridgeName: number;
+  fridgeName: string;
   onInviteSuccess?: () => void;
 };
 

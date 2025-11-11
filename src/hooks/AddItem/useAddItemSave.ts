@@ -18,7 +18,8 @@ export type ConfirmedItem = {
 
 export const useAddItemSave = (
   items: ItemFormData[],
-  fridgeId: string,
+  fridgeId: number,
+  fridgeName: string | null,
   navigation: any,
   setIsLoading: (loading: boolean) => void,
 ) => {
@@ -238,7 +239,7 @@ export const useAddItemSave = (
           name: 'MainTabs',
           params: {
             fridgeId: fridgeId,
-            fridgeName: '내 냉장고',
+            fridgeName: fridgeName || '내 냉장고',
             shouldRefresh: true,
           },
         },

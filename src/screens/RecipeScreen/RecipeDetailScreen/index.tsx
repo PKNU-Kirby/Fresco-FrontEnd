@@ -353,7 +353,15 @@ const RecipeDetailScreen: React.FC = () => {
       };
     });
   };
+  // RecipeDetailScreen에 추가
+  const getCleanedSteps = (steps: string[]): string[] => {
+    if (!Array.isArray(steps)) return [];
 
+    return steps.map(step => {
+      // "1. ", "2. " 등의 패턴 제거
+      return step.replace(/^\d+\.\s*/, '').trim();
+    });
+  };
   // 냉장고 관리로 이동
   const navigateToFridgeManagement = () => {
     navigation.navigate('SharedFolder' as any);
@@ -560,9 +568,9 @@ const RecipeDetailScreen: React.FC = () => {
           />
 
           <StepsSection
-            steps={
-              Array.isArray(currentRecipe.steps) ? currentRecipe.steps : []
-            }
+            steps={getCleanedSteps(
+              Array.isArray(currentRecipe.steps) ? currentRecipe.steps : [],
+            )}
             isEditMode={isEditMode}
             onAddStep={addStep}
             onRemoveStep={removeStep}

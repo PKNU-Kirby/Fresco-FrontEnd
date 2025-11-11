@@ -221,7 +221,7 @@ export class FridgeSettingsAPIService {
    * 초대장 생성 - 쿼리 파라미터 방식으로 수정
    */
   static async generateInviteCode(
-    fridgeId: string,
+    fridgeId: number,
     fridgeName: string,
   ): Promise<string> {
     try {
@@ -307,7 +307,7 @@ export class FridgeSettingsAPIService {
 
       // 쿼리 파라미터 방식으로 변경 (cURL과 동일)
       const queryParams = new URLSearchParams({
-        refrigeratorId: fridgeId,
+        refrigeratorId: fridgeId.toString(),
         refrigeratorName: fridgeName,
         inviterId: currentUser.id.toString(),
         inviterName: currentUser.name,

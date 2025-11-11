@@ -359,7 +359,7 @@ export class ApiService {
     },
   ): Promise<{
     history: Array<{
-      id: string;
+      id: number;
       ingredientName: string;
       action: 'added' | 'updated' | 'deleted' | 'consumed';
       quantity?: number;
@@ -380,7 +380,7 @@ export class ApiService {
 
     return this.apiCall<{
       history: Array<{
-        id: string;
+        id: number;
         ingredientName: string;
         action: 'added' | 'updated' | 'deleted' | 'consumed';
         quantity?: number;
