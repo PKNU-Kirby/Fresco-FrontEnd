@@ -67,21 +67,25 @@ export const Header: React.FC<HeaderProps> = ({
         </View>
       ) : (
         <View style={styles.rightHeader}>
-          {!isSharedRecipe ? (
+          {isSharedRecipe ? (
             <View style={styles.headerActions}>
-              <TouchableOpacity
-                style={styles.favoriteButton}
-                onPress={onToggleFavorite}
-              >
-                <Icon
-                  name={isFavorite ? 'star' : 'star-border'}
-                  size={24}
-                  color={isFavorite ? '#ffd000' : '#999'}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.editButton} onPress={onEdit}>
-                <Icon name="edit" size={24} color="#333" />
-              </TouchableOpacity>
+              {!isSharedRecipe && (
+                <>
+                  <TouchableOpacity
+                    style={styles.favoriteButton}
+                    onPress={onToggleFavorite}
+                  >
+                    <Icon
+                      name={isFavorite ? 'star' : 'star-border'}
+                      size={24}
+                      color={isFavorite ? '#ffd000' : '#999'}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.editButton} onPress={onEdit}>
+                    <Icon name="edit" size={24} color="#333" />
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
           ) : (
             <View style={styles.headerActions} />

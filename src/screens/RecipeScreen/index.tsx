@@ -74,6 +74,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
         // 냉장고 재료를 API에서 가져오기
         const fridgeItems =
           await IngredientControllerAPI.getRefrigeratorIngredients(fridgeId);
+        console.log('🔍 냉장고 재료:', fridgeItems); // ← 이게 비어있을 수 있음
 
         const availabilities = await calculateMultipleRecipeAvailability(
           personalRecipes,

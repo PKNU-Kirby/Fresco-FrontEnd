@@ -13,7 +13,6 @@ interface RenderRecipeItemProps {
   onToggleFavorite: (id: string) => void;
   onPress: (recipe: Recipe) => void;
   isFavorite: boolean;
-  // 조리 가능성 props 추가
   availableIngredientsCount?: number;
   totalIngredientsCount?: number;
   canMakeWithFridge?: boolean;

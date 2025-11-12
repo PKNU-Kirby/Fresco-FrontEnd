@@ -187,7 +187,7 @@ export const calculateRecipeAvailability = async (
 // 여러 레시피의 가용성을 한번에 계산
 export const calculateMultipleRecipeAvailability = async (
   recipes: Recipe[],
-  fridgeId: string,
+  fridgeId: number,
 ): Promise<Map<string, RecipeAvailabilityInfo>> => {
   const results = new Map<string, RecipeAvailabilityInfo>();
 
