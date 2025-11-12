@@ -19,11 +19,10 @@ export const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: scale(16),
-    paddingTop: scale(16),
   },
   listContainer: {
-    paddingTop: scale(56),
-    paddingBottom: scale(20),
+    paddingTop: scale(72),
+    paddingBottom: scale(88),
   },
   loadingContainer: {
     flex: 1,
@@ -52,7 +51,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: scale(40),
-    paddingBottom: scale(100), // ✅ 버튼 자리 확보
+    paddingBottom: scale(100),
   },
   emptyTitle: {
     fontSize: scale(20),
@@ -66,10 +65,14 @@ export const styles = StyleSheet.create({
     marginTop: scale(8),
   },
   emptyButtonContainer: {
-    position: 'absolute', // ✅ 절대 위치
-    bottom: scale(460), // ✅ 하단에서 100 위로
+    position: 'absolute',
+    bottom: scale(210),
     left: scale(16),
     right: scale(16),
+  },
+  topInputContainer: {
+    paddingTop: scale(72),
+    paddingBottom: scale(88),
   },
 });
 

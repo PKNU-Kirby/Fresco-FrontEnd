@@ -73,13 +73,14 @@ export const styles = StyleSheet.create({
 export const buttonsStyles = StyleSheet.create({
   buttonContainer: {
     position: 'absolute',
-    top: scale(16),
+    top: 0,
     left: 0,
     right: 0,
-    zIndex: scale(1000),
+    zIndex: 1000,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingTop: scale(16),
     paddingHorizontal: scale(20),
     paddingBottom: scale(10),
     backgroundColor: '#e8f5e875',

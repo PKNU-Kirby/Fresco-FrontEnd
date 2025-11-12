@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import {
-  Alert,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
@@ -13,15 +12,19 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import CartItemCard from '../../components/ShoppingList/CartItemCard';
-import ItemDeleteConfirmModal from '../../components/ShoppingList/ItemDeleteConfirmModal';
-import FlushConfirmModal from '../../components/ShoppingList/FlushConfirmModal';
-import { styles, addItemStyles } from './styles';
-import ShoppingListHeader from '../../components/ShoppingList/ShoppingListHeader';
-import Buttons from '../../components/ShoppingList/Buttons';
-import NewItemCard from '../../components/ShoppingList/NewItemCard';
+
 import { useGroceryList } from '../../hooks/useGroceryList';
 import { FridgeControllerAPI } from '../../services/API/fridgeControllerAPI';
+import ConfirmModal from '../../components/modals/ConfirmModal';
+
+import Buttons from '../../components/ShoppingList/Buttons';
+import NewItemCard from '../../components/ShoppingList/NewItemCard';
+import CartItemCard from '../../components/ShoppingList/CartItemCard';
+import FlushConfirmModal from '../../components/ShoppingList/FlushConfirmModal';
+import ShoppingListHeader from '../../components/ShoppingList/ShoppingListHeader';
+import ItemDeleteConfirmModal from '../../components/ShoppingList/ItemDeleteConfirmModal';
+
+import { styles, addItemStyles } from './styles';
 
 export interface CartItem {
   id: number;
@@ -47,11 +50,9 @@ interface ShoppingListScreenProps {
 const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
   const { fridgeId, fridgeName } = route.params;
 
-  // groceryListId 상태
   const [groceryListId, setGroceryListId] = useState<number | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
 
-  // useGroceryList hook 사용
   const {
     cartItems,
     isLoading,
@@ -64,29 +65,27 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
     refresh,
   } = useGroceryList(groceryListId);
 
-  // UI 상태
   const [isEditMode, setIsEditMode] = useState(false);
   const [isAddingNewItem, setIsAddingNewItem] = useState(false);
 
-  // 🔥 변경사항 추적 (이름만)
-
-  const [pendingNameChanges, setPendingNameChanges] = useState<
-    Map<number, string>
+  // 편집 중인 변경사항은 로컬에 저장
+  const [pendingChanges, setPendingChanges] = useState<
+    Map<number, Partial<CartItem>>
   >(new Map());
 
-  // 🔥 각 아이템의 ref 관리
   const itemRefs = useRef<Map<number, any>>(new Map());
 
   const hasCheckedItems = cartItems.some(item => item.purchased);
 
-  // 삭제 확인 모달 상태
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<CartItem | null>(null);
-
-  // 비우기 확인 모달 상태
   const [showClearModal, setShowClearModal] = useState(false);
 
-  // fridgeId로 groceryListId 가져오기
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorModalTitle, setErrorModalTitle] = useState('');
+  const [errorModalMessage, setErrorModalMessage] = useState('');
+
+  // fridgeId로 groceryListId 가져옴
   useEffect(() => {
     const fetchGroceryListId = async () => {
       try {
@@ -98,7 +97,9 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
           : response?.result || response?.data || [];
 
         if (!Array.isArray(fridges)) {
-          Alert.alert('오류', '냉장고 목록 형식이 올바르지 않습니다.');
+          setErrorModalTitle('오류');
+          setErrorModalMessage('냉장고 목록 형식이 올바르지 않습니다.');
+          setErrorModalVisible(true);
           return;
         }
 
@@ -109,11 +110,15 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
         if (currentFridge?.groceryListId) {
           setGroceryListId(currentFridge.groceryListId);
         } else {
-          Alert.alert('오류', '장바구니 정보를 찾을 수 없습니다.');
+          setErrorModalTitle('오류');
+          setErrorModalMessage('장바구니 정보를 찾을 수 없습니다.');
+          setErrorModalVisible(true);
         }
       } catch (error) {
-        console.error('[ShoppingList] groceryListId 조회 실패:', error);
-        Alert.alert('오류', '장바구니 정보를 불러올 수 없습니다.');
+        // console.error('[ShoppingList] groceryListId 조회 실패', error);
+        setErrorModalTitle('오류');
+        setErrorModalMessage('장바구니 정보를 불러올 수 없습니다.');
+        setErrorModalVisible(true);
       } finally {
         setIsInitializing(false);
       }
@@ -122,7 +127,6 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
     fetchGroceryListId();
   }, [fridgeId]);
 
-  // 화면 포커스 시 새로고침
   useFocusEffect(
     useCallback(() => {
       if (groceryListId) {
@@ -131,58 +135,48 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
     }, [groceryListId, refresh]),
   );
 
-  // 🔥 편집 모드 토글 - 완료 시 일괄 저장
+  // 편집 모드 토글 - 완료 시 일괄 저장
   const handleEditToggle = async () => {
-    console.log('=== 편집 토글 ===');
-    console.log('현재 모드:', isEditMode ? '편집 중' : '일반');
-
     if (isEditMode) {
-      // 🔥 1. 키보드 내리기 (모든 TextInput blur됨)
-      Keyboard.dismiss();
-
-      // 🔥 2. 모든 아이템 강제 blur
-      console.log('모든 아이템 forceBlur 호출...');
+      // 먼저 모든 아이템 forceBlur (변경사항을 pendingChanges에 추가)
       itemRefs.current.forEach(ref => {
         if (ref?.forceBlur) {
           ref.forceBlur();
         }
       });
 
-      // 🔥 3. 약간의 딜레이 후 저장 (state 업데이트 대기)
-      setTimeout(async () => {
-        if (pendingNameChanges.size > 0) {
-          console.log(
-            '✅ 변경된 이름 저장 시작:',
-            pendingNameChanges.size,
-            '개',
-          );
-          console.log('변경 내역:', Array.from(pendingNameChanges.entries()));
+      // Keyboard dismiss
+      Keyboard.dismiss();
 
+      // 딜레이 (300ms)
+      setTimeout(async () => {
+        if (pendingChanges.size > 0) {
           try {
-            const updates = Array.from(pendingNameChanges.entries()).map(
-              ([id, name]) => ({
+            const updates = Array.from(pendingChanges.entries()).map(
+              ([id, changes]) => ({
                 id,
-                updates: { name },
+                updates: changes,
               }),
             );
 
             await updateMultipleItems(updates);
-            setPendingNameChanges(new Map());
-            console.log('✅ 이름 변경 완료');
+            setPendingChanges(new Map());
           } catch (error) {
-            console.error('❌ 이름 변경 실패:', error);
-            Alert.alert('오류', '이름 변경에 실패했습니다.');
+            setErrorModalTitle('오류');
+            setErrorModalMessage('변경사항 저장에 실패했습니다.');
+            setErrorModalVisible(true);
           }
         } else {
-          console.log('변경된 이름 없음');
         }
-      }, 200);
+      }, 300);
+    } else {
+      // 편집 모드 시작 시 pendingChanges 초기화
+      setPendingChanges(new Map());
     }
 
     setIsEditMode(!isEditMode);
   };
 
-  // 체크된 아이템 비우기
   const handleClearCheckedItems = () => {
     const checkedItems = cartItems.filter(item => item.purchased);
     if (checkedItems.length === 0) return;
@@ -194,7 +188,7 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
       await deleteCheckedItems();
       setShowClearModal(false);
     } catch (error) {
-      console.error('[ShoppingList] 체크된 아이템 삭제 실패:', error);
+      // console.error('[ShoppingList] 체크된 아이템 삭제 실패', error);
     }
   };
 
@@ -202,97 +196,92 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
     setShowClearModal(false);
   };
 
-  // Drag & Drop으로 순서 변경
   const handleDragEnd = ({ data }: { data: CartItem[] }) => {
     // UI만 업데이트 (서버에는 안 보냄)
   };
 
   // 체크박스 토글 - 즉시 저장
-  const handleToggleCheck = async (itemId: number) => {
-    const item = cartItems.find(i => i.id === itemId);
-    if (!item) return;
+  const handleToggleCheck = useCallback(
+    async (itemId: number) => {
+      const item = cartItems.find(i => i.id === itemId);
+      if (!item) return;
 
-    try {
-      await updateSingleItem(itemId, {
-        purchased: !item.purchased,
+      try {
+        await updateSingleItem(itemId, {
+          purchased: !item.purchased,
+        });
+      } catch (error) {}
+    },
+    [cartItems, updateSingleItem],
+  );
+
+  // 수량 변경 - 편집 모드에서는 로컬에만 저장
+  const handleQuantityChange = useCallback(
+    (itemId: number, newQuantity: number) => {
+      if (newQuantity <= 0) return;
+
+      setPendingChanges(prev => {
+        const newMap = new Map(prev);
+        const existing = newMap.get(itemId) || {};
+        newMap.set(itemId, { ...existing, quantity: newQuantity });
+        return newMap;
       });
-    } catch (error) {
-      console.error('[ShoppingList] 체크 토글 실패:', error);
-    }
-  };
+    },
+    [],
+  );
 
-  // 수량 변경 - 즉시 저장
-  const handleQuantityChange = async (itemId: number, newQuantity: number) => {
-    if (newQuantity <= 0) return;
-
-    try {
-      await updateSingleItem(itemId, {
-        quantity: newQuantity,
-      });
-    } catch (error) {
-      console.error('[ShoppingList] 수량 변경 실패:', error);
-    }
-  };
-
-  // 단위 변경 - 즉시 저장
-  const handleUnitChange = async (itemId: number, newUnit: string) => {
-    try {
-      await updateSingleItem(itemId, { unit: newUnit });
-    } catch (error) {
-      console.error('[ShoppingList] 단위 변경 실패:', error);
-    }
-  };
-
-  // 🔥 이름 변경 - 로컬에만 저장 (편집 완료 시 일괄 저장)
-  const handleNameChange = (itemId: number, newName: string) => {
-    console.log('=== 이름 변경 (로컬) ===');
-    console.log('itemId:', itemId, 'newName:', newName);
-
-    if (!newName.trim()) {
-      console.log('❌ 빈 문자열');
-      return;
-    }
-
-    const item = cartItems.find(i => i.id === itemId);
-    if (!item) {
-      console.log('❌ 아이템을 찾을 수 없음');
-      return;
-    }
-
-    // 이름이 실제로 변경되었는지 확인
-    if (item.name === newName.trim()) {
-      console.log('⚠️ 이름이 동일함 - 저장 안 함');
-      return;
-    }
-
-    console.log('✅ 변경사항 추가:', itemId, '→', newName.trim());
-
-    // 변경사항 추적 (서버에는 아직 안 보냄)
-    setPendingNameChanges(prev => {
+  // 단위 변경 - 편집 모드에서는 로컬에만 저장
+  const handleUnitChange = useCallback((itemId: number, newUnit: string) => {
+    setPendingChanges(prev => {
       const newMap = new Map(prev);
-      newMap.set(itemId, newName.trim());
+      const existing = newMap.get(itemId) || {};
+      newMap.set(itemId, { ...existing, unit: newUnit });
       return newMap;
     });
-  };
+  }, []);
 
-  // 아이템 삭제
-  const handleDeleteItem = (itemId: number) => {
-    const itemToDeleteData = cartItems.find(item => item.id === itemId);
-    if (!itemToDeleteData) return;
+  // 이름 변경 - 로컬에만 저장
+  const handleNameChange = useCallback((itemId: number, newName: string) => {
+    if (!newName.trim()) {
+      return;
+    }
 
-    setItemToDelete(itemToDeleteData);
-    setShowDeleteModal(true);
-  };
+    setPendingChanges(prev => {
+      const newMap = new Map(prev);
+      const existing = newMap.get(itemId) || {};
+      newMap.set(itemId, { ...existing, name: newName.trim() });
+      return newMap;
+    });
+  }, []);
+
+  const handleDeleteItem = useCallback(
+    (itemId: number) => {
+      const itemToDeleteData = cartItems.find(item => item.id === itemId);
+      if (!itemToDeleteData) return;
+
+      setItemToDelete(itemToDeleteData);
+      setShowDeleteModal(true);
+    },
+    [cartItems],
+  );
 
   const handleConfirmDelete = async () => {
     if (!itemToDelete) return;
 
     try {
       await deleteItem(itemToDelete.id);
+
+      // 삭제된 아이템의 pendingChanges도 제거
+      setPendingChanges(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(itemToDelete.id);
+        return newMap;
+      });
+
       setShowDeleteModal(false);
       setItemToDelete(null);
     } catch (error) {
-      console.error('[ShoppingList] 아이템 삭제 실패:', error);
+      // console.error('[ShoppingList] 아이템 삭제 실패', error);
       setShowDeleteModal(false);
       setItemToDelete(null);
     }
@@ -303,7 +292,6 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
     setItemToDelete(null);
   };
 
-  // 새 아이템 추가
   const handleStartAddItem = () => {
     setIsAddingNewItem(true);
   };
@@ -314,13 +302,17 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
     unit: string,
   ) => {
     if (!name.trim()) {
-      Alert.alert('식재료 이름을 입력해주세요.', '');
+      setErrorModalTitle('알림');
+      setErrorModalMessage('식재료 이름을 입력해주세요.');
+      setErrorModalVisible(true);
       setIsAddingNewItem(false);
       return;
     }
 
     if (quantity <= 0) {
-      Alert.alert('올바른 수량을 입력해주세요.', '');
+      setErrorModalTitle('알림');
+      setErrorModalMessage('올바른 수량을 입력해주세요.');
+      setErrorModalVisible(true);
       setIsAddingNewItem(false);
       return;
     }
@@ -329,8 +321,10 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
       await addItem(name.trim(), quantity, unit);
       setIsAddingNewItem(false);
     } catch (error) {
-      console.error('[ShoppingList] 아이템 추가 실패:', error);
-      Alert.alert('오류', '아이템 추가에 실패했습니다.');
+      // console.error('[ShoppingList] 아이템 추가 실패', error);
+      setErrorModalTitle('오류');
+      setErrorModalMessage('아이템 추가에 실패했습니다.');
+      setErrorModalVisible(true);
       setIsAddingNewItem(false);
     }
   };
@@ -362,30 +356,27 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
     </>
   );
 
-  // 초기화 중일 때 로딩 화면
   if (isInitializing) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <ShoppingListHeader listName={fridgeName} />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="limegreen" />
+          <ActivityIndicator size="large" color="#2F4858" />
           <Text style={styles.loadingText}>장바구니 불러오는 중...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
+  // cartItems와 pendingChanges를 합쳐서 표시할 데이터 생성
+  const displayItems = cartItems.map(item => {
+    const changes = pendingChanges.get(item.id);
+    return changes ? { ...item, ...changes } : item;
+  });
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ShoppingListHeader listName={fridgeName} />
-
-      {/* 서버 동기화 중 표시 */}
-      {isSyncing && (
-        <View style={styles.syncIndicator}>
-          <ActivityIndicator size="small" color="limegreen" />
-          <Text style={styles.syncText}>동기화 중...</Text>
-        </View>
-      )}
 
       <KeyboardAvoidingView
         style={styles.content}
@@ -398,81 +389,86 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
           onClearCheckedItems={handleClearCheckedItems}
           hasCheckedItems={hasCheckedItems}
         />
+        <>
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#2F4858" />
+              <Text style={styles.loadingText}>데이터 불러오는 중...</Text>
+            </View>
+          ) : displayItems.length === 0 ? (
+            <>
+              {isAddingNewItem && (
+                <View style={styles.topInputContainer}>
+                  <NewItemCard
+                    onSave={handleAddNewItem}
+                    onCancel={handleCancelAddItem}
+                  />
+                </View>
+              )}
+              <View style={styles.emptyContainer}>
+                {!isAddingNewItem && (
+                  <>
+                    <MaterialIcons
+                      name="shopping-cart"
+                      size={80}
+                      color="#ccc"
+                    />
+                    <Text style={styles.emptyTitle}>장바구니가 비어있어요</Text>
+                    <Text style={styles.emptySubtitle}>
+                      식재료를 추가해 보세요!
+                    </Text>
+                  </>
+                )}
+              </View>
 
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="limegreen" />
-            <Text style={styles.loadingText}>데이터 불러오는 중...</Text>
-          </View>
-        ) : cartItems.length === 0 ? (
-          <>
-            {/* ✅ emptyContainer와 버튼을 분리 */}
-            <View style={styles.emptyContainer}>
               {!isAddingNewItem && (
-                <>
-                  <MaterialIcons name="shopping-cart" size={80} color="#ccc" />
-                  <Text style={styles.emptyTitle}>장바구니가 비어있어요</Text>
-                  <Text style={styles.emptySubtitle}>
-                    식재료를 추가해 보세요!
-                  </Text>
-                </>
+                <View style={styles.emptyButtonContainer}>
+                  <TouchableOpacity
+                    style={addItemStyles.addButton}
+                    onPress={handleStartAddItem}
+                    disabled={isSyncing}
+                  >
+                    <MaterialIcons name="add" size={32} color="#666" />
+                  </TouchableOpacity>
+                </View>
               )}
-            </View>
-
-            {/* ✅ 버튼 컨테이너를 밖으로 */}
-            <View style={styles.emptyButtonContainer}>
-              {isAddingNewItem ? (
-                <NewItemCard
-                  onSave={handleAddNewItem}
-                  onCancel={handleCancelAddItem}
+            </>
+          ) : (
+            <DraggableFlatList
+              data={displayItems}
+              keyExtractor={item => `cart-item-${item.id}`}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.listContainer}
+              activationDistance={10}
+              dragItemOverflow={true}
+              extraData={pendingChanges}
+              renderItem={({ item, drag, isActive, getIndex }) => (
+                <CartItemCard
+                  ref={ref => {
+                    if (ref) {
+                      itemRefs.current.set(item.id, ref);
+                    } else {
+                      itemRefs.current.delete(item.id);
+                    }
+                  }}
+                  item={item}
+                  isEditMode={isEditMode}
+                  onToggleCheck={handleToggleCheck}
+                  onNameChange={handleNameChange}
+                  onQuantityChange={handleQuantityChange}
+                  onUnitChange={handleUnitChange}
+                  onDelete={handleDeleteItem}
+                  onDrag={drag}
+                  isActive={isActive}
+                  isFirstItem={getIndex?.() === 0}
                 />
-              ) : (
-                <TouchableOpacity
-                  style={addItemStyles.addButton}
-                  onPress={handleStartAddItem}
-                  disabled={isSyncing}
-                >
-                  <MaterialIcons name="add" size={32} color="#666" />
-                </TouchableOpacity>
               )}
-            </View>
-          </>
-        ) : (
-          <DraggableFlatList
-            data={cartItems}
-            onDragEnd={handleDragEnd}
-            keyExtractor={item => `cart-item-${item.id}`}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listContainer}
-            activationDistance={10}
-            dragItemOverflow={true}
-            renderItem={({ item, drag, isActive, getIndex }) => (
-              <CartItemCard
-                ref={ref => {
-                  if (ref) {
-                    itemRefs.current.set(item.id, ref);
-                  } else {
-                    itemRefs.current.delete(item.id);
-                  }
-                }}
-                item={item}
-                isEditMode={isEditMode}
-                onToggleCheck={handleToggleCheck}
-                onNameChange={handleNameChange}
-                onQuantityChange={handleQuantityChange}
-                onUnitChange={handleUnitChange}
-                onDelete={handleDeleteItem}
-                onDrag={drag}
-                isActive={isActive}
-                isFirstItem={getIndex?.() === 0}
-              />
-            )}
-            ListFooterComponent={renderFooter}
-          />
-        )}
+              ListFooterComponent={renderFooter}
+            />
+          )}
+        </>
       </KeyboardAvoidingView>
 
-      {/* 삭제 확인 모달 */}
       <ItemDeleteConfirmModal
         visible={showDeleteModal}
         itemName={itemToDelete?.name || ''}
@@ -480,12 +476,25 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
         onCancel={handleCancelDelete}
       />
 
-      {/* 비우기 확인 모달 */}
       <FlushConfirmModal
         visible={showClearModal}
         itemCount={cartItems.filter(item => item.purchased).length}
         onConfirm={handleConfirmClear}
         onCancel={handleCancelClear}
+      />
+
+      <ConfirmModal
+        isAlert={false}
+        visible={errorModalVisible}
+        title={errorModalTitle}
+        message={errorModalMessage}
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setErrorModalVisible(false)}
+        onCancel={() => setErrorModalVisible(false)}
       />
     </SafeAreaView>
   );

@@ -4,6 +4,7 @@ import React, {
   useRef,
   useImperativeHandle,
   forwardRef,
+  memo,
 } from 'react';
 import { View, TouchableOpacity, TextInput, Text } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -27,7 +28,6 @@ interface CartItemCardProps {
 
 const UNITS = ['개', 'ml', 'g', 'kg', 'L'];
 
-// 🔥 forwardRef로 감싸기
 const CartItemCard = forwardRef<any, CartItemCardProps>(
   (
     {
@@ -50,12 +50,22 @@ const CartItemCard = forwardRef<any, CartItemCardProps>(
 
     const nameInputRef = useRef<TextInput>(null);
 
-    // 🔥 외부에서 강제로 blur 호출할 수 있게
+    // blur 후 직접 onChange 호출
     useImperativeHandle(ref, () => ({
       forceBlur: () => {
-        console.log('[CartItemCard] forceBlur 호출:', item.id, tempName);
+        // console.log('[CartItemCard] forceBlur 호출 ', item.id, tempName);
+
+        // TextInput blur
+        nameInputRef.current?.blur();
+
+        // 즉시 변경사항 전달
         if (tempName.trim() && tempName !== item.name) {
           onNameChange(item.id, tempName.trim());
+        }
+
+        // 수량 체크
+        if (tempQuantity !== item.quantity) {
+          onQuantityChange(item.id, tempQuantity);
         }
       },
     }));
@@ -68,7 +78,6 @@ const CartItemCard = forwardRef<any, CartItemCardProps>(
       setTempName(item.name);
     }, [item.name]);
 
-    // 편집모드가 켜지고 첫 번째 아이템일 때 포커스
     useEffect(() => {
       if (isEditMode && isFirstItem) {
         const timer = setTimeout(() => {
@@ -80,22 +89,18 @@ const CartItemCard = forwardRef<any, CartItemCardProps>(
 
     const handleNameSubmit = () => {
       const trimmedName = tempName.trim();
-      console.log('=== 이름 제출 시도 ===');
-      console.log('원본 이름:', item.name);
-      console.log('입력한 이름:', tempName);
-      console.log('trim된 이름:', trimmedName);
-
       if (trimmedName && trimmedName !== item.name) {
-        console.log('✅ onNameChange 호출:', item.id, trimmedName);
+        // console.log('onNameChange 호출:', item.id, trimmedName);
         onNameChange(item.id, trimmedName);
       } else if (!trimmedName) {
-        console.log('❌ 빈 문자열 - 원래 이름으로 복구');
+        // console.log('빈 문자열 -> 원래 이름으로 복구');
         setTempName(item.name);
       } else {
-        console.log('⚠️ 이름이 동일해서 API 호출 안 함');
+        // console.log('이름이 동일 -> API 호출 안 함');
       }
     };
 
+    // 수량 변경 핸들러
     const handleQuantityChange = (newQuantity: number) => {
       setTempQuantity(newQuantity);
       const quantity = newQuantity;
@@ -126,7 +131,6 @@ const CartItemCard = forwardRef<any, CartItemCardProps>(
             isActive && styles.activeItemCard,
           ]}
         >
-          {/* Check Box Section */}
           <TouchableOpacity
             style={styles.checkboxContainer}
             onPress={() => onToggleCheck(item.id)}
@@ -143,7 +147,6 @@ const CartItemCard = forwardRef<any, CartItemCardProps>(
             </View>
           </TouchableOpacity>
 
-          {/* Item Info */}
           <View style={styles.itemInfo}>
             {isEditMode ? (
               <TextInput
@@ -196,7 +199,6 @@ const CartItemCard = forwardRef<any, CartItemCardProps>(
             </View>
           </View>
 
-          {/* Delete Button */}
           <TouchableOpacity
             style={styles.deleteButton}
             onPress={() => onDelete(item.id)}
@@ -209,4 +211,15 @@ const CartItemCard = forwardRef<any, CartItemCardProps>(
   },
 );
 
-export default CartItemCard;
+export default memo(CartItemCard, (prevProps, nextProps) => {
+  return (
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.item.name === nextProps.item.name &&
+    prevProps.item.quantity === nextProps.item.quantity &&
+    prevProps.item.unit === nextProps.item.unit &&
+    prevProps.item.purchased === nextProps.item.purchased &&
+    prevProps.isEditMode === nextProps.isEditMode &&
+    prevProps.isActive === nextProps.isActive &&
+    prevProps.isFirstItem === nextProps.isFirstItem
+  );
+});
