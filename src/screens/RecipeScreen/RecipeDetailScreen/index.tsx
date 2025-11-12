@@ -55,7 +55,9 @@ const RecipeDetailScreen: React.FC = () => {
     isEditing = false,
     isNewRecipe = false,
     fridgeId,
+    fridgeName,
     aiGeneratedData,
+    isSharedRecipe = false,
   } = route.params;
 
   // 초기 레시피 데이터 생성
@@ -87,7 +89,7 @@ const RecipeDetailScreen: React.FC = () => {
         createdAt: new Date().toISOString().split('T')[0],
         ingredients: [
           {
-            id: `new_${Math.random().toString(36).substr(2, 9)}`,
+            id: parseInt(`new_${Math.random().toString(36).substr(2, 9)}`, 10),
             name: '',
             quantity: 0,
             unit: '',
@@ -99,7 +101,6 @@ const RecipeDetailScreen: React.FC = () => {
     }
   };
 
-  // ✅ state 선언 (useRecipeDetail 대체)
   const [currentRecipe, setCurrentRecipe] = useState(getInitialRecipe());
   const [isEditMode, setIsEditMode] = useState(isNewRecipe || isEditing);
   const [isFavorite, setIsFavorite] = useState(recipe?.isFavorite || false);
@@ -168,7 +169,7 @@ const RecipeDetailScreen: React.FC = () => {
           console.log('상세 레시피 로드:', currentRecipe.id);
 
           const detailRecipe = await RecipeAPI.getRecipeDetail(
-            parseInt(currentRecipe.id, 10),
+            currentRecipe.id,
           );
           setCurrentRecipe(detailRecipe);
 
@@ -184,7 +185,6 @@ const RecipeDetailScreen: React.FC = () => {
     loadRecipeDetail();
   }, [currentRecipe.id, isNewRecipe]);
 
-  // ✅ 유틸 함수들 추가
   const getStepsArray = (steps: any): string[] => {
     if (!steps) return [];
     if (Array.isArray(steps)) {
@@ -231,22 +231,42 @@ const RecipeDetailScreen: React.FC = () => {
         console.log('🔥 새 레시피 생성 데이터:', createData);
 
         // ✅ AIRecipeScreen과 동일한 API 사용
-        const savedRecipe = await RecipeAPI.saveAIRecipe(createData);
+        interface SavedRecipeResponse {
+          recipeId: number;
+          title: string;
+          ingredients: {
+            recipeIngredientId: number;
+            name: string;
+            quantity: number;
+            unit: string;
+          }[];
+          steps: string | string[];
+          url?: string;
+        }
+
+        const savedRecipe = (await RecipeAPI.saveAIRecipe(
+          createData,
+        )) as SavedRecipeResponse;
 
         console.log('✅ 저장된 레시피:', savedRecipe);
 
         // ✅ 저장 후 상태 업데이트 (AIRecipeScreen의 매핑 방식 참고)
         setCurrentRecipe({
-          id: savedRecipe.recipeId.toString(),
+          id: savedRecipe.recipeId,
           title: savedRecipe.title,
           createdAt: new Date().toISOString().split('T')[0],
-          ingredients: savedRecipe.ingredients.map(ing => ({
-            id: ing.recipeIngredientId.toString(),
+          ingredients: (savedRecipe.ingredients || []).map(ing => ({
+            id: ing.recipeIngredientId,
             name: ing.name,
             quantity: ing.quantity,
             unit: ing.unit,
           })),
-          steps: savedRecipe.steps.split('\n'), // ← 백엔드가 string으로 주면 배열로 변환
+          steps:
+            typeof savedRecipe.steps === 'string'
+              ? savedRecipe.steps.split('\n')
+              : Array.isArray(savedRecipe.steps)
+              ? savedRecipe.steps
+              : [],
           referenceUrl: savedRecipe.url || '',
         });
 
@@ -322,8 +342,9 @@ const RecipeDetailScreen: React.FC = () => {
     });
   };
 
-  const isSharedRecipe = currentRecipe.isShared || false;
-
+  console.log('🔍 currentRecipe:', currentRecipe);
+  console.log('🔍 currentRecipe.isShared:', (currentRecipe as any).isShared);
+  console.log('🔍 isSharedRecipe:', isSharedRecipe);
   // 레시피 관련 함수들
   const addIngredient = () => {
     const newIngredient: RecipeIngredient = {
@@ -487,10 +508,7 @@ const RecipeDetailScreen: React.FC = () => {
       // ✅ 각 냉장고에 API로 공유
       for (const fridge of selectedFridges) {
         try {
-          await RecipeAPI.shareRecipe(
-            fridge.id,
-            parseInt(currentRecipe.id.toString(), 10),
-          );
+          await RecipeAPI.shareRecipe(fridge.id, currentRecipe.id);
           successCount++;
           console.log(`✅ 냉장고 ${fridge.id}에 공유 성공`);
         } catch (error: any) {
@@ -577,9 +595,7 @@ const RecipeDetailScreen: React.FC = () => {
         />
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {isSharedRecipe && (
-            <SharedRecipeIndicator sharedBy={currentRecipe.sharedBy} />
-          )}
+          {isSharedRecipe && <SharedRecipeIndicator sharedBy={fridgeName} />}
 
           <RecipeTitleSection
             title={currentRecipe.title}
@@ -592,9 +608,9 @@ const RecipeDetailScreen: React.FC = () => {
           {!isEditMode && currentRecipe.id && (
             <RecipeActionButtons
               isSharedRecipe={isSharedRecipe}
-              recipeId={parseInt(currentRecipe.id.toString(), 10)} // string -> number 변환
+              recipeId={currentRecipe.id}
+              currentFridgeId={fridgeId}
               onUseRecipe={navigateToUseRecipe}
-              onShare={openShareModal}
             />
           )}
 

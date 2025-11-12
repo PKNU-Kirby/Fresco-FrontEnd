@@ -16,7 +16,7 @@ export interface EnhancedIngredient extends RecipeIngredient {
 // RecipeNavigator.ts 또는 types.ts
 
 export interface RecipeIngredient {
-  id: string;
+  id: number;
   recipeIngredientId?: number;
   name: string;
   quantity: number;
@@ -25,7 +25,7 @@ export interface RecipeIngredient {
 }
 
 export interface Recipe {
-  id: string;
+  id: number;
   title: string;
   ingredients?: RecipeIngredient[];
   steps?: string[];
@@ -36,7 +36,7 @@ export interface Recipe {
 // 네비게이션 타입 정의
 export type RecipeStackParamList = {
   RecipeHome: {
-    fridgeId: string;
+    fridgeId: number;
     fridgeName: string;
   };
   AIRecipe: undefined;
@@ -44,18 +44,22 @@ export type RecipeStackParamList = {
     recipe?: Recipe;
     isEditing?: boolean;
     isNewRecipe?: boolean;
-    fridgeId: string;
+    fridgeId: number;
     fridgeName: string;
-    aiGeneratedData?: Partial<Recipe>; // 🔧 AI 생성 데이터 전달용 추가
+    aiGeneratedData?: Partial<Recipe>;
+    isSharedRecipe?: boolean; // 🔧 AI 생성 데이터 전달용 추가
   };
   Search: undefined; // 파라미터 없음으로 정의
   SearchResult: {
     query: string;
   };
-  SharedFolder: undefined;
+  SharedFolder: {
+    currentFridgeId?: number; // 👈 추가
+    currentFridgeName?: string; // 👈 추가
+  };
   UseRecipe: {
     recipe: Recipe;
-    fridgeId: string;
+    fridgeId: number;
     enhancedIngredients?: EnhancedIngredient[];
   };
 };
@@ -65,7 +69,7 @@ const RecipeStack = createNativeStackNavigator<RecipeStackParamList>();
 interface RecipeNavigatorProps {
   route: {
     params: {
-      fridgeId: string;
+      fridgeId: number;
       fridgeName: string;
     };
   };

@@ -67,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
         </View>
       ) : (
         <View style={styles.rightHeader}>
-          {isSharedRecipe ? (
+          {!isSharedRecipe ? (
             <View style={styles.headerActions}>
               {!isSharedRecipe && (
                 <>

@@ -18,7 +18,7 @@ interface IngredientsSectionProps {
   onAddIngredient: () => void;
   onRemoveIngredient: (id: string) => void;
   onUpdateIngredient: (
-    id: string,
+    id: number,
     field: keyof RecipeIngredient,
     value: string,
   ) => void;

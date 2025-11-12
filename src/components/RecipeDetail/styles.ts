@@ -108,16 +108,18 @@ export const styles = StyleSheet.create({
   sharedIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E8F5E8',
     padding: scale(12),
     marginTop: scale(16),
-    borderRadius: scale(8),
   },
   sharedText: {
     marginLeft: scale(8),
     fontSize: scale(14),
-    color: '#29a448ff',
+    color: '#2F4858',
     fontWeight: '500',
+  },
+  sharedByText: {
+    fontSize: scale(15),
+    fontWeight: '700',
   },
 
   // Recipe Title /////////////////////////////////////////
@@ -394,6 +396,9 @@ export const styles = StyleSheet.create({
     paddingVertical: scale(14),
     borderRadius: scale(8),
     gap: scale(8),
+  },
+  fullWidthButton: {
+    flex: 1,
   },
   shareButton: {
     flex: 1,

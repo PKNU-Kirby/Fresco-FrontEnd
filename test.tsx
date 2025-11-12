@@ -1,19 +1,18 @@
-// recipeAvailabilityUtils.ts 에서
+// RecipeDetailScreen.tsx에서
+const {
+  recipe,
+  isEditing = false,
+  isNewRecipe = false,
+  fridgeId,
+  fridgeName, // 👈 이게 이미 있어야 함
+  aiGeneratedData,
+  isSharedRecipe = false,
+} = route.params;
 
-const getFridgeItemsByFridgeId = async (fridgeId: number) => {
-  try {
-    // ✅ PageResponse를 받아서 content만 추출
-    const response = await IngredientControllerAPI.getRefrigeratorIngredients(
-      fridgeId,
-    );
+// ...
 
-    console.log('🔍 getFridgeItemsByFridgeId response:', response);
-    console.log('🔍 content:', response.content);
-
-    // ✅ content 배열 반환
-    return response.content || [];
-  } catch (error) {
-    console.error('냉장고 아이템 조회 실패:', error);
-    return [];
-  }
-};
+{
+  isSharedRecipe && (
+    <SharedRecipeIndicator sharedBy={fridgeName} /> // 👈 fridgeName 전달
+  );
+}

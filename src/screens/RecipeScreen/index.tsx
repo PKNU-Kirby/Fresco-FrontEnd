@@ -348,7 +348,10 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                 recipeCount={sharedRecipes.length}
                 onPress={() => {
                   setShowFloatingMenu(false);
-                  navigation.navigate('SharedFolder');
+                  navigation.navigate('SharedFolder', {
+                    currentFridgeId: fridgeId, // 👈 추가!
+                    currentFridgeName: fridgeName, // 👈 추가!
+                  });
                 }}
               />
             )}
@@ -392,6 +395,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                         recipe,
                         fridgeId,
                         fridgeName,
+                        isSharedRecipe: false,
                       });
                     }}
                     isFavorite={isFavorite(item.id)}
@@ -419,7 +423,10 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                   recipeCount={sharedRecipes.length}
                   onPress={() => {
                     setShowFloatingMenu(false);
-                    navigation.navigate('SharedFolder');
+                    navigation.navigate('SharedFolder', {
+                      currentFridgeId: fridgeId, // 👈 추가!
+                      currentFridgeName: fridgeName, // 👈 추가!
+                    });
                   }}
                 />
               }
@@ -445,6 +452,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
               isNewRecipe: true,
               fridgeId,
               fridgeName,
+              isSharedRecipe: false,
             });
           }}
           onAIRecommend={() => {

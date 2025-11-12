@@ -543,7 +543,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
     }
   };
 
-  // ✅ 냉장고 선택 시 조리 가능성 계산
+  // 냉장고 선택 시 조리 가능성 계산
   useEffect(() => {
     if (selectedFridge) {
       calculateRecipeAvailabilities();
@@ -560,6 +560,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
       fridgeName: selectedFridge.fridge.name,
       fridgeIngredients: selectedFridge.ingredients,
       fromSharedFolder: true,
+      isSharedRecipe: true,
     });
   };
 

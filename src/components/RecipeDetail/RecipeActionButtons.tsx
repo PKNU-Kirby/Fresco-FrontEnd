@@ -16,8 +16,8 @@ interface CheckableFridge {
 
 interface RecipeActionButtonsProps {
   isSharedRecipe: boolean;
-  recipeId: number;
-  currentFridgeId: number; // 현재 레시피가 속한 냉장고 ID
+  recipeId: number | string;
+  currentFridgeId: number | string; // 현재 레시피가 속한 냉장고 ID
   onUseRecipe: () => void;
 }
 
@@ -175,7 +175,13 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
   return (
     <>
       <View style={styles.actionButtonsContainer}>
-        <TouchableOpacity style={styles.useRecipeButton} onPress={onUseRecipe}>
+        <TouchableOpacity
+          style={[
+            styles.useRecipeButton,
+            isSharedRecipe && styles.fullWidthButton, // ✅ 공유 레시피일 때 전체 너비
+          ]}
+          onPress={onUseRecipe}
+        >
           <Image
             source={require('../../assets/icons/chef_hat_20dp.png')}
             resizeMode="contain"
