@@ -38,6 +38,18 @@ export const styles = StyleSheet.create({
     elevation: 5,
   },
 
+  // 로딩 스타일
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: scale(12),
+    fontSize: scale(16),
+    color: '#666',
+  },
+
   // 검색 관련
   searchContainer: {
     flexDirection: 'row',
