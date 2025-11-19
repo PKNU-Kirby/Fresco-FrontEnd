@@ -15,10 +15,10 @@ export interface UsageRecord {
   quantity: number;
   unit: string;
   fridgeId: number;
-  usageType: 'consume' | 'modify' | 'delete' | 'recipe_use'; // 사용 유형
-  usedAt: string; // ISO string
-  time: string; // "오후 2:30"
-  details?: string; // 추가 정보 (예: 레시피 이름)
+  usageType: 'consume' | 'modify' | 'delete' | 'recipe_use';
+  usedAt: string;
+  time: string;
+  details?: string;
 }
 
 const USAGE_RECORDS_KEY = 'usage_records';
@@ -67,11 +67,25 @@ export class UsageTrackingService {
     }
   }
 
-  // 특정 냉장고의 사용 기록
-  static async getFridgeUsageRecords(fridgeId: number): Promise<UsageRecord[]> {
+  // 특정 냉장고의 사용 기록 (서버에서 가져오기)
+  static async getFridgeUsageRecords(
+    fridgeId: number,
+    options?: {
+      page?: number;
+      size?: number;
+    },
+  ): Promise<UsageRecord[]> {
     try {
-      // 서버에서 해당 냉장고의 전체 사용 기록을 가져옴
-      const records = await UsageHistoryAPI.getAllUsageHistory(fridgeId);
+      console.log(`📡 냉장고 ${fridgeId}의 사용 기록 서버 조회 시작...`);
+
+      // 옵션이 있으면 페이지네이션, 없으면 전체 조회
+      const records = options
+        ? await UsageHistoryAPI.getUsageHistory(fridgeId, options).then(
+            response => response.content,
+          )
+        : await UsageHistoryAPI.getAllUsageHistory(fridgeId);
+
+      console.log(`✅ 서버에서 ${records.length}개의 기록 조회 완료`);
 
       return records.map((item: HistoryRecord, index: number) => {
         return {
@@ -90,37 +104,66 @@ export class UsageTrackingService {
         };
       });
     } catch (error) {
-      console.error('서버 사용 기록 조회 실패:', error);
+      console.error('❌ 서버 사용 기록 조회 실패:', error);
       return [];
     }
   }
 
-  loadUsageRecords = async () => {
+  // 페이지네이션을 사용한 사용 기록 조회
+  static async getFridgeUsageRecordsPaginated(
+    fridgeId: number,
+    page: number = 0,
+    size: number = 20,
+  ): Promise<{
+    records: UsageRecord[];
+    hasMore: boolean;
+    totalPages: number;
+    totalElements: number;
+  }> {
     try {
-      setIsLoading(true);
-      const records = await UsageTrackingService.getFridgeUsageRecords(
-        fridgeId,
-      );
-
-      // 🔍 디버깅용 로그
       console.log(
-        `📦 냉장고 ${fridgeId}의 전체 사용 기록: ${records.length}개`,
+        `📡 냉장고 ${fridgeId}의 사용 기록 조회 (page: ${page}, size: ${size})`,
       );
-      if (records.length > 0) {
-        console.log('📊 기록 예시:', {
-          첫번째: records[0].userName,
-          마지막: records[records.length - 1].userName,
-        });
-      }
 
-      setUsageRecords(records);
+      const response = await UsageHistoryAPI.getUsageHistory(fridgeId, {
+        page,
+        size,
+      });
+
+      const records = response.content.map(
+        (item: HistoryRecord, index: number) => ({
+          id: new Date(item.usedAt).getTime() + index,
+          userId: item.consumerId,
+          userName: item.consumerName || '알 수 없음',
+          userAvatar: item.consumerName ? item.consumerName.charAt(0) : '👤',
+          itemId: item.refrigeratorIngredientId,
+          itemName: item.ingredientName,
+          quantity: item.usedQuantity,
+          unit: item.unit,
+          fridgeId: fridgeId,
+          usageType: 'consume' as const,
+          usedAt: item.usedAt,
+          time: UsageHistoryAPI.formatTime(item.usedAt),
+        }),
+      );
+
+      return {
+        records,
+        hasMore: response.pageInfo.hasNext,
+        totalPages: response.pageInfo.totalPages,
+        totalElements: response.pageInfo.totalElements,
+      };
     } catch (error) {
-      console.error('사용 기록 로드 실패:', error);
-      setUsageRecords([]);
-    } finally {
-      setIsLoading(false);
+      console.error('❌ 페이지네이션 사용 기록 조회 실패:', error);
+      return {
+        records: [],
+        hasMore: false,
+        totalPages: 0,
+        totalElements: 0,
+      };
     }
-  };
+  }
+
   // 현재 사용자 정보 가져오기
   static async getCurrentUserInfo(): Promise<{
     id: number;
@@ -134,7 +177,6 @@ export class UsageTrackingService {
       const user = await AsyncStorageService.getUserById(userId);
       if (!user) return null;
 
-      // 사용자 아바타는 이름 첫 글자나 이모지로 설정
       const avatar = user.name ? user.name.charAt(0) : '👤';
 
       return {
@@ -254,7 +296,7 @@ export class UsageTrackingService {
     });
   }
 
-  // 사용 기록 정리 (오래된 기록 삭제 - 선택사항)
+  // 사용 기록 정리 (오래된 기록 삭제)
   static async cleanOldRecords(daysToKeep: number = 90): Promise<void> {
     try {
       const allRecords = await this.getUsageRecords();
@@ -269,6 +311,7 @@ export class UsageTrackingService {
         USAGE_RECORDS_KEY,
         JSON.stringify(filteredRecords),
       );
+
       console.log(
         `${
           allRecords.length - filteredRecords.length

@@ -17,8 +17,27 @@ class NotificationService {
   async requestPermission(): Promise<boolean> {
     try {
       // iOS에서 원격 메시지 등록
+      /*
+      Apple Developer에서 푸시 알림 인증서 설정 필요:
+
+      Apple Developer Console 접속
+      Certificates, Identifiers & Profiles → Identifiers
+      앱 Bundle ID 선택
+      Push Notifications 체크박스 활성화
+      인증서 생성 및 다운로드
+      Xcode에서 Signing & Capabilities에 Push Notifications 추가
+      */
       if (Platform.OS === 'ios') {
-        await messaging().registerDeviceForRemoteMessages();
+        try {
+          if (Platform.OS === 'ios') {
+            await messaging().registerDeviceForRemoteMessages();
+          }
+          const token = await messaging().getToken();
+          console.log('📱 FCM 토큰:', token);
+        } catch (error) {
+          console.log('⚠️ FCM 설정 스킵 (개발 환경)');
+          // 개발 중에는 무시
+        }
       }
 
       const authStatus = await messaging().requestPermission();
@@ -54,8 +73,27 @@ class NotificationService {
       console.log('=> FCM 토큰 가져오기 시작...');
 
       // iOS에서 원격 메시지 등록
+      /*
+      Apple Developer에서 푸시 알림 인증서 설정 필요:
+
+      Apple Developer Console 접속
+      Certificates, Identifiers & Profiles → Identifiers
+      앱 Bundle ID 선택
+      Push Notifications 체크박스 활성화
+      인증서 생성 및 다운로드
+      Xcode에서 Signing & Capabilities에 Push Notifications 추가
+      */
       if (Platform.OS === 'ios') {
-        await messaging().registerDeviceForRemoteMessages();
+        try {
+          if (Platform.OS === 'ios') {
+            await messaging().registerDeviceForRemoteMessages();
+          }
+          const token = await messaging().getToken();
+          console.log('📱 FCM 토큰:', token);
+        } catch (error) {
+          console.log('⚠️ FCM 설정 스킵 (개발 환경)');
+          // 개발 중에는 무시
+        }
       }
 
       this.fcmToken = await messaging().getToken();

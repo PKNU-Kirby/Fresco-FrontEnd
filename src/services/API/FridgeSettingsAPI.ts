@@ -2,6 +2,7 @@ import Config from '../../types/config';
 import { getValidAccessToken } from '../../utils/authUtils';
 import { ApiErrorHandler } from '../../utils/errorHandler';
 import { AsyncStorageService } from '../AsyncStorageService';
+import { ApiService } from '../apiServices';
 
 // 타입 정의
 export interface FridgeMember {
@@ -9,6 +10,30 @@ export interface FridgeMember {
   userName: string;
   role: 'OWNER' | 'MEMBER';
 }
+// 사용 기록 타입
+export type HistoryRecord = {
+  consumerId: number;
+  consumerName: string;
+  refrigeratorIngredientId: number;
+  ingredientName: string;
+  usedQuantity: number;
+  unit: string;
+  usedAt: string;
+};
+
+export type HistoryResponse = {
+  content: HistoryRecord[];
+  pageInfo: {
+    currentPage: number;
+    pageSize: number;
+    totalElements: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
+    first: boolean;
+    last: boolean;
+  };
+};
 
 export interface InvitationResponse {
   refrigeratorInvitationId: number;
@@ -44,7 +69,7 @@ export class FridgeSettingsAPIService {
   /**
    * 냉장고 멤버 목록 조회
    */
-  static async getFridgeMembers(fridgeId: string): Promise<FridgeMember[]> {
+  static async getFridgeMembers(fridgeId: number): Promise<FridgeMember[]> {
     try {
       const token = await getValidAccessToken();
       if (!token) {
@@ -97,11 +122,11 @@ export class FridgeSettingsAPIService {
    * 냉장고 멤버 추가
    */
   static async addFridgeMember(
-    fridgeId: string,
+    fridgeId: number,
     memberData: {
-      id?: string;
+      id?: number;
       name?: string;
-      groceryListId?: string;
+      groceryListId?: number;
     },
   ): Promise<void> {
     try {
@@ -155,8 +180,8 @@ export class FridgeSettingsAPIService {
    * 냉장고 멤버 삭제
    */
   static async removeFridgeMember(
-    fridgeId: string,
-    userId: string,
+    fridgeId: number,
+    userId: number,
   ): Promise<void> {
     try {
       const token = await getValidAccessToken();
@@ -355,7 +380,7 @@ export class FridgeSettingsAPIService {
    * 초대장 정보 조회
    */
   static async getInvitationInfo(
-    invitationId: string,
+    invitationId: number,
   ): Promise<InvitationResponse> {
     try {
       const token = await getValidAccessToken();
@@ -468,6 +493,7 @@ export class FridgeSettingsAPIService {
     page: number;
     size: number;
     sort: string;
+    fridgeId: number;
   }): Promise<UsageHistoryResponse> {
     try {
       const token = await getValidAccessToken();
@@ -486,7 +512,9 @@ export class FridgeSettingsAPIService {
       });
 
       const response = await fetch(
-        `${Config.API_BASE_URL}/api/v1/history?${queryParams.toString()}`,
+        `${
+          Config.API_BASE_URL
+        }/api/v1/history/${fridgeId}?${queryParams.toString()}`,
         {
           method: 'GET',
           headers: {
@@ -575,7 +603,7 @@ export class FridgeSettingsAPIService {
    * 현재 사용자의 냉장고 내 역할 확인
    */
   static async getUserRoleInFridge(
-    fridgeId: string,
+    fridgeId: number,
   ): Promise<'owner' | 'member' | null> {
     try {
       // AsyncStorageService 안전성 검사
@@ -603,7 +631,7 @@ export class FridgeSettingsAPIService {
 
       const members = await this.getFridgeMembers(fridgeId);
       const currentUserMember = members.find(
-        member => member.userId === currentUserId,
+        member => member.userId === parseInt(currentUserId, 10),
       );
 
       if (!currentUserMember) {
@@ -615,6 +643,70 @@ export class FridgeSettingsAPIService {
       console.error('사용자 역할 확인 실패:', error);
       ApiErrorHandler.logError(error, 'FridgeSettingsAPI.getUserRoleInFridge');
       return null;
+    }
+  }
+}
+
+export class UsageHistoryAPI {
+  static formatTime(dateString: string): string {
+    const date = new Date(dateString);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? '오후' : '오전';
+    const displayHours = hours % 12 || 12;
+    return `${ampm} ${displayHours}:${minutes.toString().padStart(2, '0')}`;
+  }
+
+  /**
+   * 냉장고 사용 기록 조회
+   */
+  static async getUsageHistory(fridgeId: number): Promise<HistoryResponse> {
+    try {
+      console.log(`냉장고 ${fridgeId} 사용 기록 조회 중...`);
+
+      const response = await ApiService.apiCall<HistoryResponse>(
+        `/api/v1/history/${fridgeId}`,
+        {
+          method: 'GET',
+        },
+      );
+
+      console.log(`사용 기록 조회 완료: ${response.content.length}개`);
+      return response;
+    } catch (error) {
+      console.error('사용 기록 조회 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 페이지네이션을 사용한 전체 사용 기록 조회
+   */
+  static async getAllUsageHistory(
+    fridgeId: number,
+    maxPages: number = 10,
+  ): Promise<HistoryRecord[]> {
+    const allRecords: HistoryRecord[] = [];
+    let currentPage = 0;
+    let hasMore = true;
+
+    try {
+      while (hasMore && currentPage < maxPages) {
+        const response = await this.getUsageHistory(fridgeId, {
+          page: currentPage,
+          size: 100,
+        });
+
+        allRecords.push(...response.content);
+        hasMore = response.pageInfo.hasNext;
+        currentPage++;
+      }
+
+      console.log(`전체 사용 기록 조회 완료: ${allRecords.length}개`);
+      return allRecords;
+    } catch (error) {
+      console.error('전체 사용 기록 조회 실패:', error);
+      throw error;
     }
   }
 }

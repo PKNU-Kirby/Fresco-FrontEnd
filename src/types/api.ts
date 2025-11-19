@@ -32,39 +32,39 @@ export const API_ENDPOINTS = {
   REFRIGERATOR: {
     LIST: '/api/v1/refrigerator',
     CREATE: '/api/v1/refrigerator',
-    DETAIL: (id: string) => `/api/v1/refrigerator/${id}`,
-    UPDATE: (id: string) => `/api/v1/refrigerator/${id}`,
-    DELETE: (id: string) => `/api/v1/refrigerator/${id}`,
-    ADD_USER: (id: string) => `/api/v1/refrigerator/${id}/user`,
-    REMOVE_USER: (id: string) => `/api/v1/refrigerator/${id}/user`,
+    DETAIL: (id: number) => `/api/v1/refrigerator/${id}`,
+    UPDATE: (id: number) => `/api/v1/refrigerator/${id}`,
+    DELETE: (id: number) => `/api/v1/refrigerator/${id}`,
+    ADD_USER: (id: number) => `/api/v1/refrigerator/${id}/user`,
+    REMOVE_USER: (id: number) => `/api/v1/refrigerator/${id}/user`,
     USERS: {
-      LIST: (refrigeratorId: string) =>
+      LIST: (refrigeratorId: number) =>
         `/api/v1/refrigerator/users/${refrigeratorId}`,
-      ADD: (refrigeratorId: string) =>
+      ADD: (refrigeratorId: number) =>
         `/api/v1/refrigerator/users/${refrigeratorId}`,
-      REMOVE: (refrigeratorId: string, deleteUserId: string) =>
+      REMOVE: (refrigeratorId: number, deleteUserId: number) =>
         `/api/v1/refrigerator/users/${refrigeratorId}/${deleteUserId}`,
     },
     INVITATION: {
       CREATE: '/api/v1/refrigerator/invitation',
-      GET: (refrigeratorInvitationId: string) =>
+      GET: (refrigeratorInvitationId: number) =>
         `/api/v1/refrigerator/invitation/${refrigeratorInvitationId}`,
     },
   },
   INGREDIENT: {
-    LIST: (refrigeratorId: string) => `/api/v1/ingredient/${refrigeratorId}`,
-    BY_CATEGORY: (refrigeratorId: string) =>
+    LIST: (refrigeratorId: number) => `/api/v1/ingredient/${refrigeratorId}`,
+    BY_CATEGORY: (refrigeratorId: number) =>
       `/api/v1/ingredient/${refrigeratorId}/category`,
-    UPDATE: (refrigeratorId: string, ingredientId: string) =>
+    UPDATE: (refrigeratorId: number, ingredientId: number) =>
       `/api/v1/ingredient/${refrigeratorId}/${ingredientId}`,
-    USAGE_HISTORY: (refrigeratorId: string) =>
-      `/api/v1/ingredient/${refrigeratorId}/history`,
+    USAGE_HISTORY: (refrigeratorId: number) =>
+      `/api/v1/history/${refrigeratorId}`,
   },
   GROCERY: {
     CREATE: '/grocery/item',
-    LIST: (groceryListId: string) => `/grocery/${groceryListId}`,
-    UPDATE: (groceryListId: string) => `/grocery/${groceryListId}/update`,
-    DELETE: (groceryListId: string) => `/grocery/${groceryListId}/delete`,
+    LIST: (groceryListId: number) => `/grocery/${groceryListId}`,
+    UPDATE: (groceryListId: number) => `/grocery/${groceryListId}/update`,
+    DELETE: (groceryListId: number) => `/grocery/${groceryListId}/delete`,
   },
 } as const;
 
@@ -127,16 +127,16 @@ export interface RefreshTokenRequest {
 export interface LoginResponse extends SuccessApiResponse {
   code: 'AUTH_OK_001';
   result: {
-    userId: string;
+    userId: number;
     accessToken: string;
     refreshToken: string;
     user?: {
-      id: string;
+      id: number;
       name: string;
       email?: string;
       profileImage?: string;
       provider: SocialProvider;
-      providerId: string;
+      providerId: number;
       createdAt?: string;
       updatedAt?: string;
     };
@@ -340,7 +340,7 @@ export const getRefrigeratorUsers = async (refrigeratorId: string) => {
 
 // 냉장고에 사용자 추가
 export const addUserToRefrigerator = async (
-  refrigeratorId: string,
+  refrigeratorId: number,
   inviterName: string,
 ) => {
   const response = await apiCall(
@@ -360,8 +360,8 @@ export const addUserToRefrigerator = async (
 
 // 특정 사용자를 냉장고에서 제거
 export const removeUserFromRefrigerator = async (
-  refrigeratorId: string,
-  deleteUserId: string,
+  refrigeratorId: number,
+  deleteUserId: number,
 ) => {
   const response = await apiCall(
     API_ENDPOINTS.REFRIGERATOR.USERS.REMOVE(refrigeratorId, deleteUserId),
@@ -378,7 +378,7 @@ export const removeUserFromRefrigerator = async (
 };
 
 // 냉장고 삭제
-export const deleteRefrigerator = async (refrigeratorId: string) => {
+export const deleteRefrigerator = async (refrigeratorId: number) => {
   const response = await apiCall(
     API_ENDPOINTS.REFRIGERATOR.DELETE(refrigeratorId),
     {
@@ -396,9 +396,9 @@ export const deleteRefrigerator = async (refrigeratorId: string) => {
 // 냉장고 초대장 생성
 export const createRefrigeratorInvitation = async (
   refrigeratorId: number,
-  refrigeratorName: string,
+  refrigeratorName: number,
   inviterId: number,
-  inviterName: string,
+  inviterName: number,
 ) => {
   const response = await apiCall(API_ENDPOINTS.REFRIGERATOR.INVITATION.CREATE, {
     method: 'POST',
@@ -419,7 +419,7 @@ export const createRefrigeratorInvitation = async (
 
 // 냉장고 초대장 조회
 export const getRefrigeratorInvitation = async (
-  refrigeratorInvitationId: string,
+  refrigeratorInvitationId: number,
 ) => {
   const response = await apiCall(
     API_ENDPOINTS.REFRIGERATOR.INVITATION.GET(refrigeratorInvitationId),
@@ -438,7 +438,7 @@ export const getRefrigeratorInvitation = async (
 // 식재료 API (토큰 자동 갱신)
 // ============================================================================
 
-export const getIngredientList = async (refrigeratorId: string) => {
+export const getIngredientList = async (refrigeratorId: number) => {
   const response = await apiCall(
     API_ENDPOINTS.INGREDIENT.LIST(refrigeratorId),
     {
@@ -453,7 +453,7 @@ export const getIngredientList = async (refrigeratorId: string) => {
   return response.json();
 };
 
-export const getIngredientsByCategory = async (refrigeratorId: string) => {
+export const getIngredientsByCategory = async (refrigeratorId: number) => {
   const response = await apiCall(
     API_ENDPOINTS.INGREDIENT.BY_CATEGORY(refrigeratorId),
     {
@@ -469,8 +469,8 @@ export const getIngredientsByCategory = async (refrigeratorId: string) => {
 };
 
 export const updateIngredient = async (
-  refrigeratorId: string,
-  ingredientId: string,
+  refrigeratorId: number,
+  ingredientId: number,
   data: any,
 ) => {
   const response = await apiCall(

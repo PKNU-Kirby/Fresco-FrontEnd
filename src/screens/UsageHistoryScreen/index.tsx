@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -33,7 +33,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { fridgeId } = route.params;
 
-  const [activeFilter, setActiveFilter] = useState('최근 한 주');
+  const [activeFilter, setActiveFilter] = useState('일주일');
   const [showDateRangePicker, setShowDateRangePicker] = useState(false);
   const [customDateRange, setCustomDateRange] = useState<{
     start: string;
@@ -42,25 +42,30 @@ const UsageHistoryScreen = ({ route }: Props) => {
   const [usageRecords, setUsageRecords] = useState<UsageRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 사용 기록 로드
-  useEffect(() => {
-    loadUsageRecords();
-  }, [fridgeId]);
-
-  const loadUsageRecords = async () => {
+  // 사용 기록 로드 - useCallback으로 메모이제이션
+  const loadUsageRecords = useCallback(async () => {
     try {
       setIsLoading(true);
+      console.log(`📡 냉장고 ${fridgeId}의 사용 기록 로드 시작...`);
+
       const records = await UsageTrackingService.getFridgeUsageRecords(
         fridgeId,
       );
+
+      console.log(`✅ ${records.length}개의 사용 기록 로드 완료`);
       setUsageRecords(records);
     } catch (error) {
-      console.error('사용 기록 로드 실패:', error);
+      console.error('❌ 사용 기록 로드 실패:', error);
       setUsageRecords([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fridgeId]);
+
+  // 초기 로드
+  useEffect(() => {
+    loadUsageRecords();
+  }, [loadUsageRecords]);
 
   const handleBack = () => {
     navigation.goBack();
@@ -92,22 +97,6 @@ const UsageHistoryScreen = ({ route }: Props) => {
       return '어제';
     } else {
       return `${date.getMonth() + 1}월 ${date.getDate()}일`;
-    }
-  };
-
-  // 사용 유형별 텍스트 생성
-  const getUsageText = (record: UsageRecord) => {
-    const baseText = `${record.userName} 님이 ${record.itemName} ${record.quantity}${record.unit}를 `;
-
-    switch (record.usageType) {
-      case 'consume':
-        return baseText + '사용했습니다';
-      case 'modify':
-        return baseText + '수정했습니다';
-      case 'delete':
-        return baseText + '삭제했습니다';
-      default:
-        return baseText + '처리했습니다';
     }
   };
 
@@ -167,6 +156,22 @@ const UsageHistoryScreen = ({ route }: Props) => {
       );
   }, [usageRecords, activeFilter, customDateRange]);
 
+  // 사용 유형별 동사 반환
+  const getUsageTypeText = (usageType: UsageRecord['usageType']) => {
+    switch (usageType) {
+      case 'consume':
+        return '사용했습니다';
+      case 'modify':
+        return '수정했습니다';
+      case 'delete':
+        return '삭제했습니다';
+      case 'recipe_use':
+        return '사용했습니다';
+      default:
+        return '처리했습니다';
+    }
+  };
+
   const renderUsageItem = ({ item }: { item: UsageRecord }) => (
     <View style={styles.usageCard}>
       <View style={styles.usageHeader}>
@@ -181,14 +186,11 @@ const UsageHistoryScreen = ({ route }: Props) => {
               {item.quantity}
               {item.unit}
             </Text>
-            {item.usageType === 'recipe_use'
-              ? '를 사용했습니다'
-              : item.usageType === 'delete'
-              ? '를 삭제했습니다'
-              : item.usageType === 'modify'
-              ? '를 수정했습니다'
-              : '를 사용했습니다'}
+            를 {getUsageTypeText(item.usageType)}
           </Text>
+          {item.details && (
+            <Text style={styles.usageDetails}>{item.details}</Text>
+          )}
           <Text style={styles.usageTime}>{item.time}</Text>
         </View>
       </View>
@@ -203,6 +205,9 @@ const UsageHistoryScreen = ({ route }: Props) => {
 
   const renderEmptyList = () => (
     <View style={styles.emptyContainer}>
+      <View style={styles.emptyIcon}>
+        <Ionicons name="time-outline" size={64} color="#999" />
+      </View>
       <Text style={styles.emptyText}>사용 기록이 없습니다</Text>
       <Text style={styles.emptySubText}>
         식재료를 사용하거나 수정하면 기록이 나타납니다
@@ -271,7 +276,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
       {/* 사용 기록 리스트 */}
       <SectionList
         sections={groupedData}
-        keyExtractor={item => item.id}
+        keyExtractor={item => `${item.id}-${item.usedAt}`}
         renderItem={renderUsageItem}
         renderSectionHeader={renderSectionHeader}
         ListEmptyComponent={renderEmptyList}

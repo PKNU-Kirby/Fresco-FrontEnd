@@ -53,7 +53,7 @@ export class UsageHistoryAPI {
       console.log(`냉장고 ${fridgeId} 사용 기록 조회 중...`);
 
       const response = await ApiService.apiCall<HistoryResponse>(
-        `/api/v1/history`,
+        `/api/v1/history/${fridgeId}`,
         {
           method: 'GET',
         },

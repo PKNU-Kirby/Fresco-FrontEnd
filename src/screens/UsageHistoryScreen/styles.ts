@@ -4,11 +4,11 @@ const { width } = Dimensions.get('window');
 
 // iPhone 16 Pro
 const baseWidth = 402;
-//const baseHeight = 874;
+const baseHeight = 874;
 
 // 반응형 함수
 //const wp = (percentage: number) => (width * percentage) / 100;
-//const hp = (percentage: number) => (height * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
 const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
@@ -76,14 +76,18 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  emptyIcon: {
+    marginTop: scale(200),
+  },
   emptyText: {
-    marginTop: scale(12),
-    fontSize: scale(16),
+    marginTop: 16,
+    fontSize: scale(18),
     color: '#666',
+    fontWeight: '800',
   },
   emptySubText: {
     marginTop: scale(8),
-    fontSize: scale(14),
+    fontSize: scale(16),
     color: '#999',
     textAlign: 'center',
     paddingHorizontal: scale(20),

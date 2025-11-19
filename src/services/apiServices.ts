@@ -10,12 +10,12 @@ type ApiResponse<T> = {
 };
 
 type User = {
-  id: string;
+  id: number;
   name: string;
 };
 
 type FridgeMember = {
-  id: string;
+  id: number;
   name: string;
   role: 'owner' | 'member';
 };
@@ -350,7 +350,7 @@ export class ApiService {
 
   // 사용 기록 조회
   static async getUsageHistory(
-    fridgeId: string,
+    fridgeId: number,
     options?: {
       limit?: number;
       offset?: number;
@@ -389,7 +389,7 @@ export class ApiService {
         createdAt: string;
       }>;
       total: number;
-    }>(`/api/v1/history?${queryParams.toString()}`);
+    }>(`/api/v1/history/${fridgeId}?${queryParams.toString()}`);
   }
 
   // 로그인
@@ -502,7 +502,7 @@ export class ApiService {
   > {
     return this.apiCall<
       Array<{
-        id: string;
+        id: number;
         name: string;
         description?: string;
         memberCount: number;
@@ -516,12 +516,12 @@ export class ApiService {
   static async createFridge(fridgeData: {
     name: string;
     description?: string;
-  }): Promise<{ id: string; name: string }> {
+  }): Promise<{ id: number; name: string }> {
     if (!fridgeData.name || fridgeData.name.trim() === '') {
       throw new Error('냉장고 이름을 입력해주세요.');
     }
 
-    return this.apiCall<{ id: string; name: string }>('/api/v1/refrigerator', {
+    return this.apiCall<{ id: number; name: string }>('/api/v1/refrigerator', {
       method: 'POST',
       body: JSON.stringify({
         name: fridgeData.name.trim(),
@@ -532,7 +532,7 @@ export class ApiService {
 
   // 냉장고 멤버 초대
   static async inviteMember(
-    fridgeId: string,
+    fridgeId: number,
     inviteData: {
       email?: string;
       userName?: string;
@@ -550,8 +550,8 @@ export class ApiService {
 
   // 냉장고 멤버 삭제 (방장이 구성원을 삭제)
   static async deleteFridgeMember(
-    fridgeId: string,
-    deleteUserId: string,
+    fridgeId: number,
+    deleteUserId: number,
   ): Promise<void> {
     console.log('=== 멤버 삭제 API 호출 ===');
     console.log('fridgeId:', fridgeId);
