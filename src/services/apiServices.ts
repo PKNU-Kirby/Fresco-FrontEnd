@@ -389,7 +389,7 @@ export class ApiService {
         createdAt: string;
       }>;
       total: number;
-    }>(`/api/v1/history/${fridgeId}?${queryParams.toString()}`);
+    }>(`/api/v1/history/${fridgeId}`);
   }
 
   // 로그인

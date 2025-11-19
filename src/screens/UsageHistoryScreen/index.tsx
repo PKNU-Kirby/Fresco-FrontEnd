@@ -188,9 +188,6 @@ const UsageHistoryScreen = ({ route }: Props) => {
             </Text>
             를 {getUsageTypeText(item.usageType)}
           </Text>
-          {item.details && (
-            <Text style={styles.usageDetails}>{item.details}</Text>
-          )}
           <Text style={styles.usageTime}>{item.time}</Text>
         </View>
       </View>

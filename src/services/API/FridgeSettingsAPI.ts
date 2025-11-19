@@ -512,9 +512,9 @@ export class FridgeSettingsAPIService {
       });
 
       const response = await fetch(
-        `${
-          Config.API_BASE_URL
-        }/api/v1/history/${fridgeId}?${queryParams.toString()}`,
+        `${Config.API_BASE_URL}/api/v1/history/refrigeratorId=${
+          pageData.fridgeId
+        }&?${queryParams.toString()}`,
         {
           method: 'GET',
           headers: {

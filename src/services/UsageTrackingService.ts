@@ -10,7 +10,6 @@ export interface UsageRecord {
   userId: number;
   userName: string;
   userAvatar: string;
-  itemId: number;
   itemName: string;
   quantity: number;
   unit: string;
@@ -93,10 +92,9 @@ export class UsageTrackingService {
           userId: item.consumerId,
           userName: item.consumerName || '알 수 없음',
           userAvatar: item.consumerName ? item.consumerName.charAt(0) : '👤',
-          itemId: item.refrigeratorIngredientId,
           itemName: item.ingredientName,
           quantity: item.usedQuantity,
-          unit: item.unit,
+          unit: '', // 백엔드에서 unit을 안 주므로 빈 문자열
           fridgeId: fridgeId,
           usageType: 'consume' as const,
           usedAt: item.usedAt,
@@ -136,10 +134,9 @@ export class UsageTrackingService {
           userId: item.consumerId,
           userName: item.consumerName || '알 수 없음',
           userAvatar: item.consumerName ? item.consumerName.charAt(0) : '👤',
-          itemId: item.refrigeratorIngredientId,
           itemName: item.ingredientName,
           quantity: item.usedQuantity,
-          unit: item.unit,
+          unit: '',
           fridgeId: fridgeId,
           usageType: 'consume' as const,
           usedAt: item.usedAt,
@@ -211,7 +208,6 @@ export class UsageTrackingService {
       userId: userInfo.id,
       userName: userInfo.name,
       userAvatar: userInfo.avatar,
-      itemId,
       itemName,
       quantity,
       unit,
@@ -236,7 +232,6 @@ export class UsageTrackingService {
       userId: userInfo.id,
       userName: userInfo.name,
       userAvatar: userInfo.avatar,
-      itemId,
       itemName,
       quantity,
       unit,
@@ -261,7 +256,6 @@ export class UsageTrackingService {
       userId: userInfo.id,
       userName: userInfo.name,
       userAvatar: userInfo.avatar,
-      itemId,
       itemName,
       quantity,
       unit,
@@ -286,7 +280,6 @@ export class UsageTrackingService {
       userId: userInfo.id,
       userName: userInfo.name,
       userAvatar: userInfo.avatar,
-      itemId,
       itemName,
       quantity,
       unit,
