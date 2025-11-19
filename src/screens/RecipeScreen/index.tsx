@@ -332,7 +332,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <GestureHandlerRootView style={styles.container}>
-        <RecipeHeader />
+        <RecipeHeader fridgeId={fridgeId} fridgeName={fridgeName} />
 
         {/* Tab */}
         <View style={styles.tabContainer}>

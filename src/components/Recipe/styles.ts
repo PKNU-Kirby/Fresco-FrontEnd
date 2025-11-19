@@ -194,7 +194,6 @@ export const recipeCardStyles = StyleSheet.create({
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
   },
-  // recipeCardStyles에 추가할 스타일들
   ingredientStatus: {
     marginTop: 4,
     alignItems: 'flex-start',

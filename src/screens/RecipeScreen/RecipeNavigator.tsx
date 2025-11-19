@@ -50,9 +50,14 @@ export type RecipeStackParamList = {
     aiGeneratedData?: Partial<Recipe>;
     isSharedRecipe?: boolean;
   };
-  Search: undefined;
+  Search: {
+    fridgeId: number;
+    fridgeName: string;
+  };
   SearchResult: {
     query: string;
+    fridgeId?: number;
+    fridgeName?: string;
   };
   SharedFolder: {
     currentFridgeId?: number;

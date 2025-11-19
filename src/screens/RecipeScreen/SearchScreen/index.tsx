@@ -9,6 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { RecipeStackParamList } from '../RecipeNavigator';
 import { SearchHistoryStorage } from '../../../utils/AsyncStorageUtils';
@@ -18,12 +19,14 @@ type SearchScreenNavigationProp = NativeStackNavigationProp<
   RecipeStackParamList,
   'Search'
 >;
+type SearchScreenRouteProp = RouteProp<RecipeStackParamList, 'Search'>;
 
 interface SearchScreenProps {}
 
 const SearchScreen: React.FC<SearchScreenProps> = () => {
   const navigation = useNavigation<SearchScreenNavigationProp>();
-
+  const route = useRoute<SearchScreenRouteProp>();
+  const { fridgeId, fridgeName } = route.params || {};
   const [searchQuery, setSearchQuery] = useState('');
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
@@ -64,16 +67,22 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
     if (!searchQuery.trim()) return;
 
     try {
-      // 검색 히스토리 업데이트 및 저장
       const newHistory = await SearchHistoryStorage.addSearchQuery(searchQuery);
       setSearchHistory(newHistory);
 
-      // 검색 결과 화면으로 이동
-      navigation.replace('SearchResult', { query: searchQuery });
+      // fridgeId, fridgeName 전달
+      navigation.replace('SearchResult', {
+        query: searchQuery,
+        fridgeId,
+        fridgeName,
+      });
     } catch (error) {
       console.error('검색 히스토리 저장 실패:', error);
-      // 에러가 나도 검색은 진행
-      navigation.replace('SearchResult', { query: searchQuery });
+      navigation.replace('SearchResult', {
+        query: searchQuery,
+        fridgeId,
+        fridgeName,
+      });
     }
   };
 
@@ -81,15 +90,23 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
   // (AsyncStorage 연결)
   const handleHistoryItemPress = async (item: string) => {
     setSearchQuery(item);
-
     try {
-      // 검색 히스토리 업데이트
       const newHistory = await SearchHistoryStorage.addSearchQuery(item);
       setSearchHistory(newHistory);
-      navigation.replace('SearchResult', { query: item });
+
+      // fridgeId, fridgeName
+      navigation.replace('SearchResult', {
+        query: item,
+        fridgeId,
+        fridgeName,
+      });
     } catch (error) {
       console.error('검색 히스토리 업데이트 실패:', error);
-      navigation.replace('SearchResult', { query: item });
+      navigation.replace('SearchResult', {
+        query: item,
+        fridgeId,
+        fridgeName,
+      });
     }
   };
 

@@ -15,6 +15,10 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import RecipeAPI from '../../../services/API/RecipeAPI';
+import {
+  calculateMultipleRecipeAvailability,
+  RecipeAvailabilityInfo,
+} from '../../../utils/recipeAvailabilityUtils';
 import { Recipe, RecipeStackParamList } from '../RecipeNavigator';
 import { SearchHistoryStorage } from '../../../utils/AsyncStorageUtils';
 import { styles } from './styles';
@@ -30,16 +34,53 @@ type SearchResultScreenRouteProp = RouteProp<
 
 interface SearchResultScreenProps {}
 
-// Component : Recipe Card
 const SearchRecipeCard: React.FC<{
   recipe: Recipe;
   isFavorite: boolean;
   onToggleFavorite: (recipeId: string) => void;
   onPress: (recipe: Recipe) => void;
-}> = ({ recipe, isFavorite, onToggleFavorite, onPress }) => {
+  availableIngredientsCount?: number;
+  totalIngredientsCount?: number;
+  canMakeWithFridge?: boolean;
+}> = ({
+  recipe,
+  isFavorite,
+  onToggleFavorite,
+  onPress,
+  availableIngredientsCount = 0,
+  totalIngredientsCount = 0,
+  canMakeWithFridge = false,
+}) => {
+  // 재료 가용성 뱃지 렌더링
+  const renderIngredientStatus = () => {
+    if (totalIngredientsCount === 0) return null;
+
+    return (
+      <View style={styles.ingredientStatus}>
+        <View
+          style={[
+            styles.statusIndicator,
+            canMakeWithFridge
+              ? styles.canMakeIndicator
+              : styles.cannotMakeIndicator,
+          ]}
+        >
+          <Text
+            style={[
+              styles.statusText,
+              canMakeWithFridge ? styles.canMakeText : styles.cannotMakeText,
+            ]}
+          >
+            {availableIngredientsCount} / {totalIngredientsCount}
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <TouchableOpacity
-      style={[styles.recipeCard]}
+      style={[styles.recipeCard, canMakeWithFridge && styles.canMakeCard]}
       onPress={() => onPress(recipe)}
     >
       <View style={styles.recipeCardContent}>
@@ -50,6 +91,8 @@ const SearchRecipeCard: React.FC<{
         />
         <View style={styles.recipeInfo}>
           <Text style={styles.recipeTitle}>{recipe.title}</Text>
+          {/* ✅ 가용성 뱃지 */}
+          {renderIngredientStatus()}
         </View>
         <View style={styles.cardActions}>
           <TouchableOpacity
@@ -83,6 +126,11 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   const [_isSearchFocused, setIsSearchFocused] = useState(false);
   const [_isInputActive, setIsInputActive] = useState(false);
 
+  // ✅ 가용성 상태 추가
+  const [recipeAvailabilities, setRecipeAvailabilities] = useState<
+    Map<string, RecipeAvailabilityInfo>
+  >(new Map());
+
   const scrollViewRef = useRef<ScrollView>(null);
   const searchInputRef = useRef<TextInput>(null);
   const ITEMS_PER_PAGE = 15;
@@ -110,7 +158,48 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     return favoriteRecipeIds.includes(recipeId);
   };
 
-  // 검색 API
+  // ✅ 검색 결과의 레시피들에 대한 가용성 계산
+  const calculateSearchResultAvailabilities = async (recipes: Recipe[]) => {
+    if (!fridgeId || recipes.length === 0) {
+      return;
+    }
+
+    try {
+      console.log('🔍 검색 결과 가용성 계산 시작...');
+
+      // 재료 정보가 없는 레시피는 상세 정보 먼저 로드
+      const recipesWithIngredients = await Promise.all(
+        recipes.map(async recipe => {
+          if (!recipe.ingredients || recipe.ingredients.length === 0) {
+            try {
+              const detailResponse = await RecipeAPI.getRecipeDetail(recipe.id);
+              return {
+                ...recipe,
+                ingredients: detailResponse.ingredients || [],
+              };
+            } catch (error) {
+              console.error(`레시피 ${recipe.id} 상세 로드 실패:`, error);
+              return recipe;
+            }
+          }
+          return recipe;
+        }),
+      );
+
+      const availabilities = await calculateMultipleRecipeAvailability(
+        recipesWithIngredients,
+        Number(fridgeId),
+      );
+
+      setRecipeAvailabilities(availabilities);
+      console.log('✅ 검색 결과 가용성 계산 완료');
+    } catch (error) {
+      console.error('❌ 가용성 계산 실패:', error);
+      setRecipeAvailabilities(new Map());
+    }
+  };
+
+  // ✅ 검색 API (순서 수정)
   const handleSearch = React.useCallback(async () => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
@@ -128,18 +217,20 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
 
       // 레시피 검색 API
       const results = await RecipeAPI.searchRecipes(searchQuery);
-
-      // console.log('검색 결과:', results.length);
       setSearchResults(results);
       setCurrentPage(1);
+
+      // ✅ 가용성 계산
+      if (results.length > 0) {
+        await calculateSearchResultAvailabilities(results);
+      }
     } catch (error) {
-      // console.error('X 검색 실패:', error);
       setSearchResults([]);
       Alert.alert('검색 실패', '레시피 검색 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
-  }, [searchQuery]);
+  }, [searchQuery, fridgeId]);
 
   // 검색어 변경 시 실시간 검색
   const handleSearchQueryChange = (text: string) => {
@@ -232,12 +323,10 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
               }}
               onSubmitEditing={handleSearchSubmit}
               onFocus={() => {
-                console.log('포커스됨');
                 setIsSearchFocused(true);
                 setIsInputActive(true);
               }}
               onBlur={() => {
-                console.log('블러됨');
                 setIsSearchFocused(false);
                 setIsInputActive(searchQuery.length > 0);
               }}
@@ -299,24 +388,37 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
             </View>
           )}
 
-          {/* Result List */}
+          {/* Result List with Availability */}
           {!isLoading &&
-            displayedResults.map(recipe => (
-              <SearchRecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                isFavorite={isFavorite(recipe.id)}
-                onToggleFavorite={toggleFavorite}
-                onPress={recipe =>
-                  navigation.navigate('RecipeDetail', {
-                    recipe,
-                    fridgeId: fridgeId || '1',
-                    fridgeName: fridgeName || '우리집 냉장고',
-                    isSharedRecipe: true,
-                  })
-                }
-              />
-            ))}
+            displayedResults.map(recipe => {
+              const availability = recipeAvailabilities.get(recipe.id);
+
+              return (
+                <SearchRecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  isFavorite={isFavorite(recipe.id)}
+                  onToggleFavorite={toggleFavorite}
+                  onPress={recipe =>
+                    navigation.navigate('RecipeDetail', {
+                      recipe,
+                      fridgeId: Number(fridgeId) || 1,
+                      fridgeName: fridgeName || '우리집 냉장고',
+                      isSharedRecipe: true,
+                    })
+                  }
+                  availableIngredientsCount={
+                    availability?.availableIngredientsCount || 0
+                  }
+                  totalIngredientsCount={
+                    availability?.totalIngredientsCount ||
+                    recipe.ingredients?.length ||
+                    0
+                  }
+                  canMakeWithFridge={availability?.canMakeWithFridge || false}
+                />
+              );
+            })}
 
           {/* load more */}
           {hasMoreResults && !isLoading && (

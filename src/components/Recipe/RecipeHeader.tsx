@@ -9,11 +9,17 @@ import { recipeHeaderStyles as styles } from './styles';
 type RecipeHeaderNavigationProp =
   NativeStackNavigationProp<RecipeStackParamList>;
 
-const RecipeHeader: React.FC = () => {
+const RecipeHeader: React.FC<{ fridgeId: number; fridgeName: string }> = ({
+  fridgeId,
+  fridgeName,
+}) => {
   const navigation = useNavigation<RecipeHeaderNavigationProp>();
 
-  const openSearchPage = () => {
-    navigation.navigate('Search');
+  const openSearchPage = (): void => {
+    navigation.navigate('Search', {
+      fridgeId: fridgeId,
+      fridgeName: fridgeName,
+    });
   };
 
   return (

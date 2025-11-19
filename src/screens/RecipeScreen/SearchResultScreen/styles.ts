@@ -183,4 +183,41 @@ export const styles = StyleSheet.create({
     fontSize: scale(16),
     fontWeight: '500',
   },
+
+  ingredientStatus: {
+    marginTop: 4,
+    alignItems: 'flex-start',
+  },
+  statusIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  canMakeIndicator: {
+    backgroundColor: '#E8F5E8',
+    borderWidth: 1,
+    borderColor: 'limegreen',
+  },
+  cannotMakeIndicator: {
+    backgroundColor: '#eee',
+    borderWidth: 1,
+    borderColor: '#aaa',
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  canMakeText: {
+    color: '#2E7D32',
+  },
+  cannotMakeText: {
+    color: '#aaa',
+  },
+  canMakeCard: {
+    borderWidth: 1,
+    borderColor: 'limegreen',
+    backgroundColor: '#fff',
+  },
 });
