@@ -223,7 +223,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
   );
 
   const handleUnitChange = useCallback(
-    async (itemId: string, newUnit: string) => {
+    async (itemId: number, newUnit: string) => {
       if (isEditMode) {
         // 편집 모드에서는 로컬 상태만 변경
         console.log(`로컬 단위 변경: ${itemId} -> ${newUnit}`);

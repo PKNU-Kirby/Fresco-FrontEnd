@@ -890,7 +890,7 @@ export class IngredientControllerAPI {
   }
 
   static async updateRefrigeratorIngredient(
-    refrigeratorIngredientId: string,
+    refrigeratorIngredientId: number,
     updateData: UpdateIngredientRequest,
   ): Promise<RefrigeratorIngredientResponse> {
     const processedData: any = {};
