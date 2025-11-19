@@ -1,35 +1,28 @@
 import Config from '../../types/config';
 import { getValidAccessToken } from '../../utils/authUtils';
 import { ApiErrorHandler } from '../../utils/errorHandler';
-
-// AsyncStorageService import - 여러 방식으로 시도
 import { AsyncStorageService } from '../AsyncStorageService';
-
-// 만약 위의 방식이 안 된다면 아래 방식들 중 하나를 시도
-// import AsyncStorageService from '../asyncStorageService';
-// import * as AsyncStorageModule from '../asyncStorageService';
-// const AsyncStorageService = AsyncStorageModule.AsyncStorageService;
 
 // 타입 정의
 export interface FridgeMember {
-  userId: string;
+  userId: number;
   userName: string;
   role: 'OWNER' | 'MEMBER';
 }
 
 export interface InvitationResponse {
-  refrigeratorInvitationId: string;
-  refrigeratorId: string;
+  refrigeratorInvitationId: number;
+  refrigeratorId: number;
   refrigeratorName: string;
-  inviterId: string;
+  inviterId: number;
   inviterName: string;
 }
 
 export interface UsageHistoryResponse {
   content: Array<{
-    consumerId: string;
+    consumerId: number;
     consumerName: string;
-    refrigeratorIngredientId: string;
+    refrigeratorIngredientId: number;
     ingredientName: string;
     usedQuantity: number;
     unit: string;

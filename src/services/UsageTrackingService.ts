@@ -67,27 +67,15 @@ export class UsageTrackingService {
     }
   }
 
-  // 특정 냉장고의 사용 기록 조회
+  // 특정 냉장고의 사용 기록
   static async getFridgeUsageRecords(fridgeId: number): Promise<UsageRecord[]> {
     try {
+      // 서버에서 해당 냉장고의 전체 사용 기록을 가져옴
       const records = await UsageHistoryAPI.getAllUsageHistory(fridgeId);
 
-      // 🔍 서버 응답 상세 로깅
-      console.log('📦 전체 레코드 수:', records.length);
-      if (records.length > 0) {
-        console.log('📦 첫 번째 레코드:', JSON.stringify(records[0], null, 2));
-      }
-
       return records.map((item: HistoryRecord, index: number) => {
-        // 🔍 각 항목의 consumerName 확인
-        console.log(
-          `👤 [${index}] consumerId: ${item.consumerId}, consumerName: "${item.consumerName}"`,
-        );
-
-        const timestamp = new Date(item.usedAt).getTime();
-
         return {
-          id: timestamp + index,
+          id: new Date(item.usedAt).getTime() + index,
           userId: item.consumerId,
           userName: item.consumerName || '알 수 없음',
           userAvatar: item.consumerName ? item.consumerName.charAt(0) : '👤',
@@ -106,17 +94,33 @@ export class UsageTrackingService {
       return [];
     }
   }
-  // 특정 사용자의 사용 기록 조회
-  static async getUserUsageRecords(userId: number): Promise<UsageRecord[]> {
-    try {
-      const allRecords = await this.getUsageRecords();
-      return allRecords.filter(record => record.userId === userId);
-    } catch (error) {
-      console.error('사용자별 사용 기록 조회 실패:', error);
-      return [];
-    }
-  }
 
+  loadUsageRecords = async () => {
+    try {
+      setIsLoading(true);
+      const records = await UsageTrackingService.getFridgeUsageRecords(
+        fridgeId,
+      );
+
+      // 🔍 디버깅용 로그
+      console.log(
+        `📦 냉장고 ${fridgeId}의 전체 사용 기록: ${records.length}개`,
+      );
+      if (records.length > 0) {
+        console.log('📊 기록 예시:', {
+          첫번째: records[0].userName,
+          마지막: records[records.length - 1].userName,
+        });
+      }
+
+      setUsageRecords(records);
+    } catch (error) {
+      console.error('사용 기록 로드 실패:', error);
+      setUsageRecords([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // 현재 사용자 정보 가져오기
   static async getCurrentUserInfo(): Promise<{
     id: number;

@@ -23,7 +23,7 @@ import { useIngredientMatching } from '../../../hooks/Recipe/useIngredientMatchi
 import { useRecipeSteps } from '../../../hooks/Recipe/useRecipeSteps';
 import { RecipeStackParamList, Recipe } from '../../../types';
 import { EnhancedIngredient } from '../../../hooks/Recipe/useIngredientMatching';
-import { UsageTrackingService } from '../../../services/UseageTrackingService';
+import { UsageTrackingService } from '../../../services/UsageTrackingService';
 import { styles } from './styles';
 
 type UseRecipeScreenNavigationProp = NativeStackNavigationProp<

@@ -18,12 +18,12 @@ import { useFridgeData } from '../../hooks/useFridgeData';
 import { useModalState } from '../../hooks/useModalState';
 
 // Usage tracking
-// import { UsageTrackingService } from '../../services/UseageTrackingService';
+// import { UsageTrackingService } from '../../services/UsageTrackingService';
 
 type Props = {
   route: {
     params: {
-      fridgeId: string;
+      fridgeId: number;
       fridgeName: string;
       shouldRefresh?: boolean;
       newItems?: any[];

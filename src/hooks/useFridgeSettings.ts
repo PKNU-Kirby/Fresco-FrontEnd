@@ -12,19 +12,19 @@ import { RootStackParamList } from '../../App';
 import { PermissionAPIService } from '../services/API/permissionAPI';
 
 type Member = {
-  id: string;
+  id: number;
   name: string;
   role: 'owner' | 'member';
 };
 
 type User = {
-  id: string;
+  id: number;
   name: string;
   email: string;
 };
 
 export const useFridgeSettings = (
-  fridgeId: string,
+  fridgeId: number,
   fridgeName: string,
   userRole?: 'owner' | 'member',
 ) => {
@@ -57,9 +57,9 @@ export const useFridgeSettings = (
         Object.keys(userPermissions),
       );
       console.log('fridgeId 타입:', typeof fridgeId, 'fridgeId 값:', fridgeId);
-      console.log('숫자로 변환:', parseInt(fridgeId));
+      console.log('숫자로 변환:', fridgeId);
       console.log('권한에서 문자열로 체크:', userPermissions[fridgeId]);
-      console.log('권한에서 숫자로 체크:', userPermissions[parseInt(fridgeId)]);
+      console.log('권한에서 숫자로 체크:', userPermissions[fridgeId]);
       console.log(
         '권한에서 19번 직접 체크:',
         userPermissions[19],
@@ -70,7 +70,7 @@ export const useFridgeSettings = (
       const isCurrentUserOwner = userPermissions[fridgeId] === true;
 
       const memberList: Member[] = fridgeMembers.map(member => ({
-        id: member.userId.toString(),
+        id: member.userId,
         name: member.userName,
         role: 'member' as const, // 다른 멤버 권한은 표시 안함
       }));

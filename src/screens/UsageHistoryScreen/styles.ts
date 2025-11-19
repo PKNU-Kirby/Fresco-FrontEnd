@@ -1,67 +1,123 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
 // iPhone 16 Pro
 const baseWidth = 402;
-// const baseHeight = 874;
+//const baseHeight = 874;
 
 // 반응형 함수
-// const wp = (percentage: number) => (width * percentage) / 100;
-// const hp = (percentage: number) => (height * percentage) / 100;
+//const wp = (percentage: number) => (width * percentage) / 100;
+//const hp = (percentage: number) => (height * percentage) / 100;
 const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#e8f5e8',
   },
 
-  // 헤더
+  // Header Style
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: scale(20),
-    paddingVertical: scale(16),
-    backgroundColor: '#fff',
-    borderBottomWidth: scale(1),
-    borderBottomColor: '#e0e0e0',
+    minHeight: scale(60),
+    backgroundColor: '#e8f5e8',
+    paddingHorizontal: scale(16),
+    paddingTop:
+      Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 8 : 8,
+    paddingBottom: scale(8),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: scale(5),
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+    zIndex: 1001,
+  },
+  leftSection: {
+    width: scale(56),
+    alignItems: 'flex-start',
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: scale(8),
+  },
+  rightSection: {
+    width: scale(56),
+    alignItems: 'flex-end',
   },
   headerTitle: {
-    fontSize: scale(18),
-    fontWeight: '600',
-    color: '#000',
+    fontSize: scale(20),
+    fontWeight: 'bold',
+    color: '#444',
+    textAlign: 'center',
+    maxWidth: '100%',
   },
-  headerRight: {
-    width: scale(40),
+
+  // Loading Style
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: scale(12),
+    fontSize: scale(16),
+    color: '#666',
+  },
+
+  // Empty Style
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    marginTop: scale(12),
+    fontSize: scale(16),
+    color: '#666',
+  },
+  emptySubText: {
+    marginTop: scale(8),
+    fontSize: scale(14),
+    color: '#999',
+    textAlign: 'center',
+    paddingHorizontal: scale(20),
+  },
+  emptyListContent: {
+    paddingHorizontal: scale(16),
   },
 
   // 필터 바 (홈 화면 스타일)
   filterBar: {
     flexDirection: 'row',
     paddingHorizontal: scale(20),
-    paddingVertical: scale(12),
-    gap: scale(10),
+    paddingVertical: scale(16),
+    gap: scale(8),
+    backgroundColor: '#e8f5e875',
   },
   filterButton: {
     paddingHorizontal: scale(16),
     paddingVertical: scale(8),
     backgroundColor: 'lightgray',
     borderRadius: scale(16),
-    minWidth: scale(80),
+    minWidth: scale(56),
   },
   filterButtonActive: {
-    backgroundColor: 'limegreen',
+    backgroundColor: '#2F4858',
   },
   filterButtonText: {
     fontSize: scale(14),
     color: '#666',
-    fontWeight: '500',
+    fontWeight: '600',
     textAlign: 'center',
   },
   filterButtonTextActive: {
-    color: '#333',
+    color: '#f8f8f8',
     fontWeight: '600',
   },
 
@@ -70,7 +126,7 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    padding: scale(16),
+    paddingHorizontal: scale(16),
   },
 
   // 섹션 헤더 (날짜)
@@ -86,31 +142,35 @@ export const styles = StyleSheet.create({
     color: '#333',
   },
 
-  // 사용 기록 카드 (넷플릭스 스타일)
+  // 사용 기록 카드
+  usageHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 0,
+  },
   usageCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f8f8',
     borderRadius: scale(12),
-    padding: scale(16),
-    marginBottom: scale(8),
+    paddingVertical: scale(16),
+    paddingHorizontal: scale(12),
+    marginBottom: scale(12),
     shadowColor: '#000',
     shadowOffset: {
       width: scale(0),
-      height: scale(2),
+      height: scale(5),
     },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: scale(4),
     elevation: 3,
   },
-  usageHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  usageAvatar: {
+  userIconContainer: {
     fontSize: scale(24),
     marginRight: scale(12),
   },
   usageInfo: {
     flex: 1,
+    justifyContent: 'space-between',
   },
   usageText: {
     fontSize: scale(16),
@@ -119,8 +179,8 @@ export const styles = StyleSheet.create({
     marginBottom: scale(6),
   },
   userName: {
-    fontWeight: '600',
-    color: 'limegreen',
+    fontWeight: '800',
+    color: '#2F4858',
   },
   itemName: {
     fontWeight: '900',

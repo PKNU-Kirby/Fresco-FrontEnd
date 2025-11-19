@@ -9,13 +9,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import BackButton from '../../components/_common/BackButton';
 import DateRangePicker from '../../components/modals/DateRangePicker';
 import { RootStackParamList } from '../../../App';
 import {
   UsageTrackingService,
   UsageRecord,
-} from '../../services/UseageTrackingService';
+} from '../../services/UsageTrackingService';
 import { styles } from './styles';
 
 type Props = {
@@ -95,7 +97,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
 
   // 사용 유형별 텍스트 생성
   const getUsageText = (record: UsageRecord) => {
-    const baseText = `${record.userName}님이 ${record.itemName} ${record.quantity}${record.unit}를 `;
+    const baseText = `${record.userName} 님이 ${record.itemName} ${record.quantity}${record.unit}를 `;
 
     switch (record.usageType) {
       case 'consume':
@@ -104,8 +106,6 @@ const UsageHistoryScreen = ({ route }: Props) => {
         return baseText + '수정했습니다';
       case 'delete':
         return baseText + '삭제했습니다';
-      case 'recipe_use':
-        return baseText + `사용했습니다 (${record.details})`;
       default:
         return baseText + '처리했습니다';
     }
@@ -117,17 +117,17 @@ const UsageHistoryScreen = ({ route }: Props) => {
 
     // 필터에 따른 데이터 필터링
     const now = new Date();
-    if (activeFilter === '최근 한 주') {
+    if (activeFilter === '일주일') {
       const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       filteredData = usageRecords.filter(
         record => new Date(record.usedAt) >= oneWeekAgo,
       );
-    } else if (activeFilter === '최근 한 달') {
+    } else if (activeFilter === '한 달') {
       const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       filteredData = usageRecords.filter(
         record => new Date(record.usedAt) >= oneMonthAgo,
       );
-    } else if (activeFilter === '원하는 기간' && customDateRange) {
+    } else if (activeFilter === '기간 선택' && customDateRange) {
       try {
         const startDate = new Date(customDateRange.start.replace(/\./g, '-'));
         const endDate = new Date(customDateRange.end.replace(/\./g, '-'));
@@ -170,10 +170,12 @@ const UsageHistoryScreen = ({ route }: Props) => {
   const renderUsageItem = ({ item }: { item: UsageRecord }) => (
     <View style={styles.usageCard}>
       <View style={styles.usageHeader}>
-        <Text style={styles.usageAvatar}>{item.userAvatar}</Text>
+        <View style={styles.userIconContainer}>
+          <Ionicons name="person-circle" size={44} color="#2F4858" />
+        </View>
         <View style={styles.usageInfo}>
           <Text style={styles.usageText}>
-            <Text style={styles.userName}>{item.userName}</Text>님이{' '}
+            <Text style={styles.userName}>{item.userName}</Text> 님이{' '}
             <Text style={styles.itemName}>{item.itemName}</Text>{' '}
             <Text style={styles.quantity}>
               {item.quantity}
@@ -187,9 +189,6 @@ const UsageHistoryScreen = ({ route }: Props) => {
               ? '를 수정했습니다'
               : '를 사용했습니다'}
           </Text>
-          {item.details && (
-            <Text style={styles.usageDetails}>{item.details}</Text>
-          )}
           <Text style={styles.usageTime}>{item.time}</Text>
         </View>
       </View>
@@ -215,12 +214,16 @@ const UsageHistoryScreen = ({ route }: Props) => {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <BackButton onPress={handleBack} />
-          <Text style={styles.headerTitle}>식재료 사용 기록</Text>
-          <View style={styles.headerRight} />
+          <View style={styles.leftSection}>
+            <BackButton onPress={handleBack} />
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.headerTitle}>사용 기록</Text>
+          </View>
+          <View style={styles.rightSection} />
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4CAF50" />
+          <ActivityIndicator size="large" color="#2F4858" />
           <Text style={styles.loadingText}>사용 기록을 불러오는 중...</Text>
         </View>
       </SafeAreaView>
@@ -231,14 +234,18 @@ const UsageHistoryScreen = ({ route }: Props) => {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* 헤더 */}
       <View style={styles.header}>
-        <BackButton onPress={handleBack} />
-        <Text style={styles.headerTitle}>식재료 사용 기록</Text>
-        <View style={styles.headerRight} />
+        <View style={styles.leftSection}>
+          <BackButton onPress={handleBack} />
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.headerTitle}>사용 기록</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
 
       {/* 필터 바 */}
       <View style={styles.filterBar}>
-        {['최근 한 주', '최근 한 달', '원하는 기간'].map(filter => (
+        {['일주일', '한 달', '기간 선택'].map(filter => (
           <TouchableOpacity
             key={filter}
             style={[
@@ -253,7 +260,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
                 activeFilter === filter && styles.filterButtonTextActive,
               ]}
             >
-              {filter === '원하는 기간' && customDateRange
+              {filter === '기간 선택' && customDateRange
                 ? `${customDateRange.start} ~ ${customDateRange.end}`
                 : filter}
             </Text>

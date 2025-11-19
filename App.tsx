@@ -268,18 +268,12 @@ function App(): React.JSX.Element {
             <Stack.Screen
               name="UsageHistoryScreen"
               component={UsageHistoryScreen}
-              options={{
-                presentation: 'modal',
-                animation: 'slide_from_right',
-              }}
+              options={{}}
             />
             <Stack.Screen
               name="NotificationSettingsScreen"
               component={NotificationSettingsScreen}
-              options={{
-                presentation: 'modal',
-                animation: 'slide_from_right',
-              }}
+              options={{}}
             />
             <Stack.Screen name="CameraScreen" component={CameraScreen} />
             <Stack.Screen

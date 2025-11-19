@@ -6,7 +6,7 @@ import {
   updateFridgeItem,
   type FridgeItem,
 } from '../utils/fridgeStorage';
-import { UsageTrackingService } from '../services/UseageTrackingService';
+import { UsageTrackingService } from '../services/UsageTrackingService';
 
 // 허용되는 단위 목록
 export const ALLOWED_UNITS = ['kg', 'g', 'L', 'ml', '개'] as const;

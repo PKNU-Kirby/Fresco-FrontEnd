@@ -1,7 +1,7 @@
 // hooks/useApiUsageHistory.ts - API와 연결된 사용 기록 훅
 import { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
-import ApiService from '../services/ApiService';
+import ApiService from '../services/apiServices';
 
 export type UsageRecord = {
   id: number;

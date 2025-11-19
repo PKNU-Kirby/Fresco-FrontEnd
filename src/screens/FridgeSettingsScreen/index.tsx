@@ -13,7 +13,7 @@ import { styles } from './styles';
 type Props = {
   route: {
     params: {
-      fridgeId: string;
+      fridgeId: number;
       fridgeName: string;
       userRole?: 'owner' | 'member';
     };
@@ -66,7 +66,7 @@ const FridgeSettingsScreen = ({ route }: Props) => {
           <View style={styles.headerRight} />
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="limegreen" />
+          <ActivityIndicator size="large" color="#2F4858" />
           <Text style={styles.loadingText}>설정을 불러오는 중...</Text>
         </View>
       </SafeAreaView>

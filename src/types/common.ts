@@ -150,7 +150,7 @@ export interface UsageHistory {
 
 // 사용 내역 생성 요청 타입
 export interface CreateUsageHistoryRequest {
-  refrigeratorIngredientId: string;
+  refrigeratorIngredientId: number;
   usedQuantity: number;
 }
 

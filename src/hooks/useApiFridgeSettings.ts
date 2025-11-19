@@ -19,7 +19,7 @@ interface UserPermissions {
 }
 
 export const useApiFridgeSettings = (
-  fridgeId: string,
+  fridgeId: number,
   fridgeName: string,
   userRole?: 'owner' | 'member',
 ) => {
