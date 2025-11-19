@@ -56,6 +56,7 @@ const RecipeDetailScreen: React.FC = () => {
     isNewRecipe = false,
     fridgeId,
     fridgeName,
+    currentFridgeId,
     aiGeneratedData,
     isSharedRecipe = false,
   } = route.params;
@@ -328,16 +329,24 @@ const RecipeDetailScreen: React.FC = () => {
     [],
   );
 
-  // UseRecipe 네비게이션 (향상된 재료 데이터 전달)
+  // ✅ currentFridgeId가 있으면 사용, 없으면 fridgeId 사용
+  const targetFridgeId = currentFridgeId || fridgeId;
+
   const navigateToUseRecipe = () => {
     if (!currentRecipe.ingredients || currentRecipe.ingredients.length === 0) {
       modalHandlers.setNoIngredientsVisible(true);
       return;
     }
 
+    console.log('🔍 RecipeDetail 냉장고 정보:', {
+      fridgeId, // 레시피가 속한 냉장고
+      currentFridgeId, // 현재 접속 냉장고
+      targetFridgeId, // 실제 사용할 냉장고
+    });
+
     navigation.navigate('UseRecipe', {
       recipe: currentRecipe,
-      fridgeId: fridgeId,
+      fridgeId: targetFridgeId, // ← 수정!
       enhancedIngredients: enhancedIngredients,
     });
   };
@@ -609,7 +618,7 @@ const RecipeDetailScreen: React.FC = () => {
             <RecipeActionButtons
               isSharedRecipe={isSharedRecipe}
               recipeId={currentRecipe.id}
-              currentFridgeId={fridgeId}
+              currentFridgeId={targetFridgeId}
               onUseRecipe={navigateToUseRecipe}
             />
           )}
@@ -618,7 +627,7 @@ const RecipeDetailScreen: React.FC = () => {
             ingredients={getIngredientsArray(currentRecipe.ingredients)}
             isEditMode={isEditMode}
             isNewRecipe={isNewRecipe}
-            fridgeId={fridgeId}
+            fridgeId={targetFridgeId}
             onAddIngredient={addIngredient}
             onRemoveIngredient={removeIngredient}
             onUpdateIngredient={updateIngredient}

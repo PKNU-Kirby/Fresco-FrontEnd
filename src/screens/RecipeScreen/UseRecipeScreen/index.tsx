@@ -35,7 +35,7 @@ type UseRecipeScreenRouteProp = RouteProp<
   {
     UseRecipe: {
       recipe: Recipe;
-      fridgeId: string;
+      fridgeId: number;
       enhancedIngredients?: EnhancedIngredient[];
     };
   },
@@ -64,7 +64,7 @@ const UseRecipeScreen: React.FC = () => {
   });
   const [errorMessage, setErrorMessage] = useState('');
 
-  const numericFridgeId = parseInt(fridgeId, 10);
+  const numericFridgeId = fridgeId;
 
   const {
     matchedIngredients,

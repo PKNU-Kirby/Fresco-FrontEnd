@@ -111,7 +111,7 @@ export interface RecipeAvailabilityInfo {
 
 export const calculateRecipeAvailability = async (
   recipe: Recipe,
-  fridgeId: string,
+  fridgeId: number,
 ): Promise<RecipeAvailabilityInfo> => {
   try {
     const fridgeItems = await getFridgeItemsByFridgeId(fridgeId);

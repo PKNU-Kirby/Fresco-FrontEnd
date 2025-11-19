@@ -22,6 +22,10 @@ import {
   RecipeIngredient,
   RecipeDetailResponse,
 } from '../../../types/Recipe';
+import {
+  calculateMultipleRecipeAvailability,
+  RecipeAvailabilityInfo,
+} from '../../../utils/recipeAvailabilityUtils';
 import { RecipeStackParamList } from '../RecipeNavigator';
 import { AsyncStorageService } from '../../../services/AsyncStorageService';
 import { IngredientControllerAPI } from '../../../services/API/ingredientControllerAPI';
@@ -29,7 +33,7 @@ import { styles, sharedRecipeStyles } from './styles';
 
 // 냉장고 식재료 타입 정의
 interface FridgeIngredient {
-  id: string;
+  id: number;
   ingredientId?: number;
   categoryId?: number;
   ingredientName?: string;
@@ -47,10 +51,10 @@ type SharedFolderScreenNavigationProp = NativeStackNavigationProp<
 
 interface UserFridge {
   fridge: {
-    id: string;
+    id: number;
     name: string;
     description?: string;
-    ownerId: string;
+    ownerId: number;
     inviteCode: string;
     memberCount: number;
   };
@@ -64,224 +68,26 @@ interface SharedFolderScreenProps {
   route: {
     params: {
       currentUserId?: string;
+      currentFridgeId?: number;
     };
   };
 }
-
-// 식재료 매칭 결과 타입
-interface IngredientMatchResult {
-  recipeIngredient: RecipeIngredient;
-  matched: boolean;
-  fridgeIngredient?: FridgeIngredient;
-  hasEnoughQuantity: boolean;
-  instead?: string;
-}
-
-// 레시피 상태 타입
-interface RecipeAvailabilityStatus {
-  availableCount: number;
-  totalCount: number;
-  canMakeWithFridge: boolean;
-  matchResults: IngredientMatchResult[];
-}
-
-// 백엔드 제공 대체재를 활용한 식재료 매칭
-const findMatchingIngredient = (
-  recipeIngredient: RecipeIngredient & { instead?: string },
-  fridgeIngredients: FridgeIngredient[],
-): FridgeIngredient | null => {
-  const recipeName = recipeIngredient.name.toLowerCase().trim();
-
-  console.log(
-    `🔍 매칭 시도: "${recipeIngredient.name}" (대체: ${
-      recipeIngredient.instead || '없음'
-    })`,
-  );
-
-  // 정확한 이름 매칭
-  let match = fridgeIngredients.find(
-    ingredient => ingredient.name.toLowerCase().trim() === recipeName,
-  );
-
-  if (match) {
-    console.log(`✅ 정확한 매칭: ${recipeIngredient.name} → ${match.name}`);
-    return match;
-  }
-
-  // 백엔드가 제공한 대체 재료로 매칭 (instead 필드)
-  if (recipeIngredient.instead) {
-    const alternativeName = recipeIngredient.instead.toLowerCase().trim();
-
-    match = fridgeIngredients.find(
-      ingredient => ingredient.name.toLowerCase().trim() === alternativeName,
-    );
-
-    if (match) {
-      console.log(
-        `>> 대체 재료 매칭: ${recipeIngredient.name} → ${match.name} (instead: ${recipeIngredient.instead})`,
-      );
-      return match;
-    }
-
-    // 대체 재료 부분 매칭
-    match = fridgeIngredients.find(
-      ingredient =>
-        ingredient.name.toLowerCase().includes(alternativeName) ||
-        alternativeName.includes(ingredient.name.toLowerCase().trim()),
-    );
-
-    if (match) {
-      console.log(
-        `>> 대체 재료 부분 매칭: ${recipeIngredient.name} → ${match.name}`,
-      );
-      return match;
-    }
-  }
-
-  // 부분 매칭 (폴백)
-  match = fridgeIngredients.find(
-    ingredient =>
-      ingredient.name.toLowerCase().includes(recipeName) ||
-      recipeName.includes(ingredient.name.toLowerCase().trim()),
-  );
-
-  if (match) {
-    console.log(`>> 부분 매칭: ${recipeIngredient.name} → ${match.name}`);
-    return match;
-  }
-
-  console.log(`X 매칭 실패: ${recipeIngredient.name}`);
-  return null;
-};
-
-// 레시피 상세 정보 가져오기 (instead 포함)
-const fetchRecipeDetailWithAlternatives = async (
-  recipeId: string,
-): Promise<RecipeDetailResponse | null> => {
-  try {
-    console.log(`📋 레시피 ${recipeId} 상세 정보 조회 (대체재 포함)`);
-
-    // RecipeAPI.getRecipeDetail 호출
-    const recipeDetail = await RecipeAPI.getRecipeDetail(recipeId);
-
-    // RecipeDetailResponse 형식으로 변환
-    return {
-      recipeId: parseInt(recipeDetail.id, 10),
-      title: recipeDetail.title,
-      steps: recipeDetail.steps?.join('\n') || '',
-      url: recipeDetail.referenceUrl || '',
-      ingredients:
-        recipeDetail.ingredients?.map(ing => ({
-          ingredientId: parseInt(ing.id, 10),
-          name: ing.name,
-          quantity: ing.quantity,
-          instead: (ing as any).instead || '',
-        })) || [],
-    };
-  } catch (error) {
-    console.error('레시피 상세 조회 실패:', error);
-    return null;
-  }
-};
-
-// 레시피 조리 가능성 계산 (대체재 정보 포함)
-const calculateIngredientStatus = (
-  recipe: Recipe,
-  fridgeIngredients: FridgeIngredient[],
-  recipeDetail?: RecipeDetailResponse | null, // instead 정보가 있는 상세 데이터
-): RecipeAvailabilityStatus => {
-  console.log(`>> 레시피 "${recipe.title}" 식재료 매칭 시작`);
-
-  if (!recipe.ingredients || recipe.ingredients.length === 0) {
-    console.log(`X 레시피에 재료가 없음`);
-    return {
-      availableCount: 0,
-      totalCount: 0,
-      canMakeWithFridge: false,
-      matchResults: [],
-    };
-  }
-
-  const matchResults: IngredientMatchResult[] = [];
-  let availableCount = 0;
-  const totalCount = recipe.ingredients.length;
-
-  for (const recipeIngredient of recipe.ingredients) {
-    console.log(`\n--- 재료 "${recipeIngredient.name}" 매칭 중 ---`);
-
-    const detailIngredient = recipeDetail?.ingredients.find(
-      ing => ing.ingredientId === recipeIngredient.ingredientId,
-    );
-
-    const instead = detailIngredient?.instead;
-
-    // 매칭 시도 (대체재 포함)
-    const matchingFridgeIngredient = findMatchingIngredient(
-      { ...recipeIngredient, instead },
-      fridgeIngredients,
-    );
-
-    const matched = !!matchingFridgeIngredient;
-    let hasEnoughQuantity = false;
-
-    if (matchingFridgeIngredient) {
-      const fridgeQuantity = matchingFridgeIngredient.quantity || 0;
-      const requiredQuantity = recipeIngredient.quantity || 1;
-
-      console.log(
-        `📊 수량 비교: 냉장고 ${fridgeQuantity}${matchingFridgeIngredient.unit} vs 필요 ${requiredQuantity}`,
-      );
-
-      hasEnoughQuantity = fridgeQuantity >= requiredQuantity;
-
-      if (hasEnoughQuantity) {
-        availableCount++;
-        console.log(`>> 재료 충분: ${recipeIngredient.name}`);
-      } else {
-        console.log(`!! 재료 부족: ${recipeIngredient.name}`);
-      }
-    } else {
-      console.log(`X 매칭되는 재료 없음: ${recipeIngredient.name}`);
-    }
-
-    matchResults.push({
-      recipeIngredient,
-      matched,
-      fridgeIngredient: matchingFridgeIngredient || undefined,
-      hasEnoughQuantity,
-      instead,
-    });
-  }
-
-  const canMakeWithFridge = availableCount === totalCount && totalCount > 0;
-
-  console.log(
-    `🎯 최종 결과: ${availableCount}/${totalCount}, 조리가능: ${canMakeWithFridge}`,
-  );
-
-  return {
-    availableCount,
-    totalCount,
-    canMakeWithFridge,
-    matchResults,
-  };
-};
 
 // SharedRecipeCard 컴포넌트 (대체재 정보 표시)
 const SharedRecipeCard: React.FC<{
   recipe: Recipe;
   onPress: () => void;
-  availabilityStatus: RecipeAvailabilityStatus;
+  availabilityStatus: RecipeAvailabilityInfo;
 }> = ({ recipe, onPress, availabilityStatus }) => {
   const [showDetails, setShowDetails] = useState(false);
 
-  const { availableCount, totalCount, canMakeWithFridge, matchResults } =
-    availabilityStatus;
-
-  // 부족한 재료만 필터링
-  const missingIngredients = matchResults.filter(
-    result => !result.matched || !result.hasEnoughQuantity,
-  );
+  const {
+    availableIngredientsCount,
+    totalIngredientsCount,
+    canMakeWithFridge,
+    missingIngredients,
+    availableIngredients,
+  } = availabilityStatus;
 
   return (
     <View>
@@ -320,11 +126,10 @@ const SharedRecipeCard: React.FC<{
                       : sharedRecipeStyles.cannotMakeText,
                   ]}
                 >
-                  {availableCount} / {totalCount}
+                  {availableIngredientsCount} / {totalIngredientsCount}
                 </Text>
               </View>
 
-              {/* 부족한 재료가 있으면 상세 보기 버튼 */}
               {!canMakeWithFridge && missingIngredients.length > 0 && (
                 <TouchableOpacity
                   onPress={() => setShowDetails(!showDetails)}
@@ -342,34 +147,15 @@ const SharedRecipeCard: React.FC<{
         </View>
       </TouchableOpacity>
 
-      {/* 부족한 재료 상세 표시 (대체 재료 포함) */}
+      {/* 부족한 재료 상세 표시 */}
       {showDetails && missingIngredients.length > 0 && (
         <View style={sharedRecipeStyles.missingIngredientsContainer}>
           <Text style={sharedRecipeStyles.missingTitle}>부족한 재료:</Text>
-          {missingIngredients.map((result, index) => (
+          {missingIngredients.map((ingredientName, index) => (
             <View key={index} style={sharedRecipeStyles.missingItem}>
               <Text style={sharedRecipeStyles.missingName}>
-                • {result.recipeIngredient.name} (
-                {result.recipeIngredient.quantity})
+                • {ingredientName}
               </Text>
-              {result.instead && (
-                <Text style={sharedRecipeStyles.alternativeText}>
-                  → 대체 가능: {result.instead}
-                </Text>
-              )}
-              {!result.matched && (
-                <Text style={sharedRecipeStyles.notFoundText}>
-                  냉장고에 없음
-                </Text>
-              )}
-              {result.matched &&
-                !result.hasEnoughQuantity &&
-                result.fridgeIngredient && (
-                  <Text style={sharedRecipeStyles.insufficientText}>
-                    현재: {result.fridgeIngredient.quantity}
-                    {result.fridgeIngredient.unit}
-                  </Text>
-                )}
             </View>
           ))}
         </View>
@@ -407,6 +193,8 @@ const FridgeFolderCard: React.FC<{
 // 메인 컴포넌트
 const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   const navigation = useNavigation<SharedFolderScreenNavigationProp>();
+
+  const currentFridgeId = route.params?.currentFridgeId;
   const currentUserId = route.params?.currentUserId || 1;
 
   const [fridgeList, setFridgeList] = useState<UserFridge[]>([]);
@@ -416,8 +204,9 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   const [_currentUser, setCurrentUser] = useState<User | null>(null);
 
   // ✅ 레시피별 조리 가능성 상태
+
   const [recipeAvailabilities, setRecipeAvailabilities] = useState<
-    Map<string, RecipeAvailabilityStatus>
+    Map<string, RecipeAvailabilityInfo>
   >(new Map());
 
   // ✅ 레시피 상세 정보 (instead 포함)
@@ -428,7 +217,9 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   const scrollViewRef = useRef<ScrollView>(null);
 
   // 냉장고 식재료 로드 함수
-  const loadFridgeIngredients = async (fridgeId: number) => {
+  const loadFridgeIngredients = async (
+    fridgeId: number,
+  ): Promise<FridgeIngredient[]> => {
     try {
       console.log(`🔍 냉장고 ${fridgeId} 식재료 API 로드 시도`);
 
@@ -437,8 +228,28 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
         fridgeId,
       );
 
-      // PageResponse에서 content 배열 반환
-      return response.content || [];
+      // PageResponse에서 content 배열 반환 및 FridgeIngredient 타입으로 매핑
+      const content = response.content || [];
+      return content.map((ing: any) => ({
+        id: ing.id,
+        ingredientId:
+          ing.ingredientId !== undefined && ing.ingredientId !== null
+            ? Number(ing.ingredientId)
+            : undefined,
+        categoryId:
+          ing.categoryId !== undefined && ing.categoryId !== null
+            ? Number(ing.categoryId)
+            : undefined,
+        ingredientName: ing.ingredientName || ing.name || '',
+        name: (ing.name || ing.ingredientName || '').toString(),
+        quantity:
+          ing.quantity !== undefined && ing.quantity !== null
+            ? Number(ing.quantity)
+            : 0,
+        unit: ing.unit || '',
+        expirationDate: ing.expirationDate || ing.expiryDate || undefined,
+        expiryDate: ing.expiryDate || ing.expirationDate || undefined,
+      }));
     } catch (error) {
       console.error(`❌ 냉장고 ${fridgeId} 식재료 로드 실패:`, error);
       return [];
@@ -505,41 +316,73 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
     }
   };
 
-  // ✅ 선택된 냉장고의 레시피 조리 가능성 계산
   const calculateRecipeAvailabilities = async () => {
     if (!selectedFridge || selectedFridge.recipes.length === 0) {
       return;
     }
 
+    // ✅ currentFridgeId가 없으면 계산 불가
+    if (!currentFridgeId) {
+      console.warn(
+        '⚠️ 현재 접속 중인 냉장고 ID가 없어 가용성 계산을 건너뜁니다.',
+      );
+      setRecipeAvailabilities(new Map());
+      return;
+    }
+
     try {
       console.log('🔍 레시피 조리 가능성 계산 시작...');
+      console.log(`📍 현재 접속 냉장고: ${currentFridgeId}`);
+      console.log(`📂 선택된 냉장고: ${selectedFridge.fridge.id}`);
+      console.log(`📋 레시피 개수: ${selectedFridge.recipes.length}개`);
 
-      const availabilities = new Map<string, RecipeAvailabilityStatus>();
-      const details = new Map<string, RecipeDetailResponse>();
+      // ✅ RecipeScreen처럼 상세 정보 먼저 로드
+      const recipesWithIngredients = await Promise.all(
+        selectedFridge.recipes.map(async recipe => {
+          if (!recipe.ingredients || recipe.ingredients.length === 0) {
+            try {
+              console.log(`📋 [${recipe.title}] 상세 정보 로드 중...`);
+              const detailResponse = await RecipeAPI.getRecipeDetail(recipe.id);
 
-      // ✅ 각 레시피의 상세 정보 가져오기 (instead 포함)
-      for (const recipe of selectedFridge.recipes) {
-        const recipeDetail = await fetchRecipeDetailWithAlternatives(recipe.id);
+              const updatedRecipe = {
+                ...recipe,
+                ingredients: detailResponse.ingredients || [],
+              };
 
-        if (recipeDetail) {
-          details.set(recipe.id, recipeDetail);
-        }
+              console.log(
+                `✅ [${recipe.title}] 재료 ${updatedRecipe.ingredients.length}개 로드됨`,
+              );
+              return updatedRecipe;
+            } catch (error) {
+              console.error(`❌ [${recipe.title}] 상세 로드 실패:`, error);
+              return recipe;
+            }
+          }
+          return recipe;
+        }),
+      );
 
-        // 조리 가능성 계산
-        const status = calculateIngredientStatus(
-          recipe,
-          selectedFridge.ingredients,
-          recipeDetail,
-        );
+      // ✅ 항상 currentFridgeId(현재 접속 냉장고)의 재료로 계산
+      const availabilities = await calculateMultipleRecipeAvailability(
+        recipesWithIngredients,
+        currentFridgeId, // ← 현재 접속 중인 냉장고 ID 고정
+      );
 
-        availabilities.set(recipe.id, status);
-      }
-
-      setRecipeDetails(details);
       setRecipeAvailabilities(availabilities);
+
+      // 디버깅: 결과 확인
       console.log('✅ 조리 가능성 계산 완료');
+      availabilities.forEach((value, key) => {
+        const recipe = recipesWithIngredients.find(r => r.id === key);
+        if (recipe && value.totalIngredientsCount > 0) {
+          console.log(
+            `  - ${recipe.title}: ${value.availableIngredientsCount}/${value.totalIngredientsCount}`,
+          );
+        }
+      });
     } catch (error) {
       console.error('❌ 조리 가능성 계산 실패:', error);
+      setRecipeAvailabilities(new Map());
     }
   };
 
@@ -558,6 +401,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
       recipe,
       fridgeId: selectedFridge.fridge.id,
       fridgeName: selectedFridge.fridge.name,
+      currentFridgeId: currentFridgeId,
       fridgeIngredients: selectedFridge.ingredients,
       fromSharedFolder: true,
       isSharedRecipe: true,
@@ -698,38 +542,26 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           ) : (
             // 선택된 냉장고의 레시피 목록 보기// 선택된 냉장고의 레시피 목록 보기
             <>
-              {selectedFridge.recipes.length === 0 ? (
-                <View style={styles.emptyContainer}>
-                  <Icon name="restaurant" size={48} color="#ccc" />
-                  <Text style={styles.emptyText}>공유된 레시피가 없습니다</Text>
-                  <Text style={styles.emptySubText}>
-                    첫 번째 레시피를 공유해보세요
-                  </Text>
-                </View>
-              ) : (
-                <>
-                  {/* ✅ 레시피 목록 - 대체재 정보 포함 */}
-                  {selectedFridge.recipes.map(recipe => {
-                    const availabilityStatus = recipeAvailabilities.get(
-                      recipe.id,
-                    ) || {
-                      availableCount: 0,
-                      totalCount: recipe.ingredients?.length || 0,
-                      canMakeWithFridge: false,
-                      matchResults: [],
-                    };
+              {selectedFridge.recipes.map(recipe => {
+                const availabilityStatus = recipeAvailabilities.get(
+                  recipe.id,
+                ) || {
+                  availableIngredientsCount: 0,
+                  totalIngredientsCount: recipe.ingredients?.length || 0,
+                  canMakeWithFridge: false,
+                  missingIngredients: [],
+                  availableIngredients: [],
+                };
 
-                    return (
-                      <SharedRecipeCard
-                        key={recipe.id}
-                        recipe={recipe}
-                        onPress={() => handleRecipePress(recipe)}
-                        availabilityStatus={availabilityStatus}
-                      />
-                    );
-                  })}
-                </>
-              )}
+                return (
+                  <SharedRecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    onPress={() => handleRecipePress(recipe)}
+                    availabilityStatus={availabilityStatus}
+                  />
+                );
+              })}
             </>
           )}
         </ScrollView>

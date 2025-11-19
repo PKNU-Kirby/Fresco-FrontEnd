@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  TurboModuleRegistry,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DraggableFlatList from 'react-native-draggable-flatlist';
@@ -70,21 +71,55 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     try {
       if (personalRecipes.length > 0 && fridgeId) {
         console.log('🔍 조리 가능성 계산 시작...');
+        console.log(`📊 전체 레시피: ${personalRecipes.length}개`);
 
-        // 냉장고 재료를 API에서 가져오기
-        const fridgeItems =
-          await IngredientControllerAPI.getRefrigeratorIngredients(fridgeId);
-        console.log('🔍 냉장고 재료:', fridgeItems); // ← 이게 비어있을 수 있음
+        // ✅ 1단계: 재료 정보 확인 및 상세 정보 로드
+        const recipesWithIngredients = await Promise.all(
+          personalRecipes.map(async recipe => {
+            // 재료가 없으면 상세 정보 불러오기
+            if (!recipe.ingredients || recipe.ingredients.length === 0) {
+              try {
+                console.log(`📋 [${recipe.title}] 상세 정보 로드 중...`);
+                const detailResponse = await RecipeAPI.getRecipeDetail(
+                  recipe.id,
+                );
 
+                const updatedRecipe = {
+                  ...recipe,
+                  ingredients: detailResponse.ingredients || [],
+                };
+
+                console.log(
+                  `✅ [${recipe.title}] 재료 ${updatedRecipe.ingredients.length}개 로드됨`,
+                );
+                return updatedRecipe;
+              } catch (error) {
+                console.error(`❌ [${recipe.title}] 상세 로드 실패:`, error);
+                return recipe;
+              }
+            }
+            return recipe;
+          }),
+        );
+
+        // ✅ 2단계: 조리 가능성 계산
         const availabilities = await calculateMultipleRecipeAvailability(
-          personalRecipes,
+          recipesWithIngredients,
           fridgeId,
         );
+
         setRecipeAvailabilities(availabilities);
-        // console.log('조리 가능성 계산 완료');
+
+        // 디버깅: 결과 확인
+        console.log('✅ 조리 가능성 계산 완료');
+        availabilities.forEach((value, key) => {
+          console.log(
+            `  - ${key}: ${value.availableIngredientsCount}/${value.totalIngredientsCount}`,
+          );
+        });
       }
     } catch (error) {
-      // console.error('레시피 가용성 계산 실패:', error);
+      console.error('❌ 레시피 가용성 계산 실패:', error);
       setRecipeAvailabilities(new Map());
     }
   };
@@ -350,7 +385,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                   setShowFloatingMenu(false);
                   navigation.navigate('SharedFolder', {
                     currentFridgeId: fridgeId, // 👈 추가!
-                    currentFridgeName: fridgeName, // 👈 추가!
                   });
                 }}
               />
@@ -381,6 +415,13 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                 const isDragEnabled = currentTab === 'all';
                 const availability = recipeAvailabilities.get(item.id);
 
+                // 🔍 디버깅 로그 (이미 있음)
+                console.log('Recipe:', item.title, {
+                  hasAvailability: !!availability,
+                  availability: availability,
+                  mapSize: recipeAvailabilities.size,
+                });
+
                 return (
                   <RenderRecipeItem
                     item={item}
@@ -395,7 +436,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                         recipe,
                         fridgeId,
                         fridgeName,
-                        isSharedRecipe: false,
+                        isSharedRecipe: true,
                       });
                     }}
                     isFavorite={isFavorite(item.id)}
@@ -403,7 +444,10 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                       availability?.availableIngredientsCount || 0
                     }
                     totalIngredientsCount={
-                      availability?.totalIngredientsCount || 0
+                      // ✅ 폴백 추가: availability가 없거나 0일 때 실제 재료 개수 사용
+                      availability?.totalIngredientsCount ||
+                      item.ingredients?.length ||
+                      0
                     }
                     canMakeWithFridge={availability?.canMakeWithFridge || false}
                   />
@@ -452,7 +496,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
               isNewRecipe: true,
               fridgeId,
               fridgeName,
-              isSharedRecipe: false,
+              isSharedRecipe: true,
             });
           }}
           onAIRecommend={() => {

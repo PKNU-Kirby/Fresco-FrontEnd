@@ -6,7 +6,7 @@ import RecipeDetailScreen from './RecipeDetailScreen';
 import SearchScreen from './SearchScreen';
 import SearchResultScreen from './SearchResultScreen';
 import SharedFolderScreen from './SharedFolderScreen';
-import UseRecipeScreen from './UseRecipeScreen'; // 🔧 UseRecipeScreen import 추가
+import UseRecipeScreen from './UseRecipeScreen';
 
 // EnhancedIngredient 타입 정의
 export interface EnhancedIngredient extends RecipeIngredient {
@@ -21,7 +21,7 @@ export interface RecipeIngredient {
   name: string;
   quantity: number;
   unit: string;
-  instead?: string; // ✅ 대체 재료 필드 추가
+  instead?: string;
 }
 
 export interface Recipe {
@@ -33,7 +33,7 @@ export interface Recipe {
   createdAt: string;
   updatedAt?: string;
 }
-// 네비게이션 타입 정의
+
 export type RecipeStackParamList = {
   RecipeHome: {
     fridgeId: number;
@@ -46,16 +46,17 @@ export type RecipeStackParamList = {
     isNewRecipe?: boolean;
     fridgeId: number;
     fridgeName: string;
+    currentFridgeId?: number;
     aiGeneratedData?: Partial<Recipe>;
-    isSharedRecipe?: boolean; // 🔧 AI 생성 데이터 전달용 추가
+    isSharedRecipe?: boolean;
   };
-  Search: undefined; // 파라미터 없음으로 정의
+  Search: undefined;
   SearchResult: {
     query: string;
   };
   SharedFolder: {
-    currentFridgeId?: number; // 👈 추가
-    currentFridgeName?: string; // 👈 추가
+    currentFridgeId?: number;
+    currentFridgeName?: string;
   };
   UseRecipe: {
     recipe: Recipe;

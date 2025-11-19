@@ -148,13 +148,13 @@ export interface MatchedIngredientSeparate {
 
 // FridgeItem 타입 (fridgeStorage에서 사용)
 export interface FridgeItem {
-  id: string;
+  id: number;
   name: string;
   quantity: number;
   unit?: string;
   expiryDate?: string;
   category?: string;
-  fridgeId: string;
+  fridgeId: number;
   addedBy?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -178,9 +178,9 @@ export type RootStackParamList = {
   Splash: undefined;
   Login: undefined;
   FridgeSelect: undefined;
-  MainTabs: { fridgeId: string; fridgeName: string };
+  MainTabs: { fridgeId: number; fridgeName: string };
   CameraScreen: {
-    fridgeId: string;
+    fridgeId: number;
   };
 
   PhotoPreview: {
@@ -196,7 +196,7 @@ export type RootStackParamList = {
   };
 
   AddItemScreen: {
-    fridgeId: string;
+    fridgeId: number;
     // 1. 직접 추가 - 파라미터 없음
     // 2. 카메라 → 수동 입력
     recognizedData?: {
@@ -212,7 +212,7 @@ export type RootStackParamList = {
     scanMode?: 'ingredient' | 'receipt';
   };
   FridgeSettings: {
-    fridgeId: string;
+    fridgeId: number;
     fridgeName: string;
     userRole: 'owner' | 'member';
   };
@@ -220,9 +220,9 @@ export type RootStackParamList = {
 };
 
 export type MainTabParamList = {
-  FridgeHomeScreen: { fridgeId: string; fridgeName: string };
-  Recipe: { fridgeId: string; fridgeName: string };
-  ShoppingListScreen: { fridgeId: string; fridgeName: string };
+  FridgeHomeScreen: { fridgeId: number; fridgeName: string };
+  Recipe: { fridgeId: number; fridgeName: string };
+  ShoppingListScreen: { fridgeId: number; fridgeName: string };
 };
 
 export type NavigationProps<T extends keyof RootStackParamList> = {

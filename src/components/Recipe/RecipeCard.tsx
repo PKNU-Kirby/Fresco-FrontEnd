@@ -48,8 +48,6 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
   // 재료 가능 상태 표시 컴포넌트 (대체재료 포함)
   const renderIngredientStatus = () => {
-    if (totalIngredientsCount === 0) return null;
-
     return (
       <View style={styles.ingredientStatus}>
         <View
