@@ -15,7 +15,7 @@ export type FridgeItem = {
   expiryDate: string;
   imageUri?: string;
   itemCategory: string;
-  fridgeId: string;
+  fridgeId: number;
   unit?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -41,7 +41,7 @@ const CATEGORY_ID_TO_NAME: { [key: number]: string } = {
 // API 응답을 FridgeItem으로 변환
 const mapApiItemToFridgeItem = (
   apiItem: RefrigeratorIngredientResponse,
-  actualFridgeId: string,
+  actualFridgeId: number,
 ): FridgeItem => ({
   id: apiItem.id,
   name: apiItem.ingredientName,
@@ -66,7 +66,7 @@ const getFridgeItemsFromStorage = async (): Promise<FridgeItem[]> => {
 };
 
 const getFridgeItemsByFridgeIdFromStorage = async (
-  fridgeId: string,
+  fridgeId: number,
 ): Promise<FridgeItem[]> => {
   try {
     const allItems = await getFridgeItemsFromStorage();
@@ -123,7 +123,7 @@ export const getFridgeItemsByFridgeId = async (
  * 아이템 업데이트 (API 우선, AsyncStorage fallback)
  */
 export const updateFridgeItem = async (
-  itemId: string,
+  itemId: number,
   updates: Partial<Omit<FridgeItem, 'id' | 'createdAt'>>,
 ): Promise<void> => {
   try {
@@ -173,7 +173,7 @@ export const updateFridgeItem = async (
 /**
  * 여러 아이템 배치 삭제 (API 우선, AsyncStorage fallback)
  */
-export const batchDeleteItems = async (itemIds: string[]): Promise<void> => {
+export const batchDeleteItems = async (itemIds: number[]): Promise<void> => {
   try {
     await IngredientControllerAPI.batchDeleteIngredients(itemIds);
     console.log(`API를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`);
@@ -241,7 +241,7 @@ export const batchDeleteItems = async (itemIds: string[]): Promise<void> => {
 /**
  * 기존 deleteItemFromFridge를 배치 삭제로 래핑
  */
-export const deleteItemFromFridge = async (itemId: string): Promise<void> => {
+export const deleteItemFromFridge = async (itemId: number): Promise<void> => {
   return await batchDeleteItems([itemId]);
 };
 
@@ -300,10 +300,10 @@ export const confirmMultipleIngredients = async (
  * ⚠️ 수정: 올바른 API 함수 호출
  */
 export const addConfirmedIngredientsToFridge = async (
-  fridgeId: string,
+  fridgeId: number,
   confirmedIngredients: Array<{
     userInput: {
-      id: string;
+      id: number;
       name: string;
       quantity: number;
       unit: string;
@@ -345,12 +345,12 @@ export const addConfirmedIngredientsToFridge = async (
       const currentTime = new Date().toISOString();
       const maxId =
         existingItems.length > 0
-          ? Math.max(...existingItems.map(item => parseInt(item.id, 10)))
+          ? Math.max(...existingItems.map(item => item.id))
           : 0;
 
       const newItems: FridgeItem[] = confirmedIngredients.map(
         (confirmed, index) => ({
-          id: (maxId + index + 1).toString(),
+          id: maxId + index + 1,
           name: confirmed.apiResult.ingredientName,
           quantity: confirmed.userInput.quantity,
           unit: confirmed.userInput.unit,
@@ -383,7 +383,7 @@ export const addConfirmedIngredientsToFridge = async (
  * 단일 아이템 추가 (기존 함수 - 호환성 유지)
  */
 export const addItemToFridge = async (
-  fridgeId: string,
+  fridgeId: number,
   item: Omit<FridgeItem, 'id' | 'createdAt' | 'updatedAt'>,
   categoryId: number = 0,
 ): Promise<FridgeItem> => {
@@ -395,7 +395,7 @@ export const addItemToFridge = async (
     );
 
     const mappedResult: FridgeItem = {
-      id: `new_${Date.now()}`,
+      id: Date.now(),
       name: item.name,
       quantity: item.quantity,
       unit: item.unit || 'g',
@@ -415,12 +415,12 @@ export const addItemToFridge = async (
     const currentTime = new Date().toISOString();
     const maxId =
       existingItems.length > 0
-        ? Math.max(...existingItems.map(item => parseInt(item.id, 10)))
+        ? Math.max(...existingItems.map(item => item.id))
         : 0;
 
     const newItem: FridgeItem = {
       ...item,
-      id: (maxId + 1).toString(),
+      id: maxId + 1,
       fridgeId,
       createdAt: currentTime,
       updatedAt: currentTime,

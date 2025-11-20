@@ -1,6 +1,5 @@
 import { ApiService } from '../apiServices';
 import { Platform } from 'react-native';
-import { launchImageLibrary, MediaType } from 'react-native-image-picker';
 import Config from '../../types/config';
 
 // 식재료 관련 타입
@@ -85,7 +84,7 @@ export type PhotoScanResult = {
 // ConfirmedIngredient 타입
 export type ConfirmedIngredient = {
   userInput: {
-    id: string;
+    id: number;
     name: string;
     quantity: number;
     unit: string;
@@ -359,7 +358,7 @@ export class IngredientControllerAPI {
    */
   static async validateFormDataTransmissionWithFridgeId(
     imageUri: string,
-    fridgeId: string,
+    fridgeId: number,
   ): Promise<void> {
     try {
       console.log('=== FormData 전송 검증 시작 (fridgeId 포함) ===');
@@ -430,7 +429,7 @@ export class IngredientControllerAPI {
    * 서버 파라미터 요구사항 검증 (refrigeratorId 포함)
    */
   static async validateServerParametersWithFridgeId(
-    fridgeId: string,
+    fridgeId: number,
   ): Promise<void> {
     console.log('=== 서버 파라미터 요구사항 검증 (fridgeId 포함) ===');
 
@@ -851,7 +850,7 @@ export class IngredientControllerAPI {
     }
   }
   static async addIngredientsToRefrigerator(
-    refrigeratorId: string,
+    refrigeratorId: number,
     saveRequest: SaveIngredientsRequest,
   ): Promise<any> {
     console.log('=== addIngredientsToRefrigerator 디버깅 ===');
@@ -954,7 +953,7 @@ export class IngredientControllerAPI {
   }
 
   static async addConfirmedIngredients(
-    fridgeId: string,
+    fridgeId: number,
     confirmedIngredients: ConfirmedIngredient[],
   ): Promise<any> {
     const saveRequest: SaveIngredientsRequest = {
@@ -973,12 +972,12 @@ export class IngredientControllerAPI {
     return this.addIngredientsToRefrigerator(fridgeId, saveRequest);
   }
 
-  static async batchDeleteIngredients(ingredientIds: string[]): Promise<void> {
+  static async batchDeleteIngredients(ingredientIds: number[]): Promise<void> {
     try {
       console.log('=== 배치 삭제 디버깅 ===');
       console.log('입력 ID들:', ingredientIds);
 
-      const numericIds = ingredientIds.map(id => parseInt(id, 10));
+      const numericIds = ingredientIds.map(id => id);
       console.log('숫자 ID들:', numericIds);
 
       // API 문서대로: ids=1&ids=2 형식

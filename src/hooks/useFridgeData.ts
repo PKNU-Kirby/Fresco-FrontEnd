@@ -12,7 +12,7 @@ import { UsageTrackingService } from '../services/UsageTrackingService';
 export const ALLOWED_UNITS = ['kg', 'g', 'L', 'ml', '개'] as const;
 export type UnitType = (typeof ALLOWED_UNITS)[number];
 
-export const useFridgeData = (fridgeId: string) => {
+export const useFridgeData = (fridgeId: number) => {
   // 식재료 카테고리 목록
   const [itemCategories, setItemCategories] = useState<string[]>([]);
   // API에서 가져온 냉장고 아이템들
@@ -88,7 +88,7 @@ export const useFridgeData = (fridgeId: string) => {
 
   // 단일 아이템 삭제 함수 (API 사용)
   const deleteItem = useCallback(
-    async (itemId: string) => {
+    async (itemId: number) => {
       try {
         const currentItem = fridgeItems.find(item => item.id === itemId);
 
@@ -119,7 +119,7 @@ export const useFridgeData = (fridgeId: string) => {
 
   // ✅ 새로 추가: 편집 모드용 로컬 상태 업데이트 함수들
   const updateItemQuantityLocal = useCallback(
-    (itemId: string, newQuantity: number) => {
+    (itemId: number, newQuantity: number) => {
       setFridgeItems(prev =>
         prev.map(item =>
           item.id === itemId ? { ...item, quantity: newQuantity } : item,
@@ -130,7 +130,7 @@ export const useFridgeData = (fridgeId: string) => {
   );
 
   const updateItemUnitLocal = useCallback(
-    (itemId: string, newUnit: UnitType) => {
+    (itemId: number, newUnit: UnitType) => {
       if (!ALLOWED_UNITS.includes(newUnit)) {
         console.warn(`허용되지 않은 단위입니다: ${newUnit}`);
         return;
@@ -146,7 +146,7 @@ export const useFridgeData = (fridgeId: string) => {
   );
 
   const updateItemExpiryDateLocal = useCallback(
-    (itemId: string, newDate: string) => {
+    (itemId: number, newDate: string) => {
       setFridgeItems(prev =>
         prev.map(item =>
           item.id === itemId ? { ...item, expiryDate: newDate } : item,
@@ -158,7 +158,7 @@ export const useFridgeData = (fridgeId: string) => {
 
   // 아이템 수량 변경 함수 (API 사용)
   const updateItemQuantity = useCallback(
-    async (itemId: string, newQuantity: number) => {
+    async (itemId: number, newQuantity: number) => {
       try {
         await updateFridgeItem(itemId, { quantity: newQuantity });
 
@@ -178,7 +178,7 @@ export const useFridgeData = (fridgeId: string) => {
 
   // 아이템 단위 변경 함수 (API 사용)
   const updateItemUnit = useCallback(
-    async (itemId: string, newUnit: UnitType) => {
+    async (itemId: number, newUnit: UnitType) => {
       if (!ALLOWED_UNITS.includes(newUnit)) {
         console.warn(`허용되지 않은 단위입니다: ${newUnit}`);
         return;
@@ -203,7 +203,7 @@ export const useFridgeData = (fridgeId: string) => {
 
   // 아이템 소비기한 변경 함수 (API 사용)
   const updateItemExpiryDate = useCallback(
-    async (itemId: string, newDate: string) => {
+    async (itemId: number, newDate: string) => {
       try {
         await updateFridgeItem(itemId, { expiryDate: newDate });
 

@@ -297,7 +297,7 @@ export const createRefrigerator = async (name: string) => {
   return response.json();
 };
 
-export const updateRefrigerator = async (id: string, data: any) => {
+export const updateRefrigerator = async (id: number, data: any) => {
   const response = await apiCall(API_ENDPOINTS.REFRIGERATOR.UPDATE(id), {
     method: 'PUT',
     body: JSON.stringify(data),
@@ -310,7 +310,7 @@ export const updateRefrigerator = async (id: string, data: any) => {
   return response.json();
 };
 
-export const getRefrigeratorDetail = async (id: string) => {
+export const getRefrigeratorDetail = async (id: number) => {
   const response = await apiCall(API_ENDPOINTS.REFRIGERATOR.DETAIL(id), {
     method: 'GET',
   });
@@ -323,7 +323,7 @@ export const getRefrigeratorDetail = async (id: string) => {
 };
 
 // 냉장고 사용자 목록 조회
-export const getRefrigeratorUsers = async (refrigeratorId: string) => {
+export const getRefrigeratorUsers = async (refrigeratorId: number) => {
   const response = await apiCall(
     API_ENDPOINTS.REFRIGERATOR.USERS.LIST(refrigeratorId),
     {

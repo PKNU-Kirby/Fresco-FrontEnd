@@ -5,9 +5,9 @@ export type SocialProvider = 'KAKAO' | 'NAVER';
 // ============================================================================
 
 export interface User {
-  id: string; // BIGINT -> string으로 처리 (실제 DB의 사용자 ID)
+  id: number; // BIGINT -> string으로 처리 (실제 DB의 사용자 ID)
   provider: SocialProvider; // ENUM('KAKAO', 'NAVER')
-  providerId: string; // VARCHAR(30) - 소셜 제공자의 고유 ID
+  providerId: number; // VARCHAR(30) - 소셜 제공자의 고유 ID
   name: string; // VARCHAR(20) - 사용자 이름
   fcmToken?: string; // VARCHAR(255) - FCM 토큰 (nullable)
   createdAt: string; // TIMESTAMP - 생성 시간
@@ -72,7 +72,7 @@ export interface LoginResponse {
   code: string;
   message: string;
   result: {
-    userId: string; // 실제 DB의 사용자 ID
+    userId: number; // 실제 DB의 사용자 ID
     accessToken: string;
     refreshToken: string;
     user?: User; // 사용자 정보 (선택적)
@@ -120,9 +120,9 @@ export type StorageKey =
 
 // ERD 기반 저장될 사용자 정보
 export interface StoredUserProfile {
-  userId: string; // 실제 DB의 사용자 ID (서버에서 받음)
+  userId: number; // 실제 DB의 사용자 ID (서버에서 받음)
   provider: SocialProvider;
-  providerId: string; // 소셜 제공자의 고유 ID
+  providerId: number; // 소셜 제공자의 고유 ID
   name: string;
   email?: string;
   profileImage?: string;
@@ -139,7 +139,7 @@ export interface LoginButtonProps {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   saveUserDataAndNavigate: (
     provider: SocialProvider,
-    providerId: string,
+    providerId: number,
     name: string,
     email?: string,
     profileImage?: string,
@@ -214,9 +214,9 @@ export type RootStackParamList = {
       memberCount?: number;
     };
   };
-  MainTabs: { fridgeId: string; fridgeName: string };
+  MainTabs: { fridgeId: number; fridgeName: string };
   CameraScreen: {
-    fridgeId: string;
+    fridgeId: number;
   };
 
   PhotoPreview: {
@@ -228,11 +228,11 @@ export type RootStackParamList = {
       type?: string;
       fileName?: string;
     };
-    fridgeId: string;
+    fridgeId: number;
   };
 
   AddItemScreen: {
-    fridgeId: string;
+    fridgeId: number;
     // 1. 직접 추가 - 파라미터 없음
     // 2. 카메라 → 수동 입력
     recognizedData?: {
@@ -248,7 +248,7 @@ export type RootStackParamList = {
     scanMode?: 'ingredient' | 'receipt';
   };
   FridgeSettings: {
-    fridgeId: string;
+    fridgeId: number;
     fridgeName: string;
     userRole: 'owner' | 'member'; // 권한에 따른 UI 분리
   };

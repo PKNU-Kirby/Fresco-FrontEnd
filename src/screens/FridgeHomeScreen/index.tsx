@@ -209,7 +209,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
 
   // 수정된 로컬 상태 변경 핸들러들
   const handleQuantityChange = useCallback(
-    async (itemId: string, newQuantity: number) => {
+    async (itemId: number, newQuantity: number) => {
       if (isEditMode) {
         // 편집 모드에서는 로컬 상태만 변경
         console.log(`로컬 수량 변경: ${itemId} -> ${newQuantity}`);
