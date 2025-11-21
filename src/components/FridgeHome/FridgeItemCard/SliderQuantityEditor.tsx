@@ -31,6 +31,19 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
   const [_isInputFocused, setIsInputFocused] = useState(false);
   const [_hasUserInteracted, setHasUserInteracted] = useState(false);
   const [isSliderMode, setIsSliderMode] = useState(false);
+  const [tempSliderValue, setTempSliderValue] = useState(quantity);
+  const [localMaxQuantity, setLocalMaxQuantity] = useState(maxQuantity);
+
+  useEffect(() => {
+    if (!_isSliding) {
+      setTempSliderValue(quantity);
+    }
+  }, [quantity, _isSliding]);
+
+  // maxQuantity 초기화 (슬라이더 범위는 고정)
+  useEffect(() => {
+    setLocalMaxQuantity(maxQuantity);
+  }, [maxQuantity]);
 
   // 수량 포맷 함수: 정수면 소수점 없이, 소수면 둘째자리까지
   const formatQuantity = (value: number | string): number => {
@@ -108,7 +121,7 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     return false;
   };
 
-  // 스테퍼 증가/감소 (무조건 1.0 단위)
+  // 스테퍼 증가 버튼을 눌렀을 때만 maxQuantity 업데이트
   const handleStepperChange = (increment: boolean) => {
     const currentValue = quantity || 0;
     const step = stepperStep;
@@ -116,14 +129,12 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
 
     if (increment) {
       newValue = currentValue + step;
-      // 플러스 버튼으로 maxQuantity 초과 시 maxQuantity 업데이트
+      // 🟢 스테퍼 플러스 버튼으로만 maxQuantity 초과 가능
       if (newValue > maxQuantity) {
         onMaxQuantityChange?.(newValue);
       }
     } else {
       newValue = Math.max(0, currentValue - step);
-
-      // 0이 되면 삭제 모달 트리거
       if (checkAndTriggerDelete(newValue)) {
         return;
       }
@@ -134,21 +145,32 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     onQuantityChange(newValue);
   };
 
-  // 슬라이더 변경 시 소수점 표시
+  // 슬라이더 변경 시 - tempSliderValue만 업데이트
   const handleSliderChange = (value: number) => {
-    console.log('>> Slider changed:', {
-      rawValue: value,
-      maxQuantity,
-      unit,
-      step: sliderStep,
-      roundedValue: roundToStep(value, sliderStep),
-    });
-
     setHasUserInteracted(true);
+    const roundedValue = roundToStep(value, sliderStep);
+    const clampedValue = Math.max(0, Math.min(roundedValue, localMaxQuantity));
+
+    let finalValue;
+    if (sliderStep >= 1) {
+      finalValue = Math.round(clampedValue);
+    } else if (sliderStep === 0.1) {
+      finalValue = Math.round(clampedValue * 10) / 10;
+    } else {
+      finalValue = Math.round(clampedValue * 100) / 100;
+    }
+
+    // 슬라이딩 중에는 tempSliderValue만 업데이트
+    setTempSliderValue(formatQuantity(finalValue));
+  };
+
+  const handleSliderComplete = (value: number) => {
+    setIsSliding(false);
+    setHasUserInteracted(true);
+
     const roundedValue = roundToStep(value, sliderStep);
     const clampedValue = Math.max(0, Math.min(roundedValue, maxQuantity));
 
-    // 0이 되면 삭제 모달 트리거
     if (checkAndTriggerDelete(clampedValue)) {
       return;
     }
@@ -159,24 +181,18 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     } else if (sliderStep === 0.1) {
       finalValue = Math.round(clampedValue * 10) / 10;
     } else {
-      // 0.01
       finalValue = Math.round(clampedValue * 100) / 100;
     }
 
+    // quantity만 변경, maxQuantity는 변경 안함
     onQuantityChange(formatQuantity(finalValue));
   };
 
-  const handleSliderComplete = (value: number) => {
-    setIsSliding(false);
-    setHasUserInteracted(true);
-    handleSliderChange(value);
-  };
-
   // 직접 입력 처리
+  // 키보드 입력으로도 maxQuantity 초과 가능
   const handleTextChange = (text: string) => {
     let cleanText = text.replace(/[^0-9.]/g, '');
 
-    // 소수점이 여러 개 있으면 첫 번째만 유지
     const parts = cleanText.split('.');
     if (parts.length > 2) {
       cleanText = parts[0] + '.' + parts.slice(1).join('');
@@ -184,7 +200,7 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
 
     setHasUserInteracted(true);
 
-    // 키보드 입력으로 maxQuantity 초과 시 maxQuantity 업데이트
+    // 🟢 키보드 입력으로만 maxQuantity 초과 가능
     if (cleanText !== '') {
       const numValue = parseFloat(cleanText) || 0;
       if (numValue > maxQuantity) {
@@ -323,8 +339,8 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
               onValueChange={handleSliderChange}
               onSlidingStart={() => setIsSliding(true)}
               onSlidingComplete={handleSliderComplete}
-              minimumTrackTintColor="limegreen"
-              maximumTrackTintColor="#f2f2f2"
+              minimumTrackTintColor="rgba(47, 72, 88, 0.5)"
+              maximumTrackTintColor="#d2d2d2"
               thumbTintColor={thumbColor}
               disabled={!isEditMode}
             />

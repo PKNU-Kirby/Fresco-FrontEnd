@@ -1,14 +1,20 @@
+// FridgeHome -> FridgeItemCard
+//
+// TODO
+// FridgeItem 타입 맞추기
 import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
+//
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import DatePicker from '../../modals/DatePicker';
-import SliderQuantityEditor from './SliderQuantityEditor';
+//
 import UnitSelector from './UnitSelector';
 import DeleteButton from './DeleteButton';
+import DatePicker from '../../modals/DatePicker';
 import ConfirmModal from '../../modals/ConfirmModal';
+import SliderQuantityEditor from './SliderQuantityEditor';
 import { cardStyles as styles } from './styles';
 
-// 카테고리별 아이콘 설정
+// 카테고리별 아이콘,
 const getCategoryIcon = (category: string) => {
   const iconMap: { [key: string]: { name: string; color: string } } = {
     베이커리: { name: 'bread-slice', color: '#999' },
@@ -47,7 +53,7 @@ type FridgeItemCardProps = {
   onExpiryDateChange?: (itemId: number, newDate: string) => void;
   onUnitChange?: (itemId: number, newUnit: string) => void;
   onDeleteItem?: (itemId: number) => void;
-  onMaxQuantityChange?: (itemId: string, newMaxQuantity: number) => void;
+  onMaxQuantityChange?: (itemId: number, newMaxQuantity: number) => void;
 };
 
 const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
@@ -60,13 +66,14 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
   onDeleteItem,
   onMaxQuantityChange,
 }) => {
-  const [localQuantity, setLocalQuantity] = useState(item.quantity);
-  const [localUnit, setLocalUnit] = useState(item.unit || '개');
-  const [localExpiryDate, setLocalExpiryDate] = useState(item.expiryDate);
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isSliderActive, _setIsSliderActive] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [localUnit, setLocalUnit] = useState(item.unit || '개');
+  const [localQuantity, setLocalQuantity] = useState(item.quantity);
   const [previousQuantity, setPreviousQuantity] = useState(item.quantity);
+  const [localExpiryDate, setLocalExpiryDate] = useState(item.expiryDate);
   const [maxQuantity, setMaxQuantity] = useState(
     item.maxQuantity || item.quantity || 10,
   );
@@ -89,7 +96,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     return diffDays;
   };
 
-  // 소비기한 상태 계산
+  // 소비기한 상태 계산 : isExpiringSoon / isExpired
   const daysLeft = getDaysUntilExpiry(localExpiryDate);
   const isExpiringSoon = daysLeft <= 3 && daysLeft >= 0; // 3일 이하
   const isExpired = daysLeft < 0; // 지남
@@ -113,7 +120,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     return styles.editableExpiry;
   };
 
-  // 수량 포맷 -> 정수면 소수점 없이, 소수면 둘째자리까지
+  // Quantity 포맷 -> 정수면 소수점 없이, 소수면 둘째자리까지
   const formatQuantity = (value: number | string): string => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(numValue)) return '0';
@@ -125,7 +132,8 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     }
   };
 
-  // (!EditMode -> EditMode) : init maxQuantity
+  // (!EditMode -> EditMode)
+  // init maxQuantity
   useEffect(() => {
     if (isEditMode) {
       const currentQuantity = item.quantity || 10;
@@ -142,7 +150,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     setLocalQuantity(item.quantity);
   }, [item.quantity]);
 
-  // item.maxQuantity prop 변경 시 maxQuantity 동기화
+  // item.maxQuantity prop 변경 -> maxQuantity 동기화
   useEffect(() => {
     if (item.maxQuantity !== undefined && item.maxQuantity !== maxQuantity) {
       setMaxQuantity(item.maxQuantity);
@@ -164,6 +172,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     onExpiryDateChange?.(item.id, formattedDate);
   };
 
+  // Handle : Quantity 변경
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity === 0) {
       setLocalQuantity(newQuantity);
@@ -172,32 +181,39 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
 
     setLocalQuantity(newQuantity);
     onQuantityChange?.(item.id, newQuantity);
-  };
 
-  const handleMaxQuantityChange = (newMaxQuantity: number) => {
-    if (newMaxQuantity > maxQuantity) {
-      setMaxQuantity(newMaxQuantity);
-      onMaxQuantityChange?.(item.id.toString(), newMaxQuantity);
+    if (newQuantity > maxQuantity && !isSliderActive) {
+      setMaxQuantity(newQuantity);
     }
   };
 
-  const handleDeleteRequest = () => {
-    // SliderQuantityEditor에서 0이 되면 호출됨
-    console.log('>> handleDeleteRequest called in FridgeItemCard');
-    setPreviousQuantity(localQuantity);
-    setShowDeleteModal(true);
-    console.log('>> showDeleteModal set to true');
+  // 총량 변화시 적용
+  const handleMaxQuantityChange = (newMaxQuantity: number) => {
+    if (newMaxQuantity > maxQuantity) {
+      setMaxQuantity(newMaxQuantity);
+      onMaxQuantityChange?.(item.id, newMaxQuantity);
+    }
   };
 
+  // Handle : 식재료 삭제
+  const handleDeleteRequest = () => {
+    // SliderQuantityEditor에서 0이 되면 호출됨
+    setPreviousQuantity(localQuantity);
+    setShowDeleteModal(true);
+  };
+
+  // Modal : 식제료 삭제 확인
   const handleDeleteConfirm = (_name: string) => {
     setShowDeleteModal(true);
   };
 
+  // Handle : 식재료 삭제 [확인]
   const handleConfirmDelete = () => {
     setShowDeleteModal(false);
     onDeleteItem?.(item.id);
   };
 
+  // Handle : 식제료 삭제 [취소]
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
     // 삭제 취소 시 이전 수량으로 복원
@@ -225,13 +241,14 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
           <DeleteButton onPress={() => handleDeleteConfirm(item.name)} />
         )}
 
-        {/* 소비기한 경고 배지 (일반 모드에서만 표시) */}
+        {/* 소비기한 경고 배지 ( !isEditMode ) */}
         {!isEditMode && (isExpiringSoon || isExpired) && (
           <View style={[styles.expiryBadge, isExpired && styles.expiredBadge]}>
             <Text style={styles.expiryBadgeText}>{getExpiryWarningText()}</Text>
           </View>
         )}
 
+        {/* 카테고리별 아이콘 이미지 */}
         <View style={styles.itemImageContainer}>
           <View style={styles.itemImagePlaceholder}>
             <Icon
@@ -245,18 +262,29 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
         <View style={styles.itemInfo}>
           <View style={styles.itemHeader}>
             <Text style={styles.itemName}>{item.name}</Text>
-            {isEditMode && (
+
+            {isEditMode ? (
               <TouchableOpacity
                 style={styles.expiaryContainer}
                 onPress={() => setShowDatePicker(true)}
               >
-                <Text style={[styles.itemExpiry, getEditExpiryStyle()]}>
-                  [{localExpiryDate}]
+                <Text
+                  style={[
+                    styles.itemExpiryNormal,
+                    isExpiringSoon && styles.itemExpiringSoon,
+                    isExpired && styles.itemExpired,
+                    getEditExpiryStyle(),
+                  ]}
+                >
+                  {localExpiryDate}
                 </Text>
               </TouchableOpacity>
+            ) : (
+              <View />
             )}
           </View>
 
+          {/* 슬라이더 수량 편집기 (isEditMode) */}
           {isEditMode ? (
             <View style={styles.itemDetails}>
               <SliderQuantityEditor
@@ -274,12 +302,14 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
           ) : (
             <>
               <View style={styles.itemDetails}>
-                <Text style={styles.itemQuantity}>
-                  {formatQuantity(item.quantity)} {item.unit || '개'}
-                </Text>
+                <View style={styles.itemQuantityContainer}>
+                  <Text style={styles.itemQuantity}>
+                    {formatQuantity(item.quantity)} {item.unit || '개'}
+                  </Text>
+                </View>
                 <Text
                   style={[
-                    styles.itemExpiry,
+                    styles.itemExpiary,
                     isExpiringSoon && styles.expiryTextSoon,
                     isExpired && styles.expiryTextExpired,
                   ]}
@@ -293,7 +323,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
         </View>
       </CardComponent>
 
-      {/* 기존 모달들 */}
+      {/* Modals */}
       <UnitSelector
         visible={showUnitModal}
         selectedUnit={localUnit}
@@ -301,14 +331,12 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
         onSelect={handleUnitSelect}
         onClose={() => setShowUnitModal(false)}
       />
-
       <DatePicker
         visible={showDatePicker}
         initialDate={localExpiryDate}
         onDateSelect={handleDateSelect}
         onClose={() => setShowDatePicker(false)}
       />
-
       <ConfirmModal
         visible={showDeleteModal}
         title="식재료 삭제"

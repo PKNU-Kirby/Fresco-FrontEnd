@@ -61,9 +61,13 @@ const FridgeSettingsScreen = ({ route }: Props) => {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <BackButton onPress={handleBack} />
-          <Text style={styles.headerTitle}>냉장고 설정</Text>
-          <View style={styles.headerRight} />
+          <View style={styles.leftSection}>
+            <BackButton onPress={handleBack} />
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.headerTitle}>냉장고 설정</Text>
+          </View>
+          <View style={styles.rightSection} />
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#2F4858" />
@@ -77,9 +81,13 @@ const FridgeSettingsScreen = ({ route }: Props) => {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <BackButton onPress={handleBack} />
-        <Text style={styles.headerTitle}>냉장고 설정</Text>
-        <View style={styles.headerRight} />
+        <View style={styles.leftSection}>
+          <BackButton onPress={handleBack} />
+        </View>
+        <View style={styles.centerSection}>
+          <Text style={styles.headerTitle}>냉장고 설정</Text>
+        </View>
+        <View style={styles.rightSection} />
       </View>
       <ScrollView
         style={styles.settingsContainer}

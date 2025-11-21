@@ -15,7 +15,7 @@ const OptionButton: React.FC<OptionButtonProps> = ({
   iconName,
   text,
   onPress,
-  iconColor = '#666',
+  iconColor = '#333',
   iconSize = 24,
 }) => {
   return (
@@ -25,7 +25,7 @@ const OptionButton: React.FC<OptionButtonProps> = ({
       accessible={true}
       accessibilityLabel={`${text} 옵션`}
       accessibilityRole="button"
-      activeOpacity={0.7}
+      activeOpacity={0.6}
     >
       <View style={styles.optionIcon}>
         <FontAwesome6 name={iconName} size={iconSize} color={iconColor} />

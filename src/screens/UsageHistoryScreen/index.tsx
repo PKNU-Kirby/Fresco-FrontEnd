@@ -9,7 +9,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import BackButton from '../../components/_common/BackButton';
 import DateRangePicker from '../../components/modals/DateRangePicker';
@@ -18,6 +17,8 @@ import {
   UsageTrackingService,
   UsageRecord,
 } from '../../services/UsageTrackingService';
+import { AsyncStorageService } from '../../services/AsyncStorageService';
+import { getTokenUserId } from '../../utils/authUtils';
 import { styles } from './styles';
 
 type Props = {
@@ -42,18 +43,52 @@ const UsageHistoryScreen = ({ route }: Props) => {
   const [usageRecords, setUsageRecords] = useState<UsageRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 사용 기록 로드 - useCallback으로 메모이제이션
+  // 🟢 useFridgeSelect와 동일한 방식으로 사용자 정보 로드
+  const initializeUser = async () => {
+    try {
+      const tokenUserId = Number(await getTokenUserId());
+      const localUserId = Number(await AsyncStorageService.getCurrentUserId());
+
+      console.log('✅ 토큰 사용자 ID:', tokenUserId);
+      console.log('✅ 로컬 사용자 ID:', localUserId);
+
+      if (!tokenUserId) {
+        console.error('❌ 토큰 사용자 ID 없음');
+        return;
+      }
+    } catch (error) {
+      console.error('❌ 사용자 정보 로드 실패:', error);
+    }
+  };
+
+  // 사용 기록 로드
   const loadUsageRecords = useCallback(async () => {
     try {
       setIsLoading(true);
       console.log(`📡 냉장고 ${fridgeId}의 사용 기록 로드 시작...`);
-
       const records = await UsageTrackingService.getFridgeUsageRecords(
         fridgeId,
       );
-
       console.log(`✅ ${records.length}개의 사용 기록 로드 완료`);
-      setUsageRecords(records);
+
+      // usedQuantity가 0인 기록 필터링 & 사용자 이름 매핑
+      const recordsWithUserName = records
+        .filter(record => record.usedQuantity !== 0) // 🟢 usedQuantity가 0이 아닌 것만 표시
+        .map(record => {
+          // 🟢 백엔드에서 제공하는 consumerName 사용
+          const displayName = record.consumerName || '알 수 없음';
+
+          console.log(
+            `👤 기록 ${record.id}: consumerName=${record.consumerName}, displayName=${displayName}, usedQuantity=${record.usedQuantity}`,
+          );
+
+          return {
+            ...record,
+            userName: displayName,
+          };
+        });
+
+      setUsageRecords(recordsWithUserName);
     } catch (error) {
       console.error('❌ 사용 기록 로드 실패:', error);
       setUsageRecords([]);
@@ -62,7 +97,12 @@ const UsageHistoryScreen = ({ route }: Props) => {
     }
   }, [fridgeId]);
 
-  // 초기 로드
+  // 초기 사용자 정보 로드
+  useEffect(() => {
+    initializeUser();
+  }, []);
+
+  // 사용자 정보 로드 후 사용 기록 로드
   useEffect(() => {
     loadUsageRecords();
   }, [loadUsageRecords]);
@@ -121,7 +161,6 @@ const UsageHistoryScreen = ({ route }: Props) => {
         const startDate = new Date(customDateRange.start.replace(/\./g, '-'));
         const endDate = new Date(customDateRange.end.replace(/\./g, '-'));
         endDate.setHours(23, 59, 59, 999);
-
         filteredData = usageRecords.filter(record => {
           const recordDate = new Date(record.usedAt);
           return recordDate >= startDate && recordDate <= endDate;
@@ -156,8 +195,20 @@ const UsageHistoryScreen = ({ route }: Props) => {
       );
   }, [usageRecords, activeFilter, customDateRange]);
 
-  // 사용 유형별 동사 반환
-  const getUsageTypeText = (usageType: UsageRecord['usageType']) => {
+  // 사용 유형별 텍스트 반환 (usedQuantity 고려)
+  const getUsageTypeText = (
+    usageType: UsageRecord['usageType'],
+    usedQuantity: number,
+    itemName: string,
+  ) => {
+    // usedQuantity가 음수인 경우 (수량 증가)
+    if (usedQuantity < 0) {
+      return `${itemName}의 수량을 ${Math.abs(
+        usedQuantity,
+      )}만큼 증가시켰습니다`;
+    }
+
+    // usedQuantity가 양수인 경우 (일반적인 사용/수정/삭제)
     switch (usageType) {
       case 'consume':
         return '사용했습니다';
@@ -172,27 +223,50 @@ const UsageHistoryScreen = ({ route }: Props) => {
     }
   };
 
-  const renderUsageItem = ({ item }: { item: UsageRecord }) => (
-    <View style={styles.usageCard}>
-      <View style={styles.usageHeader}>
-        <View style={styles.userIconContainer}>
-          <Ionicons name="person-circle" size={44} color="#2F4858" />
-        </View>
-        <View style={styles.usageInfo}>
-          <Text style={styles.usageText}>
-            <Text style={styles.userName}>{item.userName}</Text> 님이{' '}
-            <Text style={styles.itemName}>{item.itemName}</Text>{' '}
-            <Text style={styles.quantity}>
-              {item.quantity}
-              {item.unit}
-            </Text>
-            를 {getUsageTypeText(item.usageType)}
-          </Text>
-          <Text style={styles.usageTime}>{item.time}</Text>
+  const renderUsageItem = ({ item }: { item: UsageRecord }) => {
+    // usedQuantity가 음수인 경우 다른 형식으로 표시
+    const isIncrease = item.usedQuantity < 0;
+
+    return (
+      <View style={styles.usageCard}>
+        <View style={styles.usageHeader}>
+          <View style={styles.userIconContainer}>
+            <Ionicons name="person-circle" size={44} color="#2F4858" />
+          </View>
+          <View style={styles.usageInfo}>
+            {isIncrease ? (
+              // 수량 증가인 경우
+              <Text style={styles.usageText}>
+                <Text style={styles.userName}>{item.consumerName}</Text> 님이{' '}
+                {getUsageTypeText(
+                  item.usageType,
+                  item.usedQuantity,
+                  item.itemName,
+                )}
+              </Text>
+            ) : (
+              // 일반적인 사용/수정/삭제인 경우
+              <Text style={styles.usageText}>
+                <Text style={styles.userName}>{item.consumerName}</Text> 님이{' '}
+                <Text style={styles.itemName}>{item.itemName}</Text>{' '}
+                <Text style={styles.quantity}>
+                  {item.usedQuantity}
+                  {item.unit}
+                </Text>
+                를{' '}
+                {getUsageTypeText(
+                  item.usageType,
+                  item.usedQuantity,
+                  item.itemName,
+                )}
+              </Text>
+            )}
+            <Text style={styles.usageTime}>{item.time}</Text>
+          </View>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   const renderSectionHeader = ({ section }: { section: { title: string } }) => (
     <View style={styles.sectionHeader}>

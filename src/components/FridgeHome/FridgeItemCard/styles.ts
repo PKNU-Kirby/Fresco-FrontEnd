@@ -1,3 +1,4 @@
+// FridgeHome -> FridgeItemCard/ styles
 import { StyleSheet, Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -13,6 +14,13 @@ const scale = (size: number) => (width / baseWidth) * size;
 
 // Delete Button Styles : './DeleteButton.tsx'
 export const deleteButtonStyles = StyleSheet.create({
+  deleteItemButtonContainer: {
+    position: 'absolute',
+    top: scale(4),
+    right: scale(4),
+    width: scale(40),
+    height: scale(40),
+  },
   deleteItemButton: {
     position: 'absolute',
     top: scale(4),
@@ -28,13 +36,14 @@ export const deleteButtonStyles = StyleSheet.create({
 
 // Item Card Styles : './index.tsx'
 export const cardStyles = StyleSheet.create({
+  // 헤더
   itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 0,
+    marginBottom: scale(0),
   },
-
+  // 카드 전체 배경 스타일
   itemCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
@@ -43,7 +52,7 @@ export const cardStyles = StyleSheet.create({
     marginBottom: scale(16),
     shadowColor: '#000',
     shadowOffset: {
-      width: 0,
+      width: scale(0),
       height: scale(5),
     },
     shadowOpacity: 0.1,
@@ -52,52 +61,20 @@ export const cardStyles = StyleSheet.create({
     position: 'relative',
   },
 
-  // 소비기한 별 카드 스타일
+  // 소비기한 별 카드 스타일 ////////////////////////////////////////////////////////////////////////////////////////
   cardExpiringSoon: {
     borderWidth: scale(1),
-    borderColor: '#ffc8aaff',
+    borderColor: 'rgba(255, 200, 170, 0.25)',
     backgroundColor: '#fbe5d9ff',
   },
   cardExpired: {
     borderWidth: scale(1),
-    borderColor: '#ff7b82ff',
+    borderColor: 'rgba(255, 199, 199, 0.25)',
     backgroundColor: '#ffc7c7ff',
     opacity: 0.85,
   },
 
-  // 소비기한 경고 배지
-  expiryBadge: {
-    position: 'absolute',
-    top: scale(8),
-    right: scale(8),
-    backgroundColor: '#ffc8aaff',
-    paddingHorizontal: scale(8),
-    paddingVertical: scale(4),
-    borderRadius: scale(10),
-    zIndex: 10,
-  },
-  // 만료 배지
-  expiredBadge: {
-    backgroundColor: '#ff7b82ff',
-  },
-  // 배지 텍스트
-  expiryBadgeText: {
-    color: '#222',
-    fontSize: scale(13),
-    fontWeight: 'bold',
-  },
-
-  // 소비기한 텍스트 스타일
-  expiryTextSoon: {
-    color: '#39252A',
-    fontWeight: 'bold',
-  },
-  expiryTextExpired: {
-    color: '#39252A',
-    fontWeight: 'bold',
-    textDecorationLine: 'line-through',
-  },
-
+  // 아이템 아이콘 이미지 스타일 /////////////////////////////////////////////////////////////////////////////////////
   itemImageContainer: {
     marginRight: scale(16),
   },
@@ -110,6 +87,7 @@ export const cardStyles = StyleSheet.create({
     justifyContent: 'center',
   },
 
+  // 식재료 정보 부분 스타일 ////////////////////////////////////////////////////////////////////////////////////////
   itemInfo: {
     flex: 1,
     justifyContent: 'space-between',
@@ -118,27 +96,41 @@ export const cardStyles = StyleSheet.create({
     fontSize: scale(18),
     fontWeight: 'bold',
     color: '#333',
+    lineHeight: scale(30),
     flex: 1,
+    marginRight: scale(0),
   },
-  itemExpiry: {
-    fontSize: scale(14),
-    color: '#666',
+
+  // 소비기한 경고 배지 스타일 ///////////////////////////////////////////////////////////////////////////////////////
+  expiryBadge: {
+    position: 'absolute',
+    top: scale(8),
+    right: scale(8),
+    backgroundColor: '#ffc8aaff',
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
+    borderRadius: scale(10),
+    zIndex: 10,
   },
-  itemDetails: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  // 소비기한 만료 배지
+  expiredBadge: {
+    backgroundColor: '#ff7b82ff',
   },
-  itemQuantity: {
-    fontSize: scale(14),
-    color: '#666',
-    marginRight: scale(12),
+  // 배지 텍스트
+  expiryBadgeText: {
+    color: '#1a2831ff',
+    fontSize: scale(13),
+    fontWeight: 'bold',
   },
+
+  // 소비기한 텍스트 스타일 /////////////////////////////////////////////////////////////////////////////////////////
+  // 소비기한 Container
   expiaryContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1.05,
-    marginBottom: 4,
+    marginBottom: scale(4),
+    marginRight: scale(6),
+    paddingHorizontal: scale(0),
   },
+
   // 편집 모드 소비기한
   editableExpiry: {
     marginLeft: scale(10),
@@ -161,13 +153,67 @@ export const cardStyles = StyleSheet.create({
     color: '#ff3a44ff',
     textDecorationLine: 'line-through',
   },
+
+  // 소비기한 텍스트 스타일 ///////////////////////////
+  expiryTextSoon: {
+    color: '#1a2831ff',
+    fontWeight: 'bold',
+  },
+  expiryTextExpired: {
+    color: '#1a2831ff',
+    fontWeight: 'bold',
+    textDecorationLine: 'line-through',
+  },
+  itemExpiary: {
+    fontSize: scale(14),
+    color: '#666',
+    paddingHorizontal: scale(4),
+  },
+  // 편집모드 소비기한 텍스트 스타일 ////////////////////
+  itemExpiryNormal: {
+    fontSize: scale(14),
+    color: '#666',
+    textAlign: 'right',
+    backgroundColor: '#e8f5e8',
+    paddingHorizontal: scale(4),
+  },
+  itemExpiringSoon: {
+    fontSize: scale(14),
+    color: '#666',
+    textAlign: 'right',
+    backgroundColor: 'rgba(255, 200, 170, 09)',
+    paddingHorizontal: scale(4),
+  },
+  itemExpired: {
+    fontSize: scale(14),
+    color: '#666',
+    textAlign: 'right',
+    backgroundColor: '#FF9F9F',
+    paddingHorizontal: scale(4),
+  },
+  // 식재료 수량 스타일 //////////////////////////////
+
+  // 슬라이더 수량 편집기 스타일
+  itemDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  itemQuantityContainer: {
+    minWidth: scale(32),
+    marginBottom: scale(4),
+  },
+  itemQuantity: {
+    fontSize: scale(14),
+    color: '#666',
+    marginRight: scale(12),
+  },
+
+  // 카테고리 정보 텍스트 스타일
   itemStatus: {
     fontSize: scale(12),
     color: '#999',
     fontStyle: 'italic',
   },
-  editableitemStatus: {},
-
   message: {
     fontSize: scale(15),
     color: '#666',
@@ -193,10 +239,12 @@ export const quantityStyles = StyleSheet.create({
     paddingHorizontal: scale(4),
     width: scale(172),
   },
+  // - / + 버튼 스타일
   quantityButton: {
     margin: scale(3),
     opacity: 0.5,
   },
+  // 수량 - 사용자 직접 입력부 스타일
   quantityInput: {
     flex: 1,
     minWidth: scale(30),
@@ -206,6 +254,7 @@ export const quantityStyles = StyleSheet.create({
     color: '#333',
     paddingHorizontal: scale(8),
   },
+  // 단위 입력부 스타일
   quantityUnit: {
     fontSize: scale(14),
     color: '#666',
@@ -379,7 +428,7 @@ export const sliderQuantityStyles = StyleSheet.create({
   slider: {
     width: '100%',
     height: scale(12),
-    backgroundColor: 'limegreen',
+    backgroundColor: 'rgba(47, 72, 88, 0.5)',
     borderRadius: scale(6),
   },
   sliderLabels: {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, Animated, Alert } from 'react-native';
+import { ActivityIndicator, Text, Animated, Alert, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -11,7 +11,7 @@ import { FridgeWithRole } from '../../types/permission';
 import { validateUserTokenMatch } from '../../utils/authUtils';
 import { FridgeModals } from '../../components/FridgeSelect/FridgeModal';
 import { FridgeHeader } from '../../components/FridgeSelect/FridgeHeader';
-import { FridgeList } from '../../components/FridgeSelect/FridgeTileList';
+import { FridgeList } from '../../components/FridgeSelect/FridgeList';
 import { FridgeModalManager } from '../../components/FridgeSelect/FridgeModalManager';
 import { styles } from './styles';
 
@@ -145,8 +145,8 @@ const FridgeSelectScreen = () => {
     }
 
     Alert.prompt(
-      '냉장고 이름 변경',
-      '새 이름을 입력하세요',
+      '모임명 변경하기',
+      '',
       [
         { text: '취소', style: 'cancel' },
         {
@@ -315,9 +315,11 @@ const FridgeSelectScreen = () => {
   // 로딩 상태
   if (loading || !currentUser) {
     return (
-      <SafeAreaView style={styles.center} edges={['top']}>
-        <ActivityIndicator size="large" />
-        <Text>냉장고 목록을 불러오는 중...</Text>
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#2F4858" />
+          <Text style={styles.loadingText}>냉장고 목록을 불러오는 중...</Text>
+        </View>
       </SafeAreaView>
     );
   }

@@ -7,6 +7,7 @@ import {
   type FridgeItem,
 } from '../utils/fridgeStorage';
 import { UsageTrackingService } from '../services/UsageTrackingService';
+import { IngredientControllerAPI } from '../services/API/ingredientControllerAPI';
 
 // 허용되는 단위 목록
 export const ALLOWED_UNITS = ['kg', 'g', 'L', 'ml', '개'] as const;
@@ -92,20 +93,31 @@ export const useFridgeData = (fridgeId: number) => {
       try {
         const currentItem = fridgeItems.find(item => item.id === itemId);
 
-        // API를 통한 삭제
+        if (!currentItem) {
+          throw new Error('삭제할 아이템을 찾을 수 없습니다.');
+        }
+
+        // 🔥 1. 수량이 0보다 크면 먼저 PUT으로 0으로 만들기 (사용 기록 생성)
+        if (currentItem.quantity > 0) {
+          await IngredientControllerAPI.updateRefrigeratorIngredient(itemId, {
+            quantity: 0,
+            unit: currentItem.unit || '개',
+            expirationDate: currentItem.expiryDate,
+          });
+        }
+
+        // 🔥 2. DELETE로 실제 삭제
         await deleteItemFromFridge(itemId);
 
-        // 삭제 즉시 사용 기록 추가
-        if (currentItem) {
-          await UsageTrackingService.trackItemDeletion(
-            itemId,
-            currentItem.name,
-            currentItem.quantity,
-            currentItem.unit || '개',
-            fridgeId,
-            '완전 소진',
-          );
-        }
+        // 삭제 즉시 사용 기록 추가 (로컬)
+        await UsageTrackingService.trackItemDeletion(
+          itemId,
+          currentItem.name,
+          currentItem.quantity,
+          currentItem.unit || '개',
+          fridgeId,
+          '완전 소진',
+        );
 
         // 로컬 상태에서 제거
         setFridgeItems(prev => prev.filter(item => item.id !== itemId));

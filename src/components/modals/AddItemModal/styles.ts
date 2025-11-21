@@ -4,14 +4,13 @@ const { width } = Dimensions.get('window');
 
 // iPhone 16 Pro
 const baseWidth = 402;
-//const baseHeight = 874;
+// const baseHeight = 874;
 
 // 반응형 함수
-//const wp = (percentage: number) => (width * percentage) / 100;
-//const hp = (percentage: number) => (height * percentage) / 100;
+// const wp = (percentage: number) => (width * percentage) / 100;
+// const hp = (percentage: number) => (height * percentage) / 100;
 const scale = (size: number) => (width / baseWidth) * size;
 
-// 메인 모달 스타일
 export const modalStyles = StyleSheet.create({
   fullScreenOverlay: {
     position: 'absolute',
@@ -19,7 +18,7 @@ export const modalStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
   },
   modalOverlay: {
     position: 'absolute',
@@ -29,39 +28,39 @@ export const modalStyles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
-      width: 0,
-      height: scale(4),
+      width: scale(0),
+      height: scale(8),
     },
-    shadowOpacity: 0.3,
-    shadowRadius: scale(6),
-    elevation: 8,
+    shadowOpacity: 0.4,
+    shadowRadius: scale(12),
+    elevation: 10,
   },
   modalContent: {
-    backgroundColor: 'rgba(138, 138, 138, 0.92)',
+    paddingVertical: scale(4),
+    backgroundColor: '#a4a4a4d6',
     borderRadius: scale(24),
-    width: scale(208),
+    width: scale(240),
     overflow: 'hidden',
   },
   modalHeader: {
-    padding: scale(16),
-    borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(255, 255, 255, 0.3)',
+    padding: scale(20),
+    borderBottomWidth: scale(0),
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: scale(18),
-    fontWeight: '800',
-    color: '#f8f8f8',
+    fontSize: scale(20),
+    fontWeight: '900',
+    color: '#444',
+    letterSpacing: -0.3,
   },
   optionContainer: {
-    marginHorizontal: scale(24),
-    paddingVertical: scale(16),
-    height: scale(164),
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(8),
   },
   modalButtons: {
-    borderTopWidth: 0.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.3)',
-    backgroundColor: 'rgba(138, 138, 138, 0.92)',
+    borderTopWidth: scale(1),
+    borderTopColor: '#cacaca4d',
+    backgroundColor: 'f3f3f3',
   },
   cancelButton: {
     paddingVertical: scale(16),
@@ -69,7 +68,7 @@ export const modalStyles = StyleSheet.create({
   },
   cancelButtonText: {
     fontSize: scale(16),
-    color: '#f8f8f8',
+    color: '#444',
     fontWeight: '800',
   },
 });
@@ -79,39 +78,45 @@ export const optionStyles = StyleSheet.create({
   optionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     paddingVertical: scale(16),
     paddingHorizontal: scale(16),
-    marginBottom: scale(12),
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    borderRadius: scale(20),
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    shadowColor: 'rgba(55, 55, 55, 0.57)',
+    marginBottom: scale(10),
+    backgroundColor: '#d7d7d7ca',
+    borderRadius: scale(16),
+    borderWidth: 1.5,
+    borderColor: '#d7d7d7ca',
+    // 그림자 더 부드럽게
+    shadowColor: '#000',
     shadowOffset: {
-      width: 0,
-      height: scale(4),
-    },
-    shadowOpacity: 0.8,
-    shadowRadius: scale(12),
-    elevation: 4,
-  },
-  optionIcon: {
-    borderRadius: scale(25),
-    marginRight: scale(16),
-    shadowColor: 'rgba(0, 0, 0, 0.1)',
-    shadowOffset: {
-      width: 0,
+      width: scale(0),
       height: scale(2),
     },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.08,
     shadowRadius: scale(8),
-    elevation: 6,
+    elevation: 3,
+  },
+  optionIcon: {
+    width: scale(44),
+    height: scale(44),
+    borderRadius: scale(22),
+    backgroundColor: '#e1e1e1ca',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: scale(14),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: scale(0),
+      height: scale(1),
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: scale(4),
+    elevation: 2,
   },
   optionText: {
-    fontSize: scale(18),
+    fontSize: scale(17),
     fontWeight: '600',
     color: '#444',
     flex: 1,
+    letterSpacing: -0.2,
   },
 });

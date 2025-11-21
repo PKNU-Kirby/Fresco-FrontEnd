@@ -9,13 +9,15 @@ import { listStyles as styles } from './styles';
 
 type FridgeItem = {
   id: number;
-  fridgeId: number;
-  name: string;
-  quantity: number;
+  ingredientId: number;
+  categoryId: number;
+  ingredientName: string;
   expiryDate: string;
-  imageUri?: string;
+  quantity: number;
+  unit: string;
+  //
+  fridgeId: number;
   itemCategory: string;
-  unit?: string;
 };
 
 type FridgeItemListProps = {

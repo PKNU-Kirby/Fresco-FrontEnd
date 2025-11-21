@@ -33,17 +33,17 @@ export const FridgeHeader: React.FC<FridgeHeaderProps> = ({
 
   return (
     <View style={styles.header}>
-      <View style={styles.leftHeader}>
+      <View style={styles.leftSection}>
         <BackButton onPress={onLogout} />
       </View>
 
-      <View style={styles.centerHeader}>
+      <View style={styles.centerSection}>
         <Text style={styles.headerTitle}>
           <Text style={styles.userName}>{currentUser.name}</Text> 님의 모임
         </Text>
       </View>
 
-      <View style={styles.rightHeader}>
+      <View style={styles.rightSection}>
         <TouchableOpacity onPress={handleEditToggle}>
           {isEditMode ? (
             <Text style={[styles.saveButton]}>완료</Text>

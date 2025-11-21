@@ -85,9 +85,13 @@ const MembersScreen = ({ route }: Props) => {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <BackButton onPress={handleBack} />
-          <Text style={styles.headerTitle}>구성원</Text>
-          <View style={styles.headerRight} />
+          <View style={styles.leftSection}>
+            <BackButton onPress={handleBack} />
+          </View>
+          <View style={styles.centerSection}>
+            <Text style={styles.headerTitle}>구성원</Text>
+          </View>
+          <View style={styles.rightSection} />
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="limegreen" />
@@ -101,13 +105,15 @@ const MembersScreen = ({ route }: Props) => {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
+        <View style={styles.leftSection}>
           <BackButton onPress={handleBack} />
         </View>
-        <Text style={styles.headerTitle}>멤버</Text>
+        <View style={styles.centerSection}>
+          <Text style={styles.headerTitle}>멤버</Text>
+        </View>
         <TouchableOpacity
           onPress={handleMemberInvite}
-          style={[styles.headerRight, !canInviteMembers && { opacity: 0.5 }]}
+          style={[styles.rightSection, !canInviteMembers && { opacity: 0.5 }]}
           disabled={!canInviteMembers}
         >
           <Ionicons

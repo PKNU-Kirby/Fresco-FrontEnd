@@ -3,7 +3,7 @@ import { View, FlatList, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import { FridgeTile } from './FridgeTile';
 import { FridgeWithRole, FridgePermission } from '../../types/permission';
-import { styles, fridgeTileStyles } from './styles';
+import { fridgeTileStyles as styles } from './styles';
 
 interface FridgeListProps {
   fridges: FridgeWithRole[];
@@ -45,22 +45,19 @@ export const FridgeList: React.FC<FridgeListProps> = ({
 
   const renderFridgeItem = ({ item }: { item: FridgeWithRole }) => {
     if (isEditMode && item.id === -2) {
-      return <View style={[fridgeTileStyles.tile, { opacity: 0 }]} />;
+      return <View style={[styles.tile, { opacity: 0 }]} />;
     } else if (isEditMode && item.id === -1) {
       return (
-        <View style={fridgeTileStyles.plusTile}>
-          <TouchableOpacity
-            style={fridgeTileStyles.plusButton}
-            onPress={onAddFridge}
-          >
-            <View style={fridgeTileStyles.plusIcon}>
+        <View style={styles.plusTile}>
+          <TouchableOpacity style={styles.plusButton} onPress={onAddFridge}>
+            <View style={styles.plusIcon}>
               <Icon name="plus" size={32} color="#f8f8f8" />
             </View>
           </TouchableOpacity>
         </View>
       );
     } else if (!isEditMode && item.id === -3) {
-      return <View style={[fridgeTileStyles.tile, { opacity: 0 }]} />;
+      return <View style={[styles.tile, { opacity: 0 }]} />;
     } else {
       return (
         <FridgeTile

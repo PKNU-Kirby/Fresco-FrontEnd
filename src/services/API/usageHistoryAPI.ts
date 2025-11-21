@@ -6,6 +6,7 @@ export type HistoryRecord = {
   consumerName: string;
   ingredientName: string;
   usedQuantity: number;
+  unit: string;
   usedAt: string;
 };
 

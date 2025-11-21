@@ -100,7 +100,8 @@ export const styles = StyleSheet.create({
   filterBar: {
     flexDirection: 'row',
     paddingHorizontal: scale(20),
-    paddingVertical: scale(16),
+    paddingTop: scale(16),
+    paddingBottom: scale(6),
     gap: scale(8),
     backgroundColor: '#e8f5e875',
   },
@@ -138,7 +139,7 @@ export const styles = StyleSheet.create({
     paddingVertical: scale(12),
     paddingHorizontal: scale(4),
     marginTop: scale(16),
-    marginBottom: scale(8),
+    marginBottom: scale(6),
   },
   sectionTitle: {
     fontSize: scale(16),

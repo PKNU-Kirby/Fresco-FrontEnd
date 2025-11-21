@@ -8,10 +8,10 @@ import {
 export interface UsageRecord {
   id: number;
   userId: number;
-  userName: string;
+  consumerName: string;
   userAvatar: string;
   itemName: string;
-  quantity: number;
+  usedQuantity: number;
   unit: string;
   fridgeId: number;
   usageType: 'consume' | 'modify' | 'delete' | 'recipe_use';
@@ -90,11 +90,11 @@ export class UsageTrackingService {
         return {
           id: new Date(item.usedAt).getTime() + index,
           userId: item.consumerId,
-          userName: item.consumerName || '알 수 없음',
+          consumerName: item.consumerName || '알 수 없음',
           userAvatar: item.consumerName ? item.consumerName.charAt(0) : '👤',
           itemName: item.ingredientName,
-          quantity: item.usedQuantity,
-          unit: '', // 백엔드에서 unit을 안 주므로 빈 문자열
+          usedQuantity: item.usedQuantity,
+          unit: item.unit || '',
           fridgeId: fridgeId,
           usageType: 'consume' as const,
           usedAt: item.usedAt,
@@ -132,11 +132,11 @@ export class UsageTrackingService {
         (item: HistoryRecord, index: number) => ({
           id: new Date(item.usedAt).getTime() + index,
           userId: item.consumerId,
-          userName: item.consumerName || '알 수 없음',
+          consumerName: item.consumerName || '알 수 없음',
           userAvatar: item.consumerName ? item.consumerName.charAt(0) : '👤',
           itemName: item.ingredientName,
-          quantity: item.usedQuantity,
-          unit: '',
+          usedQuantity: item.usedQuantity,
+          unit: item.unit || '',
           fridgeId: fridgeId,
           usageType: 'consume' as const,
           usedAt: item.usedAt,
@@ -168,7 +168,7 @@ export class UsageTrackingService {
     avatar: string;
   } | null> {
     try {
-      const userId = await AsyncStorageService.getCurrentUserId();
+      const userId = Number(await AsyncStorageService.getCurrentUserId());
       if (!userId) return null;
 
       const user = await AsyncStorageService.getUserById(userId);
@@ -191,7 +191,8 @@ export class UsageTrackingService {
   static async trackItemConsumption(
     itemId: number,
     itemName: string,
-    quantity: number,
+    consumerName: string,
+    usedQuantity: number,
     unit: string,
     fridgeId: number,
     details?: string,
@@ -206,10 +207,10 @@ export class UsageTrackingService {
 
     await this.addUsageRecord({
       userId: userInfo.id,
-      userName: userInfo.name,
       userAvatar: userInfo.avatar,
+      consumerName,
       itemName,
-      quantity,
+      usedQuantity,
       unit,
       fridgeId,
       usageType: 'consume',
@@ -220,7 +221,8 @@ export class UsageTrackingService {
   static async trackItemModification(
     itemId: number,
     itemName: string,
-    quantity: number,
+    consumerName: string,
+    usedQuantity: number,
     unit: string,
     fridgeId: number,
     details?: string,
@@ -230,10 +232,10 @@ export class UsageTrackingService {
 
     await this.addUsageRecord({
       userId: userInfo.id,
-      userName: userInfo.name,
       userAvatar: userInfo.avatar,
+      consumerName,
       itemName,
-      quantity,
+      usedQuantity,
       unit,
       fridgeId,
       usageType: 'modify',
@@ -244,7 +246,8 @@ export class UsageTrackingService {
   static async trackItemDeletion(
     itemId: number,
     itemName: string,
-    quantity: number,
+    consumerName: string,
+    usedQuantity: number,
     unit: string,
     fridgeId: number,
     details?: string,
@@ -254,10 +257,10 @@ export class UsageTrackingService {
 
     await this.addUsageRecord({
       userId: userInfo.id,
-      userName: userInfo.name,
       userAvatar: userInfo.avatar,
+      consumerName,
       itemName,
-      quantity,
+      usedQuantity,
       unit,
       fridgeId,
       usageType: 'delete',
@@ -268,7 +271,8 @@ export class UsageTrackingService {
   static async trackRecipeUsage(
     itemId: number,
     itemName: string,
-    quantity: number,
+    consumerName: string,
+    usedQuantity: number,
     unit: string,
     fridgeId: number,
     recipeName: string,
@@ -278,10 +282,10 @@ export class UsageTrackingService {
 
     await this.addUsageRecord({
       userId: userInfo.id,
-      userName: userInfo.name,
       userAvatar: userInfo.avatar,
+      consumerName,
       itemName,
-      quantity,
+      usedQuantity,
       unit,
       fridgeId,
       usageType: 'recipe_use',

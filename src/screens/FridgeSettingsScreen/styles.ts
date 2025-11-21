@@ -35,8 +35,8 @@ export const styles = StyleSheet.create({
     paddingVertical: scale(16),
   },
   groupTitle: {
-    fontSize: scale(16),
-    fontWeight: '600',
+    fontSize: scale(18),
+    fontWeight: '900',
     color: '#333',
   },
 
@@ -144,7 +144,7 @@ export const styles = StyleSheet.create({
   },
   settingsContainer: {
     flex: 1,
-    paddingTop: scale(16),
+    paddingTop: scale(24),
   },
   // Loading style
   loadingContainer: {
@@ -186,9 +186,9 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   settingsItemTitle: {
-    fontSize: scale(16),
+    fontSize: scale(17),
     fontWeight: '600',
-    color: 'rgba(78, 89, 104, 1)',
+    color: '#2F4858',
     marginBottom: scale(2),
   },
   // Right Section
@@ -199,6 +199,7 @@ export const styles = StyleSheet.create({
   settingsItemValue: {
     fontSize: scale(16),
     color: '#6B7280',
+    fontWeight: '700',
     marginRight: scale(8),
   },
   settingsItemArrow: {

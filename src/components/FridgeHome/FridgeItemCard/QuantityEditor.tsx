@@ -1,6 +1,9 @@
+// FridgeHome -> FridgeItemCard -> QuantityEditor
 import React, { useState } from 'react';
 import { View, TouchableOpacity, TextInput, Text } from 'react-native';
+//
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+//
 import { quantityStyles as styles } from './styles';
 
 interface QuantityEditorProps {
@@ -48,7 +51,8 @@ const QuantityEditor: React.FC<QuantityEditorProps> = ({
   const handleTextChange = (text: string) => {
     // 숫자와 소수점 허용
     const numericText = text.replace(/[^0-9.]/g, '');
-    onQuantityChange(numericText);
+    const parsed = numericText === '' ? 0 : parseFloat(numericText);
+    onQuantityChange(isNaN(parsed) ? 0 : parsed);
   };
 
   const handleFocus = () => {

@@ -1,24 +1,24 @@
+// Fridge Home Screen
+
+//
+// TODO
+// 당겨서 새로고침 시 loading indicator?? 그거 집어넣기
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Alert } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../App';
-import { styles } from './styles';
-
-// Components
+//
+import { useFridgeData } from '../../hooks/useFridgeData';
+import { useModalState } from '../../hooks/useModalState';
 import FridgeHeader from '../../components/FridgeHome/FridgeHeader';
 import FridgeItemList from '../../components/FridgeHome/FridgeItemList';
 import ItemCategoryModal from '../../components/modals/ItemCategoryModal';
 import AddItemModal from '../../components/modals/AddItemModal';
 import ConfirmModal from '../../components/modals/ConfirmModal';
-
-// Hooks
-import { useFridgeData } from '../../hooks/useFridgeData';
-import { useModalState } from '../../hooks/useModalState';
-
-// Usage tracking
-// import { UsageTrackingService } from '../../services/UsageTrackingService';
+//
+import { styles } from './styles';
 
 type Props = {
   route: {
@@ -45,7 +45,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
   const [deleteSuccessModalVisible, setDeleteSuccessModalVisible] =
     useState(false);
   const [deleteErrorModalVisible, setDeleteErrorModalVisible] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
 
   // useFridgeData hook
   const {
@@ -63,7 +63,6 @@ const FridgeHomeScreen = ({ route }: Props) => {
     updateItemUnitLocal,
     updateItemExpiryDateLocal,
     applyEditChanges,
-    refreshData,
     refreshWithCategory,
   } = useFridgeData(fridgeId);
 
@@ -82,18 +81,26 @@ const FridgeHomeScreen = ({ route }: Props) => {
   const [isAddItemModalVisible, setIsAddItemModalVisible] = useState(false);
 
   // 필터링된 아이템들
-  const filteredItems = fridgeItems.filter(
-    item =>
-      activeItemCategory === '전체' || item.itemCategory === activeItemCategory,
-  );
+  const filteredItems = fridgeItems
+    .filter(
+      item =>
+        activeItemCategory === '전체' ||
+        item.itemCategory === activeItemCategory,
+    )
+    .map(item => ({
+      ...item,
+      ingredientId: item.ingredientId || 0,
+      categoryId: item.categoryId || 0,
+      ingredientName: item.ingredientName || item.itemName || '',
+    }));
 
   // 당겨서 새로고침
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
       await refreshWithCategory(activeItemCategory);
-    } catch (error) {
-      console.error('새로고침 실패:', error);
+    } catch (refreshError) {
+      // console.error('새로고침 실패:', refreshError);
     } finally {
       setIsRefreshing(false);
     }
@@ -184,8 +191,8 @@ const FridgeHomeScreen = ({ route }: Props) => {
         // 성공했을 때만 편집 모드 종료 및 상태 초기화
         setEditModeStartState([]);
         setIsEditMode(false);
-      } catch (error) {
-        console.error('편집 모드 종료 중 오류:', error);
+      } catch (editError) {
+        console.error('편집 모드 종료 중 오류:', editError);
 
         // 실패하면 서버에서 최신 데이터 다시 불러오기
         await refreshWithCategory(activeItemCategory);
@@ -258,15 +265,15 @@ const FridgeHomeScreen = ({ route }: Props) => {
   }, []);
 
   const confirmDeleteItem = useCallback(async () => {
-    if (!itemToDelete) return;
+    if (itemToDelete === null) return;
 
     try {
       setDeleteConfirmModalVisible(false);
       await deleteItem(itemToDelete);
       // 🔥 Alert 대신 모달 표시
       setDeleteSuccessModalVisible(true);
-    } catch (error) {
-      console.error('아이템 삭제 실패:', error);
+    } catch (deleteError) {
+      console.error('아이템 삭제 실패:', deleteError);
       // 🔥 Alert 대신 모달 표시
       setDeleteErrorModalVisible(true);
     } finally {

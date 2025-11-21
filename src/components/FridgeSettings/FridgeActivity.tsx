@@ -24,10 +24,7 @@ const FridgeActivity: React.FC<FridgeActivityProps> = ({
         <SettingsItem title="식재료 사용 기록" onPress={onUsageHistory} />
       )}
 
-      <SettingsItem
-        title="알림 설정 (나머지 API 연결 후 설정)"
-        onPress={onNotificationSettings}
-      />
+      <SettingsItem title="알림 설정" onPress={onNotificationSettings} />
     </View>
   );
 };

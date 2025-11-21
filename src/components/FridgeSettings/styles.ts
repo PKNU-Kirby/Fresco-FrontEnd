@@ -64,7 +64,7 @@ export const styles = StyleSheet.create({
   // 냉장고 정보 섹션 스타일
   settingsGroup: {
     backgroundColor: '#fff',
-    marginHorizontal: scale(22),
+    marginHorizontal: scale(16),
     marginBottom: scale(12),
     borderRadius: scale(20),
     paddingBottom: scale(8),
@@ -75,7 +75,7 @@ export const styles = StyleSheet.create({
     paddingTop: scale(28),
   },
   groupTitle: {
-    fontSize: scale(18),
+    fontSize: scale(19),
     fontWeight: '800',
     color: 'rgba(51, 61, 75, 1)',
     textTransform: 'uppercase',
