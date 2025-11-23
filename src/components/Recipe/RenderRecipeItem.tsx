@@ -16,6 +16,7 @@ interface RenderRecipeItemProps {
   availableIngredientsCount?: number;
   totalIngredientsCount?: number;
   canMakeWithFridge?: boolean;
+  canDelete?: boolean; // 👈 추가
 }
 
 const RenderRecipeItem: React.FC<RenderRecipeItemProps> = ({
@@ -30,6 +31,7 @@ const RenderRecipeItem: React.FC<RenderRecipeItemProps> = ({
   availableIngredientsCount = 0,
   totalIngredientsCount = 0,
   canMakeWithFridge = false,
+  canDelete = true, // 👈 추가 (기본값 true)
 }) => (
   <View style={[isActive && styles.draggingItem]}>
     <RecipeCard
@@ -44,6 +46,7 @@ const RenderRecipeItem: React.FC<RenderRecipeItemProps> = ({
       availableIngredientsCount={availableIngredientsCount}
       totalIngredientsCount={totalIngredientsCount}
       canMakeWithFridge={canMakeWithFridge}
+      canDelete={canDelete} // 👈 추가
     />
   </View>
 );

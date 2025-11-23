@@ -18,6 +18,7 @@ interface RecipeCardProps {
   availableIngredientsCount?: number;
   totalIngredientsCount?: number;
   canMakeWithFridge?: boolean;
+  canDelete?: boolean; // 👈 추가
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({
@@ -31,6 +32,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   availableIngredientsCount = 0,
   totalIngredientsCount = 0,
   canMakeWithFridge = false,
+  canDelete = true, // 👈 추가 (기본값 true)
 }) => {
   const [isSwipeOpen, setIsSwipeOpen] = useState(false);
 
@@ -46,7 +48,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     </View>
   );
 
-  // 재료 가능 상태 표시 컴포넌트 (대체재료 포함)
+  // 재료 가능 상태 표시 컴포넌트
   const renderIngredientStatus = () => {
     return (
       <View style={styles.ingredientStatus}>
@@ -73,13 +75,15 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
   return (
     <ScaleDecorator>
+      {/* 👇 canDelete가 false면 Swipeable 비활성화 */}
       <Swipeable
-        renderRightActions={renderRightActions}
+        renderRightActions={canDelete ? renderRightActions : undefined} // 👈 수정
         onSwipeableWillOpen={() => setIsSwipeOpen(true)}
         onSwipeableWillClose={() => setIsSwipeOpen(false)}
         onSwipeableClose={() => setIsSwipeOpen(false)}
         onSwipeableOpen={() => setIsSwipeOpen(true)}
         rightThreshold={10}
+        enabled={canDelete} // 👈 추가
       >
         <TouchableOpacity
           style={[
@@ -99,7 +103,6 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               style={styles.recipeIcon}
               resizeMode="contain"
             />
-
             <View style={styles.recipeInfo}>
               <Text
                 style={[
@@ -109,10 +112,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               >
                 {recipe.title}
               </Text>
-              {/* 대체재료 포함 조리 가능 상태 표시 */}
               {renderIngredientStatus()}
             </View>
-
             <View style={styles.cardActions}>
               <TouchableOpacity
                 style={styles.favoriteButton}

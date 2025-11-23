@@ -65,7 +65,7 @@ export const styles = StyleSheet.create({
 
   content: {
     flex: 1,
-    marginHorizontal: scale(4),
+    marginHorizontal: scale(16),
     paddingTop: scale(16),
   },
   infoContainer: {
@@ -145,7 +145,6 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    marginHorizontal: scale(16),
     marginVertical: scale(8),
     paddingVertical: scale(20),
     paddingHorizontal: scale(20),
@@ -329,9 +328,11 @@ export const sharedRecipeStyles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: scale(16),
     marginBottom: scale(12),
-    marginHorizontal: scale(16),
     shadowColor: '#333',
-    shadowOffset: { width: scale(0), height: scale(5) },
+    shadowOffset: {
+      width: 0,
+      height: scale(5),
+    },
     shadowOpacity: 0.15,
     shadowRadius: 3.84,
     elevation: 3,
@@ -344,6 +345,7 @@ export const sharedRecipeStyles = StyleSheet.create({
     flexDirection: 'row',
     padding: scale(16),
     alignItems: 'center',
+    paddingRight: scale(0),
   },
   recipeIcon: {
     width: scale(30),
@@ -389,7 +391,6 @@ export const sharedRecipeStyles = StyleSheet.create({
     color: '#aaa',
   },
   detailButton: {
-    marginLeft: scale(8),
     padding: scale(4),
   },
   missingIngredientsContainer: {
@@ -434,5 +435,30 @@ export const sharedRecipeStyles = StyleSheet.create({
     color: '#FF9800',
     marginLeft: scale(12),
     marginTop: scale(2),
+  },
+  rightActionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    marginBottom: scale(12),
+  },
+  actionButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: scale(80),
+    borderTopRightRadius: scale(16),
+    borderBottomRightRadius: scale(16),
+  },
+  deleteActionButton: {
+    backgroundColor: '#eb4e3d',
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+  },
+  swipeOpenCard: {
+    borderRadius: 0,
+    transform: [{ scale: 0.98 }],
+  },
+  swipeOpenTitle: {
+    color: '#eb4e3d',
+    fontWeight: '600',
   },
 });

@@ -206,9 +206,9 @@ export const recipeCardStyles = StyleSheet.create({
     borderRadius: 8,
   },
   canMakeIndicator: {
-    backgroundColor: '#E8F5E8',
+    backgroundColor: 'rgba(50, 205, 82, 0.2)',
     borderWidth: 1,
-    borderColor: 'limegreen',
+    borderColor: '#95E39D',
   },
   cannotMakeIndicator: {
     backgroundColor: '#eee',
@@ -226,8 +226,8 @@ export const recipeCardStyles = StyleSheet.create({
     color: '#aaa',
   },
   canMakeCard: {
-    borderWidth: 1,
-    borderColor: 'limegreen',
+    borderWidth: 2,
+    borderColor: 'rgba(50, 205, 82, 0.3)',
     backgroundColor: '#fff',
   },
 });

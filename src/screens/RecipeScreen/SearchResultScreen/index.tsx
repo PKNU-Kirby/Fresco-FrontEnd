@@ -409,7 +409,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
                       recipe,
                       fridgeId: Number(fridgeId) || 1,
                       fridgeName: fridgeName || '우리집 냉장고',
-                      isSharedRecipe: true,
+                      isSharedRecipe: false,
                     })
                   }
                   availableIngredientsCount={

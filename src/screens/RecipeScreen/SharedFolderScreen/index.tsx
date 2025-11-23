@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -17,6 +18,7 @@ import ConfirmModal from '../../../components/modals/ConfirmModal';
 import { User } from '../../../types/auth';
 import RecipeAPI from '../../../services/API/RecipeAPI';
 import { ApiService } from '../../../services/apiServices';
+import { PermissionAPIService } from '../../../services/API/permissionAPI';
 import {
   Recipe,
   RecipeIngredient,
@@ -72,14 +74,15 @@ interface SharedFolderScreenProps {
     };
   };
 }
-
 // SharedRecipeCard 컴포넌트
 const SharedRecipeCard: React.FC<{
   recipe: Recipe;
   onPress: () => void;
+  onDelete: () => void;
   availabilityStatus: RecipeAvailabilityInfo;
-}> = ({ recipe, onPress, availabilityStatus }) => {
-  const [showDetails, setShowDetails] = useState(false);
+  canDelete: boolean;
+}> = ({ recipe, onPress, onDelete, availabilityStatus, canDelete }) => {
+  const [isSwipeOpen, setIsSwipeOpen] = useState(false);
 
   const {
     availableIngredientsCount,
@@ -89,77 +92,83 @@ const SharedRecipeCard: React.FC<{
     availableIngredients,
   } = availabilityStatus;
 
-  return (
-    <View>
+  // 👇 RecipeCard와 동일한 renderRightActions
+  const renderRightActions = () => (
+    <View style={sharedRecipeStyles.rightActionsContainer}>
       <TouchableOpacity
         style={[
-          sharedRecipeStyles.recipeCard,
-          canMakeWithFridge && sharedRecipeStyles.canMakeCard,
+          sharedRecipeStyles.actionButton,
+          sharedRecipeStyles.deleteActionButton,
         ]}
-        onPress={onPress}
-        activeOpacity={0.7}
+        onPress={onDelete}
       >
-        <View style={sharedRecipeStyles.recipeCardContent}>
-          <Image
-            source={require('../../../assets/icons/chef_hat_96dp.png')}
-            style={sharedRecipeStyles.recipeIcon}
-            resizeMode="contain"
-          />
-          <View style={sharedRecipeStyles.recipeInfo}>
-            <Text style={sharedRecipeStyles.recipeTitle}>{recipe.title}</Text>
+        <Icon name="delete" size={28} color="#f8f8f8" />
+      </TouchableOpacity>
+    </View>
+  );
 
-            {/* 재료 상태 표시 */}
-            <View style={sharedRecipeStyles.ingredientStatus}>
-              <View
+  return (
+    <View>
+      <Swipeable
+        renderRightActions={canDelete ? renderRightActions : undefined}
+        onSwipeableWillOpen={() => setIsSwipeOpen(true)}
+        onSwipeableWillClose={() => setIsSwipeOpen(false)}
+        onSwipeableClose={() => setIsSwipeOpen(false)}
+        onSwipeableOpen={() => setIsSwipeOpen(true)}
+        rightThreshold={10}
+        enabled={canDelete}
+      >
+        <TouchableOpacity
+          style={[
+            sharedRecipeStyles.recipeCard,
+            canMakeWithFridge && sharedRecipeStyles.canMakeCard,
+            isSwipeOpen && sharedRecipeStyles.swipeOpenCard,
+          ]}
+          onPress={onPress}
+          activeOpacity={0.7}
+        >
+          <View style={sharedRecipeStyles.recipeCardContent}>
+            <Image
+              source={require('../../../assets/icons/chef_hat_96dp.png')}
+              style={sharedRecipeStyles.recipeIcon}
+              resizeMode="contain"
+            />
+            <View style={sharedRecipeStyles.recipeInfo}>
+              <Text
                 style={[
-                  sharedRecipeStyles.statusIndicator,
-                  canMakeWithFridge
-                    ? sharedRecipeStyles.canMakeIndicator
-                    : sharedRecipeStyles.cannotMakeIndicator,
+                  sharedRecipeStyles.recipeTitle,
+                  isSwipeOpen && sharedRecipeStyles.swipeOpenTitle,
                 ]}
               >
-                <Text
+                {recipe.title}
+              </Text>
+
+              {/* 재료 상태 표시 */}
+              <View style={sharedRecipeStyles.ingredientStatus}>
+                <View
                   style={[
-                    sharedRecipeStyles.statusText,
+                    sharedRecipeStyles.statusIndicator,
                     canMakeWithFridge
-                      ? sharedRecipeStyles.canMakeText
-                      : sharedRecipeStyles.cannotMakeText,
+                      ? sharedRecipeStyles.canMakeIndicator
+                      : sharedRecipeStyles.cannotMakeIndicator,
                   ]}
                 >
-                  {availableIngredientsCount} / {totalIngredientsCount}
-                </Text>
+                  <Text
+                    style={[
+                      sharedRecipeStyles.statusText,
+                      canMakeWithFridge
+                        ? sharedRecipeStyles.canMakeText
+                        : sharedRecipeStyles.cannotMakeText,
+                    ]}
+                  >
+                    {availableIngredientsCount} / {totalIngredientsCount}
+                  </Text>
+                </View>
               </View>
-
-              {!canMakeWithFridge && missingIngredients.length > 0 && (
-                <TouchableOpacity
-                  onPress={() => setShowDetails(!showDetails)}
-                  style={sharedRecipeStyles.detailButton}
-                >
-                  <Icon
-                    name={showDetails ? 'expand-less' : 'expand-more'}
-                    size={16}
-                    color="#666"
-                  />
-                </TouchableOpacity>
-              )}
             </View>
           </View>
-        </View>
-      </TouchableOpacity>
-
-      {/* 부족한 재료 상세 표시 */}
-      {showDetails && missingIngredients.length > 0 && (
-        <View style={sharedRecipeStyles.missingIngredientsContainer}>
-          <Text style={sharedRecipeStyles.missingTitle}>부족한 재료:</Text>
-          {missingIngredients.map((ingredientName, index) => (
-            <View key={index} style={sharedRecipeStyles.missingItem}>
-              <Text style={sharedRecipeStyles.missingName}>
-                • {ingredientName}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
+        </TouchableOpacity>
+      </Swipeable>
     </View>
   );
 };
@@ -217,6 +226,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [deleteSuccessVisible, setDeleteSuccessVisible] = useState(false);
   const [deleteErrorVisible, setDeleteErrorVisible] = useState(false);
+  const [noPermissionVisible, setNoPermissionVisible] = useState(false);
   const [selectedRecipeForDelete, setSelectedRecipeForDelete] =
     useState<Recipe | null>(null);
 
@@ -279,10 +289,25 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
       }
 
       const userFridgesResponse = await ApiService.getUserFridges();
-      console.log('사용자 냉장고 목록 (API):', userFridgesResponse);
-
+      console.log('🔍 API 응답 - 사용자 냉장고 목록:', userFridgesResponse);
       const fridgesWithRecipes: UserFridge[] = await Promise.all(
         userFridgesResponse.map(async fridge => {
+          // 👇 PermissionAPI로 권한 확인
+          const permissions = await PermissionAPIService.getFridgePermissions(
+            Number(fridge.id),
+          );
+
+          // canEdit 또는 canDelete가 true면 owner, 아니면 member
+          const role: 'owner' | 'member' =
+            permissions.canEdit || permissions.canDelete ? 'owner' : 'member';
+
+          console.log('🔍 냉장고 role 확인:', {
+            fridgeId: fridge.id,
+            fridgeName: fridge.name,
+            permissions,
+            determinedRole: role,
+          });
+
           const sharedRecipes = await RecipeAPI.getSharedRecipes(
             Number(fridge.id),
           );
@@ -290,25 +315,35 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
             Number(fridge.id),
           );
 
-          return {
+          const fridgeData = {
             fridge: {
               id: fridge.id,
               name: fridge.name,
               description: fridge.description,
-              ownerId: fridge.userRole === 'owner' ? user.id : '',
+              ownerId: role === 'owner' ? user.id : '',
               inviteCode: '',
               memberCount: fridge.memberCount,
             },
-            role: fridge.userRole,
+            role: role, // 👈 PermissionAPI로 확인한 role
             joinedAt: fridge.createdAt,
             recipes: sharedRecipes,
             ingredients: fridgeIngredients,
           };
+
+          console.log('🔍 생성된 fridgeData:', {
+            fridgeId: fridgeData.fridge.id,
+            fridgeName: fridgeData.fridge.name,
+            role: fridgeData.role,
+          });
+
+          return fridgeData;
         }),
       );
-
       setFridgeList(fridgesWithRecipes);
-      console.log('=== 최종 냉장고 + 레시피 + 식재료 ===:', fridgesWithRecipes);
+      console.log('=== 최종 냉장고 + 레시피 + 식재료 ===');
+      fridgesWithRecipes.forEach(fridge => {
+        console.log(`  - ${fridge.fridge.name}: role=${fridge.role}`);
+      });
     } catch (error: any) {
       console.error('데이터 로드 실패:', error);
       setLoadErrorMessage(
@@ -396,6 +431,22 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   const handleRecipePress = (recipe: Recipe) => {
     if (!selectedFridge) return;
 
+    // 👇 navigate 하기 전에 로그 확인!
+    console.log('🔍 ===== 레시피 클릭 (navigate 직전) =====');
+    console.log('🔍 레시피:', recipe.title);
+    console.log('🔍 selectedFridge:', selectedFridge);
+    console.log('🔍 selectedFridge.role:', selectedFridge.role);
+    console.log('🔍 selectedFridge.role type:', typeof selectedFridge.role);
+    console.log('🔍 전달할 params:', {
+      recipe: recipe.title,
+      fridgeId: selectedFridge.fridge.id,
+      fridgeName: selectedFridge.fridge.name,
+      currentFridgeId: currentFridgeId,
+      isSharedRecipe: true,
+      userRole: selectedFridge.role,
+    });
+    console.log('🔍 =========================================');
+
     navigation.navigate('RecipeDetail', {
       recipe,
       fridgeId: selectedFridge.fridge.id,
@@ -404,11 +455,18 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
       fridgeIngredients: selectedFridge.ingredients,
       fromSharedFolder: true,
       isSharedRecipe: true,
+      userRole: selectedFridge.role,
     });
   };
 
   // 레시피 삭제 핸들러
   const handleRecipeDelete = async (recipe: Recipe) => {
+    if (!selectedFridge) return;
+
+    if (selectedFridge.role !== 'owner') {
+      setNoPermissionVisible(true);
+      return;
+    }
     setSelectedRecipeForDelete(recipe);
     setDeleteConfirmVisible(true);
   };
@@ -438,13 +496,28 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   // 화면 포커스 시 데이터 새로고침
   useFocusEffect(
     React.useCallback(() => {
-      loadUserFridgesWithRecipes();
-      setSelectedFridge(null);
+      const unsubscribe = navigation.addListener('focus', e => {
+        const routes = navigation.getState()?.routes;
+        const currentRoute = routes?.[routes.length - 1];
+
+        if (currentRoute?.params?.fromRecipeDetail !== true) {
+          loadUserFridgesWithRecipes();
+          setSelectedFridge(null);
+        } else {
+          loadUserFridgesWithRecipes();
+        }
+      });
+
+      return unsubscribe;
     }, [currentUserId]),
   );
 
   const handleFridgePress = (userFridge: UserFridge) => {
-    console.log('냉장고 선택:', userFridge);
+    console.log('🔍 냉장고 선택:', {
+      name: userFridge.fridge.name,
+      role: userFridge.role,
+      roleType: typeof userFridge.role,
+    });
     setSelectedFridge(userFridge);
   };
 
@@ -462,7 +535,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4CAF50" />
+          <ActivityIndicator size="large" color="#2F4858" />
           <Text style={styles.loadingText}>냉장고를 불러오는 중...</Text>
         </View>
       </SafeAreaView>
@@ -508,7 +581,6 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           showsVerticalScrollIndicator={false}
         >
           {!selectedFridge ? (
-            // 냉장고 목록 보기
             <>
               <View style={styles.infoContainer}>
                 <View style={styles.infoIcon}>
@@ -541,8 +613,8 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
               )}
             </>
           ) : (
-            // 선택된 냉장고의 레시피 목록 보기
             <>
+              {/* 선택된 냉장고의 레시피 목록 보기 */}
               {selectedFridge.recipes.map(recipe => {
                 const availabilityStatus = recipeAvailabilities.get(
                   recipe.id,
@@ -554,12 +626,17 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
                   availableIngredients: [],
                 };
 
+                // 👇 방장 여부 확인
+                const canDelete = selectedFridge.role === 'owner';
+
                 return (
                   <SharedRecipeCard
                     key={recipe.id}
                     recipe={recipe}
                     onPress={() => handleRecipePress(recipe)}
+                    onDelete={() => handleRecipeDelete(recipe)} // 👈 삭제 핸들러
                     availabilityStatus={availabilityStatus}
+                    canDelete={canDelete} // 👈 권한 전달
                   />
                 );
               })}
@@ -577,7 +654,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           </TouchableOpacity>
         )}
 
-        {/* 데이터 로드 에러 모달 */}
+        {/* 모달들 */}
         <ConfirmModal
           isAlert={false}
           visible={loadErrorModalVisible}
@@ -592,7 +669,20 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           onCancel={() => setLoadErrorModalVisible(false)}
         />
 
-        {/* 레시피 삭제 확인 모달 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={noPermissionVisible}
+          title="권한 없음"
+          message="공유 레시피는 방장만 삭제할 수 있습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'block', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setNoPermissionVisible(false)}
+          onCancel={() => setNoPermissionVisible(false)}
+        />
+
         <ConfirmModal
           isAlert={true}
           visible={deleteConfirmVisible}
@@ -610,7 +700,6 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           }}
         />
 
-        {/* 레시피 삭제 성공 모달 */}
         <ConfirmModal
           isAlert={false}
           visible={deleteSuccessVisible}
@@ -625,7 +714,6 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           onCancel={() => setDeleteSuccessVisible(false)}
         />
 
-        {/* 레시피 삭제 실패 모달 */}
         <ConfirmModal
           isAlert={false}
           visible={deleteErrorVisible}
