@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Animated,
+  TextInput,
+  TextInputProps,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { styles } from './styles';
 
 interface ConfirmModalProps {
-  isAlert?: boolean; // true: Alert, false: Confirm
+  isAlert?: boolean;
   visible: boolean;
   title: string;
   message: string | React.ReactNode;
@@ -31,6 +33,12 @@ interface ConfirmModalProps {
     friction?: number;
     duration?: number;
   };
+  // 👇 추가된 props
+  showInput?: boolean;
+  inputValue?: string;
+  inputPlaceholder?: string;
+  onInputChange?: (text: string) => void;
+  inputProps?: Omit<TextInputProps, 'value' | 'onChangeText' | 'placeholder'>;
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -46,6 +54,12 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   onCancel,
   animationConfig = { tension: 150, friction: 8, duration: 200 },
+  // Input Modal Props
+  showInput = false,
+  inputValue = '',
+  inputPlaceholder = '냉장고 이름을 입력해 주세요',
+  onInputChange,
+  inputProps = {},
 }) => {
   const scaleValue = React.useRef(new Animated.Value(0)).current;
 
@@ -100,15 +114,31 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
               <Text style={styles.title}>{title}</Text>
 
               {/* 메시지 */}
-              <View style={styles.messageContainer}>
-                {typeof message === 'string' ? (
-                  <Text style={styles.message}>{message}</Text>
-                ) : (
-                  message
-                )}
-              </View>
+              {message && (
+                <View style={styles.messageContainer}>
+                  {typeof message === 'string' ? (
+                    <Text style={styles.message}>{message}</Text>
+                  ) : (
+                    message
+                  )}
+                </View>
+              )}
 
-              {/* 버튼들 */}
+              {/* Input */}
+              {showInput && (
+                <TextInput
+                  style={styles.input}
+                  value={inputValue}
+                  onChangeText={onInputChange}
+                  placeholder={inputPlaceholder}
+                  autoFocus
+                  returnKeyType="done"
+                  onSubmitEditing={onConfirm}
+                  {...inputProps}
+                />
+              )}
+
+              {/* Buttons */}
               <View style={styles.buttonContainer}>
                 {isAlert && (
                   <TouchableOpacity

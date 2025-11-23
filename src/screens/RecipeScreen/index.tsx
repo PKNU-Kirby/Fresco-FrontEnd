@@ -5,9 +5,7 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
-  TurboModuleRegistry,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DraggableFlatList from 'react-native-draggable-flatlist';
@@ -15,17 +13,15 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ConfirmModal from '../../components/modals/ConfirmModal';
 import { styles } from './styles';
 import { Recipe, RecipeStackParamList } from './RecipeNavigator';
-
 import RecipeAPI from '../../services/API/RecipeAPI';
 import { IngredientControllerAPI } from '../../services/API/ingredientControllerAPI';
-
 import {
   calculateMultipleRecipeAvailability,
   RecipeAvailabilityInfo,
 } from '../../utils/recipeAvailabilityUtils';
-
 import RecipeHeader from '../../components/Recipe/RecipeHeader';
 import FloatingButton from '../../components/Recipe/FloatingButton';
 import SharedRecipeFolder from '../../components/Recipe/SharedRecipeFolder';
@@ -63,8 +59,18 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     Map<string, RecipeAvailabilityInfo>
   >(new Map());
 
+  // ConfirmModal 상태들
+  const [favoriteErrorModalVisible, setFavoriteErrorModalVisible] =
+    useState(false);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [deleteSuccessVisible, setDeleteSuccessVisible] = useState(false);
+  const [deleteErrorVisible, setDeleteErrorVisible] = useState(false);
+  const [orderChangeErrorVisible, setOrderChangeErrorVisible] = useState(false);
+  const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(null);
+
   const scrollViewRef = useRef<ScrollView>(null);
   const flatListRef = useRef<any>(null);
+
   const ITEMS_PER_PAGE = 15;
 
   const calculateRecipeAvailabilities = async () => {
@@ -76,19 +82,16 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
         // ✅ 1단계: 재료 정보 확인 및 상세 정보 로드
         const recipesWithIngredients = await Promise.all(
           personalRecipes.map(async recipe => {
-            // 재료가 없으면 상세 정보 불러오기
             if (!recipe.ingredients || recipe.ingredients.length === 0) {
               try {
                 console.log(`📋 [${recipe.title}] 상세 정보 로드 중...`);
                 const detailResponse = await RecipeAPI.getRecipeDetail(
                   recipe.id,
                 );
-
                 const updatedRecipe = {
                   ...recipe,
                   ingredients: detailResponse.ingredients || [],
                 };
-
                 console.log(
                   `✅ [${recipe.title}] 재료 ${updatedRecipe.ingredients.length}개 로드됨`,
                 );
@@ -110,7 +113,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
 
         setRecipeAvailabilities(availabilities);
 
-        // 디버깅: 결과 확인
         console.log('✅ 조리 가능성 계산 완료');
         availabilities.forEach((value, key) => {
           console.log(
@@ -128,7 +130,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   const loadInitialData = async () => {
     try {
       setIsLoading(true);
-
       const [personalResult, favoriteResult, sharedResult] =
         await Promise.allSettled([
           RecipeAPI.getRecipeList(),
@@ -137,34 +138,24 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
         ]);
 
       if (personalResult.status === 'fulfilled') {
-        // console.log('개인 레시피 로드 성공 ', personalResult.value.length);
         setPersonalRecipes(personalResult.value);
       } else {
-        // console.warn('개인 레시피 로드 실패 ', personalResult.reason);
         setPersonalRecipes([]);
       }
 
       if (favoriteResult.status === 'fulfilled') {
-        // console.log('즐겨찾기 로드 성공 ', favoriteResult.value.length);
         const favoriteIds = favoriteResult.value.map(recipe => recipe.id);
         setFavoriteRecipeIds(favoriteIds);
       } else {
-        // console.warn('즐겨찾기 로드 실패 ', favoriteResult.reason);
         setFavoriteRecipeIds([]);
       }
 
       if (sharedResult.status === 'fulfilled') {
-        // console.log('공유 레시피 로드 성공 ', sharedResult.value.length);
         setSharedRecipes(sharedResult.value);
       } else {
-        // console.warn('공유 레시피 로드 실패 ', sharedResult.reason);
         setSharedRecipes([]);
       }
-
-      // 조리 가능성 계산은 personalRecipes가 설정된 후 useEffect에서 처리
     } catch (error) {
-      // console.error('초기 데이터 로드 실패:', error);
-      // -> 완전 실패 시에도 빈 상태로 표시
       setPersonalRecipes([]);
       setSharedRecipes([]);
       setFavoriteRecipeIds([]);
@@ -173,30 +164,24 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     }
   };
 
-  // 컴포넌트 마운트 시 데이터 로드
   React.useEffect(() => {
     loadInitialData();
   }, []);
 
-  // personalRecipes가 변경될 때마다 조리 가능성 재계산
   React.useEffect(() => {
     if (personalRecipes.length > 0 && !isLoading) {
-      // console.log('personalRecipes 변경 감지, 조리 가능성 재계산...');
       calculateRecipeAvailabilities();
     }
   }, [personalRecipes, fridgeId]);
 
-  // 화면 포커스 시 데이터 동기화
   useFocusEffect(
     React.useCallback(() => {
-      // console.log('화면 포커스, 데이터 새로고침...');
       setCurrentPage(1);
       loadInitialData();
     }, []),
   );
 
-  // 즐겨찾기 헬퍼 함수들
-  const isFavorite = (recipeId: string) => {
+  const isFavorite = (recipeId: number) => {
     return favoriteRecipeIds.includes(recipeId);
   };
 
@@ -204,7 +189,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     return personalRecipes.filter(recipe => isFavorite(recipe.id));
   };
 
-  // 현재 표시할 레시피들 필터링
   const getFilteredRecipes = () => {
     let recipes = personalRecipes;
     if (currentTab === 'favorites') {
@@ -227,63 +211,53 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   const hasMoreRecipes = filteredRecipes.length < allFilteredRecipes;
 
   // 즐겨찾기 토글
-  const toggleFavorite = async (recipeId: string) => {
+  const toggleFavorite = async (recipeId: number) => {
     try {
-      // console.log('즐겨찾기 토글:', recipeId);
       const result = await RecipeAPI.toggleFavorite(recipeId);
 
-      // 로컬 상태 업데이트
       if (result.favorite) {
         setFavoriteRecipeIds(prev => [...prev, recipeId]);
-        // console.log('즐겨찾기 추가 ', recipeId);
       } else {
         setFavoriteRecipeIds(prev => prev.filter(id => id !== recipeId));
-        // console.log('즐겨찾기 제거 ', recipeId);
       }
     } catch (error) {
-      // console.error('즐겨찾기 토글 실패 ', error);
-      Alert.alert('오류', '즐겨찾기 설정에 실패했습니다.');
+      console.error('즐겨찾기 토글 실패', error);
+      setFavoriteErrorModalVisible(true);
     }
   };
 
-  // 레시피 삭제)
+  // 레시피 삭제
   const deleteRecipe = (recipeId: number) => {
-    Alert.alert('레시피 삭제', '이 레시피를 삭제하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            // console.log('레시피 삭제 ', recipeId);
-            await RecipeAPI.deleteRecipe(recipeId);
-
-            // 로컬 상태 업데이트
-            setPersonalRecipes(prev => prev.filter(r => r.id !== recipeId));
-            setFavoriteRecipeIds(prev => prev.filter(id => id !== recipeId));
-
-            // console.log('레시피 삭제 완료 ', recipeId);
-            Alert.alert('성공', '레시피가 삭제되었습니다.');
-          } catch (error) {
-            // console.error('레시피 삭제 실패 ', error);
-            Alert.alert('오류', '레시피 삭제에 실패했습니다.');
-          }
-        },
-      },
-    ]);
+    setSelectedRecipeId(recipeId);
+    setDeleteConfirmVisible(true);
   };
 
-  // 드래그 엔드 핸들러 (순서 변경은 로컬에서만)
+  const handleDeleteConfirm = async () => {
+    if (!selectedRecipeId) return;
+
+    try {
+      await RecipeAPI.deleteRecipe(selectedRecipeId);
+
+      setPersonalRecipes(prev => prev.filter(r => r.id !== selectedRecipeId));
+      setFavoriteRecipeIds(prev => prev.filter(id => id !== selectedRecipeId));
+
+      setDeleteConfirmVisible(false);
+      setDeleteSuccessVisible(true);
+      setSelectedRecipeId(null);
+    } catch (error) {
+      console.error('레시피 삭제 실패', error);
+      setDeleteConfirmVisible(false);
+      setDeleteErrorVisible(true);
+      setSelectedRecipeId(null);
+    }
+  };
+
+  // 드래그 엔드 핸들러
   const handleDragEnd = async ({ data }: { data: Recipe[] }) => {
     if (currentTab === 'all') {
       setPersonalRecipes(data);
-      // console.log('레시피 순서 변경 완료');
     } else {
-      Alert.alert(
-        '순서 변경 불가',
-        '전체 레시피 탭에서만 순서를 변경할 수 있습니다.',
-        [{ text: '확인' }],
-      );
+      setOrderChangeErrorVisible(true);
     }
   };
 
@@ -317,7 +291,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     setCurrentPage(prev => prev + 1);
   };
 
-  // 로딩 중일 때
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -352,6 +325,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
               전체 레시피 ({personalRecipes.length})
             </Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={[styles.tab, currentTab === 'favorites' && styles.activeTab]}
             onPress={() => {
@@ -384,7 +358,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                 onPress={() => {
                   setShowFloatingMenu(false);
                   navigation.navigate('SharedFolder', {
-                    currentFridgeId: fridgeId, // 👈 추가!
+                    currentFridgeId: fridgeId,
                   });
                 }}
               />
@@ -415,13 +389,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                 const isDragEnabled = currentTab === 'all';
                 const availability = recipeAvailabilities.get(item.id);
 
-                // 🔍 디버깅 로그 (이미 있음)
-                console.log('Recipe:', item.title, {
-                  hasAvailability: !!availability,
-                  availability: availability,
-                  mapSize: recipeAvailabilities.size,
-                });
-
                 return (
                   <RenderRecipeItem
                     item={item}
@@ -444,7 +411,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                       availability?.availableIngredientsCount || 0
                     }
                     totalIngredientsCount={
-                      // ✅ 폴백 추가: availability가 없거나 0일 때 실제 재료 개수 사용
                       availability?.totalIngredientsCount ||
                       item.ingredients?.length ||
                       0
@@ -468,8 +434,8 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                   onPress={() => {
                     setShowFloatingMenu(false);
                     navigation.navigate('SharedFolder', {
-                      currentFridgeId: fridgeId, // 👈 추가!
-                      currentFridgeName: fridgeName, // 👈 추가!
+                      currentFridgeId: fridgeId,
+                      currentFridgeName: fridgeName,
                     });
                   }}
                 />
@@ -505,6 +471,84 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
           }}
           showScrollToTop={showScrollToTop}
           onScrollToTop={scrollToTop}
+        />
+
+        {/* 즐겨찾기 에러 모달 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={favoriteErrorModalVisible}
+          title="오류"
+          message="즐겨찾기 설정에 실패했습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setFavoriteErrorModalVisible(false)}
+          onCancel={() => setFavoriteErrorModalVisible(false)}
+        />
+
+        {/* 레시피 삭제 확인 모달 */}
+        <ConfirmModal
+          isAlert={true}
+          visible={deleteConfirmVisible}
+          title="레시피 삭제"
+          message="이 레시피를 삭제하시겠습니까?"
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="삭제"
+          cancelText="취소"
+          confirmButtonStyle="danger"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => {
+            setDeleteConfirmVisible(false);
+            setSelectedRecipeId(null);
+          }}
+        />
+
+        {/* 레시피 삭제 성공 모달 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={deleteSuccessVisible}
+          title="성공"
+          message="레시피가 삭제되었습니다."
+          iconContainer={{ backgroundColor: '#d3f0d3' }}
+          icon={{ name: 'check', color: 'limegreen', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setDeleteSuccessVisible(false)}
+          onCancel={() => setDeleteSuccessVisible(false)}
+        />
+
+        {/* 레시피 삭제 실패 모달 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={deleteErrorVisible}
+          title="오류"
+          message="레시피 삭제에 실패했습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setDeleteErrorVisible(false)}
+          onCancel={() => setDeleteErrorVisible(false)}
+        />
+
+        {/* 순서 변경 불가 알림 모달 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={orderChangeErrorVisible}
+          title="순서 변경 불가"
+          message="전체 레시피 탭에서만 순서를 변경할 수 있습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setOrderChangeErrorVisible(false)}
+          onCancel={() => setOrderChangeErrorVisible(false)}
         />
       </GestureHandlerRootView>
     </SafeAreaView>

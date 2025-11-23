@@ -3,7 +3,6 @@ import {
   View,
   TouchableOpacity,
   Switch,
-  Alert,
   ScrollView,
   Text,
   Modal,
@@ -12,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import BackButton from '../../components/_common/BackButton';
+import ConfirmModal from '../../components/modals/ConfirmModal';
 import UnifiedNotificationService from '../../services/UnifiedNotificationService';
 import { NotificationSettings } from '../../services/LocalNotificationService';
 import { styles } from './styles';
@@ -28,6 +28,12 @@ const NotificationSettingsScreen = () => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showDayPicker, setShowDayPicker] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
+
+  // ConfirmModal 상태들
+  const [saveErrorModalVisible, setSaveErrorModalVisible] = useState(false);
+  const [permissionDeniedModalVisible, setPermissionDeniedModalVisible] =
+    useState(false);
+  const [toggleErrorModalVisible, setToggleErrorModalVisible] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -60,7 +66,7 @@ const NotificationSettingsScreen = () => {
       console.log('✅ 설정 저장 완료:', newSettings);
     } catch (error) {
       console.error('❌ 설정 저장 실패:', error);
-      Alert.alert('오류', '설정 저장 중 문제가 발생했습니다.');
+      setSaveErrorModalVisible(true);
     }
   };
 
@@ -72,11 +78,7 @@ const NotificationSettingsScreen = () => {
           const granted = await UnifiedNotificationService.requestPermission();
 
           if (!granted) {
-            Alert.alert(
-              '알림 권한 필요',
-              '알림을 받으려면 설정에서 알림 권한을 허용해주세요.',
-              [{ text: '취소', style: 'cancel' }, { text: '확인' }],
-            );
+            setPermissionDeniedModalVisible(true);
             return;
           }
 
@@ -102,7 +104,7 @@ const NotificationSettingsScreen = () => {
       console.log('✅ 알림 설정 완료:', newSettings);
     } catch (error) {
       console.error('❌ 알림 토글 처리 실패:', error);
-      Alert.alert('오류', '알림 설정 중 문제가 발생했습니다.');
+      setToggleErrorModalVisible(true);
       setSettings({ ...settings, enabled: false });
     }
   };
@@ -222,7 +224,7 @@ const NotificationSettingsScreen = () => {
         style={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* 🔥 알림 상태 카드 */}
+        {/* 알림 상태 카드 */}
         <View style={styles.notificationSection}>
           <View style={styles.notificationCardHeader}>
             <View style={styles.notificationIconContainer}>
@@ -256,7 +258,7 @@ const NotificationSettingsScreen = () => {
           </View>
         </View>
 
-        {/* 🔥 알림 설정 카드 (알림이 활성화된 경우에만 표시) */}
+        {/* 알림 설정 카드 (알림이 활성화된 경우에만 표시) */}
         {settings.enabled && hasPermission && (
           <View style={styles.notificationSection}>
             <Text style={styles.sectionHeaderText}>알림 세부 설정</Text>
@@ -301,7 +303,7 @@ const NotificationSettingsScreen = () => {
           </View>
         )}
 
-        {/* 🔥 알림 안내 카드 (알림이 비활성화된 경우) */}
+        {/* 알림 안내 카드 (알림이 비활성화된 경우) */}
         {(!settings.enabled || !hasPermission) && (
           <View style={styles.notificationSection}>
             <View style={styles.infoContent}>
@@ -322,6 +324,64 @@ const NotificationSettingsScreen = () => {
           </View>
         )}
       </ScrollView>
+
+      {/* 일수 선택 모달 */}
+      <DayPickerModal />
+
+      {/* 시간 선택 모달 */}
+      <DateTimePickerModal
+        isVisible={showTimePicker}
+        mode="time"
+        onConfirm={handleTimeConfirm}
+        onCancel={() => setShowTimePicker(false)}
+        date={getTimeFromString(settings.notificationTime)}
+        locale="ko-KR"
+      />
+
+      {/* 설정 저장 에러 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={saveErrorModalVisible}
+        title="오류"
+        message="설정 저장 중 문제가 발생했습니다."
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setSaveErrorModalVisible(false)}
+        onCancel={() => setSaveErrorModalVisible(false)}
+      />
+
+      {/* 알림 권한 거부 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={permissionDeniedModalVisible}
+        title="알림 권한 필요"
+        message="알림을 받으려면 설정에서 알림 권한을 허용해주세요."
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'notifications-off', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setPermissionDeniedModalVisible(false)}
+        onCancel={() => setPermissionDeniedModalVisible(false)}
+      />
+
+      {/* 알림 토글 에러 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={toggleErrorModalVisible}
+        title="오류"
+        message="알림 설정 중 문제가 발생했습니다."
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setToggleErrorModalVisible(false)}
+        onCancel={() => setToggleErrorModalVisible(false)}
+      />
     </SafeAreaView>
   );
 };

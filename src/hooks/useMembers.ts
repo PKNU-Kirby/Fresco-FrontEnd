@@ -1,20 +1,35 @@
 import { useState, useEffect } from 'react';
-import { Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import React from 'react';
 import { AsyncStorageService } from '../services/AsyncStorageService';
 
 export type Member = {
-  id: string;
+  id: number;
   name: string;
   role: 'owner' | 'member';
   joinDate: string;
 };
 
-export const useMembers = (fridgeId: string, _fridgeName: string) => {
+// ConfirmModal 상태 타입
+export interface MembersModalState {
+  errorModalVisible: boolean;
+  memberInfoModalVisible: boolean;
+  memberInfoTitle: string;
+  memberInfoMessage: string;
+  setErrorModalVisible: (visible: boolean) => void;
+  setMemberInfoModalVisible: (visible: boolean) => void;
+}
+
+export const useMembers = (fridgeId: number, _fridgeName: string) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // ConfirmModal 상태들
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [memberInfoModalVisible, setMemberInfoModalVisible] = useState(false);
+  const [memberInfoTitle, setMemberInfoTitle] = useState('');
+  const [memberInfoMessage, setMemberInfoMessage] = useState('');
 
   // 멤버 목록 로드
   const loadMembers = async () => {
@@ -23,7 +38,7 @@ export const useMembers = (fridgeId: string, _fridgeName: string) => {
       const userId = await AsyncStorageService.getCurrentUserId();
       if (!userId) return;
 
-      const user = await AsyncStorageService.getUserById(userId);
+      const user = await AsyncStorageService.getUserById(Number(userId));
       setCurrentUser(user);
 
       const refrigeratorUsers =
@@ -31,9 +46,7 @@ export const useMembers = (fridgeId: string, _fridgeName: string) => {
       const users = await AsyncStorageService.getUsers();
       const refrigerators = await AsyncStorageService.getRefrigerators();
 
-      const currentFridge = refrigerators.find(
-        r => r.id.toString() === fridgeId.toString(),
-      );
+      const currentFridge = refrigerators.find(r => r.id === fridgeId);
 
       if (!currentFridge) {
         console.error('냉장고를 찾을 수 없습니다:', fridgeId);
@@ -41,12 +54,12 @@ export const useMembers = (fridgeId: string, _fridgeName: string) => {
       }
 
       const fridgeMembers = refrigeratorUsers.filter(
-        ru => ru.refrigeratorId.toString() === fridgeId.toString(),
+        ru => ru.refrigeratorId === fridgeId,
       );
 
       const memberList: Member[] = fridgeMembers
         .map(ru => {
-          const memberUser = users.find(u => u.id === ru.inviteeId.toString());
+          const memberUser = users.find(u => u.id === ru.inviteeId);
           if (!memberUser) return null;
 
           const isOwner = ru.inviterId === ru.inviteeId;
@@ -76,20 +89,20 @@ export const useMembers = (fridgeId: string, _fridgeName: string) => {
       setMembers(memberList);
     } catch (error) {
       console.error('멤버 목록 로드 실패:', error);
-      Alert.alert('오류', '멤버 목록을 불러올 수 없습니다.');
+      setErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleMemberPress = (member: Member) => {
-    Alert.alert(
-      member.name,
+    setMemberInfoTitle(member.name);
+    setMemberInfoMessage(
       `역할: ${member.role === 'owner' ? '방장' : '구성원'}\n가입일: ${
         member.joinDate
       }`,
-      [{ text: '확인', style: 'default' }],
     );
+    setMemberInfoModalVisible(true);
   };
 
   useEffect(() => {
@@ -102,11 +115,21 @@ export const useMembers = (fridgeId: string, _fridgeName: string) => {
     }, [fridgeId]),
   );
 
+  const modalState: MembersModalState = {
+    errorModalVisible,
+    memberInfoModalVisible,
+    memberInfoTitle,
+    memberInfoMessage,
+    setErrorModalVisible,
+    setMemberInfoModalVisible,
+  };
+
   return {
     members,
     isLoading,
     currentUser,
     loadMembers,
     handleMemberPress,
+    modalState, // 모달 상태 추가
   };
 };

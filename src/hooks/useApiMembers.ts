@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import React from 'react';
 import { ApiService } from '../services/apiServices';
 import { AsyncStorageService } from '../services/AsyncStorageService';
 import { PermissionAPIService } from '../services/API/permissionAPI';
-import { isOwner } from '../types';
 
 export type Member = {
   id: number;
@@ -25,12 +23,30 @@ export type CurrentUser = {
   canDelete?: boolean;
 };
 
+// ConfirmModal 상태 타입
+export interface MembersModalState {
+  errorMessage: string;
+  memberInfoTitle: string;
+  memberInfoMessage: string;
+  errorModalVisible: boolean;
+  memberInfoModalVisible: boolean;
+  setErrorModalVisible: (visible: boolean) => void;
+  setMemberInfoModalVisible: (visible: boolean) => void;
+}
+
 export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
-  const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [members, setMembers] = useState<Member[]>([]);
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
 
-  // 멤버 목록 로드 (기존 useFridgeSettings와 동일한 방식)
+  // ConfirmModal 상태들
+  const [errorMessage, setErrorMessage] = useState('');
+  const [memberInfoTitle, setMemberInfoTitle] = useState('');
+  const [memberInfoMessage, setMemberInfoMessage] = useState('');
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [memberInfoModalVisible, setMemberInfoModalVisible] = useState(false);
+
+  // 멤버 목록 로드
   const loadMembers = async () => {
     try {
       setIsLoading(true);
@@ -39,19 +55,20 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
 
       const [fridgeMembers, fridgePermissions] = await Promise.all([
         ApiService.getFridgeMembers(fridgeId),
-        PermissionAPIService.getFridgePermissions(fridgeId), // 이걸로 변경!
+        PermissionAPIService.getFridgePermissions(fridgeId),
       ]);
 
       console.log('=== 디버깅 정보 ===');
       console.log('membersResponse:', fridgeMembers);
       console.log('permissionsResponse:', fridgePermissions);
 
-      // 현재 사용자 정보 가져오기 (토큰에서 추출된 정보 사용)
+      // 현재 사용자 정보 가져오기
       const userId = await AsyncStorageService.getCurrentUserId();
       console.log('현재 사용자 ID:', userId);
 
       if (!userId) {
-        Alert.alert('오류', '사용자 정보를 찾을 수 없습니다.');
+        setErrorMessage('사용자 정보를 찾을 수 없습니다.');
+        setErrorModalVisible(true);
         return;
       }
 
@@ -67,7 +84,7 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
 
       // currentUser 설정 - 권한 정보 포함
       const user = {
-        id: userId.toString(),
+        id: userId,
         name: 'Current User',
         role: userRole,
         isOwner: isOwner,
@@ -78,10 +95,9 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
       console.log('최종 설정된 currentUser:', user);
       setCurrentUser(user);
 
-      // 각 멤버의 역할 결정 (간단하게)
+      // 각 멤버의 역할 결정
       const memberList: Member[] = fridgeMembers.map((member: any) => {
-        // 현재 사용자면 owner, 아니면 member로 설정
-        const isSelf = member.userId.toString() === userId.toString();
+        const isSelf = member.userId === userId;
         const memberRole = isSelf ? userRole : 'member';
 
         console.log(
@@ -89,7 +105,7 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
         );
 
         return {
-          id: member.userId.toString(),
+          id: member.userId,
           name: member.userName || `사용자 ${member.userId}`,
           role: memberRole,
           joinDate: new Date().toISOString().split('T')[0],
@@ -101,28 +117,29 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
       setMembers(memberList);
     } catch (error) {
       console.error('멤버 목록 로드 실패:', error);
-      Alert.alert('오류', '멤버 목록을 불러올 수 없습니다.');
+      setErrorMessage('멤버 목록을 불러올 수 없습니다.');
+      setErrorModalVisible(true);
       setMembers([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 멤버 클릭 핸들러 (기존 Alert 방식 유지)
+  // 멤버 클릭 핸들러
   const handleMemberPress = (member: Member) => {
     const roleText = member.role === 'owner' ? '방장' : '구성원';
     const joinDateText = new Date(member.joinDate).toLocaleDateString('ko-KR');
 
-    Alert.alert(
-      member.name,
+    setMemberInfoTitle(member.name);
+    setMemberInfoMessage(
       `역할: ${roleText}\n가입일: ${joinDateText}${
         member.email ? `\n이메일: ${member.email}` : ''
       }`,
-      [{ text: '확인', style: 'default' }],
     );
+    setMemberInfoModalVisible(true);
   };
 
-  // 멤버 삭제 기능 (새로운 deleteFridgeMember API 사용)
+  // 멤버 삭제 기능
   const removeMember = async (memberId: number) => {
     try {
       setIsLoading(true);
@@ -144,7 +161,7 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
     }
   };
 
-  // 현재 사용자 권한 확인 함수 (권한 API 결과를 직접 사용)
+  // 현재 사용자 권한 확인 함수
   const canRemoveMember = (targetMember: Member) => {
     console.log('=== 삭제 권한 확인 ===');
     console.log('currentUser:', currentUser);
@@ -155,7 +172,7 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
       return false;
     }
 
-    // 현재 사용자가 방장이어야 함 (currentUser.role 사용)
+    // 현재 사용자가 방장이어야 함
     console.log('currentUser.role:', currentUser.role);
 
     if (currentUser.role !== 'owner') {
@@ -189,13 +206,24 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
     }, [fridgeId]),
   );
 
+  const modalState: MembersModalState = {
+    errorMessage,
+    memberInfoTitle,
+    errorModalVisible,
+    memberInfoMessage,
+    memberInfoModalVisible,
+    setErrorModalVisible,
+    setMemberInfoModalVisible,
+  };
+
   return {
     members,
     isLoading,
+    modalState,
     currentUser,
     loadMembers,
-    handleMemberPress,
     removeMember,
     canRemoveMember,
+    handleMemberPress,
   };
 };

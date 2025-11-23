@@ -4,13 +4,13 @@ import {
   View,
   Modal,
   TouchableOpacity,
-  Alert,
   Platform,
   Text,
   ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import ConfirmModal from '../modals/ConfirmModal';
 import { styles } from './styles';
 
 type DateRangePickerProps = {
@@ -32,6 +32,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const [endDate, setEndDate] = useState(new Date());
   const [pickerMode, setPickerMode] = useState<PickerMode>('range');
   const [tempDate, setTempDate] = useState(new Date());
+
+  // ConfirmModal 상태
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
 
   const formatDate = (date: Date): string => {
     const year = date.getFullYear();
@@ -86,10 +89,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   const handleConfirm = () => {
     if (startDate > endDate) {
-      Alert.alert('오류', '시작일은 종료일보다 빨라야 합니다.');
+      setErrorModalVisible(true);
       return;
     }
-
     onDateRangeSelect(formatDate(startDate), formatDate(endDate));
     onClose();
     setPickerMode('range');
@@ -201,141 +203,155 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   }
 
   return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={handleClose}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          {/* 헤더 */}
-          <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={handleClose}>
-              <Text style={styles.cancelButtonText}>취소</Text>
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>
-              {pickerMode === 'startDate'
-                ? '시작일 선택'
-                : pickerMode === 'endDate'
-                ? '종료일 선택'
-                : '기간 선택'}
-            </Text>
-            <TouchableOpacity
-              onPress={
-                pickerMode === 'range' ? handleConfirm : handleDateConfirm
-              }
-            >
-              <Text style={styles.confirmButtonText}>
-                {pickerMode === 'range' ? '완료' : '확인'}
+    <>
+      <Modal
+        visible={visible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* 헤더 */}
+            <View style={styles.modalHeader}>
+              <TouchableOpacity onPress={handleClose}>
+                <Text style={styles.cancelButtonText}>취소</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>
+                {pickerMode === 'startDate'
+                  ? '시작일 선택'
+                  : pickerMode === 'endDate'
+                  ? '종료일 선택'
+                  : '기간 선택'}
               </Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity
+                onPress={
+                  pickerMode === 'range' ? handleConfirm : handleDateConfirm
+                }
+              >
+                <Text style={styles.confirmButtonText}>
+                  {pickerMode === 'range' ? '완료' : '확인'}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {/* 기간 선택 화면 */}
-            {pickerMode === 'range' && (
-              <>
-                {/* 빠른 선택 */}
-                <View style={styles.settingsGroup}>
-                  <View style={styles.groupHeader}>
-                    <Text style={styles.groupTitle}>빠른 선택</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {/* 기간 선택 화면 */}
+              {pickerMode === 'range' && (
+                <>
+                  {/* 빠른 선택 */}
+                  <View style={styles.settingsGroup}>
+                    <View style={styles.groupHeader}>
+                      <Text style={styles.groupTitle}>빠른 선택</Text>
+                    </View>
+                    {getQuickOptions().map((option, index) => (
+                      <QuickSelectItem
+                        key={option.label}
+                        label={option.label}
+                        start={option.start}
+                        end={option.end}
+                        isLast={index === getQuickOptions().length - 1}
+                      />
+                    ))}
                   </View>
 
-                  {getQuickOptions().map((option, index) => (
-                    <QuickSelectItem
-                      key={option.label}
-                      label={option.label}
-                      start={option.start}
-                      end={option.end}
-                      isLast={index === getQuickOptions().length - 1}
+                  {/* 사용자 정의 기간 */}
+                  <View style={styles.settingsGroup}>
+                    <View style={styles.groupHeader}>
+                      <Text style={styles.groupTitle}>사용자 정의</Text>
+                    </View>
+                    <ModalSettingsItem
+                      title="시작일"
+                      value={formatDisplayDate(startDate)}
+                      icon="calendar-outline"
+                      iconColor="#60A5FA"
+                      onPress={handleStartDatePress}
                     />
-                  ))}
-                </View>
-
-                {/* 사용자 정의 기간 */}
-                <View style={styles.settingsGroup}>
-                  <View style={styles.groupHeader}>
-                    <Text style={styles.groupTitle}>사용자 정의</Text>
+                    <ModalSettingsItem
+                      title="종료일"
+                      value={formatDisplayDate(endDate)}
+                      icon="calendar-outline"
+                      iconColor="#60A5FA"
+                      onPress={handleEndDatePress}
+                      isLast
+                    />
                   </View>
 
-                  <ModalSettingsItem
-                    title="시작일"
-                    value={formatDisplayDate(startDate)}
-                    icon="calendar-outline"
-                    iconColor="#60A5FA"
-                    onPress={handleStartDatePress}
+                  {/* 선택된 기간 요약 */}
+                  <View style={styles.settingsGroup}>
+                    <View style={styles.section}>
+                      <Text style={styles.sectionDescription}>
+                        {formatDisplayDate(startDate)} ~{' '}
+                        {formatDisplayDate(endDate)}
+                      </Text>
+                      <Text style={styles.sectionDescription}>
+                        총{' '}
+                        {Math.ceil(
+                          (endDate.getTime() - startDate.getTime()) /
+                            (1000 * 60 * 60 * 24),
+                        ) + 1}
+                        일 기간
+                      </Text>
+                    </View>
+                  </View>
+                </>
+              )}
+
+              {/* 날짜 선택 화면 */}
+              {(pickerMode === 'startDate' || pickerMode === 'endDate') && (
+                <View style={styles.datePickerContainer}>
+                  <DateTimePicker
+                    value={tempDate}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={handleDateChange}
+                    locale="ko-KR"
+                    textColor="#000"
+                    maximumDate={
+                      pickerMode === 'startDate' ? endDate : new Date()
+                    }
+                    minimumDate={
+                      pickerMode === 'endDate' ? startDate : undefined
+                    }
                   />
-
-                  <ModalSettingsItem
-                    title="종료일"
-                    value={formatDisplayDate(endDate)}
-                    icon="calendar-outline"
-                    iconColor="#60A5FA"
-                    onPress={handleEndDatePress}
-                    isLast
-                  />
+                  {pickerMode === 'startDate' && (
+                    <View style={styles.section}>
+                      <Text style={styles.sectionDescription}>
+                        종료일({formatDisplayDate(endDate)})보다 이전 날짜를
+                        선택해주세요
+                      </Text>
+                    </View>
+                  )}
+                  {pickerMode === 'endDate' && (
+                    <View style={styles.section}>
+                      <Text style={styles.sectionDescription}>
+                        시작일({formatDisplayDate(startDate)})보다 이후 날짜를
+                        선택해주세요
+                      </Text>
+                    </View>
+                  )}
                 </View>
-
-                {/* 선택된 기간 요약 */}
-                <View style={styles.settingsGroup}>
-                  <View style={styles.section}>
-                    <Text style={styles.sectionDescription}>
-                      {formatDisplayDate(startDate)} ~{' '}
-                      {formatDisplayDate(endDate)}
-                    </Text>
-                    <Text style={styles.sectionDescription}>
-                      총{' '}
-                      {Math.ceil(
-                        (endDate.getTime() - startDate.getTime()) /
-                          (1000 * 60 * 60 * 24),
-                      ) + 1}
-                      일 기간
-                    </Text>
-                  </View>
-                </View>
-              </>
-            )}
-
-            {/* 날짜 선택 화면 */}
-            {(pickerMode === 'startDate' || pickerMode === 'endDate') && (
-              <View style={styles.datePickerContainer}>
-                <DateTimePicker
-                  value={tempDate}
-                  mode="date"
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={handleDateChange}
-                  locale="ko-KR"
-                  textColor="#000"
-                  maximumDate={
-                    pickerMode === 'startDate' ? endDate : new Date()
-                  }
-                  minimumDate={pickerMode === 'endDate' ? startDate : undefined}
-                />
-
-                {pickerMode === 'startDate' && (
-                  <View style={styles.section}>
-                    <Text style={styles.sectionDescription}>
-                      종료일({formatDisplayDate(endDate)})보다 이전 날짜를
-                      선택해주세요
-                    </Text>
-                  </View>
-                )}
-
-                {pickerMode === 'endDate' && (
-                  <View style={styles.section}>
-                    <Text style={styles.sectionDescription}>
-                      시작일({formatDisplayDate(startDate)})보다 이후 날짜를
-                      선택해주세요
-                    </Text>
-                  </View>
-                )}
-              </View>
-            )}
-          </ScrollView>
+              )}
+            </ScrollView>
+          </View>
         </View>
-      </View>
-    </Modal>
+      </Modal>
+
+      {/* 에러 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={errorModalVisible}
+        title="오류"
+        message="시작일은 종료일보다 빨라야 합니다."
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setErrorModalVisible(false)}
+        onCancel={() => setErrorModalVisible(false)}
+      />
+    </>
   );
 };
 

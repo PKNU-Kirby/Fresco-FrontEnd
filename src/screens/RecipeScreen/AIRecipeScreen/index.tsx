@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,8 +12,9 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AsyncStorageService } from '../../../services/AsyncStorageService';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ConfirmModal from '../../../components/modals/ConfirmModal';
 import { RecipeStackParamList } from '../RecipeNavigator';
-import RecipeAPI from '../../../services/API/RecipeAPI'; // ✅ 추가
+import RecipeAPI from '../../../services/API/RecipeAPI';
 import { styles } from './styles';
 
 type AIRecipeScreenNavigationProp = NativeStackNavigationProp<
@@ -23,7 +23,7 @@ type AIRecipeScreenNavigationProp = NativeStackNavigationProp<
 >;
 
 interface RecipeIngredient {
-  id: string;
+  id: number;
   name: string;
   quantity: number;
   unit: string;
@@ -43,6 +43,7 @@ interface AIGeneratedRecipe {
 
 const AIRecipeScreen: React.FC = () => {
   const navigation = useNavigation<AIRecipeScreenNavigationProp>();
+
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [generatedRecipe, setGeneratedRecipe] =
@@ -52,6 +53,16 @@ const AIRecipeScreen: React.FC = () => {
     '달걀 요리 추천해줘',
     '10분 안에 만들 수 있는 요리',
   ]);
+
+  // ConfirmModal 상태들
+  const [emptyPromptModalVisible, setEmptyPromptModalVisible] = useState(false);
+  const [generateErrorModalVisible, setGenerateErrorModalVisible] =
+    useState(false);
+  const [generateErrorMessage, setGenerateErrorMessage] = useState('');
+  const [saveConfirmVisible, setSaveConfirmVisible] = useState(false);
+  const [saveSuccessVisible, setSaveSuccessVisible] = useState(false);
+  const [saveErrorModalVisible, setSaveErrorModalVisible] = useState(false);
+  const [saveErrorMessage, setSaveErrorMessage] = useState('');
 
   console.log('🔍 렌더링 상태:', {
     isLoading,
@@ -63,7 +74,7 @@ const AIRecipeScreen: React.FC = () => {
   // AI 레시피 생성
   const generateRecipe = async () => {
     if (!prompt.trim()) {
-      Alert.alert('알림', '요청 내용을 입력해주세요.');
+      setEmptyPromptModalVisible(true);
       return;
     }
 
@@ -79,16 +90,14 @@ const AIRecipeScreen: React.FC = () => {
     try {
       console.log('📤 AI 레시피 요청:', prompt);
 
-      // AIRecipeScreen.tsx
       const aiRecipeData = await RecipeAPI.getAIRecipe(prompt);
-      // 이제 aiRecipeData는 AIRecipeResponse 타입이에요!
 
       const mappedRecipe: AIGeneratedRecipe = {
-        title: aiRecipeData.title, // ✅ 타입 안전
+        title: aiRecipeData.title,
         description: `AI가 추천하는 "${prompt}" 레시피입니다.`,
         ingredients: aiRecipeData.ingredients.map((ing, index) => ({
           id: `${Date.now()}_${Math.random()}_${index}`,
-          name: ing.ingredientName, // ✅ 자동완성 됨
+          name: ing.ingredientName,
           quantity: ing.quantity,
           unit: ing.unit,
         })),
@@ -100,10 +109,10 @@ const AIRecipeScreen: React.FC = () => {
       setGeneratedRecipe(mappedRecipe);
     } catch (error: any) {
       console.error('❌ AI 레시피 생성 실패:', error);
-      Alert.alert(
-        '오류',
+      setGenerateErrorMessage(
         error.message || 'AI 레시피 생성에 실패했습니다. 다시 시도해주세요.',
       );
+      setGenerateErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
@@ -112,61 +121,49 @@ const AIRecipeScreen: React.FC = () => {
   // 레시피 저장
   const handleSaveRecipe = async () => {
     if (!generatedRecipe) return;
+    setSaveConfirmVisible(true);
+  };
 
-    Alert.alert('레시피 저장', '이 레시피를 내 레시피에 저장하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '저장',
-        onPress: async () => {
-          try {
-            setIsLoading(true);
+  const handleSaveConfirm = async () => {
+    if (!generatedRecipe) return;
 
-            const saveData = {
-              title: generatedRecipe.title,
-              ingredients: generatedRecipe.ingredients.map(ing => ({
-                ingredientName: ing.name,
-                quantity: ing.quantity || 0,
-                unit: ing.unit,
-              })),
-              steps: generatedRecipe.steps,
-              substitutions: generatedRecipe.substitutions || [],
-            };
+    try {
+      setIsLoading(true);
+      setSaveConfirmVisible(false);
 
-            console.log('📤 AI 레시피 저장 요청:', saveData);
-            const savedRecipe = await RecipeAPI.saveAIRecipe(saveData);
-            console.log('✅ AI 레시피 저장 성공:', savedRecipe);
+      const saveData = {
+        title: generatedRecipe.title,
+        ingredients: generatedRecipe.ingredients.map(ing => ({
+          ingredientName: ing.name,
+          quantity: ing.quantity || 0,
+          unit: ing.unit,
+        })),
+        steps: generatedRecipe.steps,
+        substitutions: generatedRecipe.substitutions || [],
+      };
 
-            // ✅ 현재 선택된 냉장고 ID 가져오기
-            const currentFridgeId =
-              await AsyncStorageService.getSelectedFridgeId();
-            console.log('📦 현재 냉장고 ID:', currentFridgeId);
+      console.log('📤 AI 레시피 저장 요청:', saveData);
+      const savedRecipe = await RecipeAPI.saveAIRecipe(saveData);
+      console.log('✅ AI 레시피 저장 성공:', savedRecipe);
 
-            Alert.alert(
-              '성공',
-              '레시피가 저장되었습니다.\n레시피 탭에서 확인하세요!',
-              [
-                {
-                  text: '확인',
-                  onPress: () => {
-                    // ✅ AI 화면 초기화
-                    setGeneratedRecipe(null);
-                    setPrompt('');
+      const currentFridgeId = await AsyncStorageService.getSelectedFridgeId();
+      console.log('📦 현재 냉장고 ID:', currentFridgeId);
 
-                    // RecipeHome으로 이동
-                    navigation.navigate('RecipeHome' as any);
-                  },
-                },
-              ],
-            );
-          } catch (error: any) {
-            console.error('❌ AI 레시피 저장 실패:', error);
-            Alert.alert('오류', error.message || '레시피 저장에 실패했습니다.');
-          } finally {
-            setIsLoading(false);
-          }
-        },
-      },
-    ]);
+      setSaveSuccessVisible(true);
+    } catch (error: any) {
+      console.error('❌ AI 레시피 저장 실패:', error);
+      setSaveErrorMessage(error.message || '레시피 저장에 실패했습니다.');
+      setSaveErrorModalVisible(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveSuccess = () => {
+    setSaveSuccessVisible(false);
+    setGeneratedRecipe(null);
+    setPrompt('');
+    navigation.navigate('RecipeHome' as any);
   };
 
   const handleRegenerate = () => {
@@ -191,7 +188,6 @@ const AIRecipeScreen: React.FC = () => {
             <Icon name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
         </View>
-
         <View style={styles.centerSection}>
           <Text style={styles.headerTitle}>AI 레시피 추천</Text>
         </View>
@@ -221,7 +217,6 @@ const AIRecipeScreen: React.FC = () => {
               <Text style={styles.sectionSubtitle}>
                 재료, 요리 종류, 시간, 난이도 등을 자유롭게 입력해보세요
               </Text>
-
               <TextInput
                 style={styles.promptInput}
                 value={prompt}
@@ -231,7 +226,6 @@ const AIRecipeScreen: React.FC = () => {
                 numberOfLines={4}
                 textAlignVertical="top"
               />
-
               {prompt.trim() ? (
                 <TouchableOpacity
                   style={styles.generateButton}
@@ -400,6 +394,81 @@ const AIRecipeScreen: React.FC = () => {
           </View>
         )}
       </ScrollView>
+
+      {/* 프롬프트 입력 필요 알림 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={emptyPromptModalVisible}
+        title="알림"
+        message="요청 내용을 입력해주세요."
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setEmptyPromptModalVisible(false)}
+        onCancel={() => setEmptyPromptModalVisible(false)}
+      />
+
+      {/* AI 레시피 생성 에러 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={generateErrorModalVisible}
+        title="오류"
+        message={generateErrorMessage}
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setGenerateErrorModalVisible(false)}
+        onCancel={() => setGenerateErrorModalVisible(false)}
+      />
+
+      {/* 레시피 저장 확인 */}
+      <ConfirmModal
+        isAlert={true}
+        visible={saveConfirmVisible}
+        title="레시피 저장"
+        message="이 레시피를 내 레시피에 저장하시겠습니까?"
+        iconContainer={{ backgroundColor: '#e3f2fd' }}
+        icon={{ name: 'save', color: '#2196F3', size: 48 }}
+        confirmText="저장"
+        cancelText="취소"
+        confirmButtonStyle="primary"
+        onConfirm={handleSaveConfirm}
+        onCancel={() => setSaveConfirmVisible(false)}
+      />
+
+      {/* 레시피 저장 성공 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={saveSuccessVisible}
+        title="성공"
+        message="레시피가 저장되었습니다.\n레시피 탭에서 확인하세요!"
+        iconContainer={{ backgroundColor: '#d3f0d3' }}
+        icon={{ name: 'check', color: 'limegreen', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={handleSaveSuccess}
+        onCancel={handleSaveSuccess}
+      />
+
+      {/* 레시피 저장 실패 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={saveErrorModalVisible}
+        title="오류"
+        message={saveErrorMessage}
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setSaveErrorModalVisible(false)}
+        onCancel={() => setSaveErrorModalVisible(false)}
+      />
     </SafeAreaView>
   );
 };

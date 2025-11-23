@@ -5,18 +5,19 @@ import {
   ScrollView,
   Text,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import BackButton from '../../../components/_common/BackButton';
-import InviteMemberModal from '../../../components/FridgeSettings/InviteMemberModal';
-import MemberCard from '../../../components/FridgeSettings/MemberCard';
-import { useApiMembers } from '../../../hooks/useApiMembers';
-import { RootStackParamList } from '../../../../App';
-import { styles } from '../styles';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+import { RootStackParamList } from '../../../../App';
+import { useApiMembers } from '../../../hooks/useApiMembers';
+import BackButton from '../../../components/_common/BackButton';
+import ConfirmModal from '../../../components/modals/ConfirmModal';
+import MemberCard from '../../../components/FridgeSettings/MemberCard';
+import InviteMemberModal from '../../../components/FridgeSettings/InviteMemberModal';
+import { styles } from '../styles';
 
 type Props = {
   route: {
@@ -37,14 +38,22 @@ const MembersScreen = ({ route }: Props) => {
   const {
     members,
     isLoading,
+    modalState,
     currentUser,
     loadMembers,
-    handleMemberPress,
     removeMember,
     canRemoveMember,
+    handleMemberPress,
   } = useApiMembers(fridgeId, fridgeName);
 
-  // 권한 계산 : owner (canEdit 기반)
+  const [noPermissionMessage, setNoPermissionMessage] = useState('');
+  const [removeErrorModalVisible, setRemoveErrorModalVisible] = useState(false);
+  const [noPermissionModalVisible, setNoPermissionModalVisible] =
+    useState(false);
+  const [removeSuccessModalVisible, setRemoveSuccessModalVisible] =
+    useState(false);
+
+  // 권한 계산
   const isOwner = currentUser?.role === 'owner';
   const canManageMembers = currentUser?.canEdit ?? isOwner;
   const canInviteMembers = currentUser?.canEdit ?? isOwner;
@@ -55,7 +64,8 @@ const MembersScreen = ({ route }: Props) => {
 
   const handleMemberInvite = () => {
     if (!canInviteMembers) {
-      Alert.alert('권한 없음', '구성원을 초대할 권한이 없습니다.');
+      setNoPermissionMessage('구성원을 초대할 권한이 없습니다.');
+      setNoPermissionModalVisible(true);
       return;
     }
     setShowInviteModal(true);
@@ -64,16 +74,17 @@ const MembersScreen = ({ route }: Props) => {
   // 구성원 삭제 핸들러
   const handleMemberRemove = async (memberId: number) => {
     if (!canManageMembers) {
-      Alert.alert('권한 없음', '구성원을 삭제할 권한이 없습니다.');
+      setNoPermissionMessage('구성원을 삭제할 권한이 없습니다.');
+      setNoPermissionModalVisible(true);
       return;
     }
 
     try {
       await removeMember(memberId);
-      Alert.alert('완료', '구성원이 삭제되었습니다.');
+      setRemoveSuccessModalVisible(true);
     } catch (error) {
       console.error('구성원 삭제 실패:', error);
-      Alert.alert('오류', '구성원 삭제에 실패했습니다.');
+      setRemoveErrorModalVisible(true);
     }
   };
 
@@ -197,6 +208,85 @@ const MembersScreen = ({ route }: Props) => {
         fridgeId={fridgeId}
         fridgeName={fridgeName}
         onInviteSuccess={loadMembers}
+      />
+
+      {/* Modal : useApiMembers */}
+
+      {/* 에러 모달 (useApiMembers) */}
+      <ConfirmModal
+        isAlert={false}
+        visible={modalState.errorModalVisible}
+        title="오류"
+        message={modalState.errorMessage}
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => modalState.setErrorModalVisible(false)}
+        onCancel={() => modalState.setErrorModalVisible(false)}
+      />
+
+      {/* 멤버 정보 모달 (useApiMembers) */}
+      <ConfirmModal
+        isAlert={false}
+        visible={modalState.memberInfoModalVisible}
+        title={modalState.memberInfoTitle}
+        message={modalState.memberInfoMessage}
+        iconContainer={{ backgroundColor: '#e3f2fd' }}
+        icon={{ name: 'person', color: '#2196F3', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => modalState.setMemberInfoModalVisible(false)}
+        onCancel={() => modalState.setMemberInfoModalVisible(false)}
+      />
+
+      {/* Modal : MembersScreen */}
+
+      {/* 권한 없음 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={noPermissionModalVisible}
+        title="권한 없음"
+        message={noPermissionMessage}
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setNoPermissionModalVisible(false)}
+        onCancel={() => setNoPermissionModalVisible(false)}
+      />
+
+      {/* 구성원 삭제 성공 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={removeSuccessModalVisible}
+        title="완료"
+        message="구성원이 삭제되었습니다."
+        iconContainer={{ backgroundColor: '#d3f0d3' }}
+        icon={{ name: 'check', color: 'limegreen', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setRemoveSuccessModalVisible(false)}
+        onCancel={() => setRemoveSuccessModalVisible(false)}
+      />
+
+      {/* 구성원 삭제 실패 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={removeErrorModalVisible}
+        title="오류"
+        message="구성원 삭제에 실패했습니다."
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setRemoveErrorModalVisible(false)}
+        onCancel={() => setRemoveErrorModalVisible(false)}
       />
     </SafeAreaView>
   );

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Alert } from 'react-native';
 import { FridgeWithRole } from '../types/permission';
 import { User } from '../types/auth';
 import { useLogout } from './Auth/useLogout';
@@ -23,24 +22,25 @@ export const useFridgeActions = ({
   setIsEditModalVisible,
   setIsAddModalVisible,
   editingFridge,
-}: //navigation,
-UseFridgeActionsParams) => {
+}: UseFridgeActionsParams) => {
   // 모달 상태들
-  const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(false);
-  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [leaveConfirmVisible, setLeaveConfirmVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(false);
   const [notOwnerModalVisible, setNotOwnerModalVisible] = useState(false);
+  const [validationErrorMessage, setValidationErrorMessage] = useState('');
   const [hideToggleModalVisible, setHideToggleModalVisible] = useState(false);
+  const [validationErrorModalVisible, setValidationErrorModalVisible] =
+    useState(false);
 
   // 처리 중 상태들
-  const [isDeletingFridge, setIsDeletingFridge] = useState(false);
-  const [isAddingFridge, setIsAddingFridge] = useState(false);
-  const [isUpdatingFridge, setIsUpdatingFridge] = useState(false);
-
-  const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
+  const [isAddingFridge, setIsAddingFridge] = useState(false);
+  const [isDeletingFridge, setIsDeletingFridge] = useState(false);
+  const [isUpdatingFridge, setIsUpdatingFridge] = useState(false);
   const [selectedFridge, setSelectedFridge] = useState<FridgeWithRole | null>(
     null,
   );
@@ -60,6 +60,12 @@ UseFridgeActionsParams) => {
     setErrorModalVisible(true);
   };
 
+  // 유효성 검사 에러 모달 헬퍼
+  const showValidationErrorModal = (errors: string[]) => {
+    setValidationErrorMessage(errors.join('\n'));
+    setValidationErrorModalVisible(true);
+  };
+
   // 로그아웃 관련
   const handleLogout = () => {
     setLogoutConfirmVisible(true);
@@ -73,7 +79,7 @@ UseFridgeActionsParams) => {
   // 냉장고 편집 관련
   const handleEditFridge = (fridge: FridgeWithRole) => {
     if (!FridgeUtils.checkPermission(fridge, 'edit')) {
-      Alert.alert('권한 없음', FridgeUtils.getPermissionDeniedMessage('edit'));
+      setNotOwnerModalVisible(true);
       return;
     }
     setEditingFridge(fridge);
@@ -99,7 +105,7 @@ UseFridgeActionsParams) => {
     // 유효성 검사
     const validation = FridgeUtils.validateFridgeName(fridgeData.name);
     if (!validation.isValid) {
-      Alert.alert('입력 오류', validation.errors.join('\n'));
+      showValidationErrorModal(validation.errors);
       return;
     }
 
@@ -111,9 +117,9 @@ UseFridgeActionsParams) => {
       // 1. 서버 API 호출
       const response = await FridgeControllerAPI.create(fridgeData);
 
-      // 2. 응답 검증 (실제 API 응답에 맞게)
+      // 2. 응답 검증
       if (FridgeControllerAPI.isSuccessResponse(response, 'create')) {
-        // 3. 목록 새로고침 (로컬 동기화는 복잡하니 일단 스킵)
+        // 3. 목록 새로고침
         await loadUserFridges();
 
         // 4. 성공 알림
@@ -135,14 +141,13 @@ UseFridgeActionsParams) => {
   };
 
   // 냉장고 수정
-  // 냉장고 수정
   const handleUpdateFridge = async (updatedData: { name: string }) => {
     if (!currentUser || !editingFridge || isUpdatingFridge) return;
 
     // 유효성 검사
     const validation = FridgeUtils.validateFridgeName(updatedData.name);
     if (!validation.isValid) {
-      Alert.alert('입력 오류', validation.errors.join('\n'));
+      showValidationErrorModal(validation.errors);
       return;
     }
 
@@ -150,7 +155,7 @@ UseFridgeActionsParams) => {
 
     try {
       FridgeUtils.debugLog('냉장고 수정 시작', {
-        fridgeId: String(editingFridge.id), // ✅ 명시적으로 문자열 변환
+        fridgeId: String(editingFridge.id),
         updatedData,
       });
 
@@ -159,7 +164,7 @@ UseFridgeActionsParams) => {
         name: updatedData.name,
       });
 
-      // 2. 응답 검증 (실제 API 응답에 맞게)
+      // 2. 응답 검증
       if (FridgeControllerAPI.isSuccessResponse(response, 'update')) {
         // 3. 목록 새로고침
         await loadUserFridges();
@@ -196,13 +201,10 @@ UseFridgeActionsParams) => {
       // 1. 서버 API 호출
       const response = await FridgeControllerAPI.delete(selectedFridge.id);
 
-      // 2. 응답 검증 (DELETE는 string 응답)
+      // 2. 응답 검증
       if (FridgeControllerAPI.isSuccessResponse(response, 'delete')) {
-        // 3. 로컬 동기화 (선택사항)
-        await FridgeUtils.syncDeleteToLocal(
-          selectedFridge.id.toString(),
-          currentUser.id,
-        );
+        // 3. 로컬 동기화
+        await FridgeUtils.syncDeleteToLocal(selectedFridge.id, currentUser.id);
 
         // 4. 성공 알림
         showSuccessModal(
@@ -217,21 +219,20 @@ UseFridgeActionsParams) => {
       const errorMessage = FridgeUtils.getErrorMessage(error, 'delete');
       showErrorModal('삭제 실패', errorMessage);
     } finally {
-      await loadUserFridges(); // 항상 목록 새로고침
+      await loadUserFridges();
       setIsDeletingFridge(false);
       setSelectedFridge(null);
     }
   };
 
-  // 냉장고 나가기 (TODO: 서버 API 추가 시 업데이트)
+  // 냉장고 나가기
   const handleLeaveConfirm = async () => {
     if (!currentUser || !selectedFridge) return;
 
     setLeaveConfirmVisible(false);
     try {
-      // 현재는 로컬 로직만 사용 (서버 API 추가 시 수정 필요)
       const success = await FridgeUtils.syncDeleteToLocal(
-        selectedFridge.id.toString(),
+        selectedFridge.id,
         currentUser.id,
       );
 
@@ -251,41 +252,44 @@ UseFridgeActionsParams) => {
   return {
     // 액션 핸들러들
     handleLogout,
+    handleAddFridge,
     handleEditFridge,
     handleLeaveFridge,
-    handleAddFridge,
     handleUpdateFridge,
 
     // 상태들
     isLoggingOut,
-    isDeletingFridge,
     isAddingFridge,
+    isDeletingFridge,
     isUpdatingFridge,
 
     // 모달 관련
     modals: {
-      logoutConfirmVisible,
-      deleteConfirmVisible,
+      modalTitle,
+      modalMessage,
+      selectedFridge,
+      errorModalVisible,
       leaveConfirmVisible,
       successModalVisible,
-      errorModalVisible,
+      logoutConfirmVisible,
       notOwnerModalVisible,
+      deleteConfirmVisible,
+      validationErrorMessage,
       hideToggleModalVisible,
-      modalMessage,
-      modalTitle,
-      selectedFridge,
+      validationErrorModalVisible,
     },
     modalHandlers: {
-      setLogoutConfirmVisible,
-      setDeleteConfirmVisible,
-      setLeaveConfirmVisible,
-      setSuccessModalVisible,
-      setErrorModalVisible,
-      setNotOwnerModalVisible,
-      setHideToggleModalVisible,
+      handleLeaveConfirm,
       handleLogoutConfirm,
       handleDeleteConfirm,
-      handleLeaveConfirm,
+      setErrorModalVisible,
+      setLeaveConfirmVisible,
+      setSuccessModalVisible,
+      setDeleteConfirmVisible,
+      setLogoutConfirmVisible,
+      setNotOwnerModalVisible,
+      setHideToggleModalVisible,
+      setValidationErrorModalVisible,
     },
   };
 };

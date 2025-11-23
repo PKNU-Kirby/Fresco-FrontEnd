@@ -1,6 +1,6 @@
 // services/NotificationService.ts
 import messaging from '@react-native-firebase/messaging';
-import { Alert, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ApiService } from './apiServices';
 
@@ -10,23 +10,25 @@ export interface NotificationSettings {
   notificationTime: string;
 }
 
+// 모달 콜백 타입 정의
+export interface NotificationModalCallbacks {
+  showForegroundMessage?: (title: string, body: string) => void;
+  showTokenAlert?: (token: string, success: boolean) => void;
+  showTokenError?: () => void;
+}
+
 class NotificationService {
   private fcmToken: string | null = null;
+  private modalCallbacks: NotificationModalCallbacks = {};
+
+  // 모달 콜백 등록
+  setModalCallbacks(callbacks: NotificationModalCallbacks): void {
+    this.modalCallbacks = callbacks;
+  }
 
   // 알림 권한 요청
   async requestPermission(): Promise<boolean> {
     try {
-      // iOS에서 원격 메시지 등록
-      /*
-      Apple Developer에서 푸시 알림 인증서 설정 필요:
-
-      Apple Developer Console 접속
-      Certificates, Identifiers & Profiles → Identifiers
-      앱 Bundle ID 선택
-      Push Notifications 체크박스 활성화
-      인증서 생성 및 다운로드
-      Xcode에서 Signing & Capabilities에 Push Notifications 추가
-      */
       if (Platform.OS === 'ios') {
         try {
           if (Platform.OS === 'ios') {
@@ -36,7 +38,6 @@ class NotificationService {
           console.log('📱 FCM 토큰:', token);
         } catch (error) {
           console.log('⚠️ FCM 설정 스킵 (개발 환경)');
-          // 개발 중에는 무시
         }
       }
 
@@ -48,13 +49,11 @@ class NotificationService {
       if (enabled) {
         console.log('✅ 푸시 알림 권한 허용됨');
 
-        // 중요! 여기서 바로 토큰 가져오기
         try {
           await this.getFCMToken();
           this.setupMessageHandlers();
         } catch (tokenError) {
           console.error('❌ FCM 토큰 가져오기 실패:', tokenError);
-          // 토큰 실패해도 권한은 허용된 것으로 처리
         }
       } else {
         console.log('❌ 푸시 알림 권한 거부됨');
@@ -72,17 +71,6 @@ class NotificationService {
     try {
       console.log('=> FCM 토큰 가져오기 시작...');
 
-      // iOS에서 원격 메시지 등록
-      /*
-      Apple Developer에서 푸시 알림 인증서 설정 필요:
-
-      Apple Developer Console 접속
-      Certificates, Identifiers & Profiles → Identifiers
-      앱 Bundle ID 선택
-      Push Notifications 체크박스 활성화
-      인증서 생성 및 다운로드
-      Xcode에서 Signing & Capabilities에 Push Notifications 추가
-      */
       if (Platform.OS === 'ios') {
         try {
           if (Platform.OS === 'ios') {
@@ -92,20 +80,18 @@ class NotificationService {
           console.log('📱 FCM 토큰:', token);
         } catch (error) {
           console.log('⚠️ FCM 설정 스킵 (개발 환경)');
-          // 개발 중에는 무시
         }
       }
 
       this.fcmToken = await messaging().getToken();
       console.log('📱 FCM Token:', this.fcmToken);
 
-      // 서버에 토큰 저장
       await this.saveTokenToServer(this.fcmToken);
 
       return this.fcmToken;
     } catch (error) {
       console.error('❌ FCM 토큰 가져오기 실패:', error);
-      throw error; // 에러를 throw해서 상위에서 처리
+      throw error;
     }
   }
 
@@ -124,10 +110,8 @@ class NotificationService {
     try {
       console.log('=> 서버에 FCM 토큰 저장 시도');
 
-      // AsyncStorage에도 저장
       await AsyncStorage.setItem('fcm_token', token);
 
-      // 실제 서버 API 호출
       const success = await ApiService.registerFCMToken(token);
 
       if (success) {
@@ -148,10 +132,13 @@ class NotificationService {
     messaging().onMessage(async remoteMessage => {
       console.log('📨 포그라운드에서 메시지 수신:', remoteMessage);
 
-      Alert.alert(
-        remoteMessage.notification?.title || '알림',
-        remoteMessage.notification?.body || '새 메시지가 있습니다.',
-      );
+      // ✅ 콜백을 통해 UI에서 모달 표시
+      if (this.modalCallbacks.showForegroundMessage) {
+        this.modalCallbacks.showForegroundMessage(
+          remoteMessage.notification?.title || '알림',
+          remoteMessage.notification?.body || '새 메시지가 있습니다.',
+        );
+      }
     });
 
     // 백그라운드/종료 상태에서 알림 클릭으로 앱 열림
@@ -186,14 +173,12 @@ class NotificationService {
     try {
       console.log('💾 알림 설정 저장 시작:', settings);
 
-      // 1. 로컬에 저장
       await AsyncStorage.setItem(
         'notification_settings',
         JSON.stringify(settings),
       );
       console.log('💾 알림 설정 로컬 저장됨');
 
-      // 2. 서버에도 알림 설정 전송
       if (settings.enabled && this.fcmToken) {
         const success = await ApiService.updateNotificationSettings(
           this.fcmToken,
@@ -226,7 +211,6 @@ class NotificationService {
       console.error('알림 설정 불러오기 실패:', error);
     }
 
-    // 기본 설정
     return {
       enabled: true,
       expiryDaysBefore: 3,
@@ -237,7 +221,6 @@ class NotificationService {
   // 테스트용: FCM 토큰 출력 및 테스트 알림 전송
   async printTokenForTesting(): Promise<void> {
     try {
-      // 토큰이 없으면 가져오기
       if (!this.fcmToken) {
         await this.getFCMToken();
       }
@@ -251,25 +234,24 @@ class NotificationService {
           '=== Firebase 콘솔에서 이 토큰으로 테스트 메시지를 보내세요 ===',
         );
 
-        // 테스트 알림 전송 시도
         const success = await ApiService.sendTestNotification(token);
 
-        Alert.alert(
-          'FCM 토큰 (테스트용)',
-          success
-            ? `테스트 알림이 전송되었습니다!\n\n토큰: ${token.substring(
-                0,
-                50,
-              )}...`
-            : `토큰: ${token.substring(0, 50)}...\n\n테스트 알림 전송 실패`,
-          [{ text: '확인' }],
-        );
+        // ✅ 콜백을 통해 UI에서 모달 표시
+        if (this.modalCallbacks.showTokenAlert) {
+          this.modalCallbacks.showTokenAlert(token, success);
+        }
       } else {
-        Alert.alert('오류', 'FCM 토큰을 가져올 수 없습니다.');
+        // ✅ 콜백을 통해 UI에서 에러 모달 표시
+        if (this.modalCallbacks.showTokenError) {
+          this.modalCallbacks.showTokenError();
+        }
       }
     } catch (error) {
       console.error('❌ printTokenForTesting 실패:', error);
-      Alert.alert('오류', 'FCM 토큰을 가져오는 중 오류가 발생했습니다.');
+      // ✅ 콜백을 통해 UI에서 에러 모달 표시
+      if (this.modalCallbacks.showTokenError) {
+        this.modalCallbacks.showTokenError();
+      }
     }
   }
 

@@ -10,7 +10,40 @@ export interface ApiError {
 
 export type ErrorAction = 'retry' | 'login' | 'refresh' | 'none';
 
+export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
+
+// 모달 표시를 위한 콜백 타입
+export interface ErrorModalCallbacks {
+  showErrorModal?: (
+    title: string,
+    message: string,
+    action: ErrorAction,
+    severity: ErrorSeverity,
+    onRetry?: () => void,
+  ) => void;
+  showSuccessModal?: (
+    title: string,
+    message: string,
+    onOk?: () => void,
+  ) => void;
+  showConfirmModal?: (
+    title: string,
+    message: string,
+    onConfirm: () => void,
+    onCancel?: () => void,
+  ) => void;
+}
+
 export class ApiErrorHandler {
+  private static modalCallbacks: ErrorModalCallbacks = {};
+
+  /**
+   * 모달 콜백 등록
+   */
+  static setModalCallbacks(callbacks: ErrorModalCallbacks): void {
+    this.modalCallbacks = callbacks;
+  }
+
   /**
    * API 에러를 사용자 친화적 메시지로 변환
    */
@@ -180,9 +213,7 @@ export class ApiErrorHandler {
   /**
    * 에러 심각도 레벨 반환
    */
-  static getErrorSeverity(
-    error: ApiError | any,
-  ): 'low' | 'medium' | 'high' | 'critical' {
+  static getErrorSeverity(error: ApiError | any): ErrorSeverity {
     if (error.status) {
       if (error.status >= 500) return 'critical';
       if (error.status === 403 || error.status === 401) return 'high';
@@ -222,7 +253,6 @@ export class ApiErrorHandler {
     console.groupEnd();
 
     // 프로덕션에서는 에러 리포팅 서비스로 전송
-    // 예: Sentry, Crashlytics 등
     if (__DEV__ === false && severity === 'critical') {
       // 에러 리포팅 서비스로 전송하는 로직
       // this.reportToCrashlytics(logData);
@@ -242,53 +272,11 @@ export class ApiErrorHandler {
     if (severity === 'high') title = '인증 오류';
     if (severity === 'medium') title = '요청 오류';
 
-    const buttons: Array<{ text: string; style?: any; onPress?: () => void }> =
-      [];
-
-    switch (action) {
-      case 'retry':
-        buttons.push(
-          { text: '취소', style: 'cancel' },
-          {
-            text: '다시 시도',
-            onPress: () => {
-              /* 재시도 로직 */
-            },
-          },
-        );
-        break;
-      case 'login':
-        buttons.push(
-          { text: '취소', style: 'cancel' },
-          {
-            text: '로그인',
-            onPress: () => {
-              /* 로그인 페이지로 이동 */
-            },
-          },
-        );
-        break;
-      case 'refresh':
-        buttons.push(
-          { text: '취소', style: 'cancel' },
-          {
-            text: '새로고침',
-            onPress: () => {
-              /* 페이지 새로고침 */
-            },
-          },
-        );
-        break;
-      default:
-        buttons.push({ text: '확인' });
-    }
-
     return {
       title,
       message,
-      buttons,
-      severity,
       action,
+      severity,
     };
   }
 }
@@ -332,46 +320,84 @@ export class ErrorHelpers {
   }
 }
 
-// React Native Alert용 헬퍼
-export class AlertHelper {
+// ConfirmModal용 헬퍼 (Alert.alert 대체)
+export class ModalHelper {
   /**
-   * 에러 알림 표시
+   * 에러 모달 표시
    */
-  static showErrorAlert(error: any, context?: string, onRetry?: () => void) {
+  static showErrorModal(error: any, context?: string, onRetry?: () => void) {
     const alertData = ApiErrorHandler.createUserErrorAlert(error, context);
 
-    // Alert.alert를 동적으로 import (React Native 환경에서만)
-    import('react-native')
-      .then(({ Alert }) => {
-        const buttons = alertData.buttons.map(button => ({
-          ...button,
-          onPress:
-            button.text === '다시 시도' && onRetry ? onRetry : button.onPress,
-        }));
-
-        Alert.alert(alertData.title, alertData.message, buttons);
-      })
-      .catch(() => {
-        // React Native가 아닌 환경에서는 console.error로 대체
-        console.error(`${alertData.title}: ${alertData.message}`);
-      });
+    const callbacks = (ApiErrorHandler as any).modalCallbacks;
+    if (callbacks.showErrorModal) {
+      callbacks.showErrorModal(
+        alertData.title,
+        alertData.message,
+        alertData.action,
+        alertData.severity,
+        onRetry,
+      );
+    } else {
+      // 폴백: console.error
+      console.error(`${alertData.title}: ${alertData.message}`);
+    }
   }
 
   /**
-   * 성공 알림 표시
+   * 성공 모달 표시
+   */
+  static showSuccessModal(title: string, message: string, onOk?: () => void) {
+    const callbacks = (ApiErrorHandler as any).modalCallbacks;
+    if (callbacks.showSuccessModal) {
+      callbacks.showSuccessModal(title, message, onOk);
+    } else {
+      console.log(`${title}: ${message}`);
+    }
+  }
+
+  /**
+   * 확인 모달 표시
+   */
+  static showConfirmModal(
+    title: string,
+    message: string,
+    onConfirm: () => void,
+    onCancel?: () => void,
+  ) {
+    const callbacks = (ApiErrorHandler as any).modalCallbacks;
+    if (callbacks.showConfirmModal) {
+      callbacks.showConfirmModal(title, message, onConfirm, onCancel);
+    } else {
+      console.log(`${title}: ${message}`);
+    }
+  }
+}
+
+// 하위 호환성을 위한 AlertHelper (deprecated)
+// 기존 코드와의 호환성을 위해 유지하되, ModalHelper 사용을 권장
+export class AlertHelper {
+  /**
+   * @deprecated ModalHelper.showErrorModal 사용을 권장합니다
+   */
+  static showErrorAlert(error: any, context?: string, onRetry?: () => void) {
+    console.warn(
+      'AlertHelper.showErrorAlert is deprecated. Use ModalHelper.showErrorModal instead.',
+    );
+    ModalHelper.showErrorModal(error, context, onRetry);
+  }
+
+  /**
+   * @deprecated ModalHelper.showSuccessModal 사용을 권장합니다
    */
   static showSuccessAlert(title: string, message: string, onOk?: () => void) {
-    import('react-native')
-      .then(({ Alert }) => {
-        Alert.alert(title, message, [{ text: '확인', onPress: onOk }]);
-      })
-      .catch(() => {
-        console.log(`${title}: ${message}`);
-      });
+    console.warn(
+      'AlertHelper.showSuccessAlert is deprecated. Use ModalHelper.showSuccessModal instead.',
+    );
+    ModalHelper.showSuccessModal(title, message, onOk);
   }
 
   /**
-   * 확인 알림 표시
+   * @deprecated ModalHelper.showConfirmModal 사용을 권장합니다
    */
   static showConfirmAlert(
     title: string,
@@ -379,15 +405,9 @@ export class AlertHelper {
     onConfirm: () => void,
     onCancel?: () => void,
   ) {
-    import('react-native')
-      .then(({ Alert }) => {
-        Alert.alert(title, message, [
-          { text: '취소', style: 'cancel', onPress: onCancel },
-          { text: '확인', onPress: onConfirm },
-        ]);
-      })
-      .catch(() => {
-        console.log(`${title}: ${message}`);
-      });
+    console.warn(
+      'AlertHelper.showConfirmAlert is deprecated. Use ModalHelper.showConfirmModal instead.',
+    );
+    ModalHelper.showConfirmModal(title, message, onConfirm, onCancel);
   }
 }

@@ -1,14 +1,14 @@
 export { Header } from './Header';
-export { SharedRecipeIndicator } from './SharedRecipeIndicator';
-export { RecipeTitleSection } from './RecipeTitleSection';
-export { IngredientsSection } from './IngredientsSection';
 export { StepsSection } from './StepsSection';
-export { ReferenceUrlSection } from './ReferenceURLSection';
-export { RecipeActionButtons } from './RecipeActionButtons';
 export { UseRecipeModal } from './UseRecipeModal';
 export { ShareRecipeModal } from './ShareRecipeModal';
+export { IngredientsSection } from './IngredientsSection';
+export { RecipeTitleSection } from './RecipeTitleSection';
+export { ReferenceUrlSection } from './ReferenceURLSection';
+export { RecipeActionButtons } from './RecipeActionButtons';
+export { SharedRecipeIndicator } from './SharedRecipeIndicator';
+
 import { useState, useEffect } from 'react';
-import { Alert } from 'react-native';
 import {
   Recipe,
   RecipeIngredient,
@@ -18,6 +18,16 @@ import {
   FavoriteStorage,
   SharedRecipeStorage,
 } from '../../utils/AsyncStorageUtils';
+
+// ConfirmModal 상태 타입
+export interface RecipeModalState {
+  errorMessage: string;
+  successMessage: string;
+  errorModalVisible: boolean;
+  successModalVisible: boolean;
+  setErrorModalVisible: (visible: boolean) => void;
+  setSuccessModalVisible: (visible: boolean) => void;
+}
 
 export const useRecipeDetail = (
   initialRecipe: Recipe,
@@ -31,6 +41,12 @@ export const useRecipeDetail = (
   );
   const [isFavorite, setIsFavorite] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // ConfirmModal 상태들
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // 안전한 배열 처리 함수들
   const getStepsArray = (steps: string[] | string | undefined): string[] => {
@@ -74,7 +90,8 @@ export const useRecipeDetail = (
 
   const handleSave = async () => {
     if (!currentRecipe.title.trim()) {
-      Alert.alert('오류', '레시피 제목을 입력해주세요.');
+      setErrorMessage('레시피 제목을 입력해주세요.');
+      setErrorModalVisible(true);
       return;
     }
 
@@ -83,14 +100,15 @@ export const useRecipeDetail = (
       if (isNewRecipe) {
         const newRecipe = {
           ...currentRecipe,
-          id: Date.now().toString(),
+          id: Date.now(),
           createdAt: new Date().toISOString().split('T')[0],
           updatedAt: new Date().toISOString().split('T')[0],
           steps: getStepsArray(currentRecipe.steps),
         };
         await RecipeStorage.addPersonalRecipe(newRecipe);
         setCurrentRecipe(newRecipe);
-        Alert.alert('성공', '레시피가 저장되었습니다.');
+        setSuccessMessage('레시피가 저장되었습니다.');
+        setSuccessModalVisible(true);
       } else {
         const updatedRecipe = {
           ...currentRecipe,
@@ -105,12 +123,14 @@ export const useRecipeDetail = (
           await RecipeStorage.updatePersonalRecipe(updatedRecipe);
         }
         setCurrentRecipe(updatedRecipe);
-        Alert.alert('성공', '레시피가 업데이트되었습니다.');
+        setSuccessMessage('레시피가 업데이트되었습니다.');
+        setSuccessModalVisible(true);
       }
       setIsEditMode(false);
     } catch (error) {
       console.error('레시피 저장 실패:', error);
-      Alert.alert('오류', '레시피 저장에 실패했습니다.');
+      setErrorMessage('레시피 저장에 실패했습니다.');
+      setErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
@@ -125,20 +145,31 @@ export const useRecipeDetail = (
       setIsFavorite(newFavoriteState);
     } catch (error) {
       console.error('즐겨찾기 토글 실패:', error);
-      Alert.alert('오류', '즐겨찾기 설정에 실패했습니다.');
+      setErrorMessage('즐겨찾기 설정에 실패했습니다.');
+      setErrorModalVisible(true);
     }
   };
 
+  const modalState: RecipeModalState = {
+    errorMessage,
+    successMessage,
+    errorModalVisible,
+    successModalVisible,
+    setErrorModalVisible,
+    setSuccessModalVisible,
+  };
+
   return {
-    currentRecipe,
-    setCurrentRecipe,
-    isEditMode,
-    setIsEditMode,
-    isFavorite,
     isLoading,
+    isFavorite,
+    isEditMode,
+    modalState,
+    currentRecipe,
     handleSave,
-    toggleFavorite,
+    setIsEditMode,
     getStepsArray,
+    toggleFavorite,
+    setCurrentRecipe,
     getIngredientsArray,
   };
 };

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, Image, Alert } from 'react-native';
+import { View, TouchableOpacity, Text, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ConfirmModal from '../modals/ConfirmModal';
 import { styles } from './styles';
 import { ShareRecipeModal } from './ShareRecipeModal';
 
@@ -30,6 +31,13 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const [fridges, setFridges] = useState<CheckableFridge[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // ConfirmModal 상태들
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [noSelectionModalVisible, setNoSelectionModalVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // 냉장고 목록 불러오기
   const loadFridges = async () => {
@@ -97,7 +105,8 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
       console.log('🔍 공유 가능한 냉장고 목록:', shareableFridges);
     } catch (error) {
       console.error('❌ 냉장고 목록 로드 실패:', error);
-      Alert.alert('오류', '냉장고 목록을 불러오는데 실패했습니다.');
+      setErrorMessage('냉장고 목록을 불러오는데 실패했습니다.');
+      setErrorModalVisible(true);
       setFridges([]); // 에러 시 빈 배열로 설정
     } finally {
       setIsLoading(false);
@@ -126,7 +135,7 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
     const selectedFridges = fridges.filter(fridge => fridge.isChecked);
 
     if (selectedFridges.length === 0) {
-      Alert.alert('알림', '공유할 냉장고를 선택해주세요.');
+      setNoSelectionModalVisible(true);
       return;
     }
 
@@ -151,22 +160,17 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
       await Promise.all(sharePromises);
 
       console.log('✅ 레시피 공유 완료');
-      Alert.alert(
-        '공유 완료',
+      setSuccessMessage(
         `${selectedFridges.length}개의 냉장고에 레시피가 공유되었습니다.`,
-        [
-          {
-            text: '확인',
-            onPress: () => setIsShareModalVisible(false),
-          },
-        ],
       );
+      setSuccessModalVisible(true);
 
       // 선택 상태 초기화
       setFridges(prev => prev.map(fridge => ({ ...fridge, isChecked: false })));
     } catch (error) {
       console.error('❌ 레시피 공유 실패:', error);
-      Alert.alert('오류', '레시피 공유에 실패했습니다.');
+      setErrorMessage('레시피 공유에 실패했습니다.');
+      setErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
@@ -210,6 +214,57 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
         onToggleFridge={handleToggleFridge}
         onShareToSelectedFridges={handleShareToSelectedFridges}
         isLoading={isLoading}
+      />
+
+      {/* 에러 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={errorModalVisible}
+        title="오류"
+        message={errorMessage}
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setErrorModalVisible(false)}
+        onCancel={() => setErrorModalVisible(false)}
+      />
+
+      {/* 선택 없음 알림 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={noSelectionModalVisible}
+        title="알림"
+        message="공유할 냉장고를 선택해주세요."
+        iconContainer={{ backgroundColor: '#fae1dd' }}
+        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => setNoSelectionModalVisible(false)}
+        onCancel={() => setNoSelectionModalVisible(false)}
+      />
+
+      {/* 공유 성공 모달 */}
+      <ConfirmModal
+        isAlert={false}
+        visible={successModalVisible}
+        title="공유 완료"
+        message={successMessage}
+        iconContainer={{ backgroundColor: '#d3f0d3' }}
+        icon={{ name: 'check', color: 'limegreen', size: 48 }}
+        confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
+        onConfirm={() => {
+          setSuccessModalVisible(false);
+          setIsShareModalVisible(false);
+        }}
+        onCancel={() => {
+          setSuccessModalVisible(false);
+          setIsShareModalVisible(false);
+        }}
       />
     </>
   );

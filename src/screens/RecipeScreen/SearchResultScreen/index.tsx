@@ -7,13 +7,13 @@ import {
   TextInput,
   Keyboard,
   Image,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ConfirmModal from '../../../components/modals/ConfirmModal';
 import RecipeAPI from '../../../services/API/RecipeAPI';
 import {
   calculateMultipleRecipeAvailability,
@@ -37,7 +37,7 @@ interface SearchResultScreenProps {}
 const SearchRecipeCard: React.FC<{
   recipe: Recipe;
   isFavorite: boolean;
-  onToggleFavorite: (recipeId: string) => void;
+  onToggleFavorite: (recipeId: number) => void;
   onPress: (recipe: Recipe) => void;
   availableIngredientsCount?: number;
   totalIngredientsCount?: number;
@@ -126,10 +126,15 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   const [_isSearchFocused, setIsSearchFocused] = useState(false);
   const [_isInputActive, setIsInputActive] = useState(false);
 
-  // ✅ 가용성 상태 추가
+  // 가용성 상태
   const [recipeAvailabilities, setRecipeAvailabilities] = useState<
     Map<string, RecipeAvailabilityInfo>
   >(new Map());
+
+  // ConfirmModal 상태들
+  const [searchErrorModalVisible, setSearchErrorModalVisible] = useState(false);
+  const [favoriteErrorModalVisible, setFavoriteErrorModalVisible] =
+    useState(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
   const searchInputRef = useRef<TextInput>(null);
@@ -158,7 +163,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     return favoriteRecipeIds.includes(recipeId);
   };
 
-  // ✅ 검색 결과의 레시피들에 대한 가용성 계산
+  // 검색 결과의 레시피들에 대한 가용성 계산
   const calculateSearchResultAvailabilities = async (recipes: Recipe[]) => {
     if (!fridgeId || recipes.length === 0) {
       return;
@@ -199,7 +204,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     }
   };
 
-  // ✅ 검색 API (순서 수정)
+  // 검색 API
   const handleSearch = React.useCallback(async () => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
@@ -220,13 +225,13 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
       setSearchResults(results);
       setCurrentPage(1);
 
-      // ✅ 가용성 계산
+      // 가용성 계산
       if (results.length > 0) {
         await calculateSearchResultAvailabilities(results);
       }
     } catch (error) {
       setSearchResults([]);
-      Alert.alert('검색 실패', '레시피 검색 중 오류가 발생했습니다.');
+      setSearchErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
@@ -253,7 +258,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   };
 
   // 즐겨찾기 토글 API
-  const toggleFavorite = async (recipeId: string) => {
+  const toggleFavorite = async (recipeId: number) => {
     try {
       console.log('>> 즐겨찾기 토글:', recipeId);
 
@@ -270,7 +275,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
       }
     } catch (error) {
       console.error('X 즐겨찾기 토글 실패:', error);
-      Alert.alert('오류', '즐겨찾기 설정에 실패했습니다.');
+      setFavoriteErrorModalVisible(true);
     }
   };
 
@@ -445,6 +450,36 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
             <Icon name="north" size={24} color="white" />
           </TouchableOpacity>
         )}
+
+        {/* 검색 실패 모달 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={searchErrorModalVisible}
+          title="검색 실패"
+          message="레시피 검색 중 오류가 발생했습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setSearchErrorModalVisible(false)}
+          onCancel={() => setSearchErrorModalVisible(false)}
+        />
+
+        {/* 즐겨찾기 에러 모달 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={favoriteErrorModalVisible}
+          title="오류"
+          message="즐겨찾기 설정에 실패했습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setFavoriteErrorModalVisible(false)}
+          onCancel={() => setFavoriteErrorModalVisible(false)}
+        />
       </GestureHandlerRootView>
     </SafeAreaView>
   );

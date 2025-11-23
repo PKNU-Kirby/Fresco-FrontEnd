@@ -1,6 +1,5 @@
 // hooks/Recipe/useIngredientMatching.ts 향상된 버전
 import { useState, useCallback, useEffect } from 'react';
-import { Alert } from 'react-native';
 import {
   getFridgeItemsByFridgeId,
   FridgeItem,
@@ -11,7 +10,7 @@ import {
 } from '../../screens/RecipeScreen/RecipeNavigator';
 import { MatchedIngredientSeparate } from '../../types';
 
-// 대체재 매핑 데이터 (IngredientsSection에서 가져옴)
+// 대체재 매핑 데이터
 const ALTERNATIVE_MAPPING: {
   [key: string]: Array<{ name: string }>;
 } = {
@@ -27,7 +26,7 @@ const ALTERNATIVE_MAPPING: {
   양상추: [{ name: '양배추' }],
 };
 
-// EnhancedIngredient 타입 (IngredientsSection에서 가져옴)
+// EnhancedIngredient 타입
 export interface EnhancedIngredient extends RecipeIngredient {
   isAvailable: boolean;
   exactMatches: FridgeItem[];
@@ -39,7 +38,13 @@ export interface EnhancedIngredient extends RecipeIngredient {
   isAlternativeSelected?: boolean;
 }
 
-// 새로운 props 타입 - 기존 Recipe 타입과 새로운 ingredients 배열 지원
+// ConfirmModal 상태 타입
+export interface IngredientMatchingModalState {
+  errorModalVisible: boolean;
+  errorMessage: string;
+  setErrorModalVisible: (visible: boolean) => void;
+}
+
 interface UseIngredientMatchingProps {
   recipe?: Recipe;
   ingredients?: RecipeIngredient[];
@@ -62,13 +67,16 @@ interface UseIngredientMatchingReturn {
     enhancedIngredients: EnhancedIngredient[],
   ) => void;
 
-  // 새로 추가: IngredientsSection용 반환값들
+  // IngredientsSection용 반환값들
   enhancedIngredients: EnhancedIngredient[];
   handleFridgeItemSelection: (
-    ingredientId: string,
+    ingredientId: number,
     fridgeItem: FridgeItem,
     isAlternative: boolean,
   ) => void;
+
+  // 모달 상태
+  modalState: IngredientMatchingModalState;
 }
 
 export const useIngredientMatching = (
@@ -88,12 +96,16 @@ export const useIngredientMatching = (
   >([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 새로 추가: IngredientsSection용 상태들
+  // IngredientsSection용 상태들
   const [enhancedIngredients, setEnhancedIngredients] = useState<
     EnhancedIngredient[]
   >([]);
 
-  // 고급 문자열 매칭 함수들 (기존과 동일)
+  // ConfirmModal 상태들
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // 고급 문자열 매칭 함수들
   const normalizeString = (str: string): string => {
     return str
       .toLowerCase()
@@ -156,7 +168,7 @@ export const useIngredientMatching = (
     return matches;
   };
 
-  // 새로 추가: 대체재 찾기 함수
+  // 대체재 찾기 함수
   const findAlternatives = (
     recipeName: string,
     fridgeItems: FridgeItem[],
@@ -183,8 +195,7 @@ export const useIngredientMatching = (
 
     try {
       setIsLoading(true);
-      const stringFridgeId = fridgeId.toString();
-      const fridgeIngredients = await getFridgeItemsByFridgeId(stringFridgeId);
+      const fridgeIngredients = await getFridgeItemsByFridgeId(fridgeId);
 
       if (!recipe.ingredients || recipe.ingredients.length === 0) {
         setMatchedIngredients([]);
@@ -226,13 +237,14 @@ export const useIngredientMatching = (
       setMatchedIngredients(matched);
     } catch (error) {
       console.error('냉장고 재료 로드 실패:', error);
-      Alert.alert('오류', '냉장고 정보를 불러올 수 없습니다.');
+      setErrorMessage('냉장고 정보를 불러올 수 없습니다.');
+      setErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
   }, [recipe, fridgeId]);
 
-  // 새로 추가: IngredientsSection용 enhanced ingredients 로드 함수
+  // IngredientsSection용 enhanced ingredients 로드 함수
   const loadEnhancedIngredients = useCallback(async () => {
     if (!fridgeId || !ingredients || ingredients.length === 0 || isEditMode) {
       const basicIngredients = (ingredients || []).map(ing => ({
@@ -249,7 +261,7 @@ export const useIngredientMatching = (
     setIsLoading(true);
 
     try {
-      const fridgeItems = await getFridgeItemsByFridgeId(fridgeId.toString());
+      const fridgeItems = await getFridgeItemsByFridgeId(fridgeId);
 
       const enhanced = ingredients.map(ingredient => {
         const exactMatches = findAllMatches(ingredient.name, fridgeItems);
@@ -297,9 +309,9 @@ export const useIngredientMatching = (
     }
   }, [ingredients, fridgeId, isEditMode, onEnhancedIngredientsChange]);
 
-  // 새로 추가: 냉장고 재료 선택 변경 함수
+  // 냉장고 재료 선택 변경 함수
   const handleFridgeItemSelection = useCallback(
-    (ingredientId: string, fridgeItem: FridgeItem, isAlternative: boolean) => {
+    (ingredientId: number, fridgeItem: FridgeItem, isAlternative: boolean) => {
       const updatedIngredients = enhancedIngredients.map(ingredient => {
         if (ingredient.id === ingredientId) {
           return {
@@ -317,14 +329,14 @@ export const useIngredientMatching = (
     [enhancedIngredients, onEnhancedIngredientsChange],
   );
 
-  // 새로 추가: ingredients 배열이 변경될 때 enhanced ingredients 로드
+  // ingredients 배열이 변경될 때 enhanced ingredients 로드
   useEffect(() => {
     if (ingredients) {
       loadEnhancedIngredients();
     }
   }, [loadEnhancedIngredients]);
 
-  // 새로운 함수: 향상된 재료 데이터를 기반으로 매칭 데이터 생성
+  // 향상된 재료 데이터를 기반으로 매칭 데이터 생성
   const loadFromEnhancedIngredients = useCallback(
     (enhancedIngredients: EnhancedIngredient[]) => {
       try {
@@ -339,22 +351,21 @@ export const useIngredientMatching = (
 
             matched.push({
               recipeIngredient: {
-                name: ingredient.selectedFridgeItem.name, // 실제 냉장고 재료명 사용
-                quantity: ingredient.quantity, // 레시피에서 필요한 양
+                name: ingredient.selectedFridgeItem.name,
+                quantity: ingredient.quantity,
               },
               fridgeIngredient: ingredient.selectedFridgeItem,
               isAvailable: true,
               userInputQuantity: 0,
               maxUserQuantity: availableQuantity,
               isDeducted: false,
-              // 대체재로 선택된 경우 표시
               isAlternativeUsed: ingredient.isAlternativeSelected,
               originalRecipeName: ingredient.isAlternativeSelected
                 ? ingredient.name
                 : undefined,
             });
           } else {
-            // 냉장고에 없는 재료 (빨간색 상태) - 장바구니 담기용
+            // 냉장고에 없는 재료 (빨간색 상태)
             matched.push({
               recipeIngredient: {
                 name: ingredient.name,
@@ -372,7 +383,8 @@ export const useIngredientMatching = (
         setMatchedIngredients(matched);
       } catch (error) {
         console.error('향상된 재료 데이터 로드 실패:', error);
-        Alert.alert('오류', '재료 정보를 불러올 수 없습니다.');
+        setErrorMessage('재료 정보를 불러올 수 없습니다.');
+        setErrorModalVisible(true);
       } finally {
         setIsLoading(false);
       }
@@ -399,8 +411,14 @@ export const useIngredientMatching = (
     [],
   );
 
+  const modalState: IngredientMatchingModalState = {
+    errorModalVisible,
+    errorMessage,
+    setErrorModalVisible,
+  };
+
   return {
-    // 기존 반환값들 (UseRecipe에서 사용)
+    // 기존 반환값들
     matchedIngredients,
     setMatchedIngredients,
     isLoading,
@@ -409,8 +427,11 @@ export const useIngredientMatching = (
     loadIngredients,
     loadFromEnhancedIngredients,
 
-    // 새로 추가: IngredientsSection용 반환값들
+    // IngredientsSection용 반환값들
     enhancedIngredients,
     handleFridgeItemSelection,
+
+    // 모달 상태
+    modalState,
   };
 };

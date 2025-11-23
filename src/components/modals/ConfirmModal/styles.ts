@@ -49,6 +49,7 @@ export const styles = StyleSheet.create({
     color: '#333',
     marginBottom: scale(8),
     marginTop: scale(4),
+    textAlign: 'center',
   },
   messageContainer: {
     marginBottom: scale(16),
@@ -109,5 +110,17 @@ export const styles = StyleSheet.create({
   itemCount: {
     fontWeight: '600',
     color: 'coral',
+  },
+  input: {
+    minWidth: '80%',
+    borderWidth: scale(1),
+    borderColor: '#E0E0E0',
+    borderRadius: scale(6),
+    padding: scale(12),
+    marginTop: scale(8),
+    marginBottom: scale(16),
+    fontSize: scale(16),
+    color: '#333',
+    backgroundColor: '#f5f5f5',
   },
 });

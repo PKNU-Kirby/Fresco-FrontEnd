@@ -1,7 +1,6 @@
 // hooks/useApiUsageHistory.ts - API와 연결된 사용 기록 훅
 import { useState, useEffect } from 'react';
-import { Alert } from 'react-native';
-import ApiService from '../services/apiServices';
+import { ApiService } from '../services/apiServices';
 
 export type UsageRecord = {
   id: number;
@@ -16,11 +15,22 @@ export type UsageRecord = {
   fridgeName: string;
 };
 
-export const useApiUsageHistory = (fridgeId?: string, userId?: string) => {
+// ConfirmModal 상태 타입
+export interface UsageHistoryModalState {
+  errorModalVisible: boolean;
+  errorMessage: string;
+  setErrorModalVisible: (visible: boolean) => void;
+}
+
+export const useApiUsageHistory = (fridgeId?: number, userId?: number) => {
   const [usageHistory, setUsageHistory] = useState<UsageRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+
+  // ConfirmModal 상태들
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const loadUsageHistory = async (
     pageNum: number = 1,
@@ -50,7 +60,8 @@ export const useApiUsageHistory = (fridgeId?: string, userId?: string) => {
       setPage(pageNum);
     } catch (error) {
       console.error('사용 기록 로드 실패:', error);
-      Alert.alert('오류', '사용 기록을 불러올 수 없습니다.');
+      setErrorMessage('사용 기록을 불러올 수 없습니다.');
+      setErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
@@ -67,12 +78,13 @@ export const useApiUsageHistory = (fridgeId?: string, userId?: string) => {
   };
 
   const addUsageRecord = async (
-    itemId: string,
+    itemId: number,
     action: 'used' | 'discarded',
     quantity?: number,
   ) => {
     if (!fridgeId) {
-      Alert.alert('오류', '냉장고 정보가 필요합니다.');
+      setErrorMessage('냉장고 정보가 필요합니다.');
+      setErrorModalVisible(true);
       return;
     }
 
@@ -82,7 +94,8 @@ export const useApiUsageHistory = (fridgeId?: string, userId?: string) => {
       refresh();
     } catch (error) {
       console.error('사용 기록 추가 실패:', error);
-      Alert.alert('오류', '사용 기록을 저장할 수 없습니다.');
+      setErrorMessage('사용 기록을 저장할 수 없습니다.');
+      setErrorModalVisible(true);
     }
   };
 
@@ -92,6 +105,12 @@ export const useApiUsageHistory = (fridgeId?: string, userId?: string) => {
     }
   }, [fridgeId, userId]);
 
+  const modalState: UsageHistoryModalState = {
+    errorModalVisible,
+    errorMessage,
+    setErrorModalVisible,
+  };
+
   return {
     usageHistory,
     isLoading,
@@ -99,5 +118,6 @@ export const useApiUsageHistory = (fridgeId?: string, userId?: string) => {
     loadMore,
     refresh,
     addUsageRecord,
+    modalState,
   };
 };

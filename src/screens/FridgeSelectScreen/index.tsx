@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, Animated, Alert, View } from 'react-native';
+import { ActivityIndicator, Text, Animated, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -13,6 +13,7 @@ import { FridgeModals } from '../../components/FridgeSelect/FridgeModal';
 import { FridgeHeader } from '../../components/FridgeSelect/FridgeHeader';
 import { FridgeList } from '../../components/FridgeSelect/FridgeList';
 import { FridgeModalManager } from '../../components/FridgeSelect/FridgeModalManager';
+import ConfirmModal from '../../components/modals/ConfirmModal';
 import { styles } from './styles';
 
 const FridgeSelectScreen = () => {
@@ -43,14 +44,13 @@ const FridgeSelectScreen = () => {
   // 화면에 실제로 표시할 냉장고 목록
   const displayFridges = isEditMode ? editableFridges : serverFridges;
 
-  // ✅ 권한 체크 헬퍼 함수들 (여기로 이동)
+  // ✅ 권한 체크 헬퍼 함수들
   const hasPermission = (
     fridgeId: number,
     action: 'edit' | 'delete' | 'view',
   ) => {
     const fridge = displayFridges.find(f => f.id === fridgeId);
     if (!fridge) return false;
-
     if (action === 'view') return true;
     if (action === 'edit') return fridge.canEdit ?? fridge.isOwner;
     if (action === 'delete') return fridge.canDelete ?? fridge.isOwner;
@@ -60,7 +60,6 @@ const FridgeSelectScreen = () => {
   const getPermission = (fridgeId: number) => {
     const fridge = displayFridges.find(f => f.id === fridgeId);
     if (!fridge) return null;
-
     return {
       fridgeId: fridge.id,
       role: fridge.role === 'owner' ? 'OWNER' : 'MEMBER',
@@ -76,7 +75,33 @@ const FridgeSelectScreen = () => {
     null,
   );
   const [bottomSheetHeight] = useState(new Animated.Value(80));
-  const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
+  const [_isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
+
+  // 👇 추가 모달 상태들
+  const [noAccessModalVisible, setNoAccessModalVisible] = useState(false);
+  const [noEditPermissionModalVisible, setNoEditPermissionModalVisible] =
+    useState(false);
+  const [noDeletePermissionModalVisible, setNoDeletePermissionModalVisible] =
+    useState(false);
+  const [noPermissionModalVisible, setNoPermissionModalVisible] =
+    useState(false);
+  const [editCancelConfirmVisible, setEditCancelConfirmVisible] =
+    useState(false);
+  const [saveSuccessModalVisible, setSaveSuccessModalVisible] = useState(false);
+  const [authErrorModalVisible, setAuthErrorModalVisible] = useState(false);
+  const [permissionErrorModalVisible, setPermissionErrorModalVisible] =
+    useState(false);
+  const [saveErrorModalVisible, setSaveErrorModalVisible] = useState(false);
+  const [saveErrorMessage, setSaveErrorMessage] = useState('');
+  const [editPromptVisible, setEditPromptVisible] = useState(false);
+  const [editPromptFridge, setEditPromptFridge] =
+    useState<FridgeWithRole | null>(null);
+  const [editPromptInput, setEditPromptInput] = useState('');
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [deleteConfirmFridge, setDeleteConfirmFridge] =
+    useState<FridgeWithRole | null>(null);
+  const [addPromptVisible, setAddPromptVisible] = useState(false);
+  const [addPromptInput, setAddPromptInput] = useState('');
 
   // 서버 액션들
   const {
@@ -106,7 +131,7 @@ const FridgeSelectScreen = () => {
     }
   };
 
-  const handleUpdateFridge = async (id: string, name: string) => {
+  const handleUpdateFridge = async (id: number, name: string) => {
     try {
       const response = await FridgeControllerAPI.update(Number(id), { name });
       console.log('냉장고 업데이트 완료:', response);
@@ -117,7 +142,7 @@ const FridgeSelectScreen = () => {
     }
   };
 
-  const handleDeleteFridge = async (id: string) => {
+  const handleDeleteFridge = async (id: number) => {
     try {
       await FridgeControllerAPI.delete(id);
       console.log('냉장고 삭제 완료:', id);
@@ -133,34 +158,29 @@ const FridgeSelectScreen = () => {
       if (hasPermission(fridge.id, 'view')) {
         navigation.navigate('FridgeDetail', { fridgeId: fridge.id });
       } else {
-        Alert.alert('알림', '이 냉장고에 접근할 권한이 없습니다.');
+        setNoAccessModalVisible(true);
       }
       return;
     }
 
     // 편집 모드에서는 이름 변경
     if (!hasPermission(fridge.id, 'edit')) {
-      Alert.alert('알림', '이 냉장고를 편집할 권한이 없습니다.');
+      setNoEditPermissionModalVisible(true);
       return;
     }
 
-    Alert.prompt(
-      '모임명 변경하기',
-      '',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '확인',
-          onPress: newName => {
-            if (newName && newName.trim()) {
-              editFridgeLocally(fridge.id, newName.trim());
-            }
-          },
-        },
-      ],
-      'plain-text',
-      fridge.name,
-    );
+    setEditPromptFridge(fridge);
+    setEditPromptInput(fridge.name);
+    setEditPromptVisible(true);
+  };
+
+  const handleEditPromptConfirm = () => {
+    if (editPromptFridge && editPromptInput && editPromptInput.trim()) {
+      editFridgeLocally(editPromptFridge.id, editPromptInput.trim());
+    }
+    setEditPromptVisible(false);
+    setEditPromptFridge(null);
+    setEditPromptInput('');
   };
 
   const handleLeaveFridge = (fridge: FridgeWithRole) => {
@@ -168,30 +188,27 @@ const FridgeSelectScreen = () => {
 
     const permission = getPermission(fridge.id);
     if (!permission) {
-      Alert.alert('알림', '이 냉장고에 대한 권한이 없습니다.');
+      setNoPermissionModalVisible(true);
       return;
     }
 
     const isOwner = permission.role === 'OWNER';
-    const actionText = isOwner ? '삭제' : '나가기';
 
     if (isOwner && !hasPermission(fridge.id, 'delete')) {
-      Alert.alert('알림', '이 냉장고를 삭제할 권한이 없습니다.');
+      setNoDeletePermissionModalVisible(true);
       return;
     }
 
-    Alert.alert(
-      `냉장고 ${actionText}`,
-      `${fridge.name}을(를) ${actionText}하시겠습니까?`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: actionText,
-          style: 'destructive',
-          onPress: () => deleteFridgeLocally(fridge.id),
-        },
-      ],
-    );
+    setDeleteConfirmFridge(fridge);
+    setDeleteConfirmVisible(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteConfirmFridge) {
+      deleteFridgeLocally(deleteConfirmFridge.id);
+    }
+    setDeleteConfirmVisible(false);
+    setDeleteConfirmFridge(null);
   };
 
   const handleAddFridge = () => {
@@ -200,45 +217,23 @@ const FridgeSelectScreen = () => {
       return;
     }
 
-    Alert.prompt(
-      '새 냉장고',
-      '냉장고 이름을 입력하세요',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '추가',
-          onPress: name => {
-            if (name && name.trim()) {
-              addFridgeLocally(name.trim());
-            }
-          },
-        },
-      ],
-      'plain-text',
-      '',
-    );
+    setAddPromptInput('');
+    setAddPromptVisible(true);
+  };
+
+  const handleAddPromptConfirm = () => {
+    if (addPromptInput && addPromptInput.trim()) {
+      addFridgeLocally(addPromptInput.trim());
+    }
+    setAddPromptVisible(false);
+    setAddPromptInput('');
   };
 
   // 편집 모드 토글
   const handleEditToggle = () => {
     if (isEditMode) {
       if (hasChanges) {
-        Alert.alert(
-          '편집 취소',
-          '변경사항이 저장되지 않습니다. 정말 취소하시겠습니까?',
-          [
-            { text: '계속 편집', style: 'cancel' },
-            {
-              text: '취소',
-              style: 'destructive',
-              onPress: () => {
-                cancelEdit(serverFridges);
-                setIsBottomSheetExpanded(false);
-                bottomSheetHeight.setValue(80);
-              },
-            },
-          ],
-        );
+        setEditCancelConfirmVisible(true);
       } else {
         cancelEdit(serverFridges);
         setIsBottomSheetExpanded(false);
@@ -247,6 +242,13 @@ const FridgeSelectScreen = () => {
     } else {
       startEdit(serverFridges);
     }
+  };
+
+  const handleEditCancelConfirm = () => {
+    cancelEdit(serverFridges);
+    setIsBottomSheetExpanded(false);
+    bottomSheetHeight.setValue(80);
+    setEditCancelConfirmVisible(false);
   };
 
   const handleSaveChanges = async () => {
@@ -260,14 +262,7 @@ const FridgeSelectScreen = () => {
           console.log(
             `사용자 ID 불일치! 현재: ${currentUser.id}, 토큰: ${tokenUserId}`,
           );
-          Alert.alert(
-            '인증 오류',
-            '사용자 인증 정보가 일치하지 않습니다. 다시 로그인해주세요.',
-            [
-              { text: '취소', style: 'cancel' },
-              { text: '로그인', onPress: () => handleLogout() },
-            ],
-          );
+          setAuthErrorModalVisible(true);
           return;
         }
       }
@@ -277,23 +272,16 @@ const FridgeSelectScreen = () => {
         handleUpdateFridge,
         handleDeleteFridge,
       );
-
       await loadUserFridges();
-      Alert.alert('성공', '모든 변경사항이 저장되었습니다.');
+      setSaveSuccessModalVisible(true);
     } catch (error) {
       console.error('변경사항 저장 실패:', error);
       if (error.message.includes('403')) {
         console.log('403 에러 발생 - 사용자 ID 불일치 또는 권한 부족');
-        Alert.alert(
-          '권한 오류',
-          '인증 정보에 문제가 있습니다. 다시 로그인해주세요.',
-          [
-            { text: '취소', style: 'cancel' },
-            { text: '로그인', onPress: () => handleLogout() },
-          ],
-        );
+        setPermissionErrorModalVisible(true);
       } else {
-        Alert.alert('오류', `변경사항 저장에 실패했습니다: ${error.message}`);
+        setSaveErrorMessage(`변경사항 저장에 실패했습니다: ${error.message}`);
+        setSaveErrorModalVisible(true);
       }
     }
   };
@@ -343,7 +331,7 @@ const FridgeSelectScreen = () => {
           onEditFridge={handleEditFridge}
           onLeaveFridge={handleLeaveFridge}
           onToggleHidden={toggleHiddenLocally}
-          permissions={[]} // ❌ 이제 필요 없어요! FridgeList에서도 제거해야 함
+          permissions={[]}
         />
 
         <FridgeModals
@@ -360,6 +348,216 @@ const FridgeSelectScreen = () => {
         />
 
         <FridgeModalManager modals={modals} modalHandlers={modalHandlers} />
+
+        {/* 접근 권한 없음 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={noAccessModalVisible}
+          title="알림"
+          message="이 냉장고에 접근할 권한이 없습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setNoAccessModalVisible(false)}
+          onCancel={() => setNoAccessModalVisible(false)}
+        />
+
+        {/* 편집 권한 없음 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={noEditPermissionModalVisible}
+          title="알림"
+          message="이 냉장고를 편집할 권한이 없습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setNoEditPermissionModalVisible(false)}
+          onCancel={() => setNoEditPermissionModalVisible(false)}
+        />
+
+        {/* 삭제 권한 없음 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={noDeletePermissionModalVisible}
+          title="알림"
+          message="이 냉장고를 삭제할 권한이 없습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setNoDeletePermissionModalVisible(false)}
+          onCancel={() => setNoDeletePermissionModalVisible(false)}
+        />
+
+        {/* 권한 없음 (일반) */}
+        <ConfirmModal
+          isAlert={false}
+          visible={noPermissionModalVisible}
+          title="알림"
+          message="이 냉장고에 대한 권한이 없습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setNoPermissionModalVisible(false)}
+          onCancel={() => setNoPermissionModalVisible(false)}
+        />
+
+        {/* 편집 취소 확인 */}
+        <ConfirmModal
+          isAlert={true}
+          visible={editCancelConfirmVisible}
+          title="편집 취소"
+          message="변경사항이 저장되지 않습니다. 정말 취소하시겠습니까?"
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="취소"
+          cancelText="계속 편집"
+          confirmButtonStyle="danger"
+          onConfirm={handleEditCancelConfirm}
+          onCancel={() => setEditCancelConfirmVisible(false)}
+        />
+
+        {/* 저장 성공 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={saveSuccessModalVisible}
+          title="성공"
+          message="모든 변경사항이 저장되었습니다."
+          iconContainer={{ backgroundColor: '#d3f0d3' }}
+          icon={{ name: 'check', color: 'limegreen', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setSaveSuccessModalVisible(false)}
+          onCancel={() => setSaveSuccessModalVisible(false)}
+        />
+
+        {/* 인증 오류 */}
+        <ConfirmModal
+          isAlert={true}
+          visible={authErrorModalVisible}
+          title="인증 오류"
+          message="사용자 인증 정보가 일치하지 않습니다. 다시 로그인해주세요."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="로그인"
+          cancelText="취소"
+          confirmButtonStyle="danger"
+          onConfirm={() => {
+            setAuthErrorModalVisible(false);
+            handleLogout();
+          }}
+          onCancel={() => setAuthErrorModalVisible(false)}
+        />
+
+        {/* 권한 오류 */}
+        <ConfirmModal
+          isAlert={true}
+          visible={permissionErrorModalVisible}
+          title="권한 오류"
+          message="인증 정보에 문제가 있습니다. 다시 로그인해주세요."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="로그인"
+          cancelText="취소"
+          confirmButtonStyle="danger"
+          onConfirm={() => {
+            setPermissionErrorModalVisible(false);
+            handleLogout();
+          }}
+          onCancel={() => setPermissionErrorModalVisible(false)}
+        />
+
+        {/* 저장 오류 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={saveErrorModalVisible}
+          title="오류"
+          message={saveErrorMessage}
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setSaveErrorModalVisible(false)}
+          onCancel={() => setSaveErrorModalVisible(false)}
+        />
+
+        {/* 이름 편집 프롬프트 - 입력 기능 추가 */}
+        <ConfirmModal
+          isAlert={true}
+          visible={editPromptVisible}
+          title="모임명 변경하기"
+          message=""
+          iconContainer={{ backgroundColor: '#d3f0d3' }}
+          icon={{ name: 'edit', color: 'limegreen', size: 48 }}
+          confirmText="확인"
+          cancelText="취소"
+          confirmButtonStyle="primary"
+          showInput={true}
+          inputValue={editPromptInput}
+          inputPlaceholder="냉장고 이름을 입력하세요"
+          onInputChange={setEditPromptInput}
+          onConfirm={handleEditPromptConfirm}
+          onCancel={() => {
+            setEditPromptVisible(false);
+            setEditPromptFridge(null);
+            setEditPromptInput('');
+          }}
+        />
+
+        {/* 삭제/나가기 확인 */}
+        <ConfirmModal
+          isAlert={true}
+          visible={deleteConfirmVisible}
+          title={`냉장고 ${
+            deleteConfirmFridge?.role === 'owner' ? '삭제' : '나가기'
+          }`}
+          message={`${deleteConfirmFridge?.name}을(를) ${
+            deleteConfirmFridge?.role === 'owner' ? '삭제' : '나가기'
+          }하시겠습니까?`}
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText={
+            deleteConfirmFridge?.role === 'owner' ? '삭제' : '나가기'
+          }
+          cancelText="취소"
+          confirmButtonStyle="danger"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => {
+            setDeleteConfirmVisible(false);
+            setDeleteConfirmFridge(null);
+          }}
+        />
+
+        {/* 냉장고 추가 프롬프트 - 입력 기능 추가 */}
+        <ConfirmModal
+          isAlert={true}
+          visible={addPromptVisible}
+          title="새 냉장고"
+          message=""
+          iconContainer={{ backgroundColor: '#d3f0d3' }}
+          icon={{ name: 'add', color: 'limegreen', size: 48 }}
+          confirmText="추가"
+          cancelText="취소"
+          confirmButtonStyle="primary"
+          showInput={true}
+          inputValue={addPromptInput}
+          inputPlaceholder="냉장고 이름을 입력하세요"
+          onInputChange={setAddPromptInput}
+          onConfirm={handleAddPromptConfirm}
+          onCancel={() => {
+            setAddPromptVisible(false);
+            setAddPromptInput('');
+          }}
+        />
       </SafeAreaView>
     </GestureHandlerRootView>
   );

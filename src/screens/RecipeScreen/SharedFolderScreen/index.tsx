@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   Image,
 } from 'react-native';
@@ -13,6 +12,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ConfirmModal from '../../../components/modals/ConfirmModal';
 
 import { User } from '../../../types/auth';
 import RecipeAPI from '../../../services/API/RecipeAPI';
@@ -73,7 +73,7 @@ interface SharedFolderScreenProps {
   };
 }
 
-// SharedRecipeCard 컴포넌트 (대체재 정보 표시)
+// SharedRecipeCard 컴포넌트
 const SharedRecipeCard: React.FC<{
   recipe: Recipe;
   onPress: () => void;
@@ -203,16 +203,22 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [_currentUser, setCurrentUser] = useState<User | null>(null);
 
-  // ✅ 레시피별 조리 가능성 상태
-
   const [recipeAvailabilities, setRecipeAvailabilities] = useState<
     Map<string, RecipeAvailabilityInfo>
   >(new Map());
 
-  // ✅ 레시피 상세 정보 (instead 포함)
   const [recipeDetails, setRecipeDetails] = useState<
     Map<string, RecipeDetailResponse>
   >(new Map());
+
+  // ConfirmModal 상태들
+  const [loadErrorModalVisible, setLoadErrorModalVisible] = useState(false);
+  const [loadErrorMessage, setLoadErrorMessage] = useState('');
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [deleteSuccessVisible, setDeleteSuccessVisible] = useState(false);
+  const [deleteErrorVisible, setDeleteErrorVisible] = useState(false);
+  const [selectedRecipeForDelete, setSelectedRecipeForDelete] =
+    useState<Recipe | null>(null);
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -223,12 +229,10 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
     try {
       console.log(`🔍 냉장고 ${fridgeId} 식재료 API 로드 시도`);
 
-      // RefrigeratorAPI의 static 메서드 사용
       const response = await IngredientControllerAPI.getRefrigeratorIngredients(
         fridgeId,
       );
 
-      // PageResponse에서 content 배열 반환 및 FridgeIngredient 타입으로 매핑
       const content = response.content || [];
       return content.map((ing: any) => ({
         id: ing.id,
@@ -305,12 +309,12 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
 
       setFridgeList(fridgesWithRecipes);
       console.log('=== 최종 냉장고 + 레시피 + 식재료 ===:', fridgesWithRecipes);
-    } catch (error) {
+    } catch (error: any) {
       console.error('데이터 로드 실패:', error);
-      Alert.alert(
-        '오류',
-        '냉장고 정보를 불러오는데 실패했습니다.\n\n' + error.message,
+      setLoadErrorMessage(
+        '냉장고 정보를 불러오는데 실패했습니다.\n\n' + (error.message || ''),
       );
+      setLoadErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
@@ -321,7 +325,6 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
       return;
     }
 
-    // ✅ currentFridgeId가 없으면 계산 불가
     if (!currentFridgeId) {
       console.warn(
         '⚠️ 현재 접속 중인 냉장고 ID가 없어 가용성 계산을 건너뜁니다.',
@@ -336,7 +339,6 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
       console.log(`📂 선택된 냉장고: ${selectedFridge.fridge.id}`);
       console.log(`📋 레시피 개수: ${selectedFridge.recipes.length}개`);
 
-      // ✅ RecipeScreen처럼 상세 정보 먼저 로드
       const recipesWithIngredients = await Promise.all(
         selectedFridge.recipes.map(async recipe => {
           if (!recipe.ingredients || recipe.ingredients.length === 0) {
@@ -362,15 +364,13 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
         }),
       );
 
-      // ✅ 항상 currentFridgeId(현재 접속 냉장고)의 재료로 계산
       const availabilities = await calculateMultipleRecipeAvailability(
         recipesWithIngredients,
-        currentFridgeId, // ← 현재 접속 중인 냉장고 ID 고정
+        currentFridgeId,
       );
 
       setRecipeAvailabilities(availabilities);
 
-      // 디버깅: 결과 확인
       console.log('✅ 조리 가능성 계산 완료');
       availabilities.forEach((value, key) => {
         const recipe = recipesWithIngredients.find(r => r.id === key);
@@ -386,7 +386,6 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
     }
   };
 
-  // 냉장고 선택 시 조리 가능성 계산
   useEffect(() => {
     if (selectedFridge) {
       calculateRecipeAvailabilities();
@@ -410,23 +409,25 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
 
   // 레시피 삭제 핸들러
   const handleRecipeDelete = async (recipe: Recipe) => {
-    Alert.alert('레시피 삭제', `"${recipe.title}" 레시피를 삭제하시겠습니까?`, [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await RecipeAPI.deleteRecipe(recipe.id);
-            await loadUserFridgesWithRecipes();
-            Alert.alert('성공', '레시피가 삭제되었습니다.');
-          } catch (error) {
-            console.error('레시피 삭제 실패:', error);
-            Alert.alert('오류', '레시피 삭제에 실패했습니다.');
-          }
-        },
-      },
-    ]);
+    setSelectedRecipeForDelete(recipe);
+    setDeleteConfirmVisible(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedRecipeForDelete) return;
+
+    try {
+      setDeleteConfirmVisible(false);
+      await RecipeAPI.deleteRecipe(selectedRecipeForDelete.id);
+      await loadUserFridgesWithRecipes();
+      setDeleteSuccessVisible(true);
+      setSelectedRecipeForDelete(null);
+    } catch (error) {
+      console.error('레시피 삭제 실패:', error);
+      setDeleteConfirmVisible(false);
+      setDeleteErrorVisible(true);
+      setSelectedRecipeForDelete(null);
+    }
   };
 
   // 초기 데이터 로드
@@ -540,7 +541,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
               )}
             </>
           ) : (
-            // 선택된 냉장고의 레시피 목록 보기// 선택된 냉장고의 레시피 목록 보기
+            // 선택된 냉장고의 레시피 목록 보기
             <>
               {selectedFridge.recipes.map(recipe => {
                 const availabilityStatus = recipeAvailabilities.get(
@@ -575,6 +576,69 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
             <Icon name="keyboard-arrow-up" size={24} color="#fff" />
           </TouchableOpacity>
         )}
+
+        {/* 데이터 로드 에러 모달 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={loadErrorModalVisible}
+          title="오류"
+          message={loadErrorMessage}
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setLoadErrorModalVisible(false)}
+          onCancel={() => setLoadErrorModalVisible(false)}
+        />
+
+        {/* 레시피 삭제 확인 모달 */}
+        <ConfirmModal
+          isAlert={true}
+          visible={deleteConfirmVisible}
+          title="레시피 삭제"
+          message={`"${selectedRecipeForDelete?.title}" 레시피를 삭제하시겠습니까?`}
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="삭제"
+          cancelText="취소"
+          confirmButtonStyle="danger"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => {
+            setDeleteConfirmVisible(false);
+            setSelectedRecipeForDelete(null);
+          }}
+        />
+
+        {/* 레시피 삭제 성공 모달 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={deleteSuccessVisible}
+          title="성공"
+          message="레시피가 삭제되었습니다."
+          iconContainer={{ backgroundColor: '#d3f0d3' }}
+          icon={{ name: 'check', color: 'limegreen', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setDeleteSuccessVisible(false)}
+          onCancel={() => setDeleteSuccessVisible(false)}
+        />
+
+        {/* 레시피 삭제 실패 모달 */}
+        <ConfirmModal
+          isAlert={false}
+          visible={deleteErrorVisible}
+          title="오류"
+          message="레시피 삭제에 실패했습니다."
+          iconContainer={{ backgroundColor: '#fae1dd' }}
+          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          confirmText="확인"
+          cancelText=""
+          confirmButtonStyle="primary"
+          onConfirm={() => setDeleteErrorVisible(false)}
+          onCancel={() => setDeleteErrorVisible(false)}
+        />
       </GestureHandlerRootView>
     </SafeAreaView>
   );

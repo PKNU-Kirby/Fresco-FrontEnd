@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { Alert } from 'react-native';
 import {
   CommonActions,
   useNavigation,
@@ -23,6 +22,45 @@ type User = {
   email: string;
 };
 
+// ConfirmModal 상태 타입
+export interface FridgeSettingsModalState {
+  errorModalVisible: boolean;
+  errorMessage: string;
+  logoutConfirmVisible: boolean;
+  logoutErrorVisible: boolean;
+  deleteConfirmVisible: boolean;
+  deleteFinalConfirmVisible: boolean;
+  deletingModalVisible: boolean;
+  deleteSuccessVisible: boolean;
+  deleteErrorVisible: boolean;
+  deleteErrorMessage: string;
+  leaveConfirmVisible: boolean;
+  leavingModalVisible: boolean;
+  leaveSuccessVisible: boolean;
+  leaveErrorVisible: boolean;
+  leaveErrorMessage: string;
+  userInfoErrorVisible: boolean;
+  setErrorModalVisible: (visible: boolean) => void;
+  setLogoutConfirmVisible: (visible: boolean) => void;
+  setLogoutErrorVisible: (visible: boolean) => void;
+  setDeleteConfirmVisible: (visible: boolean) => void;
+  setDeleteFinalConfirmVisible: (visible: boolean) => void;
+  setDeletingModalVisible: (visible: boolean) => void;
+  setDeleteSuccessVisible: (visible: boolean) => void;
+  setDeleteErrorVisible: (visible: boolean) => void;
+  setLeaveConfirmVisible: (visible: boolean) => void;
+  setLeavingModalVisible: (visible: boolean) => void;
+  setLeaveSuccessVisible: (visible: boolean) => void;
+  setLeaveErrorVisible: (visible: boolean) => void;
+  setUserInfoErrorVisible: (visible: boolean) => void;
+  handleLogoutConfirm: () => Promise<void>;
+  handleDeleteFirstConfirm: () => void;
+  handleDeleteFinalConfirm: () => Promise<void>;
+  handleDeleteSuccess: () => void;
+  handleLeaveConfirm: () => Promise<void>;
+  handleLeaveSuccess: () => void;
+}
+
 export const useFridgeSettings = (
   fridgeId: number,
   fridgeName: string,
@@ -33,10 +71,29 @@ export const useFridgeSettings = (
 
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, _setCurrentUser] = useState<User | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<'owner' | 'member'>(
     'member',
   );
+
+  // ConfirmModal 상태들
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [logoutConfirmVisible, setLogoutConfirmVisible] = useState(false);
+  const [logoutErrorVisible, setLogoutErrorVisible] = useState(false);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [deleteFinalConfirmVisible, setDeleteFinalConfirmVisible] =
+    useState(false);
+  const [deletingModalVisible, setDeletingModalVisible] = useState(false);
+  const [deleteSuccessVisible, setDeleteSuccessVisible] = useState(false);
+  const [deleteErrorVisible, setDeleteErrorVisible] = useState(false);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState('');
+  const [leaveConfirmVisible, setLeaveConfirmVisible] = useState(false);
+  const [leavingModalVisible, setLeavingModalVisible] = useState(false);
+  const [leaveSuccessVisible, setLeaveSuccessVisible] = useState(false);
+  const [leaveErrorVisible, setLeaveErrorVisible] = useState(false);
+  const [leaveErrorMessage, setLeaveErrorMessage] = useState('');
+  const [userInfoErrorVisible, setUserInfoErrorVisible] = useState(false);
 
   // 냉장고 멤버 목록 로드
   const loadMembers = useCallback(async () => {
@@ -52,19 +109,6 @@ export const useFridgeSettings = (
 
       console.log('서버에서 가져온 멤버 목록:', fridgeMembers);
       console.log('권한 응답 전체:', JSON.stringify(userPermissions, null, 2));
-      console.log(
-        'Object.keys(userPermissions):',
-        Object.keys(userPermissions),
-      );
-      console.log('fridgeId 타입:', typeof fridgeId, 'fridgeId 값:', fridgeId);
-      console.log('숫자로 변환:', fridgeId);
-      console.log('권한에서 문자열로 체크:', userPermissions[fridgeId]);
-      console.log('권한에서 숫자로 체크:', userPermissions[fridgeId]);
-      console.log(
-        '권한에서 19번 직접 체크:',
-        userPermissions[19],
-        userPermissions['19'],
-      );
 
       // 현재 사용자가 이 냉장고의 owner인지 확인
       const isCurrentUserOwner = userPermissions[fridgeId] === true;
@@ -72,7 +116,7 @@ export const useFridgeSettings = (
       const memberList: Member[] = fridgeMembers.map(member => ({
         id: member.userId,
         name: member.userName,
-        role: 'member' as const, // 다른 멤버 권한은 표시 안함
+        role: 'member' as const,
       }));
 
       console.log('변환된 멤버 목록:', memberList);
@@ -82,13 +126,14 @@ export const useFridgeSettings = (
       setCurrentUserRole(isCurrentUserOwner ? 'owner' : 'member');
     } catch (error) {
       console.error('멤버 목록 로드 실패:', error);
-      Alert.alert('오류', '멤버 목록을 불러올 수 없습니다.');
+      setErrorMessage('멤버 목록을 불러올 수 없습니다.');
+      setErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
   }, [fridgeId]);
 
-  // 화면 포커스시 데이터 로드 (초기 로드 + 포커스시 새로고침)
+  // 화면 포커스시 데이터 로드
   useFocusEffect(
     useCallback(() => {
       loadMembers();
@@ -112,154 +157,151 @@ export const useFridgeSettings = (
     });
   };
 
+  // 로그아웃
   const handleLogout = () => {
-    Alert.alert('로그아웃', '로그아웃 하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '로그아웃',
-        onPress: async () => {
-          try {
-            // 서버에 로그아웃 요청 (선택사항)
-            await ApiService.logout();
-
-            // 로컬 스토리지 클리어
-            await AsyncStorageService.clearCurrentUser();
-
-            navigation.dispatch(
-              CommonActions.reset({
-                index: 0,
-                routes: [{ name: 'Login' }],
-              }),
-            );
-          } catch (error) {
-            console.error('로그아웃 실패:', error);
-            Alert.alert('오류', '로그아웃 중 문제가 발생했습니다.');
-          }
-        },
-      },
-    ]);
+    setLogoutConfirmVisible(true);
   };
 
-  const handleFridgeDelete = () => {
-    Alert.alert(
-      '냉장고 삭제',
-      `\n"${fridgeName}" 냉장고를 삭제합니다.\n\n⚠️\n 삭제된 냉장고의 모든 데이터가 영구적으로 사라지며, 복구가 불가능합니다.\n\n• 저장된 모든 식재료\n• 사용 기록\n• 구성원 정보\n`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              '최종 확인',
-              `\n"${fridgeName}" 냉장고를 정말 삭제하시겠습니까?`,
-              [
-                { text: '취소', style: 'cancel' },
-                {
-                  text: '삭제',
-                  style: 'destructive',
-                  onPress: performFridgeDelete,
-                },
-              ],
-            );
-          },
-        },
-      ],
-    );
-  };
-
-  const performFridgeDelete = async () => {
+  const handleLogoutConfirm = async () => {
     try {
-      Alert.alert('삭제 중...', '냉장고를 삭제하고 있습니다.', [], {
-        cancelable: false,
-      });
+      // 서버에 로그아웃 요청
+      await ApiService.logout();
 
+      // 로컬 스토리지 클리어
+      await AsyncStorageService.clearCurrentUser();
+
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        }),
+      );
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+      setLogoutConfirmVisible(false);
+      setLogoutErrorVisible(true);
+    }
+  };
+
+  // 냉장고 삭제
+  const handleFridgeDelete = () => {
+    setDeleteConfirmVisible(true);
+  };
+
+  const handleDeleteFirstConfirm = () => {
+    setDeleteConfirmVisible(false);
+    setDeleteFinalConfirmVisible(true);
+  };
+
+  const handleDeleteFinalConfirm = async () => {
+    setDeleteFinalConfirmVisible(false);
+    setDeletingModalVisible(true);
+
+    try {
       // 서버에 냉장고 삭제 요청
       await ApiService.deleteRefrigerator(fridgeId);
 
-      Alert.alert(
-        '삭제 완료',
-        `"${fridgeName}" 냉장고가 성공적으로 삭제되었습니다.`,
-        [
-          {
-            text: '확인',
-            onPress: () => {
-              navigation.dispatch(
-                CommonActions.reset({
-                  index: 0,
-                  routes: [{ name: 'FridgeSelect' }],
-                }),
-              );
-            },
-          },
-        ],
-        { cancelable: false },
-      );
+      setDeletingModalVisible(false);
+      setDeleteSuccessVisible(true);
     } catch (error) {
       console.error('냉장고 삭제 실패:', error);
-      Alert.alert(
-        '삭제 실패',
+      setDeletingModalVisible(false);
+      setDeleteErrorMessage(
         error.message ||
           '냉장고 삭제 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.',
       );
+      setDeleteErrorVisible(true);
     }
   };
 
-  const handleLeaveFridge = () => {
-    Alert.alert(
-      '냉장고 나가기',
-      `"${fridgeName}" 냉장고에서 나가시겠습니까?\n\n• 더 이상 이 냉장고의 식재료를 확인할 수 없습니다.\n• 나중에 다시 초대받으면 재참여할 수 있습니다.`,
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '나가기',
-          style: 'destructive',
-          onPress: performLeaveFridge,
-        },
-      ],
+  const handleDeleteSuccess = () => {
+    setDeleteSuccessVisible(false);
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'FridgeSelect' }],
+      }),
     );
   };
 
-  const performLeaveFridge = async () => {
+  // 냉장고 나가기
+  const handleLeaveFridge = () => {
+    setLeaveConfirmVisible(true);
+  };
+
+  const handleLeaveConfirm = async () => {
+    if (!currentUser) {
+      setLeaveConfirmVisible(false);
+      setUserInfoErrorVisible(true);
+      return;
+    }
+
+    setLeaveConfirmVisible(false);
+    setLeavingModalVisible(true);
+
     try {
-      if (!currentUser) {
-        Alert.alert('오류', '사용자 정보를 찾을 수 없습니다.');
-        return;
-      }
-
-      Alert.alert('처리 중...', '냉장고에서 나가는 중입니다.', [], {
-        cancelable: false,
-      });
-
       // 서버에 냉장고 나가기 요청
       await ApiService.leaveFridge(fridgeId, currentUser.id);
 
-      Alert.alert(
-        '나가기 완료',
-        `"${fridgeName}" 냉장고에서 나왔습니다.`,
-        [
-          {
-            text: '확인',
-            onPress: () => {
-              navigation.dispatch(
-                CommonActions.reset({
-                  index: 0,
-                  routes: [{ name: 'FridgeSelect' }],
-                }),
-              );
-            },
-          },
-        ],
-        { cancelable: false },
-      );
+      setLeavingModalVisible(false);
+      setLeaveSuccessVisible(true);
     } catch (error) {
       console.error('냉장고 나가기 실패:', error);
-      Alert.alert(
-        '오류',
+      setLeavingModalVisible(false);
+      setLeaveErrorMessage(
         error.message ||
           '냉장고 나가기 중 문제가 발생했습니다.\n잠시 후 다시 시도해주세요.',
       );
+      setLeaveErrorVisible(true);
     }
+  };
+
+  const handleLeaveSuccess = () => {
+    setLeaveSuccessVisible(false);
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'FridgeSelect' }],
+      }),
+    );
+  };
+
+  const modalState: FridgeSettingsModalState = {
+    errorModalVisible,
+    errorMessage,
+    logoutConfirmVisible,
+    logoutErrorVisible,
+    deleteConfirmVisible,
+    deleteFinalConfirmVisible,
+    deletingModalVisible,
+    deleteSuccessVisible,
+    deleteErrorVisible,
+    deleteErrorMessage,
+    leaveConfirmVisible,
+    leavingModalVisible,
+    leaveSuccessVisible,
+    leaveErrorVisible,
+    leaveErrorMessage,
+    userInfoErrorVisible,
+    setErrorModalVisible,
+    setLogoutConfirmVisible,
+    setLogoutErrorVisible,
+    setDeleteConfirmVisible,
+    setDeleteFinalConfirmVisible,
+    setDeletingModalVisible,
+    setDeleteSuccessVisible,
+    setDeleteErrorVisible,
+    setLeaveConfirmVisible,
+    setLeavingModalVisible,
+    setLeaveSuccessVisible,
+    setLeaveErrorVisible,
+    setUserInfoErrorVisible,
+    handleLogoutConfirm,
+    handleDeleteFirstConfirm,
+    handleDeleteFinalConfirm,
+    handleDeleteSuccess,
+    handleLeaveConfirm,
+    handleLeaveSuccess,
   };
 
   return {
@@ -274,5 +316,6 @@ export const useFridgeSettings = (
     handleLogout,
     handleFridgeDelete,
     handleLeaveFridge,
+    modalState, // 모달 상태 추가
   };
 };
