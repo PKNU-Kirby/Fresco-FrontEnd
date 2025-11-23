@@ -157,11 +157,10 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#E8F5E8',
   },
+
   loadingText: {
-    marginTop: scale(12),
-    fontSize: scale(16),
+    fontSize: scale(14),
     color: '#6B7280',
   },
 
@@ -233,41 +232,6 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#2D2D2D',
     marginBottom: scale(8),
-  },
-
-  sectionDescription: {
-    fontSize: scale(14),
-    color: '#6B7280',
-    lineHeight: scale(20),
-    marginBottom: scale(4),
-  },
-
-  // 일수 선택 옵션 (태그 스타일)
-  dayOptionsContainer: {
-    flexDirection: 'row',
-    gap: scale(10),
-    flexWrap: 'wrap',
-    paddingTop: scale(12),
-  },
-  dayOption: {
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(8),
-    borderRadius: scale(20),
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
-  },
-  dayOptionSelected: {
-    backgroundColor: '#60A5FA',
-    borderColor: '#60A5FA',
-  },
-  dayOptionText: {
-    fontSize: scale(14),
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-  dayOptionTextSelected: {
-    color: '#FFFFFF',
   },
 
   // 시간 선택기
@@ -700,89 +664,5 @@ export const styles = StyleSheet.create({
     fontSize: scale(15),
     color: '#6B7280',
     lineHeight: scale(24),
-  },
-
-  // 로딩
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  loadingText: {
-    fontSize: scale(14),
-    color: '#6B7280',
-  },
-
-  // 모달
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: scale(16),
-    width: '85%',
-    maxWidth: scale(400),
-  },
-
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: scale(20),
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-
-  modalTitle: {
-    fontSize: scale(18),
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-
-  closeButton: {
-    padding: scale(4),
-  },
-
-  sectionDescription: {
-    fontSize: scale(14),
-    color: '#6B7280',
-    marginBottom: scale(16),
-    lineHeight: scale(20),
-  },
-
-  dayOptionsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: scale(12),
-  },
-
-  dayOption: {
-    paddingVertical: scale(12),
-    paddingHorizontal: scale(20),
-    borderRadius: scale(8),
-    backgroundColor: '#F9FAFB',
-    borderWidth: scale(1),
-    borderColor: '#E5E7EB',
-  },
-
-  dayOptionSelected: {
-    backgroundColor: 'limegreen',
-    borderColor: 'limegreen',
-  },
-
-  dayOptionText: {
-    fontSize: scale(14),
-    fontWeight: '500',
-    color: '#6B7280',
-  },
-
-  dayOptionTextSelected: {
-    color: '#FFFFFF',
-    fontWeight: '600',
   },
 });
