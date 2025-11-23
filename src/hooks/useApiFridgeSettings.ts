@@ -132,7 +132,7 @@ export const useApiFridgeSettings = (
 
           console.log(`사용자 ${currentUserId} 권한:`, { canEdit, canDelete });
 
-          // canEdit과 canDelete 둘 다 true면 방장, 아니면 구성원
+          // canEdit과 canDelete 둘 다 true면 방장, 아니면 멤버
           const isOwner = canEdit && canDelete;
           setCurrentUserRole(isOwner ? 'owner' : 'member');
 
@@ -192,7 +192,7 @@ export const useApiFridgeSettings = (
         return;
       }
 
-      // 구성원이면 API로 권한 확인
+      // 멤버이면 API로 권한 확인
       const [canEdit, canViewHistory] = await Promise.all([
         PermissionAPIService.checkFridgePermission(fridgeId, 'edit'),
         PermissionAPIService.checkFridgePermission(fridgeId, 'view'),
@@ -244,7 +244,7 @@ export const useApiFridgeSettings = (
     navigation.navigate('NotificationSettingsScreen');
   };
 
-  // 구성원 목록 화면으로 이동
+  // 멤버 목록 화면으로 이동
   const handleMembersList = () => {
     navigation.navigate('MembersScreen', {
       fridgeId,

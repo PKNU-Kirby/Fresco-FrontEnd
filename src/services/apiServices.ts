@@ -548,7 +548,7 @@ export class ApiService {
     });
   }
 
-  // 냉장고 멤버 삭제 (방장이 구성원을 삭제)
+  // 냉장고 멤버 삭제 (방장이 멤버를 삭제)
   static async deleteFridgeMember(
     fridgeId: number,
     deleteUserId: number,

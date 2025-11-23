@@ -174,7 +174,7 @@ const FridgeSettingsScreen = ({ route }: Props) => {
         isAlert={true}
         visible={modalState.deleteConfirmVisible}
         title="냉장고 삭제"
-        message={`"${fridgeName}" 냉장고를 삭제하시겠습니까?\n\n⚠️ 삭제된 냉장고의 모든 데이터가 영구적으로 사라지며, 복구가 불가능합니다.\n\n• 저장된 모든 식재료\n• 사용 기록\n• 구성원 정보`}
+        message={`"${fridgeName}" 냉장고를 삭제하시겠습니까?\n\n⚠️ 삭제된 냉장고의 모든 데이터가 영구적으로 사라지며, 복구가 불가능합니다.\n\n• 저장된 모든 식재료\n• 사용 기록\n• 멤버 정보`}
         iconContainer={{ backgroundColor: '#fae1dd' }}
         icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
         confirmText="삭제"

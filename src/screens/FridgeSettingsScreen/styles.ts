@@ -50,15 +50,15 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 
-  // 빈 구성원 상태
+  // 빈 멤버 상태
   emptyMemberContainer: {
     alignItems: 'center',
     paddingVertical: scale(32),
     paddingHorizontal: scale(16),
   },
   emptyMemberText: {
-    fontSize: scale(14),
-    color: '#9CA3AF',
+    fontSize: scale(16),
+    color: '#666',
     textAlign: 'center',
   },
 
@@ -88,13 +88,19 @@ export const styles = StyleSheet.create({
   // 안내사항
   infoContainer: {
     borderRadius: scale(8),
-    padding: scale(16),
+    paddingHorizontal: scale(8),
+    paddingBottom: scale(4),
     margin: scale(16),
   },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   infoText: {
-    fontSize: scale(14),
+    fontSize: scale(15),
     color: '#4B5563',
     lineHeight: scale(20),
+    marginLeft: scale(8),
   },
 
   // 기존 스타일
@@ -670,7 +676,9 @@ export const styles = StyleSheet.create({
 
   infoIconContainer: {
     margin: scale(4),
-    //이거랑 제목이랑 가로로
+    flexDirection: 'row',
+    textAlign: 'center',
+    backgroundColor: 'black',
   },
 
   infoContent: {
@@ -682,8 +690,10 @@ export const styles = StyleSheet.create({
   infoTitle: {
     fontSize: scale(16),
     fontWeight: '700',
-    color: '#2D2D2D',
+    color: '#444',
     marginBottom: scale(8),
+    marginLeft: scale(8),
+    backgroundColor: 'red',
   },
 
   infoDescription: {

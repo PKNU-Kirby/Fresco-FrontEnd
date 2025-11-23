@@ -569,3 +569,167 @@ export const memberCardStyles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+
+export const inviteMemberModalStyle = StyleSheet.create({
+  // Modal
+  settingsItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(12),
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: scale(0.5),
+    borderBottomColor: '#C6C6C8',
+    minHeight: scale(44),
+  },
+  settingsItemLast: {
+    borderBottomWidth: scale(0),
+  },
+  settingsItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  settingsItemIcon: {
+    marginRight: scale(12),
+    width: scale(44),
+    height: scale(44),
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2F4858',
+    borderRadius: '50%',
+  },
+  settingsItemContent: {
+    flex: 1,
+    justifyContent: 'center',
+    marginLeft: scale(4),
+  },
+  settingsItemTitle: {
+    fontSize: scale(16),
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: scale(2),
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: scale(41),
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: scale(20),
+    width: '100%',
+    maxWidth: scale(400),
+    maxHeight: '80%',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: scale(0),
+      height: scale(4),
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: scale(10),
+    elevation: 8,
+  },
+  inviteSection: {
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(32),
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+  },
+  fridgeNameText: {
+    fontSize: scale(20),
+    fontWeight: '700',
+    color: '#2D2D2D',
+    marginBottom: scale(16),
+  },
+  fridgeSubText: {
+    fontSize: scale(14),
+    fontWeight: '700',
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: scale(20),
+  },
+
+  settingsGroup: {
+    backgroundColor: '#fff',
+    marginHorizontal: scale(16),
+    marginBottom: scale(12),
+    borderRadius: scale(20),
+    paddingBottom: scale(8),
+  },
+
+  linkContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    borderRadius: scale(10),
+    borderWidth: scale(1),
+    borderColor: '#E5E7EB',
+    overflow: 'hidden',
+    marginHorizontal: scale(12),
+    marginBottom: scale(12),
+  },
+  linkTextContainer: {
+    flex: 1,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(14),
+    justifyContent: 'center',
+  },
+  linkText: {
+    fontSize: scale(14),
+    color: '#374151',
+    fontFamily: 'monospace',
+    fontWeight: '500',
+  },
+  copyButton: {
+    backgroundColor: '#2F4858',
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(14),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  copyButtonText: {
+    fontSize: scale(16),
+    fontWeight: '700',
+    color: '#f8f8f8',
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  disabledShareButton: {
+    opacity: 0.4,
+  },
+
+  groupHeader: {
+    paddingHorizontal: scale(16),
+    paddingBottom: scale(12),
+    paddingTop: scale(16),
+  },
+  groupTitle: {
+    fontSize: scale(16),
+    fontWeight: '800',
+    color: '#444',
+    textTransform: 'uppercase',
+    letterSpacing: scale(0.5),
+  },
+
+  // close Button
+  closeButton: {
+    borderRadius: scale(16),
+    backgroundColor: '#e5e5e5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTopRightRadius: '0%',
+    borderTopLeftRadius: '0%',
+  },
+  closeButtonText: {
+    paddingVertical: scale(20),
+    fontSize: scale(16),
+    color: '#444',
+    fontWeight: '700',
+  },
+});

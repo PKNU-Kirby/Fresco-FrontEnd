@@ -182,7 +182,7 @@ const FridgeFolderCard: React.FC<{
     <View style={styles.folderInfo}>
       <Text style={styles.folderName}>{userFridge.fridge.name}</Text>
       <Text style={styles.folderSubInfo}>
-        구성원 {userFridge.fridge.memberCount}명 • 레시피{' '}
+        멤버 {userFridge.fridge.memberCount}명 • 레시피{' '}
         {userFridge.recipes.length}개
       </Text>
     </View>

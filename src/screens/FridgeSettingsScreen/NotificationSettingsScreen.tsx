@@ -259,11 +259,11 @@ const NotificationSettingsScreen = () => {
         </View>
 
         {/* 알림 설정 카드 (알림이 활성화된 경우에만 표시) */}
+        {/*
         {settings.enabled && hasPermission && (
           <View style={styles.notificationSection}>
             <Text style={styles.sectionHeaderText}>알림 세부 설정</Text>
 
-            {/* 알림 일수 카드 */}
             <TouchableOpacity
               style={styles.settingCard}
               onPress={() => setShowDayPicker(true)}
@@ -282,7 +282,6 @@ const NotificationSettingsScreen = () => {
               </View>
             </TouchableOpacity>
 
-            {/* 알림 시간 카드 */}
             <TouchableOpacity
               style={styles.settingCard}
               onPress={() => setShowTimePicker(true)}
@@ -302,6 +301,7 @@ const NotificationSettingsScreen = () => {
             </TouchableOpacity>
           </View>
         )}
+          */}
 
         {/* 알림 안내 카드 (알림이 비활성화된 경우) */}
         {(!settings.enabled || !hasPermission) && (
@@ -311,7 +311,7 @@ const NotificationSettingsScreen = () => {
                 <Ionicons
                   name="information-circle-outline"
                   size={24}
-                  color="#6B7280"
+                  color="#444"
                 />
                 <Text style={styles.infoTitle}>알림을 활성화하면</Text>
               </View>

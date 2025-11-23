@@ -27,15 +27,15 @@ const MemberManagement: React.FC<MemberManagementProps> = ({
   return (
     <View style={styles.settingsGroup}>
       <View style={styles.groupHeader}>
-        <Text style={styles.groupTitle}>구성원 관리</Text>
+        <Text style={styles.groupTitle}>멤버 관리</Text>
       </View>
 
       {canInviteMembers && (
-        <SettingsItem title="구성원 초대" onPress={onMemberInvite} />
+        <SettingsItem title="멤버 초대" onPress={onMemberInvite} />
       )}
 
       <SettingsItem
-        title="구성원 목록"
+        title="멤버 목록"
         value={`총 ${memberCount}명`}
         onPress={onMembersList}
       />

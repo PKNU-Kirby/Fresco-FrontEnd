@@ -97,7 +97,8 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
 
       // 각 멤버의 역할 결정
       const memberList: Member[] = fridgeMembers.map((member: any) => {
-        const isSelf = member.userId === userId;
+        console.log(`userRole=${userRole} userId:${userId} `);
+        const isSelf = String(member.userId) === String(userId);
         const memberRole = isSelf ? userRole : 'member';
 
         console.log(
@@ -127,7 +128,7 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
 
   // 멤버 클릭 핸들러
   const handleMemberPress = (member: Member) => {
-    const roleText = member.role === 'owner' ? '방장' : '구성원';
+    const roleText = member.role === 'owner' ? '방장' : '멤버';
     const joinDateText = new Date(member.joinDate).toLocaleDateString('ko-KR');
 
     setMemberInfoTitle(member.name);

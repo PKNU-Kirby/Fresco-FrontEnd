@@ -554,7 +554,7 @@ export class FridgeSettingsAPIService {
   /**
    * 냉장고 나가기 (현재 사용자를 멤버에서 제거)
    */
-  static async leaveFridge(fridgeId: string): Promise<void> {
+  static async leaveFridge(fridgeId: number): Promise<void> {
     try {
       // AsyncStorageService 안전성 검사
       if (

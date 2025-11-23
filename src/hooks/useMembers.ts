@@ -98,7 +98,7 @@ export const useMembers = (fridgeId: number, _fridgeName: string) => {
   const handleMemberPress = (member: Member) => {
     setMemberInfoTitle(member.name);
     setMemberInfoMessage(
-      `역할: ${member.role === 'owner' ? '방장' : '구성원'}\n가입일: ${
+      `역할: ${member.role === 'owner' ? '방장' : '멤버'}\n가입일: ${
         member.joinDate
       }`,
     );

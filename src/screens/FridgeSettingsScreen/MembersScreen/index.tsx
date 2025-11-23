@@ -64,17 +64,17 @@ const MembersScreen = ({ route }: Props) => {
 
   const handleMemberInvite = () => {
     if (!canInviteMembers) {
-      setNoPermissionMessage('구성원을 초대할 권한이 없습니다.');
+      setNoPermissionMessage('멤버를 초대할 권한이 없습니다.');
       setNoPermissionModalVisible(true);
       return;
     }
     setShowInviteModal(true);
   };
 
-  // 구성원 삭제 핸들러
+  // 멤버 삭제 핸들러
   const handleMemberRemove = async (memberId: number) => {
     if (!canManageMembers) {
-      setNoPermissionMessage('구성원을 삭제할 권한이 없습니다.');
+      setNoPermissionMessage('멤버를 삭제할 권한이 없습니다.');
       setNoPermissionModalVisible(true);
       return;
     }
@@ -83,12 +83,12 @@ const MembersScreen = ({ route }: Props) => {
       await removeMember(memberId);
       setRemoveSuccessModalVisible(true);
     } catch (error) {
-      console.error('구성원 삭제 실패:', error);
+      console.error('멤버 삭제 실패:', error);
       setRemoveErrorModalVisible(true);
     }
   };
 
-  // 방장과 구성원 분리
+  // 방장과 멤버 분리
   const owners = members.filter(member => member.role === 'owner');
   const regularMembers = members.filter(member => member.role === 'member');
 
@@ -100,13 +100,13 @@ const MembersScreen = ({ route }: Props) => {
             <BackButton onPress={handleBack} />
           </View>
           <View style={styles.centerSection}>
-            <Text style={styles.headerTitle}>구성원</Text>
+            <Text style={styles.headerTitle}>멤버</Text>
           </View>
           <View style={styles.rightSection} />
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="limegreen" />
-          <Text style={styles.loadingText}>구성원을 불러오는 중...</Text>
+          <Text style={styles.loadingText}>멤버를 불러오는 중...</Text>
         </View>
       </SafeAreaView>
     );
@@ -185,7 +185,7 @@ const MembersScreen = ({ route }: Props) => {
             ))
           ) : (
             <View style={styles.emptyMemberContainer}>
-              <Text style={styles.emptyMemberText}>아직 구성원이 없습니다</Text>
+              <Text style={styles.emptyMemberText}>아직 멤버가 없습니다</Text>
             </View>
           )}
         </View>
@@ -196,12 +196,24 @@ const MembersScreen = ({ route }: Props) => {
             <Text style={styles.groupTitle}>안내사항</Text>
           </View>
           <View style={styles.infoContainer}>
-            <Text style={styles.infoText}>(안내사항 추가할 거리 있으면,,)</Text>
+            <View style={styles.infoItem}>
+              <Ionicons name="ellipse-sharp" size={6} color={'#666'} />
+              <Text style={styles.infoText}>
+                방장은 멤버를 내보낼 수 있습니다.
+              </Text>
+            </View>
+
+            <View style={styles.infoItem}>
+              <Ionicons name="ellipse-sharp" size={6} color={'#666'} />
+              <Text style={styles.infoText}>
+                상단의 + 버튼으로 멤버를 초대해 보세요.
+              </Text>
+            </View>
           </View>
         </View>
       </ScrollView>
 
-      {/* 구성원 초대 모달 */}
+      {/* 멤버 초대 모달 */}
       <InviteMemberModal
         visible={showInviteModal}
         onClose={() => setShowInviteModal(false)}
@@ -259,12 +271,12 @@ const MembersScreen = ({ route }: Props) => {
         onCancel={() => setNoPermissionModalVisible(false)}
       />
 
-      {/* 구성원 삭제 성공 모달 */}
+      {/* 멤버 삭제 성공 모달 */}
       <ConfirmModal
         isAlert={false}
         visible={removeSuccessModalVisible}
         title="완료"
-        message="구성원이 삭제되었습니다."
+        message="멤버가 삭제되었습니다."
         iconContainer={{ backgroundColor: '#d3f0d3' }}
         icon={{ name: 'check', color: 'limegreen', size: 48 }}
         confirmText="확인"
@@ -274,12 +286,12 @@ const MembersScreen = ({ route }: Props) => {
         onCancel={() => setRemoveSuccessModalVisible(false)}
       />
 
-      {/* 구성원 삭제 실패 모달 */}
+      {/* 멤버 삭제 실패 모달 */}
       <ConfirmModal
         isAlert={false}
         visible={removeErrorModalVisible}
         title="오류"
-        message="구성원 삭제에 실패했습니다."
+        message="멤버 삭제에 실패했습니다."
         iconContainer={{ backgroundColor: '#fae1dd' }}
         icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
         confirmText="확인"

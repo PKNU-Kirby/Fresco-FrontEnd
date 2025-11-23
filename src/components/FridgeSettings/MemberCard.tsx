@@ -53,7 +53,7 @@ const MemberCard: React.FC<MemberCardProps> = ({
   // 삭제 권한 확인
   const canRemove = canRemoveMember(member);
 
-  // 구성원 삭제 핸들러
+  // 멤버 삭제 핸들러
   const handleRemoveMember = () => {
     setShowRemoveModal(true);
   };

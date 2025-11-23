@@ -33,7 +33,7 @@ const FridgeManagement: React.FC<FridgeManagementProps> = ({
           />
         )
       ) : (
-        // 구성원 - 냉장고 나가기
+        // 멤버 - 냉장고 나가기
         <SettingsItem
           title="냉장고 나가기"
           onPress={onLeaveFridge}
