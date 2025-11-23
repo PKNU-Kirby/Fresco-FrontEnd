@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import React from 'react';
 import { ApiService } from '../services/apiServices';
 import { AsyncStorageService } from '../services/AsyncStorageService';
 import { PermissionAPIService } from '../services/API/permissionAPI';
@@ -132,11 +131,7 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
     const joinDateText = new Date(member.joinDate).toLocaleDateString('ko-KR');
 
     setMemberInfoTitle(member.name);
-    setMemberInfoMessage(
-      `역할: ${roleText}\n가입일: ${joinDateText}${
-        member.email ? `\n이메일: ${member.email}` : ''
-      }`,
-    );
+    setMemberInfoMessage(`역할: ${roleText}\n가입일: ${joinDateText}`);
     setMemberInfoModalVisible(true);
   };
 

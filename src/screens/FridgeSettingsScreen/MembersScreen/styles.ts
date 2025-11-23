@@ -12,7 +12,6 @@ const baseWidth = 402;
 const scale = (size: number) => (width / baseWidth) * size;
 
 export const styles = StyleSheet.create({
-  // 기존 스타일
   container: {
     flex: 1,
     backgroundColor: '#E8F5E8',
@@ -29,11 +28,11 @@ export const styles = StyleSheet.create({
     paddingBottom: scale(8),
     shadowColor: '#000',
     shadowOffset: {
-      width: 0,
+      width: scale(0),
       height: scale(5),
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
+    shadowRadius: scale(3.84),
     elevation: 5,
     zIndex: 1001,
   },
@@ -67,9 +66,74 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   loadingText: {
     fontSize: scale(14),
     color: '#6B7280',
+  },
+
+  // 설정 그룹
+  settingsGroup: {
+    backgroundColor: 'white',
+    marginBottom: scale(16),
+    borderRadius: scale(12),
+    marginHorizontal: scale(16),
+    paddingVertical: scale(8),
+    overflow: 'hidden',
+  },
+  fridgeInfoHeader: {
+    alignItems: 'center',
+    paddingVertical: scale(24),
+    borderRadius: scale(12),
+    marginHorizontal: scale(16),
+  },
+  fridgeTitle: {
+    fontSize: scale(20),
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: scale(8),
+  },
+  memberCount: {
+    fontSize: scale(14),
+    color: '#666',
+  },
+  // 그룹 헤더
+  groupHeader: {
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(16),
+  },
+  groupTitle: {
+    fontSize: scale(18),
+    fontWeight: '900',
+    color: '#333',
+  },
+
+  // 빈 멤버 상태
+  emptyMemberContainer: {
+    alignItems: 'center',
+    paddingVertical: scale(32),
+    paddingHorizontal: scale(16),
+  },
+  emptyMemberText: {
+    fontSize: scale(16),
+    color: '#666',
+    textAlign: 'center',
+  },
+
+  // 안내사항
+  infoContainer: {
+    borderRadius: scale(8),
+    paddingHorizontal: scale(8),
+    paddingBottom: scale(4),
+    margin: scale(16),
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoText: {
+    fontSize: scale(15),
+    color: '#4B5563',
+    lineHeight: scale(20),
+    marginLeft: scale(8),
   },
 });

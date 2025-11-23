@@ -13,6 +13,7 @@
     "@fortawesome/react-native-fontawesome": "^0.3.2",
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-clipboard/clipboard": "^1.16.3",
     "@react-native-community/datetimepicker": "^8.4.3",
     "@react-native-community/slider": "^5.0.1",
     "@react-native-firebase/app": "^23.0.1",
@@ -42,7 +43,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
-    "@babel/runtime": "^7.25.0",
+    "@babel/runtime": "^7.28.4",
     "@react-native-community/cli": "19.1.1",
     "@react-native-community/cli-platform-android": "19.1.1",
     "@react-native-community/cli-platform-ios": "19.1.1",

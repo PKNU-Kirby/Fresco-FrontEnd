@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Switch, ScrollView, Text } from 'react-native';
+import {
+  View,
+  Switch,
+  ScrollView,
+  Text,
+  ActivityIndicator,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -134,6 +140,7 @@ const NotificationSettingsScreen = () => {
           <View style={styles.rightSection} />
         </View>
         <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#2F4858" />
           <Text style={styles.loadingText}>설정을 불러오는 중...</Text>
         </View>
       </SafeAreaView>

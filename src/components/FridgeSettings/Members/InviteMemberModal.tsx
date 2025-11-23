@@ -1,21 +1,24 @@
+//
 import React, { useState, useEffect } from 'react';
 import {
   View,
   Modal,
   TouchableOpacity,
-  Clipboard,
   Share,
   Linking,
   Text,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import ConfirmModal from '../modals/ConfirmModal';
-import { FridgeSettingsAPIService } from '../../services/API/FridgeSettingsAPI';
+import Clipboard from '@react-native-clipboard/clipboard';
+//
+import ModalSettingsItem from './ModalSettingsItem';
+import InviteMemberModals from '../../modals/InviteMemberModals';
+import { FridgeSettingsAPIService } from '../../../services/API/FridgeSettingsAPI';
+//
 import { inviteMemberModalStyle as styles } from './styles';
 
 type InviteMemberModalProps = {
-  fridgeId: number;
   visible: boolean;
+  fridgeId: number;
   fridgeName: string;
   onClose: () => void;
   onInviteSuccess?: () => void;
@@ -26,12 +29,11 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
   fridgeId,
   fridgeName,
   onClose,
-  onInviteSuccess,
 }) => {
   const [inviteCode, setInviteCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // ConfirmModal 상태들
+  // ConfirmModal States
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [smsFailedVisible, setSmsFailedVisible] = useState(false);
@@ -70,11 +72,6 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
     }
   }, [visible, loadInviteCode]);
 
-  // 초대 링크 재생성 확인
-  const regenerateCode = () => {
-    setRegenerateConfirmVisible(true);
-  };
-
   // 초대 링크 재생성 실행
   const handleRegenerateConfirm = async () => {
     try {
@@ -92,14 +89,21 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
       setErrorModalVisible(true);
     } finally {
       setIsLoading(false);
+      setRegenerateConfirmVisible(false);
     }
   };
 
   // 클립보드에 복사
-  const copyToClipboard = () => {
-    Clipboard.setString(inviteCode);
-    setSuccessMessage('초대 링크가 클립보드에 복사되었습니다.');
-    setSuccessModalVisible(true);
+  const copyToClipboard = async () => {
+    try {
+      await Clipboard.setString(inviteCode);
+      setSuccessMessage('초대 링크가 클립보드에 복사되었습니다.');
+      setSuccessModalVisible(true);
+    } catch (error) {
+      console.error('클립보드 복사 실패:', error);
+      // 에러 발생 시 공유 기능으로 대체
+      shareGeneral();
+    }
   };
 
   // 문자 메시지로 공유
@@ -151,28 +155,10 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
     });
   };
 
-  // 공유 아이템 컴포넌트
-  const ModalSettingsItem: React.FC<{
-    title: string;
-    icon: string;
-    iconColor: string;
-    onPress: () => void;
-    isLast?: boolean;
-  }> = ({ title, icon, iconColor, onPress, isLast = false }) => (
-    <TouchableOpacity
-      style={[styles.settingsItem, isLast && styles.settingsItemLast]}
-      onPress={onPress}
-    >
-      <View style={styles.settingsItemLeft}>
-        <View style={[styles.settingsItemIcon, { backgroundColor: iconColor }]}>
-          <Ionicons name={icon} size={20} color="#f8f8f8" />
-        </View>
-        <View style={styles.settingsItemContent}>
-          <Text style={styles.settingsItemTitle}>{title}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+  // 카카오톡 실패 시 일반 공유로 fallback
+  const handleKakaoFallbackToGeneral = () => {
+    shareGeneral();
+  };
 
   return (
     <>
@@ -249,125 +235,28 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
         </View>
       </Modal>
 
-      {/* 에러 모달 */}
-      <ConfirmModal
-        isAlert={false}
-        visible={errorModalVisible}
-        title="오류"
-        message={errorMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
-        confirmText="확인"
-        cancelText=""
-        confirmButtonStyle="primary"
-        onConfirm={() => setErrorModalVisible(false)}
-        onCancel={() => setErrorModalVisible(false)}
-      />
-
-      {/* 성공 모달 */}
-      <ConfirmModal
-        isAlert={false}
-        visible={successModalVisible}
-        title="완료"
-        message={successMessage}
-        iconContainer={{ backgroundColor: '#d3f0d3' }}
-        icon={{ name: 'check', color: 'limegreen', size: 48 }}
-        confirmText="확인"
-        cancelText=""
-        confirmButtonStyle="primary"
-        onConfirm={() => setSuccessModalVisible(false)}
-        onCancel={() => setSuccessModalVisible(false)}
-      />
-      {/* 초대 링크 재생성 확인 모달 */}
-      <ConfirmModal
-        isAlert={true}
-        visible={regenerateConfirmVisible}
-        title="초대 링크 재생성"
-        message="새로운 초대 링크를 생성하시겠습니까?\n기존 링크는 더 이상 사용할 수 없습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
-        confirmText="생성"
-        cancelText="취소"
-        confirmButtonStyle="danger"
-        onConfirm={handleRegenerateConfirm}
-        onCancel={() => setRegenerateConfirmVisible(false)}
-      />
-      {/* SMS 지원 안함 모달 */}
-      <ConfirmModal
-        isAlert={false}
-        visible={smsNotSupportedVisible}
-        title="SMS 지원 안함"
-        message="이 기기에서는 SMS를 지원하지 않습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
-        confirmText="확인"
-        cancelText=""
-        confirmButtonStyle="primary"
-        onConfirm={() => setSmsNotSupportedVisible(false)}
-        onCancel={() => setSmsNotSupportedVisible(false)}
-      />
-      {/* SMS 공유 실패 모달 */}
-      <ConfirmModal
-        isAlert={false}
-        visible={smsFailedVisible}
-        title="SMS 공유 실패"
-        message="SMS 공유에 실패했습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
-        confirmText="확인"
-        cancelText=""
-        confirmButtonStyle="primary"
-        onConfirm={() => setSmsFailedVisible(false)}
-        onCancel={() => setSmsFailedVisible(false)}
-      />
-      {/* 카카오톡 미설치 모달 */}
-      <ConfirmModal
-        isAlert={true}
-        visible={kakaoNotInstalledVisible}
-        title="카카오톡 미설치"
-        message="카카오톡이 설치되어 있지 않습니다. 다른 방법으로 공유하시겠습니까?"
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
-        confirmText="웹 공유"
-        cancelText="취소"
-        confirmButtonStyle="primary"
-        onConfirm={() => {
-          setKakaoNotInstalledVisible(false);
-          shareGeneral();
-        }}
-        onCancel={() => setKakaoNotInstalledVisible(false)}
-      />
-      {/* 카카오톡 공유 실패 모달 */}
-      <ConfirmModal
-        isAlert={true}
-        visible={kakaoFailedVisible}
-        title="공유 실패"
-        message="카카오톡 공유에 실패했습니다. 다른 방법으로 공유하시겠습니까?"
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
-        confirmText="웹 공유"
-        cancelText="취소"
-        confirmButtonStyle="primary"
-        onConfirm={() => {
-          setKakaoFailedVisible(false);
-          shareGeneral();
-        }}
-        onCancel={() => setKakaoFailedVisible(false)}
-      />
-
-      {/* 일반 공유 실패 모달 */}
-      <ConfirmModal
-        isAlert={false}
-        visible={shareFailedVisible}
-        title="공유 실패"
-        message="공유에 실패했습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
-        confirmText="확인"
-        cancelText=""
-        confirmButtonStyle="primary"
-        onConfirm={() => setShareFailedVisible(false)}
-        onCancel={() => setShareFailedVisible(false)}
+      {/* 모든 ConfirmModal들 */}
+      <InviteMemberModals
+        errorMessage={errorMessage}
+        successMessage={successMessage}
+        smsFailedVisible={smsFailedVisible}
+        errorModalVisible={errorModalVisible}
+        kakaoFailedVisible={kakaoFailedVisible}
+        shareFailedVisible={shareFailedVisible}
+        successModalVisible={successModalVisible}
+        setSmsFailedVisible={setSmsFailedVisible}
+        setErrorModalVisible={setErrorModalVisible}
+        onRegenerateConfirm={handleRegenerateConfirm}
+        setKakaoFailedVisible={setKakaoFailedVisible}
+        setShareFailedVisible={setShareFailedVisible}
+        setSuccessModalVisible={setSuccessModalVisible}
+        smsNotSupportedVisible={smsNotSupportedVisible}
+        kakaoNotInstalledVisible={kakaoNotInstalledVisible}
+        regenerateConfirmVisible={regenerateConfirmVisible}
+        setSmsNotSupportedVisible={setSmsNotSupportedVisible}
+        setRegenerateConfirmVisible={setRegenerateConfirmVisible}
+        setKakaoNotInstalledVisible={setKakaoNotInstalledVisible}
+        onKakaoFallbackToGeneral={handleKakaoFallbackToGeneral}
       />
     </>
   );

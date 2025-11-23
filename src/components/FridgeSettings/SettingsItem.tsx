@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { styles } from '../../screens/FridgeSettingsScreen/styles';
-
+import { settingsItemPropsStyles as styles } from './styles';
 interface SettingsItemProps {
   title: string;
   value?: string;

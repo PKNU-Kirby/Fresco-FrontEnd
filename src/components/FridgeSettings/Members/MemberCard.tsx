@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import { Member } from '../../hooks/useApiMembers';
-import ConfirmModal from '../modals/ConfirmModal';
+import { Member } from '../../../hooks/useApiMembers';
+import ConfirmModal from '../../modals/ConfirmModal';
 import { memberCardStyles as styles } from './styles';
 
 interface MemberCardProps {
   member: Member;
-  currentUser: any;
+  currentUser?: any;
   canRemoveMember: (member: Member) => boolean;
   onMemberRemove?: (memberId: number) => void;
   onMemberPress?: (member: Member) => void;
@@ -16,7 +16,6 @@ interface MemberCardProps {
 
 const MemberCard: React.FC<MemberCardProps> = ({
   member,
-  currentUser,
   canRemoveMember,
   onMemberRemove,
   onMemberPress,
@@ -43,10 +42,10 @@ const MemberCard: React.FC<MemberCardProps> = ({
 
     if (isOwner) {
       // 방장: FontAwesome5 왕관
-      return <FontAwesome5 name="crown" size={22} color="#FC3964" />;
+      return <FontAwesome5 name="crown" size={22} color="#2F4858" />;
     } else {
       // 멤버: Ionicons person
-      return <Ionicons name="person" size={22} color="#865A68" />;
+      return <Ionicons name="person" size={22} color="#2F4858" />;
     }
   };
 

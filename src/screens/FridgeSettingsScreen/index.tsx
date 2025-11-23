@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import BackButton from '../../components/_common/BackButton';
-import InviteMemberModal from '../../components/FridgeSettings/InviteMemberModal';
+import InviteMemberModal from '../../components/FridgeSettings/Members/InviteMemberModal';
 import SettingsGroups from '../../components/FridgeSettings/SettingsGroups';
 import ConfirmModal from '../../components/modals/ConfirmModal';
 import { useApiFridgeSettings } from '../../hooks/useApiFridgeSettings';

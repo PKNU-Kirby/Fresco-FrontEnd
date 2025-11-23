@@ -1,8 +1,9 @@
-// components/FridgeSettings/MemberManagement.tsx
 import React from 'react';
 import { View, Text } from 'react-native';
-import SettingsItem from './SettingsItem';
-import { styles } from '../../screens/FridgeSettingsScreen/styles';
+//
+import SettingsItem from '../SettingsItem';
+//
+import { memberManagementStyles as styles } from './styles';
 
 interface MemberManagementProps {
   canInviteMembers: boolean;

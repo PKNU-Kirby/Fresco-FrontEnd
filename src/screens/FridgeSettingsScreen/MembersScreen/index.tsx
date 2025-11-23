@@ -15,9 +15,9 @@ import { RootStackParamList } from '../../../../App';
 import { useApiMembers } from '../../../hooks/useApiMembers';
 import BackButton from '../../../components/_common/BackButton';
 import ConfirmModal from '../../../components/modals/ConfirmModal';
-import MemberCard from '../../../components/FridgeSettings/MemberCard';
-import InviteMemberModal from '../../../components/FridgeSettings/InviteMemberModal';
-import { styles } from '../styles';
+import MemberCard from '../../../components/FridgeSettings/Members/MemberCard';
+import InviteMemberModal from '../../../components/FridgeSettings/Members/InviteMemberModal';
+import { styles } from './styles';
 
 type Props = {
   route: {
@@ -105,7 +105,7 @@ const MembersScreen = ({ route }: Props) => {
           <View style={styles.rightSection} />
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="limegreen" />
+          <ActivityIndicator size="large" color="#2F4858" />
           <Text style={styles.loadingText}>멤버를 불러오는 중...</Text>
         </View>
       </SafeAreaView>
