@@ -57,7 +57,6 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
       );
       setInviteCode(link);
     } catch (error) {
-      console.error('초대 링크 로드 실패:', error);
       setErrorMessage('초대 링크를 생성할 수 없습니다.');
       setErrorModalVisible(true);
     } finally {
@@ -84,7 +83,6 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
       setSuccessMessage('새로운 초대 링크가 생성되었습니다.');
       setSuccessModalVisible(true);
     } catch (error) {
-      console.error('초대 링크 재생성 실패:', error);
       setErrorMessage('초대 링크 재생성에 실패했습니다.');
       setErrorModalVisible(true);
     } finally {
@@ -94,21 +92,28 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
   };
 
   // 클립보드에 복사
-  const copyToClipboard = async () => {
+  const copyToClipboard = () => {
+    const codeString = String(inviteCode || '');
+
+    if (!codeString || codeString === 'undefined' || codeString === 'null') {
+      setErrorMessage('유효한 초대 링크가 없습니다.');
+      setErrorModalVisible(true);
+      return;
+    }
+
     try {
-      await Clipboard.setString(inviteCode);
+      Clipboard.setString(codeString);
       setSuccessMessage('초대 링크가 클립보드에 복사되었습니다.');
       setSuccessModalVisible(true);
     } catch (error) {
-      console.error('클립보드 복사 실패:', error);
-      // 에러 발생 시 공유 기능으로 대체
-      shareGeneral();
+      setErrorMessage('클립보드 복사에 실패했습니다.');
+      setErrorModalVisible(true);
     }
   };
 
   // 문자 메시지로 공유
   const shareToSMS = () => {
-    const message = `🏠 ${fridgeName} 냉장고에 초대되었습니다!\n\n초대 링크: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 위 링크를 입력해주세요!`;
+    const message = `[Fresco] ${fridgeName} 냉장고 모임에 초대되었습니다.\n\n초대 링크: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 냉장고 모임에 참여해 보세요!`;
     const smsUrl = `sms:?body=${encodeURIComponent(message)}`;
 
     Linking.canOpenURL(smsUrl)
@@ -125,34 +130,42 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
   };
 
   // 카카오톡으로 공유
-  const shareToKakaoTalk = () => {
-    const message = `🏠 ${fridgeName} 냉장고에 초대되었습니다!\n\n초대 링크: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 위 링크를 입력해주세요!`;
+  const shareToKakaoTalk = async () => {
+    const message = `[Fresco] ${fridgeName} 냉장고 모임에 초대되었습니다.\n\n초대 링크: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 냉장고 모임에 참여해 보세요!`;
     const encodedMessage = encodeURIComponent(message);
     const kakaoUrl = `kakaotalk://send?text=${encodedMessage}`;
 
-    Linking.canOpenURL(kakaoUrl)
-      .then(supported => {
-        if (supported) {
-          return Linking.openURL(kakaoUrl);
-        } else {
-          setKakaoNotInstalledVisible(true);
-        }
-      })
-      .catch(() => {
-        setKakaoFailedVisible(true);
-      });
+    try {
+      const supported = await Linking.canOpenURL(kakaoUrl);
+
+      if (!supported) {
+        setKakaoNotInstalledVisible(true);
+        return;
+      }
+
+      await Linking.openURL(kakaoUrl);
+    } catch (error) {
+      setKakaoFailedVisible(true);
+    }
   };
 
   // 일반 공유
-  const shareGeneral = () => {
-    const message = `🏠 ${fridgeName} 냉장고에 초대되었습니다!\n\n초대 링크: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 위 링크를 입력해주세요!`;
+  const shareGeneral = async () => {
+    const message = `[Fresco] ${fridgeName} 냉장고 모임에 초대되었습니다.\n\n초대 링크: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 냉장고 모임에 참여해 보세요!`;
 
-    Share.share({
-      message,
-      title: `${fridgeName} 냉장고 초대`,
-    }).catch(() => {
+    try {
+      const result = await Share.share({
+        message,
+        title: `${fridgeName} 냉장고 초대`,
+      });
+
+      // 사용자가 취소한 경우
+      if (result.action === Share.dismissedAction) {
+        // console.log('공유 취소됨');
+      }
+    } catch (error) {
       setShareFailedVisible(true);
-    });
+    }
   };
 
   // 카카오톡 실패 시 일반 공유로 fallback

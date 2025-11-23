@@ -9,16 +9,16 @@ import { memberCardStyles as styles } from './styles';
 interface MemberCardProps {
   member: Member;
   currentUser?: any;
-  canRemoveMember: (member: Member) => boolean;
-  onMemberRemove?: (memberId: number) => void;
   onMemberPress?: (member: Member) => void;
+  onMemberRemove?: (memberId: number) => void;
+  canRemoveMember: (member: Member) => boolean;
 }
 
 const MemberCard: React.FC<MemberCardProps> = ({
   member,
-  canRemoveMember,
-  onMemberRemove,
   onMemberPress,
+  onMemberRemove,
+  canRemoveMember,
 }) => {
   const [showRemoveModal, setShowRemoveModal] = useState(false);
 
@@ -41,10 +41,8 @@ const MemberCard: React.FC<MemberCardProps> = ({
     const isOwner = role === 'OWNER' || role === 'owner';
 
     if (isOwner) {
-      // 방장: FontAwesome5 왕관
       return <FontAwesome5 name="crown" size={22} color="#2F4858" />;
     } else {
-      // 멤버: Ionicons person
       return <Ionicons name="person" size={22} color="#2F4858" />;
     }
   };

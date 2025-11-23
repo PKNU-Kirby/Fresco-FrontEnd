@@ -368,7 +368,8 @@ export class FridgeSettingsAPIService {
       }
 
       const result: InvitationResponse = data.result;
-      return result.refrigeratorInvitationId;
+
+      return result.refrigeratorInvitationId.toString();
     } catch (error) {
       console.error('초대 코드 생성 실패:', error);
       ApiErrorHandler.logError(error, 'FridgeSettingsAPI.generateInviteCode');

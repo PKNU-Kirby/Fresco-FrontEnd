@@ -1,3 +1,4 @@
+//
 import { StyleSheet, Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -19,7 +20,7 @@ export const inviteMemberModalStyle = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: scale(16),
     paddingVertical: scale(12),
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#fff',
     borderBottomWidth: scale(0.5),
     borderBottomColor: '#C6C6C8',
     minHeight: scale(44),
@@ -30,7 +31,7 @@ export const inviteMemberModalStyle = StyleSheet.create({
   settingsItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    flex: scale(1),
   },
   settingsItemIcon: {
     marginRight: scale(12),
@@ -177,24 +178,24 @@ export const inviteMemberModalStyle = StyleSheet.create({
 
 export const memberCardStyles = StyleSheet.create({
   memberCard: {
-    backgroundColor: '#FFF5F5',
-    borderRadius: 12,
-    marginBottom: 8,
-    marginHorizontal: 16,
-    shadowColor: '#442121ff',
+    backgroundColor: 'rgba(47, 72, 88, 0.1)',
+    borderRadius: scale(12),
+    marginBottom: scale(8),
+    marginHorizontal: scale(16),
+    shadowColor: 'rgba(47, 72, 88, 1.0)',
     shadowOffset: {
-      width: 0,
-      height: 1,
+      width: scale(0),
+      height: scale(1),
     },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: scale(2),
     elevation: 2,
   },
   memberCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: scale(16),
   },
   memberLeft: {
     flexDirection: 'row',
@@ -202,12 +203,13 @@ export const memberCardStyles = StyleSheet.create({
     flex: 1,
   },
   memberIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: scale(44),
+    height: scale(44),
+    borderRadius: scale(22),
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: scale(16),
+    backgroundColor: 'rgba(47, 72, 88, 0.3)',
   },
   memberInfo: {
     flex: 1,
@@ -215,44 +217,44 @@ export const memberCardStyles = StyleSheet.create({
   memberNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: scale(4),
   },
   memberName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginRight: 8,
+    fontSize: scale(17),
+    fontWeight: '700',
+    color: '#2F4858',
+    marginRight: scale(8),
   },
   roleContainer: {
-    backgroundColor: '#FFE4E6',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    backgroundColor: 'rgba(47, 72, 88, 0.3)',
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
+    borderRadius: scale(12),
   },
   roleText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: 'tomato',
+    fontSize: scale(12),
+    fontWeight: '700',
+    color: '#2F4858',
   },
   joinDate: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: scale(14),
+    color: '#2F4858',
   },
   memberRight: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   removeButton: {
-    padding: 4,
+    padding: scale(4),
   },
   // 모달 메시지 스타일
   modalMessage: {
-    fontSize: 15,
+    fontSize: scale(15),
     color: '#666',
     textAlign: 'center',
   },
   modalMemberName: {
-    fontSize: 16,
+    fontSize: scale(16),
     color: 'tomato',
     fontWeight: '700',
   },
@@ -302,7 +304,7 @@ export const memberItemStyles = StyleSheet.create({
   ownerBadgeText: {
     fontSize: scale(12),
     fontWeight: '600',
-    color: '#92400E',
+    color: '#2F4858',
   },
   sectionDescription: {
     fontSize: scale(14),
@@ -347,14 +349,14 @@ export const modalSettingsItemStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingVertical: scale(16),
+    paddingHorizontal: scale(16),
     backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
+    borderBottomWidth: scale(1),
     borderBottomColor: '#F3F4F6',
   },
   settingsItemLast: {
-    borderBottomWidth: 0,
+    borderBottomWidth: scale(0),
   },
   settingsItemLeft: {
     flexDirection: 'row',
@@ -362,18 +364,18 @@ export const modalSettingsItemStyles = StyleSheet.create({
     flex: 1,
   },
   settingsItemIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: scale(36),
+    height: scale(36),
+    borderRadius: scale(18),
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: scale(12),
   },
   settingsItemContent: {
     flex: 1,
   },
   settingsItemTitle: {
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: '500',
     color: '#1F2937',
   },
