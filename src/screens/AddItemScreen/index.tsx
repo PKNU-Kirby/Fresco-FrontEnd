@@ -15,7 +15,7 @@ import { AddItemContent } from '../../components/AddItem/AddItemContent';
 import { AddItemActions } from '../../components/AddItem/AddItemActions';
 import { useAddItemLogic } from '../../hooks/AddItem/useAddItemLogic';
 import ConfirmModal from '../../components/modals/ConfirmModal';
-import { addItemStyles as styles } from './styles';
+import { styles } from './styles';
 import { RootStackParamList } from '../../../App';
 
 import Config from '../../types/config';
@@ -99,7 +99,7 @@ const AddItemScreen: React.FC = () => {
     if (recognizedData) {
       return [
         {
-          id: '1',
+          id: 1,
           name: recognizedData.name || '',
           quantity: recognizedData.quantity || 1,
           unit: recognizedData.unit || '개',
@@ -111,7 +111,7 @@ const AddItemScreen: React.FC = () => {
     }
     return [
       {
-        id: '1',
+        id: 1,
         name: '',
         quantity: 1,
         unit: '개',
@@ -191,16 +191,19 @@ const AddItemScreen: React.FC = () => {
 
         // 사용자가 이미 식재료를 선택한 경우
         if (item.selectedIngredient) {
-          console.log('selectedIngredient 존재 - API 호출 스킵');
-
           let selectedIngredient = item.selectedIngredient;
           if (typeof selectedIngredient === 'string') {
             try {
               selectedIngredient = JSON.parse(selectedIngredient);
-              console.log('selectedIngredient 파싱 완료');
+              // console.log('selectedIngredient 파싱 완료');
             } catch (error) {
-              console.error('selectedIngredient 파싱 실패:', error);
-              selectedIngredient = null;
+              // console.error('selectedIngredient 파싱 실패:', error);
+              selectedIngredient = {
+                ingredientId: -1,
+                ingredientName: item.name,
+                categoryId: 11,
+                categoryName: '기타',
+              };
             }
           }
 
@@ -209,7 +212,7 @@ const AddItemScreen: React.FC = () => {
             const userInput = {
               id: item.id,
               name: item.name,
-              quantity: Number(item.quantity), // 명시적 Number 변환
+              quantity: item.quantity,
               unit: item.unit, // items[i]의 unit 사용
               expirationDate: item.expirationDate,
               itemCategory: item.itemCategory,
@@ -229,7 +232,7 @@ const AddItemScreen: React.FC = () => {
             console.log(`[${i}] confirmedList에 추가 완료`);
           }
         } else {
-          console.log('selectedIngredient 없음 - API 호출 필요');
+          // console.log('selectedIngredient 없음 - API 호출 필요');
 
           try {
             console.log(`"${item.name}" 검색 중...`);
@@ -242,7 +245,7 @@ const AddItemScreen: React.FC = () => {
               const userInput = {
                 id: item.id,
                 name: item.name,
-                quantity: Number(item.quantity),
+                quantity: item.quantity,
                 unit: item.unit,
                 expirationDate: item.expirationDate,
                 itemCategory: item.itemCategory,
@@ -257,17 +260,18 @@ const AddItemScreen: React.FC = () => {
               console.log(`[${i}] confirmedList에 추가 완료 (API 결과)`);
             } else {
               throw new Error(
-                `"${item.name}"에 대한 식재료를 찾을 수 없습니다.`,
+                `유효하지 않은 식재료 : "${item.name}"
+                식재료 명을 다시 확인해 주세요.`,
               );
             }
           } catch (error) {
-            console.error(`"${item.name}" 검색 실패:`, error);
+            console.error(`유효하지 않은 식재료 : "${item.name}"`, error);
 
             const defaultCategory = getCategoryByName(item.itemCategory);
             const userInput = {
               id: item.id,
               name: item.name,
-              quantity: Number(item.quantity),
+              quantity: item.quantity,
               unit: item.unit,
               expirationDate: item.expirationDate,
               itemCategory: item.itemCategory,
@@ -302,7 +306,7 @@ const AddItemScreen: React.FC = () => {
       const errorMessage =
         error instanceof Error
           ? error.message
-          : '알 수 없는 오류가 발생했습니다.';
+          : '유효하지 않은 식재료가 있습니다.\n식재료 이름을 다시 확인해주세요.';
       setErrorMessage(errorMessage);
       setShowErrorModal(true);
     } finally {
@@ -386,8 +390,9 @@ const AddItemScreen: React.FC = () => {
       const newSavedItems = (response.result || []).map(
         (responseItem, index) => {
           const confirmedIngredient = confirmedIngredients[index];
+          // 숫자형 임시 id 생성 (중복 우려가 있으면 음수로 만들어 서버 id와 충돌 방지)
           return {
-            id: `new_${Date.now()}_${index}`,
+            id: Date.now() + index,
             ingredientId: responseItem.ingredientId,
             categoryId: responseItem.categoryId,
             ingredientName: responseItem.ingredientName,
@@ -408,25 +413,16 @@ const AddItemScreen: React.FC = () => {
     } catch (error) {
       console.log('=== API 호출 실패 ===');
       console.error('에러 상세:', error);
-      console.error('에러 메시지:', error.message);
-      console.error('에러 스택:', error.stack);
 
-      let errorMessage = '식재료 저장 중 오류가 발생했습니다.';
-      if (error.message.includes('네트워크')) {
-        errorMessage = '네트워크 연결을 확인해주세요.';
-      } else if (error.message.includes('권한')) {
-        errorMessage = '저장 권한이 없습니다. 관리자에게 문의해주세요.';
-      } else if (error.message.includes('냉장고')) {
-        errorMessage = '냉장고 정보를 찾을 수 없습니다.';
-      }
-
-      setErrorMessage(`${errorMessage}\n\n상세: ${error.message}`);
+      // 간단한 에러 메시지로 변경
+      setErrorMessage(
+        '유효하지 않은 식재료가 있습니다.\n식재료 이름을 다시 확인해주세요.',
+      );
       setShowErrorModal(true);
     } finally {
       setIsLoading(false);
     }
   }, [confirmedIngredients, fridgeId, setIsLoading]);
-
   // 헤더 로직 (수정됨)
   const headerButtonText = useMemo(() => {
     if (isEditMode) {
@@ -610,7 +606,7 @@ const AddItemScreen: React.FC = () => {
   const confirmationMessage = useMemo(() => {
     if (confirmedIngredients.length === 0) return '';
 
-    return `총 ${confirmedIngredients.length}개 식재료를 냉장고에 추가하시겠습니까?`;
+    return `총 ${confirmedIngredients.length}개 식재료를 냉장고에 추가합니다.`;
   }, [confirmedIngredients]);
 
   return (
@@ -715,7 +711,9 @@ const AddItemScreen: React.FC = () => {
         onConfirm={() => {
           setShowErrorModal(false);
           setErrorMessage('');
-          handleSaveItems();
+          if (!isEditMode) {
+            setIsEditMode(true);
+          }
         }}
         onCancel={handleErrorConfirm}
       />

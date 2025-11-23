@@ -23,7 +23,7 @@ export const AddItemActions: React.FC<AddItemActionsProps> = ({
           accessibilityLabel="새 식재료 추가"
           accessibilityRole="button"
         >
-          <MaterialIcons name="add" size={24} color="#444" />
+          <MaterialIcons name="add" size={24} color="#f8f8f8" />
           <Text style={styles.addButtonText}>식재료 카드 추가</Text>
         </TouchableOpacity>
       </View>

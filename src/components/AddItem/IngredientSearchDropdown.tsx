@@ -43,7 +43,7 @@ const IngredientSearchDropdown: React.FC<IngredientSearchDropdownProps> = ({
         <View style={styles.searchErrorItem}>
           <Text style={styles.searchErrorText}>검색 결과가 없습니다</Text>
           <Text style={styles.searchErrorSubText}>
-            입력하신 이름으로 새로 추가됩니다
+            유효한 검색 결과만 추가할 수 있어요
           </Text>
         </View>
       )}

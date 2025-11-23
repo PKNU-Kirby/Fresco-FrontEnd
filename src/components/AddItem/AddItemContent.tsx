@@ -57,17 +57,21 @@ export const AddItemContent: React.FC<AddItemContentProps> = ({
         {isEditMode
           ? // 편집 모드 : 기존 카드 표시
             items.map((item, index) => (
-              <AddItemCard
+              <View
                 key={item.id}
-                item={item}
-                index={index}
-                isEditMode={isEditMode}
-                showDeleteButton={true}
-                onUpdateItem={onUpdateItem}
-                onRemoveItem={onRemoveItem}
-                focusedItemId={focusedItemId}
-                onFocusComplete={onFocusComplete}
-              />
+                style={{ zIndex: items.length - index }} // 👈 추가: 위에서 아래로 zIndex 감소
+              >
+                <AddItemCard
+                  item={item}
+                  index={index}
+                  isEditMode={isEditMode}
+                  showDeleteButton={true}
+                  onUpdateItem={onUpdateItem}
+                  onRemoveItem={onRemoveItem}
+                  focusedItemId={focusedItemId}
+                  onFocusComplete={onFocusComplete}
+                />
+              </View>
             ))
           : // 확인 모드 : 간단한 정보만 표시
             confirmedIngredients.map((confirmed, index) => {
@@ -114,9 +118,15 @@ export const AddItemContent: React.FC<AddItemContentProps> = ({
 
                     <View style={styles.confirmationDivider} />
                     <View style={styles.confirmationRow}>
-                      <Text style={styles.confirmationLabel}>소비기한:</Text>
+                      <Text style={styles.confirmationLabel}>소비기한 :</Text>
                       <Text style={styles.confirmationDetail}>
                         {confirmed.userInput?.expirationDate || '자동입력'}
+                      </Text>
+                    </View>
+                    <View style={styles.confirmationRow}>
+                      <Text style={styles.confirmationLabel}>카테고리 :</Text>
+                      <Text style={styles.confirmationDetail}>
+                        {apiResult?.categoryName || '기타'}
                       </Text>
                     </View>
                   </View>

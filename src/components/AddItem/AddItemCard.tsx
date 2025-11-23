@@ -6,6 +6,8 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+//
 import DatePicker from '../modals/DatePicker';
 import { ItemFormData } from '../../screens/AddItemScreen';
 import ItemCategoryModal from '../modals/ItemCategoryModal';
@@ -15,30 +17,31 @@ import UnitSelector from '../FridgeHome/FridgeItemCard/UnitSelector';
 import { useIngredientSearch } from '../../hooks/useIngredientSearch';
 import QuantityEditor from '../FridgeHome/FridgeItemCard/QuantityEditor';
 import { AutoCompleteSearchResponse } from '../../services/API/ingredientControllerAPI';
+//
 import { addItemCardStyles as styles } from './styles';
 
 interface AddItemCardProps {
-  item: ItemFormData;
   index: number;
+  item: ItemFormData;
   isEditMode: boolean;
   showDeleteButton: boolean;
+  focusedItemId?: number;
   onUpdateItem: (
-    itemId: string,
+    itemId: number,
     field: keyof ItemFormData,
     value: string,
   ) => void;
-  onRemoveItem: (itemId: string) => void;
-  focusedItemId?: string | null;
   onFocusComplete?: () => void;
+  onRemoveItem: (itemId: number) => void;
 }
 
 const AddItemCard: React.FC<AddItemCardProps> = ({
   item,
   isEditMode,
+  focusedItemId,
   showDeleteButton,
   onUpdateItem,
   onRemoveItem,
-  focusedItemId,
   onFocusComplete,
 }) => {
   const nameInputRef = useRef<TextInput>(null);
@@ -192,11 +195,6 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
           <DeleteButton onPress={handleDelete} />
         )}
 
-        {/* Image Section */}
-        <View style={styles.imageContainer}>
-          <View style={styles.imagePlaceholder} />
-        </View>
-
         {/* Item Info */}
         <View style={styles.itemInfo}>
           {/* Name Input/Display with Search */}
@@ -219,7 +217,7 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
                 {/* Loading Indicator */}
                 {isSearching && (
                   <View style={styles.searchLoadingIndicator}>
-                    <ActivityIndicator size="small" color="#666" />
+                    <ActivityIndicator size="small" color="#2F4858" />
                   </View>
                 )}
               </View>
@@ -237,8 +235,30 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
             <Text style={styles.itemName}>{item.name || '이름 없음'}</Text>
           )}
 
-          {/* Quantity and Unit */}
           <View style={styles.itemDetails}>
+            {/* Expiry Date */}
+            {isEditMode ? (
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowDatePicker(true)}
+              >
+                <FontAwesome6
+                  name="calendar-days"
+                  size={16}
+                  color="#2F4858"
+                  style={styles.dateButtonIcon}
+                />
+                <Text style={styles.dateButtonText}>
+                  {item.expirationDate || getDefaultExpiryDate()}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={styles.expiryText}>
+                {item.expirationDate || getDefaultExpiryDate()}
+              </Text>
+            )}
+
+            {/* Quantity and Unit */}
             {isEditMode ? (
               <QuantityEditor
                 quantity={item.quantity}
@@ -250,19 +270,6 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
             ) : (
               <Text style={styles.quantityText}>
                 {item.quantity} {item.unit || '개'}
-              </Text>
-            )}
-
-            {/* Expiry Date */}
-            {isEditMode ? (
-              <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-                <Text style={styles.dateButtonText}>
-                  {item.expirationDate || getDefaultExpiryDate()}
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <Text style={styles.expiryText}>
-                {item.expirationDate || getDefaultExpiryDate()}
               </Text>
             )}
           </View>

@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -86,7 +86,7 @@ export const addItemActionsStyles = StyleSheet.create({
   // Edit Mode Style
   addButtonContainer: {
     position: 'absolute',
-    bottom: scale(20),
+    bottom: scale(36),
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -97,7 +97,7 @@ export const addItemActionsStyles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: scale(24),
     paddingVertical: scale(12),
-    backgroundColor: '#32cd32e1',
+    backgroundColor: 'rgba(47, 72, 88, 0.7)',
     borderRadius: scale(10),
     gap: scale(8),
     shadowColor: '#000',
@@ -112,13 +112,13 @@ export const addItemActionsStyles = StyleSheet.create({
   addButtonText: {
     fontSize: scale(16),
     fontWeight: '900',
-    color: '#444',
+    color: '#f8f8f8',
   },
 
   // Edit Button Style
   editModeContainer: {
     position: 'absolute',
-    bottom: scale(20),
+    bottom: scale(36),
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -129,7 +129,7 @@ export const addItemActionsStyles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: scale(24),
     paddingVertical: scale(12),
-    backgroundColor: '#444',
+    backgroundColor: 'rgba(47, 72, 88, 0.7)',
     borderRadius: scale(10),
     gap: scale(8),
     shadowColor: '#000',
@@ -153,16 +153,15 @@ export const addItemCardStyles = StyleSheet.create({
   nameInputContainer: {
     position: 'relative',
     zIndex: 9999,
+    marginRight: scale(24),
   },
-
   nameInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     position: 'relative',
   },
-
   nameInput: {
-    width: scale(200),
+    width: scale(250),
     fontSize: scale(18),
     fontWeight: 'bold',
     color: '#333',
@@ -176,7 +175,6 @@ export const addItemCardStyles = StyleSheet.create({
     backgroundColor: '#F9F9F9',
     minHeight: scale(40),
   },
-
   searchLoadingIndicator: {
     position: 'absolute',
     right: scale(8),
@@ -201,40 +199,21 @@ export const addItemCardStyles = StyleSheet.create({
     position: 'relative',
   },
 
-  // Image styles
-  imageContainer: {
-    marginRight: scale(16),
-  },
-  itemImage: {
-    width: scale(60),
-    height: scale(60),
-    borderRadius: scale(8),
-  },
-  imagePlaceholder: {
-    width: scale(60),
-    height: scale(60),
-    backgroundColor: '#e0e0e0',
-    borderRadius: scale(8),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
   itemInfo: {
     flex: 1,
     justifyContent: 'space-between',
   },
-
   itemName: {
     fontSize: scale(18),
     fontWeight: 'bold',
     color: '#333',
     marginBottom: scale(4),
   },
-
   itemDetails: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: scale(4),
+    marginVertical: scale(6),
+    gap: scale(12),
   },
   quantityText: {
     fontSize: scale(14),
@@ -244,20 +223,24 @@ export const addItemCardStyles = StyleSheet.create({
 
   // date styles
   dateButton: {
-    paddingHorizontal: scale(8),
+    paddingHorizontal: scale(12),
     paddingVertical: scale(4),
-    backgroundColor: '#F0F0F0',
+    backgroundColor: '#f8f8f8',
     borderRadius: scale(6),
-    borderWidth: scale(1),
     borderColor: '#DDD',
     minHeight: scale(32),
     justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  dateButtonIcon: {
+    marginRight: scale(8),
   },
   dateButtonText: {
-    fontSize: scale(14),
-    color: '#666',
-    textDecorationLine: 'underline',
-    fontWeight: '500',
+    marginTop: scale(1),
+    fontSize: scale(15),
+    color: '#2F4858',
+    fontWeight: '700',
   },
   expiryText: {
     fontSize: scale(14),
@@ -284,12 +267,12 @@ export const addItemCardStyles = StyleSheet.create({
   },
   categoryButtonText: {
     fontSize: scale(12),
-    color: '#666',
+    color: '#2F4858',
     fontWeight: '600',
   },
   separator: {
     fontSize: scale(12),
-    color: '#999',
+    color: '#2F4858',
     marginHorizontal: scale(8),
   },
 });
@@ -362,8 +345,9 @@ export const addItemContentStyles = StyleSheet.create({
   },
   confirmationDetail: {
     fontSize: 15,
-    color: '#333',
+    color: '#2F4858',
     flex: 1,
+    fontWeight: '600',
   },
   confirmationArrow: {
     alignItems: 'center',
@@ -390,41 +374,53 @@ export const addItemHeaderStyles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    minHeight: scale(60),
+    backgroundColor: '#e8f5e8',
     paddingHorizontal: scale(16),
-    paddingVertical: scale(12),
-    backgroundColor: '#f2f7f2ff',
-    borderBottomWidth: scale(1),
-    borderBottomColor: '#E0E0E0',
-    ...shadows.small,
+    paddingTop:
+      Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 8 : 8,
+    paddingBottom: scale(8),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: scale(5),
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+    zIndex: 1001,
   },
-  backbutton: {
-    width: scale(50),
+  leftSection: {
+    width: scale(72),
     alignItems: 'flex-start',
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: scale(8),
+  },
+  rightSection: {
+    width: scale(72),
+    alignItems: 'flex-end',
   },
   headerTitle: {
     fontSize: scale(20),
-    fontWeight: '800',
+    fontWeight: 'bold',
     color: '#444',
-    flex: 1,
     textAlign: 'center',
+    maxWidth: '100%',
   },
   headerButton: {
-    paddingHorizontal: scale(10),
-    paddingVertical: scale(8),
+    fontSize: scale(16),
+    fontWeight: 'bold',
+    color: '#f8f8f8',
+    padding: scale(8),
     backgroundColor: '#333',
     borderRadius: scale(8),
-    width: scale(50),
-    alignItems: 'center',
-    ...shadows.small,
+    marginLeft: scale(28),
   },
   headerButtonDisabled: {
     backgroundColor: '#CCCCCC',
-  },
-  headerButtonText: {
-    fontSize: scale(14),
-    fontWeight: '600',
-    color: '#FFFFFF',
   },
 });
 
@@ -531,15 +527,16 @@ export const ingredientSearchDropdownStyles = StyleSheet.create({
     borderBottomLeftRadius: scale(6),
     borderBottomRightRadius: scale(6),
     maxHeight: scale(150),
-    zIndex: 10001,
+    maxWidth: scale(250),
+    zIndex: 99999,
+    elevation: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: scale(4),
     },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: scale(8),
-    elevation: 15,
   },
   searchErrorItem: {
     paddingHorizontal: scale(12),
@@ -547,13 +544,14 @@ export const ingredientSearchDropdownStyles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   searchErrorText: {
-    fontSize: scale(14),
-    fontWeight: '600',
-    color: '#FF6B6B',
-    marginBottom: scale(2),
+    fontSize: scale(16),
+    fontWeight: '700',
+    color: 'tomato',
+    marginBottom: scale(4),
   },
   searchErrorSubText: {
-    fontSize: scale(12),
+    fontSize: scale(14),
+    fontWeight: '600',
     color: '#999',
   },
 });
