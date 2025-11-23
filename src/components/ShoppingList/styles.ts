@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
     paddingTop: scale(16),
   },
   listContainer: {
-    paddingTop: scale(56),
+    paddingTop: scale(64),
     paddingBottom: scale(20),
   },
   loadingContainer: {
@@ -48,10 +48,10 @@ export const styles = StyleSheet.create({
     color: '#4fbb53',
   },
   emptyContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: scale(40),
+    paddingHorizontal: scale(40),
+    paddingTop: scale(200),
   },
   emptyTitle: {
     fontSize: scale(20),
@@ -67,6 +67,10 @@ export const styles = StyleSheet.create({
   emptyButtonContainer: {
     marginTop: scale(24),
     width: '100%',
+  },
+  topInputContainer: {
+    paddingTop: scale(72),
+    paddingBottom: scale(88),
   },
 });
 
@@ -147,6 +151,7 @@ export const cardStyles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: scale(16), // 12 → 16
     padding: scale(16),
+    paddingLeft: scale(9),
     marginBottom: scale(12),
     shadowColor: '#000',
     shadowOffset: {
@@ -171,7 +176,8 @@ export const cardStyles = StyleSheet.create({
 
   // checkbox section
   checkboxContainer: {
-    marginRight: scale(18),
+    marginRight: scale(9),
+    padding: scale(7),
   },
   itemImagePlaceholder: {
     width: scale(30),
@@ -260,6 +266,8 @@ export const cardStyles = StyleSheet.create({
     top: scale(8),
     right: scale(8),
     padding: scale(4),
+    paddingLeft: scale(20),
+    paddingBottom: scale(20),
     opacity: 0.6,
   },
 });
@@ -268,7 +276,7 @@ export const newItemCardStyles = StyleSheet.create({
   itemCard: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderRadius: scale(16), // 12 → 16
+    borderRadius: scale(16),
     padding: scale(16),
     marginBottom: scale(12),
     shadowColor: '#000',
@@ -282,7 +290,7 @@ export const newItemCardStyles = StyleSheet.create({
     alignItems: 'center',
   },
   newItemCard: {
-    borderColor: '#4fbb53',
+    borderColor: '#95E39D',
     borderWidth: scale(2), // 1 → 2
     backgroundColor: '#f9fff9',
   },

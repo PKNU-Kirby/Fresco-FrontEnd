@@ -8,9 +8,11 @@ import React, {
 } from 'react';
 import { View, TouchableOpacity, TextInput, Text } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+//
+import { CartItem } from '../../types/CartItem';
 import UnitSelector from '../FridgeHome/FridgeItemCard/UnitSelector';
 import QuantityEditor from '../FridgeHome/FridgeItemCard/QuantityEditor';
-import { CartItem } from '../../types/CartItem';
+//
 import { cardStyles as styles } from './styles';
 
 interface CartItemCardProps {

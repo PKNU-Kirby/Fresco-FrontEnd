@@ -8,6 +8,7 @@ import {
   Animated,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+//
 import { itemDeleteConfirmModalStyles as styles } from './styles';
 
 interface ItemDeleteConfirmModalProps {
