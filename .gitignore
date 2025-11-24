@@ -1,3 +1,4 @@
+src/types/config.ts
 
 .env
 .env.local
