@@ -89,12 +89,13 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({
           />
         </View>
       ))}
-      {isEditMode && (
-        <TouchableOpacity style={styles.addButton} onPress={onAddIngredient}>
-          <Icon name="add" size={22} color="#2F4858" />
-          <Text style={styles.addButtonText}>재료 추가</Text>
-        </TouchableOpacity>
-      )}
+      <View style={styles.addButtonContainer}>
+        {isEditMode && (
+          <TouchableOpacity style={styles.addButton} onPress={onAddIngredient}>
+            <Icon name="add" size={28} color="#e8f5e8" />
+          </TouchableOpacity>
+        )}
+      </View>
       <IngredientInfoModal
         visible={showInfoModal}
         onClose={() => setShowInfoModal(false)}

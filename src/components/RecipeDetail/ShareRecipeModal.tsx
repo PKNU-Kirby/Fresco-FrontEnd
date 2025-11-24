@@ -46,15 +46,7 @@ export const ShareRecipeModal: React.FC<ShareRecipeModalProps> = ({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <View style={styles.modalTitleLeft} />
             <Text style={styles.modalTitle}>레시피 공유하기</Text>
-            <TouchableOpacity
-              onPress={onClose}
-              style={styles.modalTitleRight}
-              disabled={isLoading}
-            >
-              <Icon name="close" size={24} color="#333" />
-            </TouchableOpacity>
           </View>
 
           <Text style={styles.modalSubtitle}>
@@ -75,46 +67,46 @@ export const ShareRecipeModal: React.FC<ShareRecipeModalProps> = ({
             <FlatList
               data={fridges}
               keyExtractor={item => item.id.toString()}
+              style={styles.checklistContainer}
+              showsVerticalScrollIndicator={false}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.checklistItem}
+                  style={
+                    item.isChecked ? styles.checkedItem : styles.checklistItem
+                  }
                   onPress={() => onToggleFridge(item.id)}
                   disabled={isLoading}
                 >
                   <Icon
                     name={item.isChecked ? 'check-circle' : 'circle'}
                     size={24}
-                    color={item.isChecked ? 'limegreen' : '#d8d8d8'}
+                    color={item.isChecked ? '#2F4858' : '#d8d8d8'}
                   />
                   <Text style={styles.checklistText}>{item.name}</Text>
                 </TouchableOpacity>
               )}
-              style={styles.checklistContainer}
-              showsVerticalScrollIndicator={false}
             />
           )}
 
-          <TouchableOpacity
-            style={[
-              styles.modalActionButton,
-              (selectedCount === 0 || isLoading) &&
-                styles.modalActionButtonDisabled,
-            ]}
-            onPress={onShareToSelectedFridges}
-            disabled={selectedCount === 0 || isLoading}
-          >
-            {isLoading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="small" color="white" />
-                <Text style={styles.modalActionButtonText}>공유 중...</Text>
-              </View>
-            ) : (
-              <Text style={styles.modalActionButtonText}>
-                {selectedCount > 0
-                  ? `${selectedCount}개 냉장고에 공유하기`
-                  : '공유하기'}
-              </Text>
-            )}
+          <TouchableOpacity style={styles.modalButtonsContainer}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.modalCloseButton}
+              disabled={isLoading}
+            >
+              <Text style={styles.modalCloseButtonText}>닫기</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.modalActionButtonContainer,
+                (selectedCount === 0 || isLoading) &&
+                  styles.modalActionButtonDisabled,
+              ]}
+              onPress={onShareToSelectedFridges}
+              disabled={selectedCount === 0 || isLoading}
+            >
+              <Text style={styles.modalActionButtonText}>공유하기</Text>
+            </TouchableOpacity>
           </TouchableOpacity>
         </View>
       </View>

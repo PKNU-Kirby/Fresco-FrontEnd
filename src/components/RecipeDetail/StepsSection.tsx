@@ -26,7 +26,9 @@ const StepInput: React.FC<{
 
   return (
     <View style={styles.stepEditRow}>
-      <Text style={styles.stepNumber}>{index + 1}.</Text>
+      <View style={styles.stepNumberContainer}>
+        <Text style={styles.stepNumber}>{index + 1}</Text>
+      </View>
       <TextInput
         style={styles.stepInput}
         value={localValue}
@@ -40,7 +42,7 @@ const StepInput: React.FC<{
         style={styles.removeStepsButton}
         onPress={() => onRemove(index)}
       >
-        <Icon name="remove" size={20} color="#FF3B30" />
+        <Icon name="remove-circle-outline" size={26} color="#666" />
       </TouchableOpacity>
     </View>
   );
@@ -83,12 +85,13 @@ export const StepsSection: React.FC<StepsSectionProps> = ({
           )}
         </View>
       ))}
-      {isEditMode && (
-        <TouchableOpacity style={styles.addButton} onPress={onAddStep}>
-          <Icon name="add" size={22} color="#2F4858" />
-          <Text style={styles.addButtonText}>단계 추가</Text>
-        </TouchableOpacity>
-      )}
+      <View style={styles.addButtonContainer}>
+        {isEditMode && (
+          <TouchableOpacity style={styles.addButton} onPress={onAddStep}>
+            <Icon name="add" size={28} color="#e8f5e8" />
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 };

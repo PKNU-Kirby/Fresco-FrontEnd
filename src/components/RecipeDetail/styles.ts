@@ -161,16 +161,17 @@ export const styles = StyleSheet.create({
     width: scale(44),
     height: scale(44),
   },
-  addButton: {
-    flexDirection: 'row',
+  addButtonContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#7FD1AE',
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(8),
-    borderRadius: scale(10),
-    gap: scale(2),
-    marginHorizontal: scale(130),
+  },
+  addButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2F4858',
+    width: scale(44),
+    height: scale(44),
+    borderRadius: '50%',
     marginTop: scale(8),
   },
   addButtonText: {
@@ -187,7 +188,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     gap: scale(8),
     backgroundColor: '#F3FBF3',
-    padding: scale(12),
+    padding: scale(10),
     borderRadius: scale(12),
     borderWidth: scale(1),
     borderColor: '#D9F9DA',
@@ -210,7 +211,6 @@ export const styles = StyleSheet.create({
   removeButton: {
     justifyContent: 'center',
     alignItems: 'center',
-    padding: scale(4),
     width: scale(44),
     height: scale(44),
   },
@@ -300,8 +300,8 @@ export const styles = StyleSheet.create({
   },
   stepEditRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: scale(8),
+    alignItems: 'center',
+    gap: scale(16),
   },
   stepRow: {
     flexDirection: 'column',
@@ -310,23 +310,31 @@ export const styles = StyleSheet.create({
     marginLeft: scale(8),
     marginTop: scale(4),
   },
+  stepNumberContainer: {
+    backgroundColor: '#2F4858',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: scale(28),
+    height: scale(28),
+    borderRadius: '50%',
+    marginTop: scale(4),
+  },
   stepNumber: {
     fontSize: scale(16),
     fontWeight: '600',
-    color: '#29a448ff',
-    minWidth: scale(24),
-    marginTop: scale(20),
-    marginLeft: scale(8),
+    color: '#e8f5e8',
   },
   stepInput: {
     flex: 1,
-    borderWidth: scale(1),
-    borderColor: '#ddd',
-    borderRadius: scale(6),
-    padding: scale(8),
-    fontSize: scale(14),
     minHeight: scale(60),
     textAlignVertical: 'top',
+    borderWidth: scale(1),
+    borderColor: '#ddd',
+    backgroundColor: '#fff',
+    borderRadius: scale(10),
+    padding: scale(10),
+    fontSize: scale(14),
+    color: '#444',
   },
   stepText: {
     flex: 1,
@@ -342,8 +350,10 @@ export const styles = StyleSheet.create({
     borderColor: '#999',
   },
   removeStepsButton: {
-    marginTop: scale(20),
-    marginLeft: scale(8),
+    width: scale(44),
+    height: scale(44),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   // URL //////////////////////////////////////////////////
@@ -476,6 +486,7 @@ export const styles = StyleSheet.create({
   checklistItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: scale(12),
     paddingHorizontal: scale(16),
     backgroundColor: 'white',
@@ -633,30 +644,39 @@ export const shareRecipeModalStyles = StyleSheet.create({
   // Modal Header
   modalHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     marginBottom: scale(16),
     paddingLeft: scale(8),
     paddingVertical: scale(8),
   },
-  modalTitleLeft: {
-    width: 56,
-  },
   modalTitle: {
     fontSize: scale(20),
     fontWeight: '700',
     color: '#444',
-    marginTop: 20,
-  },
-  modalTitleRight: {
-    padding: 16,
+    marginTop: scale(28),
   },
   // Modal Subtitle
   modalSubtitle: {
     fontSize: scale(16),
     color: '#666',
-    marginBottom: scale(24),
+    marginBottom: scale(40),
     textAlign: 'center',
+  },
+  emptyContainer: {
+    textAlign: 'center',
+    paddingVertical: scale(40),
+    paddingHorizontal: scale(20),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: scale(16),
+    color: '#666',
+    fontWeight: '600',
+  },
+  emptySubText: {
+    fontWeight: '600',
   },
   // Check List styles
   checklistContainer: {
@@ -665,9 +685,29 @@ export const shareRecipeModalStyles = StyleSheet.create({
   },
   checklistItem: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: scale(12),
     paddingHorizontal: scale(16),
     backgroundColor: '#f8f8f8',
+    marginBottom: scale(12),
+    borderRadius: scale(8),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: scale(4),
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: scale(2),
+    elevation: 2,
+  },
+  checkedItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(16),
+    backgroundColor: 'rgba(47, 72, 88, 0.1)',
     marginBottom: scale(8),
     borderRadius: scale(8),
     shadowColor: '#000',
@@ -686,18 +726,49 @@ export const shareRecipeModalStyles = StyleSheet.create({
     flex: 1,
   },
   // Buttons
-  modalActionButton: {
-    backgroundColor: 'limegreen',
-    paddingVertical: scale(16),
-    marginHorizontal: scale(24),
-    borderRadius: scale(10),
+  modalButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: scale(20),
+    gap: scale(8),
+    marginBottom: scale(16),
+  },
+  modalCloseButton: {
+    backgroundColor: '#e0e0e0',
+    padding: scale(8),
+    borderRadius: scale(8),
+    width: scale(100),
+    height: scale(44),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCloseButtonText: {
+    fontSize: scale(16),
+    fontWeight: '600',
+    color: '#444',
+  },
+  modalActionButtonContainer: {
+    backgroundColor: '#2F4858',
+    padding: scale(8),
+    borderRadius: scale(8),
+    width: scale(100),
+    height: scale(44),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modalActionButtonText: {
     fontSize: scale(18),
     fontWeight: '800',
     color: '#f8f8f8',
+  },
+  modalActionButtonDisabled: {
+    backgroundColor: 'rgba(47, 72, 88, 0.5)',
+    padding: scale(8),
+    borderRadius: scale(8),
+    width: scale(100),
+    height: scale(44),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

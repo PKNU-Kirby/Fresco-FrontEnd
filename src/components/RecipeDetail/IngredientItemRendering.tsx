@@ -12,10 +12,10 @@ interface IngredientItemProps {
   isExpanded: boolean;
   fridgeId?: number;
   isLoading: boolean;
-  onToggleExpansion: (ingredientId: string) => void;
-  onRemoveIngredient: (id: string) => void;
+  onToggleExpansion: (ingredientId: number) => void;
+  onRemoveIngredient: (id: number) => void;
   onUpdateIngredient: (
-    id: string,
+    id: number,
     field: keyof RecipeIngredient,
     value: string,
   ) => void;
@@ -40,13 +40,19 @@ export const IngredientItemRendering: React.FC<IngredientItemProps> = ({
   // 로컬 state - 수량과 단위를 합친 문자열
   const [localName, setLocalName] = React.useState(ingredient.name);
   const [localQuantityUnit, setLocalQuantityUnit] = React.useState(
-    `${ingredient.quantity}${ingredient.unit}`,
+    ingredient.quantity && ingredient.quantity !== 0
+      ? `${ingredient.quantity} ${ingredient.unit}`
+      : '1 개',
   );
 
   // ingredient가 변경 -> state도 업데이트
   React.useEffect(() => {
     setLocalName(ingredient.name);
-    setLocalQuantityUnit(`${ingredient.quantity}${ingredient.unit}`);
+    setLocalQuantityUnit(
+      ingredient.quantity && ingredient.quantity !== 0
+        ? `${ingredient.quantity} ${ingredient.unit}`
+        : '1 개',
+    );
   }, [ingredient.name, ingredient.quantity, ingredient.unit]);
 
   // 수량 & 단위 파싱
