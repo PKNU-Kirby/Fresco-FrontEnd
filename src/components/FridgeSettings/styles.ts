@@ -266,6 +266,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#2D2D2D',
   },
+  /*
   ownerBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -280,6 +281,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#92400E',
   },
+  */
   memberCardFooter: {
     borderTopWidth: scale(1),
     borderTopColor: '#E5E7EB',

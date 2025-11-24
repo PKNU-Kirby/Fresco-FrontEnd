@@ -1,4 +1,5 @@
 import Config from '../../types/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getValidAccessToken } from '../../utils/authUtils';
 import { ApiErrorHandler } from '../../utils/errorHandler';
 import { AsyncStorageService } from '../AsyncStorageService';
@@ -427,6 +428,128 @@ export class FridgeSettingsAPIService {
     } catch (error) {
       console.error('초대장 정보 조회 실패:', error);
       ApiErrorHandler.logError(error, 'FridgeSettingsAPI.getInvitationInfo');
+      throw error;
+    }
+  }
+
+  /**
+   * 초대 코드로 냉장고 참여
+   */
+  /**
+   * 초대 코드로 냉장고 참여
+   */
+  static async joinRefrigeratorByInvitation(fridgeId: number): Promise<void> {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) {
+        throw {
+          status: 401,
+          code: 'TOKEN_EXPIRED',
+          message: '인증 토큰이 없습니다',
+        };
+      }
+
+      console.log('냉장고 참여 시도 - refrigeratorId:', fridgeId);
+
+      const response = await fetch(
+        `${Config.API_BASE_URL}/api/v1/refrigerator/users/${fridgeId}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw {
+          status: response.status,
+          message: response.statusText,
+          response: response,
+        };
+      }
+
+      const data = await response.json();
+
+      if (!data.code || !data.code.includes('OK')) {
+        throw {
+          status: 200,
+          code: 'API_ERROR',
+          message: data.message || '냉장고 참여 실패',
+        };
+      }
+
+      console.log('냉장고 참여 성공:', data);
+    } catch (error) {
+      console.error('냉장고 참여 실패:', error);
+      ApiErrorHandler.logError(
+        error,
+        'FridgeSettingsAPI.joinRefrigeratorByInvitation',
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * 초대 코드 유효성 검증
+   */
+  static async validateInvitationCode(
+    refrigeratorInvitationId: number,
+  ): Promise<InvitationResponse> {
+    try {
+      // getValidAccessToken 대신 직접 가져오기
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) {
+        throw {
+          status: 401,
+          code: 'TOKEN_EXPIRED',
+          message: '인증 토큰이 없습니다',
+        };
+      }
+
+      console.log('초대 코드 유효성 검증:', refrigeratorInvitationId);
+      console.log('사용할 토큰:', token.substring(0, 30) + '...');
+
+      const response = await fetch(
+        `${Config.API_BASE_URL}/api/v1/refrigerator/invitation/${refrigeratorInvitationId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw {
+          status: response.status,
+          message: response.statusText,
+          response: response,
+        };
+      }
+
+      const data = await response.json();
+
+      if (!data.code || !data.code.includes('OK')) {
+        throw {
+          status: 200,
+          code: 'API_ERROR',
+          message: data.message || '초대 코드 조회 실패',
+        };
+      }
+
+      console.log('초대 코드 유효성 검증 완료:', data.result);
+      return data.result;
+    } catch (error) {
+      console.error('초대 코드 유효성 검증 실패:', error);
+      ApiErrorHandler.logError(
+        error,
+        'FridgeSettingsAPI.validateInvitationCode',
+      );
       throw error;
     }
   }

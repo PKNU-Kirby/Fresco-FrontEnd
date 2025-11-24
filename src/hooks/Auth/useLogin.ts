@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AsyncStorageService } from '../../services/AsyncStorageService';
 import { DeepLinkHandler } from '../../utils/deepLinkHandler';
 import { loginAPI } from '../../types/api';
+import { FridgeSettingsAPIService } from '../../services/API/FridgeSettingsAPI';
 import type { RootStackParamList, SocialProvider } from '../../types/auth';
 
 interface UserProfile {
@@ -14,18 +15,28 @@ interface UserProfile {
   profileImage?: string;
 }
 
+interface InvitationInfo {
+  refrigeratorInvitationId: number;
+  refrigeratorId: number;
+  refrigeratorName: string;
+  inviterId: number;
+  inviterName: string;
+}
+
 interface UseLoginReturn {
   isLoading: boolean;
   errorModal: {
     visible: boolean;
     message: string;
   };
+  invitationInfo: InvitationInfo | null;
   handleSocialLogin: (
     provider: SocialProvider,
     socialAccessToken: string,
     userProfile: UserProfile,
   ) => Promise<void>;
   closeErrorModal: () => void;
+  clearInvitationInfo: () => void;
 }
 
 export const useLogin = (): UseLoginReturn => {
@@ -36,6 +47,9 @@ export const useLogin = (): UseLoginReturn => {
     visible: false,
     message: '',
   });
+  const [invitationInfo, setInvitationInfo] = useState<InvitationInfo | null>(
+    null,
+  );
 
   const showErrorAlert = (message: string): void => {
     setErrorModal({
@@ -51,6 +65,11 @@ export const useLogin = (): UseLoginReturn => {
     });
   };
 
+  const clearInvitationInfo = (): void => {
+    setInvitationInfo(null);
+  };
+
+  // useLogin.ts 수정
   const handleSocialLogin = async (
     provider: SocialProvider,
     socialAccessToken: string,
@@ -143,12 +162,7 @@ export const useLogin = (): UseLoginReturn => {
           throw new Error('사용자 정보 저장에 실패했습니다.');
         }
 
-        // ❌ 이 줄 삭제
-        // await AsyncStorageService.setCurrentUserId(user.id);
-
-        // ✅ 토큰의 userId는 이미 100번째 줄에서 저장했으므로
-        // 여기서는 setCurrentUserId를 호출하지 않음
-        console.log('토큰 userId(3)가 currentUserId로 설정됨');
+        console.log('토큰 userId가 currentUserId로 설정됨');
 
         // 기본 냉장고 설정
         try {
@@ -159,7 +173,43 @@ export const useLogin = (): UseLoginReturn => {
           console.warn('기본 냉장고 초기화 실패:', fridgeError);
         }
 
-        // 대기 중인 초대 확인
+        // ⏱️ 토큰 저장 완료 후 약간의 딜레이 추가 (AsyncStorage 동기화 대기)
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // ✅ 초대코드 확인 - 로그인 완료 후 조회
+        const pendingInvitationCode = await AsyncStorage.getItem(
+          'pendingInvitationCode',
+        );
+        if (pendingInvitationCode) {
+          try {
+            console.log(
+              '초대코드 발견, 초대 정보 조회 시작:',
+              pendingInvitationCode,
+            );
+
+            // 토큰 재확인
+            const verifyToken = await AsyncStorage.getItem('accessToken');
+            console.log(
+              '초대 정보 조회 전 토큰 확인:',
+              verifyToken ? verifyToken.substring(0, 20) + '...' : 'null',
+            );
+
+            const info = await FridgeSettingsAPIService.validateInvitationCode(
+              Number(pendingInvitationCode),
+            );
+            console.log('초대 정보 조회 성공:', info);
+            setInvitationInfo(info);
+            // invitationInfo가 설정되면 LoginScreen의 useEffect에서 모달 표시
+            return;
+          } catch (inviteError) {
+            console.error('초대 정보 조회 실패:', inviteError);
+            await AsyncStorage.removeItem('pendingInvitationCode');
+            showErrorAlert('유효하지 않은 초대코드입니다.');
+            // 실패하면 그냥 FridgeSelect로
+          }
+        }
+
+        // 대기 중인 초대 확인 (딥링크)
         const pendingInvite = await DeepLinkHandler.getPendingInvite();
         if (pendingInvite) {
           navigation.replace('InviteConfirm', {
@@ -191,7 +241,9 @@ export const useLogin = (): UseLoginReturn => {
   return {
     isLoading,
     errorModal,
+    invitationInfo,
     handleSocialLogin,
     closeErrorModal,
+    clearInvitationInfo,
   };
 };

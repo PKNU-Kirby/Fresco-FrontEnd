@@ -1,9 +1,11 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { SocialProvider } from '../../types/auth';
 import KakaoLoginButton from './KakaoLoginButton';
 import NaverLoginButton from './NaverLoginButton';
 import ConfirmModal from '../modals/ConfirmModal';
+import InvitationCodeModal from '../modals/InvitationCodeModal';
 import { styles } from './styles';
 
 interface UserProfile {
@@ -33,24 +35,65 @@ const LoginForm: React.FC<LoginFormProps> = ({
   onSocialLogin,
   onCloseErrorModal,
 }) => {
+  const [showInvitationModal, setShowInvitationModal] = useState(false);
+  const [pendingInvitationCode, setPendingInvitationCode] = useState<
+    string | null
+  >(null);
+
+  // 컴포넌트 마운트 시 저장된 초대코드 확인
+  useEffect(() => {
+    const checkPendingCode = async () => {
+      const code = await AsyncStorage.getItem('pendingInvitationCode');
+      setPendingInvitationCode(code);
+    };
+    checkPendingCode();
+  }, []);
+
+  const handleInvitationConfirm = async () => {
+    // 초대코드 저장 후 버튼 텍스트 업데이트
+    const code = await AsyncStorage.getItem('pendingInvitationCode');
+    setPendingInvitationCode(code);
+    setShowInvitationModal(false);
+  };
+
+  const handleInvitationModalClose = () => {
+    setShowInvitationModal(false);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.loginBox}>
         <View style={styles.header}>
           <Text style={styles.headerText}>로그인</Text>
         </View>
+
         <View style={styles.buttonWrapper}>
+          <TouchableOpacity
+            style={[
+              styles.invitationButton,
+              isLoading && styles.invitationButtonDisabled,
+            ]}
+            onPress={() => setShowInvitationModal(true)}
+            disabled={isLoading}
+          >
+            <Text style={styles.invitationButtonText}>
+              {pendingInvitationCode
+                ? `초대코드: ${pendingInvitationCode}`
+                : '초대코드로 시작하기'}
+            </Text>
+          </TouchableOpacity>
+
           <KakaoLoginButton
             isLoading={isLoading}
-            setIsLoading={() => {}} // 이제 useLogin에서 관리하므로 빈 함수
+            setIsLoading={() => {}}
             handleSocialLoginWithAPI={onSocialLogin}
-            showErrorAlert={() => {}} // 에러도 useLogin에서 처리
+            showErrorAlert={() => {}}
           />
           <NaverLoginButton
             isLoading={isLoading}
-            setIsLoading={() => {}} // 이제 useLogin에서 관리하므로 빈 함수
+            setIsLoading={() => {}}
             handleSocialLoginWithAPI={onSocialLogin}
-            showErrorAlert={() => {}} // 에러도 useLogin에서 처리
+            showErrorAlert={() => {}}
           />
         </View>
       </View>
@@ -72,6 +115,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
         confirmButtonStyle="primary"
         onConfirm={onCloseErrorModal}
         onCancel={onCloseErrorModal}
+      />
+
+      {/* 초대코드 입력 모달 */}
+      <InvitationCodeModal
+        visible={showInvitationModal}
+        onClose={handleInvitationModalClose}
+        onConfirm={handleInvitationConfirm}
       />
     </View>
   );

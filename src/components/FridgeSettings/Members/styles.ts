@@ -292,6 +292,7 @@ export const memberItemStyles = StyleSheet.create({
     color: '#2F4858',
     marginBottom: scale(2),
   },
+  /*
   ownerBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -306,6 +307,7 @@ export const memberItemStyles = StyleSheet.create({
     fontWeight: '600',
     color: '#2F4858',
   },
+  */
   sectionDescription: {
     fontSize: scale(14),
     color: '#6B7280',

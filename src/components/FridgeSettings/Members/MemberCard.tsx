@@ -83,11 +83,13 @@ const MemberCard: React.FC<MemberCardProps> = ({
             <View style={styles.memberInfo}>
               <View style={styles.memberNameRow}>
                 <Text style={styles.memberName}>{member.name}</Text>
+                {/* 
                 <View style={styles.roleContainer}>
                   <Text style={styles.roleText}>
                     {getRoleText(member.role)}
                   </Text>
                 </View>
+                 */}
               </View>
               <Text style={styles.joinDate}>
                 {formatJoinDate(member.joinDate)} 참여

@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flex: 3,
+    flex: 4,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: scale(72),
@@ -51,6 +51,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: scale(24),
+    paddingBottom: scale(72),
   },
   loginButton: {
     width: '100%',
@@ -63,5 +64,25 @@ export const styles = StyleSheet.create({
     width: '100%',
     height: scale(53),
     resizeMode: 'contain',
+  },
+
+  // 초대코드
+  invitationButton: {
+    width: '33%',
+    borderBottomColor: 'rgba(47, 72, 88, 0.5)',
+    borderBottomWidth: scale(1.5),
+    paddingBottom: scale(2),
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: scale(8),
+    marginBottom: scale(8),
+  },
+  invitationButtonText: {
+    fontSize: scale(16),
+    color: '#2F4858',
+    fontWeight: '700',
+  },
+  invitationButtonDisabled: {
+    opacity: 0.5,
   },
 });
