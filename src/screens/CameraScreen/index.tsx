@@ -252,7 +252,7 @@ const CameraScreen: React.FC = () => {
                 >
                   <MaterialIcons name="receipt" size={48} color="#444" />
                 </View>
-                <Text style={styles.modeTitle}>영수증 스캔</Text>
+                <Text style={styles.modeTitle}>영수증 촬영</Text>
                 <Text style={styles.modeDescription}>
                   영수증을 촬영하여 여러 식재료를{'\n'}한 번에 등록합니다
                 </Text>

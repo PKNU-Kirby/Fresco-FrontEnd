@@ -319,7 +319,7 @@ const PhotoPreviewScreen: React.FC = () => {
           {/* Image Loading Overlay */}
           {imageLoading && (
             <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="large" color="#f8f8f8" />
+              <ActivityIndicator size="large" color="#2F4858" />
               <Text style={styles.loadingText}>이미지 로딩 중...</Text>
             </View>
           )}
@@ -327,13 +327,8 @@ const PhotoPreviewScreen: React.FC = () => {
           {/* Scanning Overlay */}
           {!imageLoading && isScanning && (
             <View style={styles.scanningOverlay}>
-              <ActivityIndicator size="large" color="#f8f8f8" />
+              <ActivityIndicator size="large" color="#2F4858" />
               <Text style={styles.scanningText}>{getScanningText()}</Text>
-
-              {/* Progress */}
-              {scanProgress && (
-                <Text style={styles.progressText}>{scanProgress}</Text>
-              )}
 
               {/* Retry */}
               {retryCount > 0 && (
@@ -416,11 +411,11 @@ const PhotoPreviewScreen: React.FC = () => {
         visible={emptyResultsModalVisible}
         title="인식 완료"
         message={`이미지 처리는 성공했지만 ${modeText}를 찾을 수 없었습니다.\n\n가능한 원인:\n• 이미지가 흐릿하거나 조명이 부족\n• ${modeText}가 명확하게 보이지 않음\n• 현재 AI가 인식하지 못하는 ${modeText}\n\n다른 방법으로 진행하시겠습니까?`}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'info-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'info-outline', color: '#FF6B6B', size: 48 }}
         confirmText="다시 촬영"
         cancelText="수동 입력"
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => {
           setEmptyResultsModalVisible(false);
           navigation.goBack();

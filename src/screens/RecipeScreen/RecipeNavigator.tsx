@@ -89,7 +89,7 @@ const RecipeNavigator: React.FC<RecipeNavigatorProps> = ({ route }) => {
       initialRouteName="RecipeHome"
       screenOptions={{
         headerShown: false,
-        animation: 'slide_from_right',
+        animation: 'none',
       }}
     >
       <RecipeStack.Screen
@@ -100,9 +100,7 @@ const RecipeNavigator: React.FC<RecipeNavigatorProps> = ({ route }) => {
       <RecipeStack.Screen
         name="AIRecipe"
         component={AIRecipeScreen}
-        options={{
-          animation: 'slide_from_bottom',
-        }}
+        options={{}}
       />
       <RecipeStack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
       <RecipeStack.Screen name="Search" component={SearchScreen} />
@@ -117,7 +115,6 @@ const RecipeNavigator: React.FC<RecipeNavigatorProps> = ({ route }) => {
         name="UseRecipe"
         component={UseRecipeScreen}
         options={{
-          animation: 'slide_from_right',
           // 필요시 추가 옵션들
           gestureEnabled: true,
         }}

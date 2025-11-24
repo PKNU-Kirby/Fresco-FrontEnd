@@ -54,7 +54,7 @@ export const cameraStyles = StyleSheet.create({
     borderRadius: scale(22),
   },
   headerTitle: {
-    fontSize: scale(18),
+    fontSize: scale(20),
     fontWeight: '600',
     color: '#f8f8f8',
     textAlign: 'center',
@@ -79,13 +79,12 @@ export const cameraStyles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: scale(40),
   },
-
   modeOptions: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: scale(20),
-    paddingTop: scale(20),
+    paddingBottom: scale(20),
   },
 
   modeButton: {
@@ -178,7 +177,7 @@ export const cameraStyles = StyleSheet.create({
   },
 
   cameraButtonText: {
-    fontSize: scale(16),
+    fontSize: scale(19),
     color: '#f8f8f8',
     fontWeight: '500',
   },
@@ -190,10 +189,10 @@ export const cameraStyles = StyleSheet.create({
   },
 
   guideText: {
-    fontSize: scale(14),
+    fontSize: scale(15),
     color: '#cccccc',
     textAlign: 'center',
-    lineHeight: scale(20),
+    lineHeight: scale(22),
   },
 
   // 로딩 오버레이 (추가)
@@ -264,6 +263,7 @@ export const previewStyles = StyleSheet.create({
   },
 
   bottomInfo: {
+    flex: 1,
     paddingHorizontal: scale(20),
     paddingVertical: scale(30),
     alignItems: 'center',
@@ -271,7 +271,7 @@ export const previewStyles = StyleSheet.create({
 
   infoText: {
     color: '#f8f8f8',
-    fontSize: scale(16),
+    fontSize: scale(18),
     textAlign: 'center',
     marginBottom: scale(8),
     fontWeight: '500',
@@ -279,8 +279,9 @@ export const previewStyles = StyleSheet.create({
 
   subInfoText: {
     color: '#cccccc',
-    fontSize: scale(14),
+    fontSize: scale(16),
     textAlign: 'center',
+    marginBottom: scale(16),
   },
   imagePlace: {
     borderRadius: scale(16),
@@ -326,38 +327,41 @@ export const previewStyles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#4CAF50', // 초록색
+    backgroundColor: '#98E6A8',
     paddingVertical: scale(12),
     paddingHorizontal: scale(8),
     borderRadius: scale(8),
     gap: scale(4),
     minHeight: scale(60),
   },
-
   receiptButton: {
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#2196F3', // 파란색
+    backgroundColor: '#98E6A8',
     paddingVertical: scale(12),
     paddingHorizontal: scale(8),
     borderRadius: scale(8),
     gap: scale(4),
     minHeight: scale(60),
   },
-
   manualButton: {
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FF9800', // 주황색
+    backgroundColor: '#98E6A8',
     paddingVertical: scale(12),
-    paddingHorizontal: scale(8),
+    paddingHorizontal: scale(16),
     borderRadius: scale(8),
     gap: scale(4),
-    minHeight: scale(60),
+  },
+  manualButtonText: {
+    color: '#2F4858',
+    fontSize: scale(16),
+    fontWeight: '600',
+    textAlign: 'center',
   },
 
   buttonDisabled: {
@@ -372,13 +376,6 @@ export const previewStyles = StyleSheet.create({
   },
 
   receiptButtonText: {
-    color: '#f8f8f8',
-    fontSize: scale(11),
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-
-  manualButtonText: {
     color: '#f8f8f8',
     fontSize: scale(11),
     fontWeight: '600',
@@ -406,14 +403,18 @@ export const previewStyles = StyleSheet.create({
     paddingLeft: scale(0),
     marginLeft: scale(10),
   },
-  headerTitle: { fontWeight: '600', fontSize: 18, color: '#f8f8f8' },
+  headerTitle: {
+    fontWeight: '600',
+    fontSize: 20,
+    color: '#f8f8f8',
+  },
   rightSection: {
     width: scale(60),
   },
 
   // Image Preview Styles
   imageContainer: {
-    flex: 1,
+    flex: 4,
     alignItems: 'center',
     paddingHorizontal: scale(10),
   },

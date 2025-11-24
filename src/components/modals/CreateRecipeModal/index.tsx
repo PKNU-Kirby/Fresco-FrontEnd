@@ -151,7 +151,7 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
     <>
       <Modal
         visible={visible}
-        animationType="slide"
+        animationType="fade"
         presentationStyle="overFullScreen"
         onRequestClose={handleClose}
       >

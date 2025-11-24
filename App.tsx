@@ -171,6 +171,7 @@ function MainTabNavigator({
         tabBarIconStyle: {
           marginTop: 6,
         },
+        animation: 'none',
       }}
       initialRouteName={
         (screen as keyof MainTabParamList) || 'FridgeHomeScreen'
@@ -244,7 +245,7 @@ function App(): React.JSX.Element {
         <NavigationContainer ref={navigationRef}>
           <Stack.Navigator
             initialRouteName="Splash"
-            screenOptions={{ headerShown: false }}
+            screenOptions={{ headerShown: false, animation: 'none' }}
           >
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
@@ -256,7 +257,7 @@ function App(): React.JSX.Element {
                 title: '냉장고 초대',
                 headerShown: true,
                 presentation: 'modal',
-                animation: 'slide_from_bottom',
+                animation: 'fade',
               }}
             />
             <Stack.Screen name="MainTabs" component={MainTabNavigator} />
@@ -282,7 +283,6 @@ function App(): React.JSX.Element {
               options={{
                 title: '미리보기',
                 presentation: 'modal',
-                animation: 'slide_from_right',
               }}
             />
             <Stack.Screen name="AddItemScreen" component={AddItemScreen} />

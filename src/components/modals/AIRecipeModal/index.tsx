@@ -117,7 +117,7 @@ ${
     <>
       <Modal
         visible={visible}
-        animationType="slide"
+        animationType="fade"
         presentationStyle="overFullScreen"
         onRequestClose={onClose}
       >
