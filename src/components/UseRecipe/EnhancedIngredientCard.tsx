@@ -11,6 +11,7 @@ interface EnhancedMatchedIngredientSeparate {
   recipeIngredient: {
     name: string;
     quantity: number;
+    unit: string;
   };
   fridgeIngredient: any | null;
   isAvailable: boolean;
@@ -291,6 +292,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
             )}
             <Text style={styles.needtext}>
               필요: {item.recipeIngredient.quantity}
+              {item.recipeIngredient.unit}
             </Text>
           </View>
         </View>
@@ -318,9 +320,9 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
           // 냉장고에 없는 재료 - 장바구니 담기
           <View style={unavailableStyles.unavailableSection}>
             <View style={unavailableStyles.unavailableInfo}>
-              <Icon name="error" size={22} color="#FF5722" />
+              <Icon name="error" size={22} color="#FF6B6B" />
               <Text style={unavailableStyles.unavailableText}>
-                냉장고에 없는 재료입니다
+                냉장고에 식재료가 없습니다.
               </Text>
             </View>
 
@@ -381,11 +383,11 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
         visible={errorModalVisible}
         title="오류"
         message={errorMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setErrorModalVisible(false)}
         onCancel={() => setErrorModalVisible(false)}
       />

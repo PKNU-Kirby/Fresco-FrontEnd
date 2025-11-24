@@ -45,8 +45,8 @@ export const FridgeModalManager: React.FC<FridgeModalManagerProps> = ({
         visible={modals.logoutConfirmVisible}
         title="로그아웃"
         message="정말 로그아웃하시겠습니까?"
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="로그아웃"
         cancelText="취소"
         confirmButtonStyle="danger"
@@ -60,8 +60,8 @@ export const FridgeModalManager: React.FC<FridgeModalManagerProps> = ({
         visible={modals.deleteConfirmVisible}
         title="냉장고 삭제"
         message={`${modals.selectedFridge?.name}을(를) 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="삭제"
         cancelText="취소"
         confirmButtonStyle="danger"
@@ -75,8 +75,8 @@ export const FridgeModalManager: React.FC<FridgeModalManagerProps> = ({
         visible={modals.leaveConfirmVisible}
         title="냉장고 나가기"
         message={`${modals.selectedFridge?.name}에서 나가시겠습니까?`}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="나가기"
         cancelText="취소"
         confirmButtonStyle="danger"
@@ -90,15 +90,15 @@ export const FridgeModalManager: React.FC<FridgeModalManagerProps> = ({
         visible={modals.notOwnerModalVisible}
         title="알림"
         message="냉장고 소유자만 편집할 수 있습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
         icon={{
           name: 'error-outline',
-          color: 'tomato',
+          color: 'rgba(47, 72, 88, 1)',
           size: 48,
         }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="general"
         onConfirm={() => modalHandlers.setNotOwnerModalVisible(false)}
         onCancel={() => modalHandlers.setNotOwnerModalVisible(false)}
       />
@@ -128,11 +128,11 @@ export const FridgeModalManager: React.FC<FridgeModalManagerProps> = ({
         visible={modals.errorModalVisible}
         title={modals.modalTitle}
         message={modals.modalMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => modalHandlers.setErrorModalVisible(false)}
         onCancel={() => modalHandlers.setErrorModalVisible(false)}
       />
@@ -143,11 +143,11 @@ export const FridgeModalManager: React.FC<FridgeModalManagerProps> = ({
         visible={modals.hideToggleModalVisible}
         title={modals.modalTitle}
         message={modals.modalMessage}
-        iconContainer={{ backgroundColor: '#d3f0d3' }}
-        icon={{ name: 'check', color: 'limegreen', size: 48 }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
+        icon={{ name: 'check', color: 'rgba(47, 72, 88, 1)', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="general"
         onConfirm={() => modalHandlers.setHideToggleModalVisible(false)}
         onCancel={() => modalHandlers.setHideToggleModalVisible(false)}
       />

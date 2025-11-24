@@ -17,7 +17,6 @@ export const styles = StyleSheet.create({
     backgroundColor: '#e8f5e8',
   },
   none: {},
-
   container: {
     flex: 1,
   },
@@ -103,10 +102,10 @@ export const styles = StyleSheet.create({
   // 탭 관련
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#fff',
     marginHorizontal: scale(16),
     marginTop: scale(16),
-    marginBottom: scale(8),
+    marginBottom: scale(16),
     borderRadius: scale(12),
     padding: scale(4),
     shadowColor: '#333',
@@ -150,7 +149,6 @@ export const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: scale(16),
-    paddingTop: scale(16),
   },
 
   // 공동 레시피 폴더 카드

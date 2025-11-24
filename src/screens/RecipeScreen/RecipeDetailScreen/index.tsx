@@ -728,11 +728,15 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.noIngredientsVisible}
           title="알림"
           message="이 레시피에는 재료 정보가 없습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#e8f5e9' }}
+          icon={{
+            name: 'error-outline',
+            color: 'rgba(47, 72, 88, 1)',
+            size: 48,
+          }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="danger"
+          confirmButtonStyle="general"
           onConfirm={() => modalHandlers.setNoIngredientsVisible(false)}
           onCancel={() => modalHandlers.setNoIngredientsVisible(false)}
         />
@@ -742,8 +746,8 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.userNotFoundVisible}
           title="오류"
           message="사용자 정보를 찾을 수 없습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
           confirmButtonStyle="danger"
@@ -756,8 +760,8 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.fridgeLoadErrorVisible}
           title="오류"
           message="냉장고 목록을 불러올 수 없습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
           confirmButtonStyle="danger"
@@ -770,8 +774,8 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.shareErrorVisible}
           title="오류"
           message="레시피 공유에 실패했습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
           confirmButtonStyle="danger"
@@ -784,11 +788,15 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.selectIngredientsVisible}
           title="알림"
           message="삭제할 재료를 선택해주세요."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#e8f5e9' }}
+          icon={{
+            name: 'error-outline',
+            color: 'rgba(47, 72, 88, 1)',
+            size: 48,
+          }}
           confirmText="취소"
           cancelText="삭제"
-          confirmButtonStyle="primary"
+          confirmButtonStyle="general"
           onConfirm={() => modalHandlers.setSelectIngredientsVisible(false)}
           onCancel={() => modalHandlers.setSelectIngredientsVisible(false)}
         />
@@ -798,11 +806,15 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.noSelectedFridgesVisible}
           title="알림"
           message="공유할 냉장고를 선택해주세요."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#e8f5e9' }}
+          icon={{
+            name: 'error-outline',
+            color: 'rgba(47, 72, 88, 1)',
+            size: 48,
+          }}
           confirmText="취소"
           cancelText="공유하기"
-          confirmButtonStyle="primary"
+          confirmButtonStyle="general"
           onConfirm={() => modalHandlers.setNoSelectedFridgesVisible(false)}
           onCancel={() => modalHandlers.setNoSelectedFridgesVisible(false)}
         />
@@ -826,11 +838,11 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.noFridgesVisible}
           title="알림"
           message="참여 중인 냉장고가 없습니다.\n냉장고에 참여한 후 레시피를 공유해보세요."
-          iconContainer={{ backgroundColor: '#d3f0d3' }}
-          icon={{ name: 'info', color: 'limegreen', size: 48 }}
+          iconContainer={{ backgroundColor: '#e8f5e9' }}
+          icon={{ name: 'info', color: 'rgba(47, 72, 88, 1)', size: 48 }}
           confirmText="냉장고 관리"
           cancelText="확인"
-          confirmButtonStyle="primary"
+          confirmButtonStyle="general"
           onConfirm={navigateToFridgeManagement}
           onCancel={() => modalHandlers.setNoFridgesVisible(false)}
         />
@@ -840,11 +852,11 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.alreadySharedVisible}
           title="알림"
           message="선택한 냉장고에 이미 공유된 레시피입니다."
-          iconContainer={{ backgroundColor: '#d3f0d3' }}
-          icon={{ name: 'info', color: 'limegreen', size: 48 }}
+          iconContainer={{ backgroundColor: '#e8f5e9' }}
+          icon={{ name: 'info', color: 'rgba(47, 72, 88, 1)', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="general"
           onConfirm={() => modalHandlers.setAlreadySharedVisible(false)}
           onCancel={() => modalHandlers.setAlreadySharedVisible(false)}
         />
@@ -854,11 +866,11 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.noTitleVisible}
           title="오류"
           message="레시피 제목을 입력해주세요."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => modalHandlers.setNoTitleVisible(false)}
           onCancel={() => modalHandlers.setNoTitleVisible(false)}
         />
@@ -882,11 +894,11 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.saveErrorVisible}
           title="오류"
           message="레시피 저장에 실패했습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => modalHandlers.setSaveErrorVisible(false)}
           onCancel={() => modalHandlers.setSaveErrorVisible(false)}
         />
@@ -910,11 +922,11 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.updateErrorVisible}
           title="오류"
           message="레시피 업데이트에 실패했습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => modalHandlers.setUpdateErrorVisible(false)}
           onCancel={() => modalHandlers.setUpdateErrorVisible(false)}
         />
@@ -924,11 +936,11 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.favoriteOnlyForSavedVisible}
           title="알림"
           message="저장된 레시피만 즐겨찾기할 수 있습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'info', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#e8f5e9' }}
+          icon={{ name: 'info', color: 'rgba(47, 72, 88, 1)', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="general"
           onConfirm={() => modalHandlers.setFavoriteOnlyForSavedVisible(false)}
           onCancel={() => modalHandlers.setFavoriteOnlyForSavedVisible(false)}
         />
@@ -938,11 +950,11 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.favoriteErrorVisible}
           title="오류"
           message="즐겨찾기 설정에 실패했습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => modalHandlers.setFavoriteErrorVisible(false)}
           onCancel={() => modalHandlers.setFavoriteErrorVisible(false)}
         />
@@ -952,11 +964,11 @@ const RecipeDetailScreen: React.FC = () => {
           visible={modals.shareOnlyPersonalVisible}
           title="오류"
           message="저장된 개인 레시피만 공유할 수 있습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => modalHandlers.setShareOnlyPersonalVisible(false)}
           onCancel={() => modalHandlers.setShareOnlyPersonalVisible(false)}
         />

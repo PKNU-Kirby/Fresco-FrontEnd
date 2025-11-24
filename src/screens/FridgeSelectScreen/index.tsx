@@ -355,11 +355,15 @@ const FridgeSelectScreen = () => {
           visible={noAccessModalVisible}
           title="알림"
           message="이 냉장고에 접근할 권한이 없습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#e8f5e9' }}
+          icon={{
+            name: 'error-outline',
+            color: 'rgba(47, 72, 88, 1)',
+            size: 48,
+          }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="general"
           onConfirm={() => setNoAccessModalVisible(false)}
           onCancel={() => setNoAccessModalVisible(false)}
         />
@@ -370,11 +374,15 @@ const FridgeSelectScreen = () => {
           visible={noEditPermissionModalVisible}
           title="알림"
           message="이 냉장고를 편집할 권한이 없습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#e8f5e9' }}
+          icon={{
+            name: 'error-outline',
+            color: 'rgba(47, 72, 88, 1)',
+            size: 48,
+          }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="general"
           onConfirm={() => setNoEditPermissionModalVisible(false)}
           onCancel={() => setNoEditPermissionModalVisible(false)}
         />
@@ -385,11 +393,15 @@ const FridgeSelectScreen = () => {
           visible={noDeletePermissionModalVisible}
           title="알림"
           message="이 냉장고를 삭제할 권한이 없습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#e8f5e9' }}
+          icon={{
+            name: 'error-outline',
+            color: 'rgba(47, 72, 88, 1)',
+            size: 48,
+          }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="general"
           onConfirm={() => setNoDeletePermissionModalVisible(false)}
           onCancel={() => setNoDeletePermissionModalVisible(false)}
         />
@@ -400,11 +412,15 @@ const FridgeSelectScreen = () => {
           visible={noPermissionModalVisible}
           title="알림"
           message="이 냉장고에 대한 권한이 없습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#e8f5e9' }}
+          icon={{
+            name: 'error-outline',
+            color: 'rgba(47, 72, 88, 1)',
+            size: 48,
+          }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="general"
           onConfirm={() => setNoPermissionModalVisible(false)}
           onCancel={() => setNoPermissionModalVisible(false)}
         />
@@ -415,11 +431,15 @@ const FridgeSelectScreen = () => {
           visible={editCancelConfirmVisible}
           title="편집 취소"
           message="변경사항이 저장되지 않습니다. 정말 취소하시겠습니까?"
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#e8f5e9' }}
+          icon={{
+            name: 'error-outline',
+            color: 'rgba(47, 72, 88, 1)',
+            size: 48,
+          }}
           confirmText="취소"
           cancelText="계속 편집"
-          confirmButtonStyle="danger"
+          confirmButtonStyle="general"
           onConfirm={handleEditCancelConfirm}
           onCancel={() => setEditCancelConfirmVisible(false)}
         />
@@ -445,8 +465,8 @@ const FridgeSelectScreen = () => {
           visible={authErrorModalVisible}
           title="인증 오류"
           message="사용자 인증 정보가 일치하지 않습니다. 다시 로그인해주세요."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="로그인"
           cancelText="취소"
           confirmButtonStyle="danger"
@@ -463,8 +483,8 @@ const FridgeSelectScreen = () => {
           visible={permissionErrorModalVisible}
           title="권한 오류"
           message="인증 정보에 문제가 있습니다. 다시 로그인해주세요."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="로그인"
           cancelText="취소"
           confirmButtonStyle="danger"
@@ -481,11 +501,11 @@ const FridgeSelectScreen = () => {
           visible={saveErrorModalVisible}
           title="오류"
           message={saveErrorMessage}
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => setSaveErrorModalVisible(false)}
           onCancel={() => setSaveErrorModalVisible(false)}
         />
@@ -523,8 +543,8 @@ const FridgeSelectScreen = () => {
           message={`${deleteConfirmFridge?.name}을(를) ${
             deleteConfirmFridge?.role === 'owner' ? '삭제' : '나가기'
           }하시겠습니까?`}
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText={
             deleteConfirmFridge?.role === 'owner' ? '삭제' : '나가기'
           }

@@ -55,6 +55,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   const [showFloatingMenu, setShowFloatingMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [showTab, setShowTab] = useState(true);
   const [recipeAvailabilities, setRecipeAvailabilities] = useState<
     Map<string, RecipeAvailabilityInfo>
   >(new Map());
@@ -194,7 +195,24 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     if (currentTab === 'favorites') {
       recipes = getFavoriteRecipes();
     }
-    return recipes.slice(0, currentPage * ITEMS_PER_PAGE);
+
+    // 조리 가능 여부로 정렬
+    const sortedRecipes = [...recipes].sort((a, b) => {
+      const availabilityA = recipeAvailabilities.get(a.id);
+      const availabilityB = recipeAvailabilities.get(b.id);
+
+      const canMakeA = availabilityA?.canMakeWithFridge || false;
+      const canMakeB = availabilityB?.canMakeWithFridge || false;
+
+      // 조리 가능한 레시피를 먼저
+      if (canMakeA && !canMakeB) return -1;
+      if (!canMakeA && canMakeB) return 1;
+
+      // 둘 다 조리 가능하거나 불가능하면 원래 순서 유지
+      return 0;
+    });
+
+    return sortedRecipes.slice(0, currentPage * ITEMS_PER_PAGE);
   };
 
   const filteredRecipes = getFilteredRecipes();
@@ -261,24 +279,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
     }
   };
 
-  // 스크롤 방향 기반 버튼 표시 로직
-  const handleScroll = (event: any) => {
-    const scrollY = event.nativeEvent.contentOffset.y;
-    const isScrollingUp = scrollY < lastScrollY;
-    const isScrollingDown = scrollY > lastScrollY;
-    const hasScrolledEnough = scrollY > 100;
-
-    if (isScrollingUp && hasScrolledEnough) {
-      setShowScrollToTop(true);
-    } else if (isScrollingDown) {
-      setShowScrollToTop(false);
-    } else if (scrollY < 100) {
-      setShowScrollToTop(false);
-    }
-
-    setLastScrollY(scrollY);
-  };
-
   const scrollToTop = () => {
     if (filteredRecipes.length === 0) {
       scrollViewRef.current?.scrollTo({ y: 0, animated: true });
@@ -289,6 +289,61 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
 
   const loadMore = () => {
     setCurrentPage(prev => prev + 1);
+  };
+
+  // 스크롤 방향 기반 탭 & 버튼 표시 로직
+  const handleScroll = (event: any) => {
+    const scrollY = event.nativeEvent.contentOffset.y;
+    const isScrollingUp = scrollY < lastScrollY;
+    const isScrollingDown = scrollY > lastScrollY;
+    const hasScrolledEnough = scrollY > 50;
+
+    // 탭 표시/숨김 로직
+    if (scrollY < 20) {
+      // 최상단 근처에서는 항상 표시
+      setShowTab(true);
+    } else if (isScrollingUp) {
+      // 위로 스크롤 중이면 표시
+      setShowTab(true);
+    } else if (isScrollingDown) {
+      // 아래로 스크롤 중이면 숨김
+      setShowTab(false);
+    }
+
+    // 맨 위로 버튼 로직 (기존)
+    if (isScrollingUp && hasScrolledEnough) {
+      setShowScrollToTop(true);
+    } else if (isScrollingDown) {
+      setShowScrollToTop(false);
+    } else if (scrollY < 50) {
+      setShowScrollToTop(false);
+    }
+
+    setLastScrollY(scrollY);
+  };
+
+  // DraggableFlatList의 onScrollOffsetChange도 수정
+  const handleFlatListScroll = (offset: number) => {
+    const isScrollingUp = offset < lastScrollY;
+    const isScrollingDown = offset > lastScrollY;
+
+    // 탭 표시/숨김
+    if (offset < 50) {
+      setShowTab(true);
+    } else if (isScrollingUp) {
+      setShowTab(true);
+    } else if (isScrollingDown) {
+      setShowTab(false);
+    }
+
+    // 맨 위로 버튼
+    if (offset > 50) {
+      setShowScrollToTop(true);
+    } else {
+      setShowScrollToTop(false);
+    }
+
+    setLastScrollY(offset);
   };
 
   if (isLoading) {
@@ -307,42 +362,47 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
       <GestureHandlerRootView style={styles.container}>
         <RecipeHeader fridgeId={fridgeId} fridgeName={fridgeName} />
 
-        {/* Tab */}
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[styles.tab, currentTab === 'all' && styles.activeTab]}
-            onPress={() => {
-              setCurrentTab('all');
-              setCurrentPage(1);
-            }}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                currentTab === 'all' && styles.activeTabText,
-              ]}
+        {/* Tab - 조건부 렌더링 */}
+        {showTab && (
+          <View style={styles.tabContainer}>
+            <TouchableOpacity
+              style={[styles.tab, currentTab === 'all' && styles.activeTab]}
+              onPress={() => {
+                setCurrentTab('all');
+                setCurrentPage(1);
+              }}
             >
-              전체 레시피 ({personalRecipes.length})
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[
+                  styles.tabText,
+                  currentTab === 'all' && styles.activeTabText,
+                ]}
+              >
+                전체 레시피 ({personalRecipes.length})
+              </Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.tab, currentTab === 'favorites' && styles.activeTab]}
-            onPress={() => {
-              setCurrentTab('favorites');
-              setCurrentPage(1);
-            }}
-          >
-            <Text
+            <TouchableOpacity
               style={[
-                styles.tabText,
-                currentTab === 'favorites' && styles.activeTabText,
+                styles.tab,
+                currentTab === 'favorites' && styles.activeTab,
               ]}
+              onPress={() => {
+                setCurrentTab('favorites');
+                setCurrentPage(1);
+              }}
             >
-              즐겨찾기 ({getFavoriteRecipes().length})
-            </Text>
-          </TouchableOpacity>
-        </View>
+              <Text
+                style={[
+                  styles.tabText,
+                  currentTab === 'favorites' && styles.activeTabText,
+                ]}
+              >
+                즐겨찾기 ({getFavoriteRecipes().length})
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Recipe Card List */}
         {filteredRecipes.length === 0 ? (
@@ -419,14 +479,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                   />
                 );
               }}
-              onScrollOffsetChange={offset => {
-                if (offset > 100) {
-                  setShowScrollToTop(true);
-                } else {
-                  setShowScrollToTop(false);
-                }
-                setLastScrollY(offset);
-              }}
+              onScrollOffsetChange={handleFlatListScroll}
               ListHeaderComponent={
                 <ListHeader
                   shouldShow={currentTab === 'all'}
@@ -479,11 +532,11 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
           visible={favoriteErrorModalVisible}
           title="오류"
           message="즐겨찾기 설정에 실패했습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => setFavoriteErrorModalVisible(false)}
           onCancel={() => setFavoriteErrorModalVisible(false)}
         />
@@ -494,8 +547,8 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
           visible={deleteConfirmVisible}
           title="레시피 삭제"
           message="이 레시피를 삭제하시겠습니까?"
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="삭제"
           cancelText="취소"
           confirmButtonStyle="danger"
@@ -527,11 +580,11 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
           visible={deleteErrorVisible}
           title="오류"
           message="레시피 삭제에 실패했습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => setDeleteErrorVisible(false)}
           onCancel={() => setDeleteErrorVisible(false)}
         />
@@ -542,11 +595,11 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
           visible={orderChangeErrorVisible}
           title="순서 변경 불가"
           message="전체 레시피 탭에서만 순서를 변경할 수 있습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => setOrderChangeErrorVisible(false)}
           onCancel={() => setOrderChangeErrorVisible(false)}
         />

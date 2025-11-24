@@ -168,7 +168,7 @@ export const styles = StyleSheet.create({
   recipeTitle: {
     fontSize: 24,
     fontWeight: '700' as const,
-    color: '#444',
+    color: '#333',
     marginLeft: 24,
     textAlign: 'left' as const,
     marginVertical: 16,
@@ -179,10 +179,10 @@ export const styles = StyleSheet.create({
     margin: 16,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '600' as const,
-    color: '#212529',
-    marginBottom: 12,
+    color: '#2F4858',
+    marginVertical: scale(16),
     marginHorizontal: 8,
   },
 

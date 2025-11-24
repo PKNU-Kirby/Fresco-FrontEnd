@@ -53,7 +53,7 @@ export const styles = StyleSheet.create({
   },
   messageContainer: {
     marginBottom: scale(16),
-    marginTop: scale(8),
+    marginTop: scale(24),
   },
   message: {
     fontSize: scale(16),
@@ -71,6 +71,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: scale(12),
     width: '100%',
+    marginTop: scale(16),
   },
   button: {
     flex: 1,
@@ -90,7 +91,10 @@ export const styles = StyleSheet.create({
     backgroundColor: 'limegreen',
   },
   dangerButton: {
-    backgroundColor: 'tomato',
+    backgroundColor: '#FF6B6B',
+  },
+  generalButton: {
+    backgroundColor: 'rgba(47, 72, 88, 1)',
   },
   cancelButtonText: {
     fontSize: scale(16),
@@ -99,12 +103,17 @@ export const styles = StyleSheet.create({
   },
   successButtonText: {
     fontSize: scale(18),
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#f8f8f8',
   },
   dangerButtonText: {
     fontSize: scale(16),
-    fontWeight: '500',
+    fontWeight: '700',
+    color: '#f8f8f8',
+  },
+  generalButtonText: {
+    fontSize: scale(16),
+    fontWeight: '700',
     color: '#f8f8f8',
   },
   itemCount: {

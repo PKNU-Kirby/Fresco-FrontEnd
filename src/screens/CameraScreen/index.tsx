@@ -274,11 +274,11 @@ const CameraScreen: React.FC = () => {
           visible={cameraErrorModalVisible}
           title="카메라 오류"
           message="카메라를 실행할 수 없습니다. 다시 시도해주세요."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => {
             setCameraErrorModalVisible(false);
             setScanMode(null);
@@ -294,11 +294,11 @@ const CameraScreen: React.FC = () => {
           visible={imageErrorModalVisible}
           title="오류"
           message="이미지를 가져올 수 없습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => setImageErrorModalVisible(false)}
           onCancel={() => setImageErrorModalVisible(false)}
         />
@@ -308,11 +308,15 @@ const CameraScreen: React.FC = () => {
           visible={permissionModalVisible}
           title="권한 필요"
           message="카메라 권한을 허용해 주세요.\n설정에서 권한을 변경할 수 있습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#e8f5e9' }}
+          icon={{
+            name: 'error-outline',
+            color: 'rgba(47, 72, 88, 1)',
+            size: 48,
+          }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="general"
           onConfirm={() => {
             setPermissionModalVisible(false);
             setScanMode(null);
@@ -378,8 +382,8 @@ const CameraScreen: React.FC = () => {
         visible={deletePhotoModalVisible}
         title="촬영 취소"
         message="촬영한 사진을 삭제하고 나가시겠습니까?"
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="나가기"
         cancelText="계속 진행"
         confirmButtonStyle="danger"
@@ -397,8 +401,8 @@ const CameraScreen: React.FC = () => {
         visible={cancelScanModalVisible}
         title="촬영 취소"
         message="촬영을 취소하고 나가시겠습니까?"
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="나가기"
         cancelText="계속 촬영"
         confirmButtonStyle="danger"

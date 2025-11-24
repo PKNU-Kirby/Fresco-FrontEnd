@@ -105,34 +105,22 @@ export class AuthAPIService {
 
         console.log('🔄 토큰 갱신 시도:', {
           hasRefreshToken: !!refreshToken,
-          hasAccessToken: !!currentAccessToken,
         });
 
         if (!refreshToken) {
           console.error('❌ Refresh Token이 없습니다');
           return false;
         }
-
-        // ⚠️ 중요: Authorization 헤더 제거 또는 유효한 토큰만 전송
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
         };
 
-        // 현재 Access Token이 만료되지 않았다면 헤더에 포함
+        // Access Token이 있으면 헤더에 추가
         if (currentAccessToken) {
-          try {
-            const payload = JSON.parse(atob(currentAccessToken.split('.')[1]));
-            const currentTime = Math.floor(Date.now() / 1000);
-
-            if (payload.exp > currentTime) {
-              headers.Authorization = `Bearer ${currentAccessToken}`;
-              console.log('✅ 유효한 Access Token을 헤더에 포함');
-            } else {
-              console.log('⚠️ Access Token 만료 - 헤더에서 제외');
-            }
-          } catch (e) {
-            console.warn('토큰 검증 실패:', e);
-          }
+          headers.Authorization = `Bearer ${currentAccessToken}`;
+          console.log('✅ Authorization 헤더에 Access Token 포함');
+        } else {
+          console.log('⚠️ Access Token 없음 - Authorization 헤더 제외');
         }
 
         const response = await fetch(
@@ -140,7 +128,7 @@ export class AuthAPIService {
           {
             method: 'POST',
             headers,
-            body: JSON.stringify({ refreshToken }),
+            body: JSON.stringify({ refreshToken }), // Body에 refreshToken
           },
         );
 
@@ -171,14 +159,6 @@ export class AuthAPIService {
         if (result.code === 'AUTH_OK_002' && result.result?.accessToken) {
           const newAccessToken = result.result.accessToken;
           const newRefreshToken = result.result.refreshToken || refreshToken;
-
-          // 🔍 토큰 변경 여부 확인
-          const tokenChanged = currentAccessToken !== newAccessToken;
-          console.log('🔄 토큰 변경 여부:', {
-            changed: tokenChanged,
-            oldToken: currentAccessToken?.substring(0, 30) + '...',
-            newToken: newAccessToken?.substring(0, 30) + '...',
-          });
 
           await saveTokens(newAccessToken, newRefreshToken);
           console.log('✅ 토큰 갱신 성공');

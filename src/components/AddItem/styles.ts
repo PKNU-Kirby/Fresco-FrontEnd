@@ -546,7 +546,7 @@ export const ingredientSearchDropdownStyles = StyleSheet.create({
   searchErrorText: {
     fontSize: scale(16),
     fontWeight: '700',
-    color: 'tomato',
+    color: '#FF6B6B',
     marginBottom: scale(4),
   },
   searchErrorSubText: {

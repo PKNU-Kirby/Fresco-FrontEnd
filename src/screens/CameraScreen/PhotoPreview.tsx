@@ -372,11 +372,11 @@ const PhotoPreviewScreen: React.FC = () => {
         visible={imageLoadErrorModalVisible}
         title="오류"
         message="이미지를 불러올 수 없습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => {
           setImageLoadErrorModalVisible(false);
           navigation.goBack();
@@ -393,11 +393,11 @@ const PhotoPreviewScreen: React.FC = () => {
         visible={cancelModalVisible}
         title="취소하시겠습니까?"
         message="촬영한 사진이 삭제됩니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
+        icon={{ name: 'error-outline', color: 'rgba(47, 72, 88, 1)', size: 48 }}
         confirmText="나가기"
         cancelText="계속 처리"
-        confirmButtonStyle="danger"
+        confirmButtonStyle="general"
         onConfirm={() => {
           setCancelModalVisible(false);
           navigation.goBack();
@@ -432,11 +432,11 @@ const PhotoPreviewScreen: React.FC = () => {
         visible={networkErrorModalVisible}
         title="연결 오류"
         message="서버에 연결할 수 없습니다.\n인터넷 연결을 확인하고 다시 시도해주세요."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="다시 시도"
         cancelText="수동 입력"
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => {
           setNetworkErrorModalVisible(false);
           setTimeout(() => handleAutoScan(), 1000);
@@ -453,11 +453,11 @@ const PhotoPreviewScreen: React.FC = () => {
         visible={serverErrorModalVisible}
         title="서버 오류"
         message={`서버에서 처리 중 오류가 발생했습니다.\n\n${serverErrorMessage}\n\n다른 방법으로 진행하시겠습니까?`}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="다시 시도"
         cancelText="수동 입력"
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => {
           setServerErrorModalVisible(false);
           setTimeout(() => handleAutoScan(), 2000);
@@ -476,11 +476,11 @@ const PhotoPreviewScreen: React.FC = () => {
         message={`${
           scanMode === 'ingredient' ? '식재료' : '영수증'
         } 처리 중 오류가 발생했습니다.\n\n${generalErrorMessage}`}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="수동 입력"
         cancelText="다시 촬영"
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => {
           setGeneralErrorModalVisible(false);
           handleManualInput();
@@ -499,11 +499,11 @@ const PhotoPreviewScreen: React.FC = () => {
         message={`${
           scanMode === 'ingredient' ? '식재료' : '영수증'
         }에서 항목을 인식할 수 없습니다.\n다른 방법으로 진행하시겠습니까?`}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'info-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'info-outline', color: '#FF6B6B', size: 48 }}
         confirmText="수동 입력"
         cancelText="다시 촬영"
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => {
           setScanEmptyModalVisible(false);
           handleManualInput();
@@ -521,13 +521,11 @@ const PhotoPreviewScreen: React.FC = () => {
           visible={robustErrorModalVisible}
           title={robustErrorTitle}
           message={robustErrorMessage}
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText={robustErrorActions[0]?.text || '확인'}
           cancelText={robustErrorActions[1]?.text || '취소'}
-          confirmButtonStyle={
-            robustErrorActions[0]?.action === 'cancel' ? 'primary' : 'danger'
-          }
+          confirmButtonStyle={'danger'}
           onConfirm={() =>
             handleRobustErrorAction(robustErrorActions[0]?.action)
           }

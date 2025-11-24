@@ -335,15 +335,15 @@ export const CreateRecipeModal: React.FC<CreateRecipeModalProps> = ({
         visible={alertModal.visible}
         title={alertModal.title}
         message={alertModal.message}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
         icon={{
           name: 'error-outline',
-          color: 'tomato',
+          color: '#FF6B6B',
           size: 48,
         }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={hideAlert}
         onCancel={hideAlert}
       />

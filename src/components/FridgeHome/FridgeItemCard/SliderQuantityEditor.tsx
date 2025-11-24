@@ -27,30 +27,47 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
   onUnitPress,
   onDeleteRequest,
 }) => {
-  const [_isSliding, setIsSliding] = useState(false);
-  const [_isInputFocused, setIsInputFocused] = useState(false);
-  const [_hasUserInteracted, setHasUserInteracted] = useState(false);
   const [isSliderMode, setIsSliderMode] = useState(false);
-  const [tempSliderValue, setTempSliderValue] = useState(quantity);
-  const [localMaxQuantity, setLocalMaxQuantity] = useState(maxQuantity);
+  const [localQuantity, setLocalQuantity] = useState(quantity);
 
-  useEffect(() => {
-    if (!_isSliding) {
-      setTempSliderValue(quantity);
+  // 단위별 step 계산
+  const getStepSize = (maxValue: number) => {
+    switch (unit.toLowerCase()) {
+      case 'g':
+      case 'ml':
+        return 1; // 정수 단위
+
+      case 'kg':
+      case 'l':
+        return 0.01; // 0.01 단위
+
+      case '개':
+      default:
+        return maxValue <= 10 ? 0.01 : 1; // 10개 이하면 0.01, 이상이면 정수
     }
-  }, [quantity, _isSliding]);
+  };
 
-  // maxQuantity 초기화 (슬라이더 범위는 고정)
+  // Stepper step unit : 1.0
+  const getStepperStep = () => 1;
+
+  // Slider step unit
+  const sliderStep = getStepSize(maxQuantity);
+  const stepperStep = getStepperStep();
+
   useEffect(() => {
-    setLocalMaxQuantity(maxQuantity);
-  }, [maxQuantity]);
+    setLocalQuantity(quantity);
+  }, [quantity]);
 
-  // 수량 포맷 함수: 정수면 소수점 없이, 소수면 둘째자리까지
+  // step unit으로 반올림
+  const roundToStep = (value: number, step: number) => {
+    return Math.round(value / step) * step;
+  };
+
+  // Quantity 포맷 -> 정수면 소수점 없이, 소수면 둘째자리까지
   const formatQuantity = (value: number | string): number => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(numValue)) return 0;
 
-    // 정수인지 확인 (소수점이 .00인 경우도 정수로 취급)
     if (numValue % 1 === 0) {
       return Math.round(numValue);
     } else {
@@ -58,200 +75,86 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     }
   };
 
-  // 편집 모드가 변경될 때 처리
-  useEffect(() => {
-    if (!isEditMode) {
-      setHasUserInteracted(false);
-    } else {
-      // 편집 모드로 진입 시 슬라이더를 최대값으로 설정
-      if (!_hasUserInteracted && quantity < maxQuantity) {
-        onQuantityChange(maxQuantity);
-      }
-    }
-  }, [isEditMode]);
-
-  // 단위별 슬라이더 스텝 크기 계산
-  const getSliderStepSize = (unitType: string, maxValue: number) => {
-    const normalizedUnit = unitType.toLowerCase();
-
-    switch (normalizedUnit) {
-      case 'g':
-      case 'ml':
-        return 1.0;
-      case '개':
-        return maxValue >= 10 ? 1.0 : 0.01; // 10개 이상이면 1.0, 미만이면 0.01
-      case 'kg':
-      case 'l':
-        if (maxValue < 1) {
-          return 0.01; // 1 미만일 때 0.01
-        } else if (maxValue < 10) {
-          return 0.1; // 1 이상 10 미만일 때 0.1
-        } else {
-          return 1.0; // 10 이상일 때 1.0
-        }
-      default:
-        return 1.0;
-    }
-  };
-
-  // 스테퍼는 무조건 1.0 단위
-  const getStepperStep = () => 1.0;
-
-  const sliderStep = getSliderStepSize(unit, maxQuantity);
-  const stepperStep = getStepperStep();
-
-  // 값을 스텝 단위로 반올림
-  const roundToStep = (value: number, step: number) => {
-    return Math.round(value / step) * step;
-  };
-
   // 0이 되면 삭제 모달 트리거
   const checkAndTriggerDelete = (newValue: number) => {
-    console.log('>> checkAndTriggerDelete called:', {
-      newValue,
-      hasDeleteRequest: !!onDeleteRequest,
-      willTrigger: newValue <= 0 && !!onDeleteRequest,
-    });
-
     if (newValue <= 0 && onDeleteRequest) {
-      console.log('>> Triggering delete request!');
       onDeleteRequest();
       return true;
     }
     return false;
   };
 
-  // 스테퍼 증가 버튼을 눌렀을 때만 maxQuantity 업데이트
+  // Stepper increment, decrement
   const handleStepperChange = (increment: boolean) => {
-    const currentValue = quantity || 0;
+    const currentValue = localQuantity || 0;
     const step = stepperStep;
-    let newValue;
 
+    let newValue;
     if (increment) {
-      newValue = currentValue + step;
-      // 🟢 스테퍼 플러스 버튼으로만 maxQuantity 초과 가능
-      if (newValue > maxQuantity) {
-        onMaxQuantityChange?.(newValue);
-      }
+      newValue = Math.min(currentValue + step, maxQuantity);
     } else {
-      newValue = Math.max(0, currentValue - step);
+      newValue = Math.max(currentValue - step, 0);
       if (checkAndTriggerDelete(newValue)) {
         return;
       }
     }
 
+    // to Integer
     newValue = Math.round(newValue);
-    setHasUserInteracted(true);
+
+    setLocalQuantity(newValue);
     onQuantityChange(newValue);
   };
 
-  // 슬라이더 변경 시 - tempSliderValue만 업데이트
+  // Slider change
   const handleSliderChange = (value: number) => {
-    setHasUserInteracted(true);
-    const roundedValue = roundToStep(value, sliderStep);
-    const clampedValue = Math.max(0, Math.min(roundedValue, localMaxQuantity));
-
-    let finalValue;
-    if (sliderStep >= 1) {
-      finalValue = Math.round(clampedValue);
-    } else if (sliderStep === 0.1) {
-      finalValue = Math.round(clampedValue * 10) / 10;
-    } else {
-      finalValue = Math.round(clampedValue * 100) / 100;
-    }
-
-    // 슬라이딩 중에는 tempSliderValue만 업데이트
-    setTempSliderValue(formatQuantity(finalValue));
-  };
-
-  const handleSliderComplete = (value: number) => {
-    setIsSliding(false);
-    setHasUserInteracted(true);
-
     const roundedValue = roundToStep(value, sliderStep);
     const clampedValue = Math.max(0, Math.min(roundedValue, maxQuantity));
 
-    if (checkAndTriggerDelete(clampedValue)) {
-      return;
-    }
+    // 소수점 처리
+    const finalValue =
+      sliderStep < 1
+        ? parseFloat(clampedValue.toFixed(2))
+        : Math.round(clampedValue);
 
-    let finalValue;
-    if (sliderStep >= 1) {
-      finalValue = Math.round(clampedValue);
-    } else if (sliderStep === 0.1) {
-      finalValue = Math.round(clampedValue * 10) / 10;
-    } else {
-      finalValue = Math.round(clampedValue * 100) / 100;
-    }
-
-    // quantity만 변경, maxQuantity는 변경 안함
-    onQuantityChange(formatQuantity(finalValue));
+    setLocalQuantity(finalValue);
+    onQuantityChange(finalValue);
   };
 
-  // 직접 입력 처리
-  // 키보드 입력으로도 maxQuantity 초과 가능
+  // text Input
   const handleTextChange = (text: string) => {
-    let cleanText = text.replace(/[^0-9.]/g, '');
+    // 숫자, 소수점만 허용
+    const cleanText = text.replace(/[^0-9.]/g, '');
 
     const parts = cleanText.split('.');
     if (parts.length > 2) {
-      cleanText = parts[0] + '.' + parts.slice(1).join('');
+      return; // 소수점이 2개 이상이면 무시
     }
 
-    setHasUserInteracted(true);
-
-    // 🟢 키보드 입력으로만 maxQuantity 초과 가능
-    if (cleanText !== '') {
-      const numValue = parseFloat(cleanText) || 0;
-      if (numValue > maxQuantity) {
-        onMaxQuantityChange?.(numValue);
-      }
-    }
-
-    onQuantityChange(parseFloat(cleanText));
-  };
-
-  const handleTextFocus = () => {
-    setIsInputFocused(true);
-    setHasUserInteracted(true);
+    const numValue = parseFloat(cleanText) || 0;
+    setLocalQuantity(numValue);
   };
 
   const handleTextBlur = () => {
-    setIsInputFocused(false);
+    const numValue = localQuantity || 0;
 
-    const numValue = quantity || 0;
-
-    // 입력값이 비어있거나, NaN이거나, 0 이하인 경우
-    if (
-      isNaN(numValue) ||
-      quantity === null ||
-      quantity === undefined ||
-      numValue <= 0
-    ) {
-      // 0 이하면 삭제 모달 트리거
+    // 0 이하면 삭제 모달
+    if (numValue <= 0) {
       if (checkAndTriggerDelete(0)) {
         return;
       }
-    } else {
-      const clampedValue = Math.max(0, numValue);
-
-      // 슬라이더 모드일 때는 스텝 단위로 반올림
-      let finalValue;
-      if (isSliderMode) {
-        finalValue = roundToStep(clampedValue, sliderStep);
-        if (sliderStep >= 1) {
-          onQuantityChange(Math.round(finalValue));
-        } else if (sliderStep === 0.1) {
-          onQuantityChange(Math.round(finalValue * 10) / 10);
-        } else {
-          // 0.01
-          onQuantityChange(Math.round(finalValue * 100) / 100);
-        }
-      } else {
-        onQuantityChange(clampedValue);
-      }
     }
 
+    const clampedValue = Math.max(0, Math.min(numValue, maxQuantity));
+
+    // 슬라이더 모드일 때는 스텝 단위로 반올림
+    const finalValue = isSliderMode
+      ? roundToStep(clampedValue, sliderStep)
+      : clampedValue;
+
+    const formattedValue = formatQuantity(finalValue);
+    setLocalQuantity(formattedValue);
+    onQuantityChange(formattedValue);
     onTextBlur();
   };
 
@@ -259,17 +162,19 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     setIsSliderMode(!isSliderMode);
   };
 
-  const currentQuantityNum = quantity || 0;
-  const thumbColor = '#c8c8c8';
+  const currentQuantityNum = localQuantity || 0;
 
   return (
     <View style={styles.sliderQuantityContainer}>
       {/* 수량 입력 섹션 */}
       <View style={styles.quantityEditContainer}>
-        {/* 스테퍼 (무조건 1.0 단위) */}
+        {/* 스테퍼 (정수 단위) */}
         <View style={styles.stepper}>
           <TouchableOpacity
-            style={styles.quantityButton}
+            style={[
+              styles.quantityButton,
+              currentQuantityNum <= 0 && styles.quantityButtonDisabled,
+            ]}
             activeOpacity={0.7}
             onPress={() => handleStepperChange(false)}
             disabled={!isEditMode || currentQuantityNum <= 0}
@@ -279,9 +184,8 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
 
           <TextInput
             style={styles.quantityInput}
-            value={quantity.toString()}
+            value={localQuantity.toString()}
             onChangeText={handleTextChange}
-            onFocus={handleTextFocus}
             onBlur={handleTextBlur}
             keyboardType="decimal-pad"
             editable={isEditMode}
@@ -295,35 +199,34 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.quantityButton}
+            style={[
+              styles.quantityButton,
+              currentQuantityNum >= maxQuantity &&
+                styles.quantityButtonDisabled,
+            ]}
             activeOpacity={0.7}
             onPress={() => handleStepperChange(true)}
-            disabled={!isEditMode}
+            disabled={!isEditMode || currentQuantityNum >= maxQuantity}
           >
             <FontAwesome6 name="circle-plus" size={20} color="#999" />
           </TouchableOpacity>
         </View>
 
         {/* 슬라이더/스테퍼 토글 버튼 */}
-        {isSliderMode ? (
-          <TouchableOpacity
-            style={styles.isSlidderButton}
-            activeOpacity={0.7}
-            onPress={toggleInputMode}
-            disabled={!isEditMode}
-          >
-            <FontAwesome6 name={'caret-up'} size={24} color={'#999'} />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={styles.isNotSlidderButton}
-            activeOpacity={0.7}
-            onPress={toggleInputMode}
-            disabled={!isEditMode}
-          >
-            <FontAwesome6 name={'caret-down'} size={24} color="#999" />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={
+            isSliderMode ? styles.isSlidderButton : styles.isNotSlidderButton
+          }
+          activeOpacity={0.7}
+          onPress={toggleInputMode}
+          disabled={!isEditMode}
+        >
+          <FontAwesome6
+            name={isSliderMode ? 'caret-up' : 'caret-down'}
+            size={24}
+            color="#999"
+          />
+        </TouchableOpacity>
       </View>
 
       {/* 슬라이더 섹션 (단위별 스텝 적용) */}
@@ -334,14 +237,12 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
               style={styles.slider}
               minimumValue={0}
               maximumValue={maxQuantity}
-              step={sliderStep}
               value={currentQuantityNum}
               onValueChange={handleSliderChange}
-              onSlidingStart={() => setIsSliding(true)}
-              onSlidingComplete={handleSliderComplete}
+              step={sliderStep}
               minimumTrackTintColor="rgba(47, 72, 88, 0.5)"
               maximumTrackTintColor="#d2d2d2"
-              thumbTintColor={thumbColor}
+              thumbTintColor="#c8c8c8"
               disabled={!isEditMode}
             />
           </View>
@@ -349,7 +250,6 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
           <View style={styles.sliderLabels}>
             <Text style={styles.sliderLabel}>0</Text>
             <Text style={styles.sliderLabel}>
-              {/* 포맷된 최대값 표시 */}
               {formatQuantity(maxQuantity)}
               {unit}
             </Text>

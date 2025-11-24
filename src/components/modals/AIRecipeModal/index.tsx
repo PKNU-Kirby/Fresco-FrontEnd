@@ -407,15 +407,15 @@ ${
         visible={showAlertModal}
         title="알림"
         message="어떤 요리를 원하는지 입력해주세요!"
-        iconContainer={{ backgroundColor: '#fae1dd' }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
         icon={{
           name: 'error-outline',
-          color: 'tomato',
+          color: 'rgba(47, 72, 88, 1)',
           size: 48,
         }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="general"
         onConfirm={() => setShowAlertModal(false)}
         onCancel={() => setShowAlertModal(false)}
       />

@@ -73,6 +73,7 @@ export const styles = StyleSheet.create({
 
   content: {
     flex: 1,
+    marginTop: scale(16),
     paddingHorizontal: scale(16),
     backgroundColor: '#e8f5e8',
   },

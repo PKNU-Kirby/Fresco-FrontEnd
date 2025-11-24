@@ -284,11 +284,11 @@ const ShoppingListScreen: React.FC<ShoppingListScreenProps> = ({ route }) => {
         visible={errorModalVisible}
         title={errorModalTitle}
         message={errorModalMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={closeErrorModal}
         onCancel={closeErrorModal}
       />

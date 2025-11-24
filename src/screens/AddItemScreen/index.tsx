@@ -653,11 +653,11 @@ const AddItemScreen: React.FC = () => {
             : '지금 나가면 작성 중인 내용이 사라집니다. 정말 나가시겠습니까?'
         }
         iconContainer={{
-          backgroundColor: allSavedItems.length > 0 ? '#d3f0d3' : '#fae1dd',
+          backgroundColor: allSavedItems.length > 0 ? '#d3f0d3' : '#FFE5E5',
         }}
         icon={{
           name: allSavedItems.length > 0 ? 'check-circle' : 'error-outline',
-          color: allSavedItems.length > 0 ? 'limegreen' : 'tomato',
+          color: allSavedItems.length > 0 ? 'limegreen' : '#FF6B6B',
           size: 48,
         }}
         confirmText={allSavedItems.length > 0 ? '홈으로 이동' : '나가기'}
@@ -673,11 +673,15 @@ const AddItemScreen: React.FC = () => {
         visible={showFinalConfirmModal}
         title="식재료 추가 확인"
         message={confirmationMessage}
-        iconContainer={{ backgroundColor: '#d3f0d3' }}
-        icon={{ name: 'add-circle-outline', color: 'limegreen', size: 48 }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
+        icon={{
+          name: 'add-circle-outline',
+          color: 'rgba(47, 72, 88, 1)',
+          size: 48,
+        }}
         confirmText="추가하기"
         cancelText="취소"
-        confirmButtonStyle="primary"
+        confirmButtonStyle="general"
         onConfirm={handleFinalConfirmModalConfirm}
         onCancel={handleFinalConfirmModalCancel}
       />
@@ -703,8 +707,8 @@ const AddItemScreen: React.FC = () => {
         visible={showErrorModal}
         title="저장 실패"
         message={`${errorMessage}\n\n다시 시도하시겠습니까?`}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="다시 시도"
         cancelText="편집으로 돌아가기"
         confirmButtonStyle="danger"

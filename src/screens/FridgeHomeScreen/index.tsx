@@ -356,11 +356,11 @@ const FridgeHomeScreen = ({ route }: Props) => {
         visible={saveErrorModalVisible}
         title="저장 오류"
         message="일부 항목을 저장할 수 없습니다. 삭제 권한이 없거나 이미 삭제된 항목일 수 있습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setSaveErrorModalVisible(false)}
         onCancel={() => setSaveErrorModalVisible(false)}
       />
@@ -371,11 +371,15 @@ const FridgeHomeScreen = ({ route }: Props) => {
         visible={deleteConfirmModalVisible}
         title="아이템 삭제"
         message="정말 이 아이템을 삭제하시겠습니까?"
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'delete-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
+        icon={{
+          name: 'delete-outline',
+          color: 'rgba(47, 72, 88, 1)',
+          size: 48,
+        }}
         confirmText="삭제"
         cancelText="취소"
-        confirmButtonStyle="danger"
+        confirmButtonStyle="general"
         onConfirm={confirmDeleteItem}
         onCancel={() => {
           setDeleteConfirmModalVisible(false);
@@ -404,11 +408,11 @@ const FridgeHomeScreen = ({ route }: Props) => {
         visible={deleteErrorModalVisible}
         title="삭제 오류"
         message="아이템 삭제에 실패했습니다. 다시 시도해주세요."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setDeleteErrorModalVisible(false)}
         onCancel={() => setDeleteErrorModalVisible(false)}
       />

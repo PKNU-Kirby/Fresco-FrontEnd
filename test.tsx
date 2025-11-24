@@ -129,8 +129,8 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           visible={loadErrorModalVisible}
           title="오류"
           message={loadErrorMessage}
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
           confirmButtonStyle="primary"
@@ -144,8 +144,8 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           visible={noPermissionVisible}
           title="권한 없음"
           message="공유 레시피는 방장만 삭제할 수 있습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'block', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'block', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
           confirmButtonStyle="primary"
@@ -159,8 +159,8 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           visible={deleteConfirmVisible}
           title="레시피 삭제"
           message={`"${selectedRecipeForDelete?.title}" 레시피를 삭제하시겠습니까?`}
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="삭제"
           cancelText="취소"
           confirmButtonStyle="danger"
@@ -192,8 +192,8 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           visible={deleteErrorVisible}
           title="오류"
           message="레시피 삭제에 실패했습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
           confirmButtonStyle="primary"

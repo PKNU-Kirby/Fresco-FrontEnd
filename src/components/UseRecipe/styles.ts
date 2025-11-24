@@ -28,6 +28,7 @@ export const ingredientCardStyles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: scale(12),
     padding: scale(16),
+    paddingBottom: scale(0),
     marginBottom: scale(12),
     shadowColor: '#000',
     shadowOffset: {
@@ -120,13 +121,13 @@ export const ingredientCardStyles = StyleSheet.create({
     fontWeight: '500' as const,
   },
 });
-
 export const unavailableStyles = StyleSheet.create({
   unavailableSection: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     justifyContent: 'space-between' as const,
-    paddingTop: scale(4),
+    paddingTop: scale(8),
+    paddingBottom: scale(16),
   },
   unavailableInfo: {
     flexDirection: 'row' as const,
@@ -136,13 +137,13 @@ export const unavailableStyles = StyleSheet.create({
   },
   unavailableText: {
     fontSize: scale(14),
-    color: 'tomato',
+    color: '#FF6B6B',
     fontWeight: '500' as const,
   },
   addToCartButton: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    backgroundColor: 'tomato',
+    backgroundColor: '#FF6B6B',
     paddingHorizontal: scale(8),
     paddingVertical: scale(8),
     borderRadius: scale(6),
@@ -246,13 +247,13 @@ export const styles = StyleSheet.create({
 
   section: {
     margin: scale(16),
+    marginVertical: scale(16),
   },
 
   sectionTitle: {
-    fontSize: scale(18),
+    fontSize: scale(19),
     fontWeight: '600' as const,
     color: '#212529',
-    marginBottom: scale(12),
   },
 
   // 재료 카드 스타일
@@ -733,9 +734,9 @@ export const stepsStyles = StyleSheet.create({
     gap: scale(12),
   },
   sectionTitle: {
-    fontSize: scale(18),
+    fontSize: scale(19),
     fontWeight: '600' as const,
-    color: '#212529',
+    color: '#2F4858',
     marginTop: scale(16),
     marginBottom: scale(12),
     marginHorizontal: scale(8),
@@ -766,7 +767,7 @@ export const stepsStyles = StyleSheet.create({
     flexShrink: 0,
   },
   stepCheckboxCompleted: {
-    backgroundColor: 'limegreen',
+    backgroundColor: '#2F4858',
   },
   stepNumber: {
     fontSize: scale(16),
@@ -785,19 +786,18 @@ export const stepsStyles = StyleSheet.create({
   },
   stepTextCompleted: {
     color: '#666',
-    textDecorationLine: 'line-through' as const,
   },
   progressContainer: {
     marginTop: scale(16),
     padding: scale(12),
-    backgroundColor: '#ffece6ff',
+    backgroundColor: '#FFE5E5',
     borderRadius: scale(8),
     borderWidth: scale(1),
     borderColor: '#e3f2fd',
   },
   progressText: {
     fontSize: scale(14),
-    color: '#FF7043',
+    color: '#FF6B6B',
     fontWeight: '600' as const,
     marginBottom: scale(8),
     textAlign: 'center' as const,
@@ -810,7 +810,7 @@ export const stepsStyles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: 'orange',
+    backgroundColor: '#FF6B6B',
     borderRadius: scale(3),
   },
 });

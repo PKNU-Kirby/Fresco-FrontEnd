@@ -25,7 +25,7 @@ interface ConfirmModalProps {
   };
   confirmText?: string;
   cancelText?: string;
-  confirmButtonStyle?: 'danger' | 'primary';
+  confirmButtonStyle?: 'danger' | 'primary' | 'general';
   onConfirm: () => void;
   onCancel: () => void;
   animationConfig?: {
@@ -154,6 +154,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                     styles.button,
                     confirmButtonStyle === 'danger'
                       ? styles.dangerButton
+                      : confirmButtonStyle === 'general'
+                      ? styles.generalButton
                       : styles.successButton,
                   ]}
                   onPress={onConfirm}
@@ -163,6 +165,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                     style={[
                       confirmButtonStyle === 'danger'
                         ? styles.dangerButtonText
+                        : confirmButtonStyle === 'general'
+                        ? styles.generalButtonText
                         : styles.successButtonText,
                     ]}
                   >

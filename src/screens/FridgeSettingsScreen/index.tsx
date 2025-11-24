@@ -10,6 +10,8 @@ import ConfirmModal from '../../components/modals/ConfirmModal';
 import { useApiFridgeSettings } from '../../hooks/useApiFridgeSettings';
 import { RootStackParamList } from '../../../App';
 import { styles } from './styles';
+import { AuthAPIService } from '../../services/API/authAPI';
+import { debugTokenInfo, getTokenStatus } from '../../utils/authUtils';
 
 type Props = {
   route: {
@@ -91,6 +93,7 @@ const FridgeSettingsScreen = ({ route }: Props) => {
         </View>
         <View style={styles.rightSection} />
       </View>
+
       <ScrollView
         style={styles.settingsContainer}
         showsVerticalScrollIndicator={false}
@@ -130,11 +133,11 @@ const FridgeSettingsScreen = ({ route }: Props) => {
         visible={modalState.errorModalVisible}
         title="오류"
         message={modalState.errorMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => modalState.setErrorModalVisible(false)}
         onCancel={() => modalState.setErrorModalVisible(false)}
       />
@@ -145,11 +148,11 @@ const FridgeSettingsScreen = ({ route }: Props) => {
         visible={modalState.noPermissionModalVisible}
         title="권한 없음"
         message={modalState.noPermissionMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => modalState.setNoPermissionModalVisible(false)}
         onCancel={() => modalState.setNoPermissionModalVisible(false)}
       />
@@ -160,8 +163,8 @@ const FridgeSettingsScreen = ({ route }: Props) => {
         visible={modalState.logoutConfirmVisible}
         title="로그아웃"
         message="로그아웃 하시겠습니까?"
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="로그아웃"
         cancelText="취소"
         confirmButtonStyle="danger"
@@ -174,9 +177,9 @@ const FridgeSettingsScreen = ({ route }: Props) => {
         isAlert={true}
         visible={modalState.deleteConfirmVisible}
         title="냉장고 삭제"
-        message={`"${fridgeName}" 냉장고를 삭제하시겠습니까?\n\n⚠️ 삭제된 냉장고의 모든 데이터가 영구적으로 사라지며, 복구가 불가능합니다.\n\n• 저장된 모든 식재료\n• 사용 기록\n• 멤버 정보`}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        message={`"${fridgeName}" 모임을 삭제하시겠습니까?\n\n삭제된 냉장고 모임의 모든 데이터가 영구적으로 사라지며, 복구가 불가능합니다.`}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="삭제"
         cancelText="취소"
         confirmButtonStyle="danger"
@@ -190,8 +193,8 @@ const FridgeSettingsScreen = ({ route }: Props) => {
         visible={modalState.deleteFinalConfirmVisible}
         title="최종 확인"
         message={`"${fridgeName}" 냉장고를 정말 삭제하시겠습니까?`}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="삭제"
         cancelText="취소"
         confirmButtonStyle="danger"
@@ -220,11 +223,11 @@ const FridgeSettingsScreen = ({ route }: Props) => {
         visible={modalState.deleteErrorVisible}
         title="삭제 실패"
         message="냉장고 삭제 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => modalState.setDeleteErrorVisible(false)}
         onCancel={() => modalState.setDeleteErrorVisible(false)}
       />

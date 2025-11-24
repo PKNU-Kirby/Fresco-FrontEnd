@@ -401,11 +401,11 @@ const AIRecipeScreen: React.FC = () => {
         visible={emptyPromptModalVisible}
         title="알림"
         message="요청 내용을 입력해주세요."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
+        icon={{ name: 'error-outline', color: 'rgba(47, 72, 88, 1)', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="general"
         onConfirm={() => setEmptyPromptModalVisible(false)}
         onCancel={() => setEmptyPromptModalVisible(false)}
       />
@@ -416,11 +416,11 @@ const AIRecipeScreen: React.FC = () => {
         visible={generateErrorModalVisible}
         title="오류"
         message={generateErrorMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setGenerateErrorModalVisible(false)}
         onCancel={() => setGenerateErrorModalVisible(false)}
       />
@@ -431,11 +431,11 @@ const AIRecipeScreen: React.FC = () => {
         visible={saveConfirmVisible}
         title="레시피 저장"
         message="이 레시피를 내 레시피에 저장하시겠습니까?"
-        iconContainer={{ backgroundColor: '#e3f2fd' }}
-        icon={{ name: 'save', color: '#2196F3', size: 48 }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
+        icon={{ name: 'save', color: 'rgba(47, 72, 88, 1)', size: 48 }}
         confirmText="저장"
         cancelText="취소"
-        confirmButtonStyle="primary"
+        confirmButtonStyle="general"
         onConfirm={handleSaveConfirm}
         onCancel={() => setSaveConfirmVisible(false)}
       />
@@ -461,11 +461,11 @@ const AIRecipeScreen: React.FC = () => {
         visible={saveErrorModalVisible}
         title="오류"
         message={saveErrorMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setSaveErrorModalVisible(false)}
         onCancel={() => setSaveErrorModalVisible(false)}
       />

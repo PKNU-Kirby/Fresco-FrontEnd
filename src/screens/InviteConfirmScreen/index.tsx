@@ -168,11 +168,15 @@ const InviteConfirmScreen = (): React.JSX.Element => {
         visible={showDeclineModal}
         title="초대 거절"
         message="정말로 초대를 거절하시겠습니까?"
-        iconContainer={{ backgroundColor: '#fff3e0' }}
-        icon={{ name: 'alert-circle-outline', color: '#FF9800', size: 48 }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
+        icon={{
+          name: 'alert-circle-outline',
+          color: 'rgba(47, 72, 88, 1)',
+          size: 48,
+        }}
         confirmText="거절"
         cancelText="취소"
-        confirmButtonStyle="danger"
+        confirmButtonStyle="general"
         onConfirm={handleConfirmDecline}
         onCancel={handleCancelDecline}
       />
@@ -182,8 +186,8 @@ const InviteConfirmScreen = (): React.JSX.Element => {
         visible={showErrorModal}
         title="오류"
         message={errorMessage}
-        iconContainer={{ backgroundColor: '#ffebee' }}
-        icon={{ name: 'alert-circle-outline', color: '#f44336', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'alert-circle-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         confirmButtonStyle="danger"
         onConfirm={handleErrorConfirm}

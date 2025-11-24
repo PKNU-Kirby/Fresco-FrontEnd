@@ -154,8 +154,8 @@ function MainTabNavigator({
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: 'limegreen',
-        tabBarInactiveTintColor: '#666',
+        tabBarActiveTintColor: '#2F4858',
+        tabBarInactiveTintColor: '#c0c0c0',
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopWidth: 1,

@@ -136,7 +136,7 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
       buttons.push(
         <TouchableOpacity
           key="leave"
-          style={[styles.quickActionButton, { backgroundColor: 'tomato' }]}
+          style={[styles.quickActionButton, { backgroundColor: '#FF6B6B' }]}
           onPress={() => {
             // 삭제 또는 나가기 모달 표시
             if (canDelete) {
@@ -219,11 +219,11 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
         visible={modals.editConfirmVisible}
         title={fridge.name}
         message="냉장고를 편집하시겠습니까?"
-        iconContainer={{ backgroundColor: '#d3f0d3' }}
-        icon={{ name: 'edit', color: 'limegreen', size: 48 }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
+        icon={{ name: 'edit', color: 'rgba(47, 72, 88, 1)', size: 48 }}
         confirmText="편집"
         cancelText="취소"
-        confirmButtonStyle="primary"
+        confirmButtonStyle="general"
         onConfirm={() => {
           setModals(prev => ({ ...prev, editConfirmVisible: false }));
           if (onEdit) {
@@ -241,8 +241,8 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
         visible={modals.leaveConfirmVisible}
         title={fridge.name}
         message="정말 이 냉장고에서 나가시겠습니까?"
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'logout', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'logout', color: '#FF6B6B', size: 48 }}
         confirmText="나가기"
         cancelText="취소"
         confirmButtonStyle="danger"
@@ -263,8 +263,8 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
         visible={modals.deleteConfirmVisible}
         title={fridge.name}
         message="냉장고를 삭제하시겠습니까? 삭제된 냉장고는 복구할 수 없습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'delete-forever', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'delete-forever', color: '#FF6B6B', size: 48 }}
         confirmText="삭제"
         cancelText="취소"
         confirmButtonStyle="danger"

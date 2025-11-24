@@ -125,11 +125,11 @@ const NotificationSettingsModals: React.FC<NotificationSettingsModalsProps> = ({
         visible={saveErrorModalVisible}
         title="오류"
         message="설정 저장 중 문제가 발생했습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setSaveErrorModalVisible(false)}
         onCancel={() => setSaveErrorModalVisible(false)}
       />
@@ -140,11 +140,11 @@ const NotificationSettingsModals: React.FC<NotificationSettingsModalsProps> = ({
         visible={permissionDeniedModalVisible}
         title="알림 권한 필요"
         message="알림을 받으려면 설정에서 알림 권한을 허용해주세요."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'notifications-off', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'notifications-off', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setPermissionDeniedModalVisible(false)}
         onCancel={() => setPermissionDeniedModalVisible(false)}
       />
@@ -155,11 +155,11 @@ const NotificationSettingsModals: React.FC<NotificationSettingsModalsProps> = ({
         visible={toggleErrorModalVisible}
         title="오류"
         message="알림 설정 중 문제가 발생했습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setToggleErrorModalVisible(false)}
         onCancel={() => setToggleErrorModalVisible(false)}
       />

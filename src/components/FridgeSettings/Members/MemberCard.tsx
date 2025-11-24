@@ -122,8 +122,8 @@ const MemberCard: React.FC<MemberCardProps> = ({
             냉장고에서 내보내시겠습니까?
           </Text>
         }
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'person-remove-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="삭제"
         cancelText="취소"
         confirmButtonStyle="danger"

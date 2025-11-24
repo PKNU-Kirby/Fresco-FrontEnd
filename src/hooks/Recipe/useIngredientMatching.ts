@@ -345,6 +345,7 @@ export const useIngredientMatching = (
 
         enhancedIngredients.forEach(ingredient => {
           // 선택된 냉장고 재료가 있는 경우 (초록/주황 상태)
+          // 선택된 냉장고 재료가 있는 경우 (초록/주황 상태)
           if (ingredient.selectedFridgeItem) {
             const availableQuantity =
               ingredient.selectedFridgeItem.quantity || 1;
@@ -353,6 +354,8 @@ export const useIngredientMatching = (
               recipeIngredient: {
                 name: ingredient.selectedFridgeItem.name,
                 quantity: ingredient.quantity,
+                unit:
+                  ingredient.unit || ingredient.selectedFridgeItem.unit || '개', // ✅ unit 추가
               },
               fridgeIngredient: ingredient.selectedFridgeItem,
               isAvailable: true,
@@ -370,6 +373,7 @@ export const useIngredientMatching = (
               recipeIngredient: {
                 name: ingredient.name,
                 quantity: ingredient.quantity,
+                unit: ingredient.unit || '개', // ✅ unit 추가
               },
               fridgeIngredient: null,
               isAvailable: false,

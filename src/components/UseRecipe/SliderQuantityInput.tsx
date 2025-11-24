@@ -137,7 +137,7 @@ const SliderQuantityInput: React.FC<SliderQuantityInputProps> = ({
       {/* 수량 입력 섹션 */}
       <View style={sliderQuantityStyles.quantityEditContainer}>
         {/* 스테퍼 (정수 단위) */}
-        <Text style={sliderQuantityStyles.inputText}>사용할 수량:</Text>
+        <Text style={sliderQuantityStyles.inputText}>사용량 :</Text>
         <View style={sliderQuantityStyles.stepper}>
           <TouchableOpacity
             style={[

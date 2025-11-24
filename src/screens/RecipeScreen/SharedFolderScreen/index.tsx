@@ -587,7 +587,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
                   <Icon name="info" size={20} color="#888" />
                 </View>
                 <Text style={styles.infoText}>
-                  참여 중인 냉장고별 공유 레시피를 확인해 보세요!
+                  참여 중인 모임의 공유 레시피를 확인해 보세요!
                 </Text>
               </View>
 
@@ -595,10 +595,10 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
                 <View style={styles.emptyContainer}>
                   <Icon name="kitchen" size={48} color="#ccc" />
                   <Text style={styles.emptyText}>
-                    참여 중인 냉장고가 없습니다
+                    참여 중인 모임이 없습니다
                   </Text>
                   <Text style={styles.emptySubText}>
-                    새 냉장고를 만들거나 초대 코드로 참여해보세요
+                    새 모임을 만들거나 초대 코드로 참여해보세요
                   </Text>
                 </View>
               ) : (
@@ -660,11 +660,11 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           visible={loadErrorModalVisible}
           title="오류"
           message={loadErrorMessage}
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => setLoadErrorModalVisible(false)}
           onCancel={() => setLoadErrorModalVisible(false)}
         />
@@ -674,11 +674,11 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           visible={noPermissionVisible}
           title="권한 없음"
           message="공유 레시피는 방장만 삭제할 수 있습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'block', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'block', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => setNoPermissionVisible(false)}
           onCancel={() => setNoPermissionVisible(false)}
         />
@@ -688,8 +688,8 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           visible={deleteConfirmVisible}
           title="레시피 삭제"
           message={`"${selectedRecipeForDelete?.title}" 레시피를 삭제하시겠습니까?`}
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="삭제"
           cancelText="취소"
           confirmButtonStyle="danger"
@@ -719,11 +719,11 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           visible={deleteErrorVisible}
           title="오류"
           message="레시피 삭제에 실패했습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => setDeleteErrorVisible(false)}
           onCancel={() => setDeleteErrorVisible(false)}
         />

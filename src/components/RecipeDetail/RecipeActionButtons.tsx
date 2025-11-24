@@ -222,11 +222,11 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
         visible={errorModalVisible}
         title="오류"
         message={errorMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setErrorModalVisible(false)}
         onCancel={() => setErrorModalVisible(false)}
       />
@@ -237,11 +237,11 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
         visible={noSelectionModalVisible}
         title="알림"
         message="공유할 냉장고를 선택해주세요."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
+        icon={{ name: 'error-outline', color: 'rgba(47, 72, 88, 1)', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="general"
         onConfirm={() => setNoSelectionModalVisible(false)}
         onCancel={() => setNoSelectionModalVisible(false)}
       />

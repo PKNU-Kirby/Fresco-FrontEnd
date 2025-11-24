@@ -66,11 +66,11 @@ const InviteMemberModals: React.FC<InviteMemberModalsProps> = ({
         visible={errorModalVisible}
         title="오류"
         message={errorMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setErrorModalVisible(false)}
         onCancel={() => setErrorModalVisible(false)}
       />
@@ -96,11 +96,11 @@ const InviteMemberModals: React.FC<InviteMemberModalsProps> = ({
         visible={regenerateConfirmVisible}
         title="초대 링크 재생성"
         message="새로운 초대 링크를 생성하시겠습니까?\n기존 링크는 더 이상 사용할 수 없습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
+        icon={{ name: 'error-outline', color: 'rgba(47, 72, 88, 1)', size: 48 }}
         confirmText="생성"
         cancelText="취소"
-        confirmButtonStyle="danger"
+        confirmButtonStyle="general"
         onConfirm={onRegenerateConfirm}
         onCancel={() => setRegenerateConfirmVisible(false)}
       />
@@ -111,11 +111,11 @@ const InviteMemberModals: React.FC<InviteMemberModalsProps> = ({
         visible={smsNotSupportedVisible}
         title="SMS 지원 안함"
         message="이 기기에서는 SMS를 지원하지 않습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setSmsNotSupportedVisible(false)}
         onCancel={() => setSmsNotSupportedVisible(false)}
       />
@@ -126,11 +126,11 @@ const InviteMemberModals: React.FC<InviteMemberModalsProps> = ({
         visible={smsFailedVisible}
         title="SMS 공유 실패"
         message="SMS 공유에 실패했습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setSmsFailedVisible(false)}
         onCancel={() => setSmsFailedVisible(false)}
       />
@@ -141,11 +141,11 @@ const InviteMemberModals: React.FC<InviteMemberModalsProps> = ({
         visible={kakaoNotInstalledVisible}
         title="카카오톡 미설치"
         message="카카오톡이 설치되어 있지 않습니다. 다른 방법으로 공유하시겠습니까?"
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#e8f5e9' }}
+        icon={{ name: 'error-outline', color: 'rgba(47, 72, 88, 1)', size: 48 }}
         confirmText="웹 공유"
         cancelText="취소"
-        confirmButtonStyle="primary"
+        confirmButtonStyle="general"
         onConfirm={() => {
           setKakaoNotInstalledVisible(false);
           onKakaoFallbackToGeneral();
@@ -159,11 +159,11 @@ const InviteMemberModals: React.FC<InviteMemberModalsProps> = ({
         visible={kakaoFailedVisible}
         title="공유 실패"
         message="카카오톡 공유에 실패했습니다. 다른 방법으로 공유하시겠습니까?"
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="웹 공유"
         cancelText="취소"
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => {
           setKakaoFailedVisible(false);
           onKakaoFallbackToGeneral();
@@ -177,11 +177,11 @@ const InviteMemberModals: React.FC<InviteMemberModalsProps> = ({
         visible={shareFailedVisible}
         title="공유 실패"
         message="공유에 실패했습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setShareFailedVisible(false)}
         onCancel={() => setShareFailedVisible(false)}
       />

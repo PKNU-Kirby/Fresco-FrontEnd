@@ -404,6 +404,8 @@ const UseRecipeScreen: React.FC = () => {
         iconContainer={{ backgroundColor: '#d3f0d3' }}
         icon={{ name: 'restaurant', color: 'limegreen', size: 48 }}
         confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="primary"
         onConfirm={handleCompleteSuccess}
         onCancel={handleCompleteSuccess}
       />
@@ -414,9 +416,11 @@ const UseRecipeScreen: React.FC = () => {
         visible={showCompleteErrorModal}
         title="오류"
         message={errorMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
+        cancelText=""
+        confirmButtonStyle="danger"
         onConfirm={() => setShowCompleteErrorModal(false)}
         onCancel={() => setShowCompleteErrorModal(false)}
       />

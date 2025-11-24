@@ -230,11 +230,11 @@ const MembersScreen = ({ route }: Props) => {
         visible={modalState.errorModalVisible}
         title="오류"
         message={modalState.errorMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => modalState.setErrorModalVisible(false)}
         onCancel={() => modalState.setErrorModalVisible(false)}
       />
@@ -246,10 +246,10 @@ const MembersScreen = ({ route }: Props) => {
         title={modalState.memberInfoTitle}
         message={modalState.memberInfoMessage}
         iconContainer={{ backgroundColor: '#e3f2fd' }}
-        icon={{ name: 'person', color: '#2196F3', size: 48 }}
+        icon={{ name: 'person', color: 'rgba(47, 72, 88, 1)', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="general"
         onConfirm={() => modalState.setMemberInfoModalVisible(false)}
         onCancel={() => modalState.setMemberInfoModalVisible(false)}
       />
@@ -262,11 +262,11 @@ const MembersScreen = ({ route }: Props) => {
         visible={noPermissionModalVisible}
         title="권한 없음"
         message={noPermissionMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setNoPermissionModalVisible(false)}
         onCancel={() => setNoPermissionModalVisible(false)}
       />
@@ -292,11 +292,11 @@ const MembersScreen = ({ route }: Props) => {
         visible={removeErrorModalVisible}
         title="오류"
         message="멤버 삭제에 실패했습니다."
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setRemoveErrorModalVisible(false)}
         onCancel={() => setRemoveErrorModalVisible(false)}
       />

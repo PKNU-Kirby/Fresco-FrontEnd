@@ -104,15 +104,15 @@ const LoginForm: React.FC<LoginFormProps> = ({
         visible={errorModal.visible}
         title="로그인 실패"
         message={errorModal.message}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
         icon={{
           name: 'error-outline',
-          color: 'tomato',
+          color: '#FF6B6B',
           size: 48,
         }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={onCloseErrorModal}
         onCancel={onCloseErrorModal}
       />

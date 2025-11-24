@@ -125,11 +125,11 @@ export const InviteCodeModal: React.FC<InviteCodeModalProps> = ({
         visible={errorModalVisible}
         title="오류"
         message={errorMessage}
-        iconContainer={{ backgroundColor: '#fae1dd' }}
-        icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+        iconContainer={{ backgroundColor: '#FFE5E5' }}
+        icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
         confirmText="확인"
         cancelText=""
-        confirmButtonStyle="primary"
+        confirmButtonStyle="danger"
         onConfirm={() => setErrorModalVisible(false)}
         onCancel={() => setErrorModalVisible(false)}
       />

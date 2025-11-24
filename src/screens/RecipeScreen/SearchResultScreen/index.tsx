@@ -91,7 +91,6 @@ const SearchRecipeCard: React.FC<{
         />
         <View style={styles.recipeInfo}>
           <Text style={styles.recipeTitle}>{recipe.title}</Text>
-          {/* ✅ 가용성 뱃지 */}
           {renderIngredientStatus()}
         </View>
         <View style={styles.cardActions}>
@@ -457,11 +456,11 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
           visible={searchErrorModalVisible}
           title="검색 실패"
           message="레시피 검색 중 오류가 발생했습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => setSearchErrorModalVisible(false)}
           onCancel={() => setSearchErrorModalVisible(false)}
         />
@@ -472,11 +471,11 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
           visible={favoriteErrorModalVisible}
           title="오류"
           message="즐겨찾기 설정에 실패했습니다."
-          iconContainer={{ backgroundColor: '#fae1dd' }}
-          icon={{ name: 'error-outline', color: 'tomato', size: 48 }}
+          iconContainer={{ backgroundColor: '#FFE5E5' }}
+          icon={{ name: 'error-outline', color: '#FF6B6B', size: 48 }}
           confirmText="확인"
           cancelText=""
-          confirmButtonStyle="primary"
+          confirmButtonStyle="danger"
           onConfirm={() => setFavoriteErrorModalVisible(false)}
           onCancel={() => setFavoriteErrorModalVisible(false)}
         />
