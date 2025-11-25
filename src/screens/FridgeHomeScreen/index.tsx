@@ -192,7 +192,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
         setEditModeStartState([]);
         setIsEditMode(false);
       } catch (editError) {
-        console.error('편집 모드 종료 중 오류:', editError);
+        // console.error('편집 모드 종료 중 오류:', editError);
 
         // 실패하면 서버에서 최신 데이터 다시 불러오기
         await refreshWithCategory(activeItemCategory);
@@ -273,7 +273,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
       // 🔥 Alert 대신 모달 표시
       setDeleteSuccessModalVisible(true);
     } catch (deleteError) {
-      console.error('아이템 삭제 실패:', deleteError);
+      // console.error('아이템 삭제 실패:', deleteError);
       // 🔥 Alert 대신 모달 표시
       setDeleteErrorModalVisible(true);
     } finally {

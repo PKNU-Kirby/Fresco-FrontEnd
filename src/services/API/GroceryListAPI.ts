@@ -162,7 +162,7 @@ export class GroceryListAPI {
       );
       return targetFridge.groceryListId;
     } catch (error) {
-      console.error('[GroceryListAPI] ❌ 조회 실패:', error);
+      // console.error('[GroceryListAPI] ❌ 조회 실패:', error);
       throw error;
     }
   }

@@ -60,13 +60,13 @@ export class AuthAPIService {
             sameExpiry: accessPayload.exp === refreshPayload.exp,
           });
         } catch (e) {
-          console.warn('토큰 페이로드 파싱 실패:', e);
+          // console.warn('토큰 페이로드 파싱 실패:', e);
         }
       }
 
       return result;
     } catch (error) {
-      console.error('❌ 로그인 API 실패:', error);
+      // console.error('❌ 로그인 API 실패:', error);
       throw error;
     }
   }
@@ -84,7 +84,7 @@ export class AuthAPIService {
         });
       }
     } catch (error) {
-      console.warn('⚠️ 서버 로그아웃 실패:', error);
+      // console.warn('⚠️ 서버 로그아웃 실패:', error);
     } finally {
       await clearTokens();
     }
@@ -108,7 +108,7 @@ export class AuthAPIService {
         });
 
         if (!refreshToken) {
-          console.error('❌ Refresh Token이 없습니다');
+          // console.error('❌ Refresh Token이 없습니다');
           return false;
         }
         const headers: Record<string, string> = {
@@ -136,10 +136,12 @@ export class AuthAPIService {
 
         if (!response.ok) {
           const errorText = await response.text();
+          /*
           console.error('❌ 토큰 갱신 실패:', {
             status: response.status,
             error: errorText,
           });
+          */
 
           if (response.status === 401 || response.status === 403) {
             console.log('🚪 인증 만료 - 토큰 클리어 및 재로그인 필요');
@@ -166,10 +168,10 @@ export class AuthAPIService {
           return true;
         }
 
-        console.warn('⚠️ 예상치 못한 응답 형식:', result);
+        // console.warn('⚠️ 예상치 못한 응답 형식:', result);
         return false;
       } catch (error) {
-        console.error('❌ 토큰 갱신 중 오류:', error);
+        // console.error('❌ 토큰 갱신 중 오류:', error);
         return false;
       } finally {
         isRefreshing = false;

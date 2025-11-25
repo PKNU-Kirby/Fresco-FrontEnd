@@ -49,7 +49,7 @@ export const useMembers = (fridgeId: number, _fridgeName: string) => {
       const currentFridge = refrigerators.find(r => r.id === fridgeId);
 
       if (!currentFridge) {
-        console.error('냉장고를 찾을 수 없습니다:', fridgeId);
+        // console.error('냉장고를 찾을 수 없습니다:', fridgeId);
         return;
       }
 
@@ -88,7 +88,7 @@ export const useMembers = (fridgeId: number, _fridgeName: string) => {
 
       setMembers(memberList);
     } catch (error) {
-      console.error('멤버 목록 로드 실패:', error);
+      // console.error('멤버 목록 로드 실패:', error);
       setErrorModalVisible(true);
     } finally {
       setIsLoading(false);

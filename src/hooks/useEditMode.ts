@@ -77,7 +77,7 @@ export const useEditMode = (initialItems: FridgeItem[]) => {
       // 이 부분은 상위 컴포넌트에서 처리하도록 콜백으로 전달
       return true;
     } catch (error) {
-      console.error('변경사항 적용 실패:', error);
+      // console.error('변경사항 적용 실패:', error);
       throw error;
     }
   }, [itemsToDelete, updatedItems]);

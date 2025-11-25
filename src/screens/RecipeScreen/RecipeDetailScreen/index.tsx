@@ -197,7 +197,7 @@ const RecipeDetailScreen: React.FC = () => {
 
           console.log('로드된 상세 레시피:', detailRecipe);
         } catch (error) {
-          console.error('레시피 상세 로드 실패:', error);
+          // console.error('레시피 상세 로드 실패:', error);
         } finally {
           setIsLoading(false);
         }
@@ -250,7 +250,7 @@ const RecipeDetailScreen: React.FC = () => {
           canDelete: isOwner,
         });
       } catch (error) {
-        console.error('❌ 권한 확인 실패:', error);
+        // console.error('❌ 권한 확인 실패:', error);
         setCanEdit(false);
         setCanDelete(false);
       }
@@ -361,7 +361,7 @@ const RecipeDetailScreen: React.FC = () => {
       }
       setIsEditMode(false);
     } catch (error) {
-      console.error('레시피 저장 실패:', error);
+      // console.error('레시피 저장 실패:', error);
       if (isNewRecipe) {
         modalHandlers.setSaveErrorVisible(true);
       } else {
@@ -384,7 +384,7 @@ const RecipeDetailScreen: React.FC = () => {
       setIsFavorite(result.favorite);
       console.log('✅ 즐겨찾기 상태:', result.favorite);
     } catch (error: any) {
-      console.error('❌ 즐겨찾기 토글 실패:', error);
+      // console.error('❌ 즐겨찾기 토글 실패:', error);
       modalHandlers.setFavoriteErrorVisible(true);
     }
   };
@@ -542,7 +542,7 @@ const RecipeDetailScreen: React.FC = () => {
       setCheckableFridges(fridges);
       setShowShareModal(true);
     } catch (error) {
-      console.error('냉장고 목록 로드 실패:', error);
+      // console.error('냉장고 목록 로드 실패:', error);
       modalHandlers.setFridgeLoadErrorVisible(true);
     }
   };
@@ -575,7 +575,7 @@ const RecipeDetailScreen: React.FC = () => {
           if (error.message?.includes('이미')) {
             console.log(`⚠️ 냉장고 ${fridge.id}에 이미 공유됨`);
           } else {
-            console.error(`❌ 냉장고 ${fridge.id} 공유 실패:`, error);
+            // console.error(`❌ 냉장고 ${fridge.id} 공유 실패:`, error);
           }
         }
       }
@@ -594,7 +594,7 @@ const RecipeDetailScreen: React.FC = () => {
 
       setShowShareModal(false);
     } catch (error) {
-      console.error('레시피 공유 실패:', error);
+      // console.error('레시피 공유 실패:', error);
       modalHandlers.setShareErrorVisible(true);
     }
   };

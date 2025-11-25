@@ -182,7 +182,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
                 ingredients: detailResponse.ingredients || [],
               };
             } catch (error) {
-              console.error(`레시피 ${recipe.id} 상세 로드 실패:`, error);
+              // console.error(`레시피 ${recipe.id} 상세 로드 실패:`, error);
               return recipe;
             }
           }
@@ -198,7 +198,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
       setRecipeAvailabilities(availabilities);
       console.log('✅ 검색 결과 가용성 계산 완료');
     } catch (error) {
-      console.error('❌ 가용성 계산 실패:', error);
+      // console.error('❌ 가용성 계산 실패:', error);
       setRecipeAvailabilities(new Map());
     }
   };
@@ -273,7 +273,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
         console.log('>> 즐겨찾기 제거');
       }
     } catch (error) {
-      console.error('X 즐겨찾기 토글 실패:', error);
+      // console.error('X 즐겨찾기 토글 실패:', error);
       setFavoriteErrorModalVisible(true);
     }
   };

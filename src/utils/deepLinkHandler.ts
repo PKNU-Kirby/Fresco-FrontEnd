@@ -46,7 +46,7 @@ export class DeepLinkHandler {
       }
       // 다른 딥링크 타입들 추가 가능
     } catch (error) {
-      console.error('딥링크 URL 파싱 실패:', error);
+      // console.error('딥링크 URL 파싱 실패:', error);
     }
   }
 
@@ -59,7 +59,7 @@ export class DeepLinkHandler {
     const memberCount = urlObj.searchParams.get('memberCount');
 
     if (!token) {
-      console.error('초대 토큰이 없습니다');
+      // console.error('초대 토큰이 없습니다');
       return;
     }
 
@@ -98,7 +98,7 @@ export class DeepLinkHandler {
       const userId = await AsyncStorage.getItem('userId');
       return !!userId;
     } catch (error) {
-      console.error('로그인 상태 확인 실패:', error);
+      // console.error('로그인 상태 확인 실패:', error);
       return false;
     }
   }
@@ -110,7 +110,7 @@ export class DeepLinkHandler {
         require('@react-native-async-storage/async-storage').default;
       await AsyncStorage.setItem('pendingInvite', JSON.stringify(inviteInfo));
     } catch (error) {
-      console.error('대기 중인 초대 저장 실패:', error);
+      // console.error('대기 중인 초대 저장 실패:', error);
     }
   }
 
@@ -128,7 +128,7 @@ export class DeepLinkHandler {
 
       return null;
     } catch (error) {
-      console.error('대기 중인 초대 가져오기 실패:', error);
+      // console.error('대기 중인 초대 가져오기 실패:', error);
       return null;
     }
   }

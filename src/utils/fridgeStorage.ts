@@ -60,7 +60,7 @@ const getFridgeItemsFromStorage = async (): Promise<FridgeItem[]> => {
     const itemsJson = await AsyncStorage.getItem(FRIDGE_ITEMS_KEY);
     return itemsJson ? JSON.parse(itemsJson) : [];
   } catch (error) {
-    console.error('AsyncStorage에서 냉장고 아이템 가져오기 실패:', error);
+    // console.error('AsyncStorage에서 냉장고 아이템 가져오기 실패:', error);
     return [];
   }
 };
@@ -78,7 +78,7 @@ const getFridgeItemsByFridgeIdFromStorage = async (
       return stringMatch || numberMatch;
     });
   } catch (error) {
-    console.error('AsyncStorage에서 특정 냉장고 아이템 가져오기 실패:', error);
+    // console.error('AsyncStorage에서 특정 냉장고 아이템 가져오기 실패:', error);
     return [];
   }
 };
@@ -92,7 +92,7 @@ export const getFridgeItemsByFridgeId = async (
   page: number = 0,
   size: number = 100,
 ): Promise<FridgeItem[]> => {
-  console.log(`API를 통해 냉장고 ${fridgeId} 아이템 조회 중...`);
+  // console.log(`API를 통해 냉장고 ${fridgeId} 아이템 조회 중...`);
 
   // ✅ categoryIds가 비어있으면 모든 카테고리 포함
   const finalCategoryIds =
@@ -112,7 +112,7 @@ export const getFridgeItemsByFridgeId = async (
     const mappedItems = response.content.map(item =>
       mapApiItemToFridgeItem(item, fridgeId),
     );
-    console.log('변환된 아이템들:', mappedItems);
+    // console.log('변환된 아이템들:', mappedItems);
     return mappedItems;
   }
 
@@ -143,9 +143,9 @@ export const updateFridgeItem = async (
       itemId,
       apiUpdates,
     );
-    console.log(`API를 통해 아이템 ${itemId} 업데이트 완료`);
+    // console.log(`API를 통해 아이템 ${itemId} 업데이트 완료`);
   } catch (error) {
-    console.error('API 업데이트 실패, AsyncStorage fallback:', error);
+    // console.error('API 업데이트 실패, AsyncStorage fallback:', error);
 
     // AsyncStorage fallback
     try {
@@ -159,9 +159,9 @@ export const updateFridgeItem = async (
         FRIDGE_ITEMS_KEY,
         JSON.stringify(updatedItems),
       );
-      console.log(`AsyncStorage를 통해 아이템 ${itemId} 업데이트 완료`);
+      // console.log(`AsyncStorage를 통해 아이템 ${itemId} 업데이트 완료`);
     } catch (storageError) {
-      console.error('AsyncStorage 업데이트도 실패:', storageError);
+      // console.error('AsyncStorage 업데이트도 실패:', storageError);
       throw error; // 원래 API 에러를 던짐
     }
   }
@@ -176,7 +176,7 @@ export const updateFridgeItem = async (
 export const batchDeleteItems = async (itemIds: number[]): Promise<void> => {
   try {
     await IngredientControllerAPI.batchDeleteIngredients(itemIds);
-    console.log(`API를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`);
+    // console.log(`API를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`);
 
     // API 삭제 성공 시 AsyncStorage도 정리
     try {
@@ -188,19 +188,19 @@ export const batchDeleteItems = async (itemIds: number[]): Promise<void> => {
         FRIDGE_ITEMS_KEY,
         JSON.stringify(updatedItems),
       );
-      console.log('AsyncStorage 동기화 완료');
+      // console.log('AsyncStorage 동기화 완료');
     } catch (syncError) {
-      console.warn('AsyncStorage 동기화 실패 (무시):', syncError);
+      // console.warn('AsyncStorage 동기화 실패 (무시):', syncError);
     }
   } catch (error) {
-    console.error('API 배치 삭제 실패:', error);
+    // console.error('API 배치 삭제 실패:', error);
 
     // 권한 오류(NP)는 서버에 이미 없는 것이므로 AsyncStorage만 정리
     if (
       error.message?.includes('권한') ||
       error.message?.includes('Permission')
     ) {
-      console.log('⚠️ 권한 오류 - 서버에 아이템 없음, AsyncStorage만 정리');
+      // console.log('⚠️ 권한 오류 - 서버에 아이템 없음, AsyncStorage만 정리');
       try {
         const existingItems = await getFridgeItemsFromStorage();
         const updatedItems = existingItems.filter(
@@ -210,10 +210,10 @@ export const batchDeleteItems = async (itemIds: number[]): Promise<void> => {
           FRIDGE_ITEMS_KEY,
           JSON.stringify(updatedItems),
         );
-        console.log(`AsyncStorage에서 ${itemIds.length}개 아이템 정리 완료`);
+        // console.log(`AsyncStorage에서 ${itemIds.length}개 아이템 정리 완료`);
         return; // 성공으로 처리
       } catch (storageError) {
-        console.error('AsyncStorage 정리 실패:', storageError);
+        // console.error('AsyncStorage 정리 실패:', storageError);
         throw storageError;
       }
     }
@@ -228,11 +228,13 @@ export const batchDeleteItems = async (itemIds: number[]): Promise<void> => {
         FRIDGE_ITEMS_KEY,
         JSON.stringify(updatedItems),
       );
+      /*
       console.log(
         `AsyncStorage를 통해 ${itemIds.length}개 아이템 배치 삭제 완료`,
       );
+      */
     } catch (storageError) {
-      console.error('AsyncStorage 배치 삭제도 실패:', storageError);
+      // console.error('AsyncStorage 배치 삭제도 실패:', storageError);
       throw error;
     }
   }
@@ -254,7 +256,7 @@ export const searchIngredients = async (
   try {
     return await IngredientControllerAPI.searchIngredients(keyword);
   } catch (error) {
-    console.error('식재료 검색 실패:', error);
+    // console.error('식재료 검색 실패:', error);
     return [];
   }
 };
@@ -268,7 +270,7 @@ export const findIngredientByName = async (
   try {
     return await IngredientControllerAPI.findIngredientByName(ingredientName);
   } catch (error) {
-    console.error('식재료 이름 검색 실패:', error);
+    // console.error('식재료 이름 검색 실패:', error);
     return null;
   }
 };
@@ -286,7 +288,7 @@ export const confirmMultipleIngredients = async (
       ingredientNames,
     );
   } catch (error) {
-    console.error('다중 식재료 검색 실패:', error);
+    // console.error('다중 식재료 검색 실패:', error);
     return ingredientNames.map(name => ({
       name,
       result: null,
@@ -319,7 +321,7 @@ export const addConfirmedIngredientsToFridge = async (
   }>,
 ): Promise<any> => {
   try {
-    console.log('확인된 식재료 추가 시작:', confirmedIngredients);
+    // console.log('확인된 식재료 추가 시작:', confirmedIngredients);
 
     // ConfirmedIngredient 형태로 변환
     const formattedIngredients: ConfirmedIngredient[] =
@@ -334,10 +336,10 @@ export const addConfirmedIngredientsToFridge = async (
       formattedIngredients,
     );
 
-    console.log('식재료 추가 API 응답:', response);
+    // console.log('식재료 추가 API 응답:', response);
     return response;
   } catch (error) {
-    console.error('API를 통한 식재료 추가 실패, AsyncStorage fallback:', error);
+    // console.error('API를 통한 식재료 추가 실패, AsyncStorage fallback:', error);
 
     // AsyncStorage fallback
     try {
@@ -368,10 +370,10 @@ export const addConfirmedIngredientsToFridge = async (
         JSON.stringify(updatedItems),
       );
 
-      console.log(`AsyncStorage를 통해 ${newItems.length}개 아이템 추가 완료`);
+      // console.log(`AsyncStorage를 통해 ${newItems.length}개 아이템 추가 완료`);
       return newItems;
     } catch (storageError) {
-      console.error('AsyncStorage 추가도 실패:', storageError);
+      // console.error('AsyncStorage 추가도 실패:', storageError);
       throw error; // 원래 API 에러를 던짐
     }
   }
@@ -405,10 +407,10 @@ export const addItemToFridge = async (
       createdAt: new Date().toISOString(),
     };
 
-    console.log('API를 통해 아이템 추가 완료:', mappedResult);
+    // console.log('API를 통해 아이템 추가 완료:', mappedResult);
     return mappedResult;
   } catch (error) {
-    console.error('API 추가 실패, AsyncStorage fallback:', error);
+    // console.error('API 추가 실패, AsyncStorage fallback:', error);
 
     // AsyncStorage fallback
     const existingItems = await getFridgeItemsFromStorage();
@@ -429,7 +431,7 @@ export const addItemToFridge = async (
     const updatedItems = [...existingItems, newItem];
     await AsyncStorage.setItem(FRIDGE_ITEMS_KEY, JSON.stringify(updatedItems));
 
-    console.log('AsyncStorage를 통해 아이템 추가 완료:', newItem);
+    // console.log('AsyncStorage를 통해 아이템 추가 완료:', newItem);
     return newItem;
   }
 };

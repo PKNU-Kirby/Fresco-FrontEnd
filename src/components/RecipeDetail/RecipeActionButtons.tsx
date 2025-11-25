@@ -63,7 +63,7 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
         } else if (responseData.data && Array.isArray(responseData.data)) {
           fridgeData = responseData.data;
         } else {
-          console.warn('⚠️ 예상하지 못한 응답 구조:', responseData);
+          // console.warn('⚠️ 예상하지 못한 응답 구조:', responseData);
           fridgeData = [];
         }
       } else {

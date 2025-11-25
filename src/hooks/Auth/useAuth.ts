@@ -59,7 +59,7 @@ export const useAuth = () => {
       setUser(null);
       return false;
     } catch (error) {
-      console.error('인증 상태 확인 실패:', error);
+      // console.error('인증 상태 확인 실패:', error);
       setIsAuthenticated(false);
       setUser(null);
       return false;
@@ -84,7 +84,7 @@ export const useAuth = () => {
 
         console.log('로그인 완료:', userData);
       } catch (error) {
-        console.error('로그인 처리 실패:', error);
+        // console.error('로그인 처리 실패:', error);
         throw error;
       }
     },
@@ -99,7 +99,7 @@ export const useAuth = () => {
       setTokenStatus(null);
       console.log('로그아웃 완료');
     } catch (error) {
-      console.error('로그아웃 처리 실패:', error);
+      // console.error('로그아웃 처리 실패:', error);
       throw error;
     }
   }, []);

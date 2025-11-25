@@ -58,7 +58,7 @@ export class UserFridgeManager {
       await this.addUserProfile(defaultUser);
       return defaultUser;
     } catch (error) {
-      console.error('현재 사용자 조회 실패:', error);
+      // console.error('현재 사용자 조회 실패:', error);
       return null;
     }
   }
@@ -77,7 +77,7 @@ export class UserFridgeManager {
 
       await AsyncStorage.setItem(USER_PROFILES_KEY, JSON.stringify(profiles));
     } catch (error) {
-      console.error('사용자 프로필 추가 실패:', error);
+      // console.error('사용자 프로필 추가 실패:', error);
       throw error;
     }
   }
@@ -88,7 +88,7 @@ export class UserFridgeManager {
       const profiles: User[] = stored ? JSON.parse(stored) : [];
       return profiles.find(p => p.id === userId) || null;
     } catch (error) {
-      console.error('사용자 프로필 조회 실패:', error);
+      // console.error('사용자 프로필 조회 실패:', error);
       return null;
     }
   }
@@ -148,7 +148,7 @@ export class UserFridgeManager {
       );
       return newFridge;
     } catch (error) {
-      console.error('냉장고 생성 실패:', error);
+      // console.error('냉장고 생성 실패:', error);
       throw error;
     }
   }
@@ -197,7 +197,7 @@ export class UserFridgeManager {
       // 냉장고 멤버 수 업데이트
       await this.updateFridgeMemberCount(fridgeId);
     } catch (error) {
-      console.error('refrigeratorUsers 관계 추가 실패:', error);
+      // console.error('refrigeratorUsers 관계 추가 실패:', error);
       throw error;
     }
   }
@@ -210,7 +210,7 @@ export class UserFridgeManager {
       const fridges: Refrigerator[] = stored ? JSON.parse(stored) : [];
       return fridges.find(f => f.inviteCode === inviteCode) || null;
     } catch (error) {
-      console.error('초대 코드로 냉장고 조회 실패:', error);
+      // console.error('초대 코드로 냉장고 조회 실패:', error);
       return null;
     }
   }
@@ -263,7 +263,7 @@ export class UserFridgeManager {
         fridge,
       };
     } catch (error) {
-      console.error('냉장고 참여 실패:', error);
+      // console.error('냉장고 참여 실패:', error);
       return { success: false, message: '냉장고 참여 중 오류가 발생했습니다.' };
     }
   }
@@ -305,7 +305,7 @@ export class UserFridgeManager {
 
       return { success: true, message: '냉장고에서 나갔습니다.' };
     } catch (error) {
-      console.error('냉장고 나가기 실패:', error);
+      // console.error('냉장고 나가기 실패:', error);
       return {
         success: false,
         message: '냉장고 나가기 중 오류가 발생했습니다.',
@@ -328,7 +328,7 @@ export class UserFridgeManager {
         ) || null
       );
     } catch (error) {
-      console.error('냉장고-사용자 관계 조회 실패:', error);
+      // console.error('냉장고-사용자 관계 조회 실패:', error);
       return null;
     }
   }
@@ -353,7 +353,7 @@ export class UserFridgeManager {
         );
       }
     } catch (error) {
-      console.error('냉장고-사용자 관계 업데이트 실패:', error);
+      // console.error('냉장고-사용자 관계 업데이트 실패:', error);
       throw error;
     }
   }
@@ -364,7 +364,7 @@ export class UserFridgeManager {
       const fridges: Refrigerator[] = stored ? JSON.parse(stored) : [];
       return fridges.find(f => f.id === fridgeId) || null;
     } catch (error) {
-      console.error('냉장고 조회 실패:', error);
+      // console.error('냉장고 조회 실패:', error);
       return null;
     }
   }
@@ -435,7 +435,7 @@ export class UserFridgeManager {
       );
       return userFridges;
     } catch (error) {
-      console.error('사용자 냉장고 목록 조회 실패:', error);
+      // console.error('사용자 냉장고 목록 조회 실패:', error);
       return [];
     }
   }
@@ -464,7 +464,7 @@ export class UserFridgeManager {
         await AsyncStorage.setItem(REFRIGERATORS_KEY, JSON.stringify(fridges));
       }
     } catch (error) {
-      console.error('냉장고 멤버 수 업데이트 실패:', error);
+      // console.error('냉장고 멤버 수 업데이트 실패:', error);
     }
   }
 
@@ -478,7 +478,7 @@ export class UserFridgeManager {
       ]);
       console.log('모든 냉장고 데이터가 초기화되었습니다.');
     } catch (error) {
-      console.error('데이터 초기화 실패:', error);
+      // console.error('데이터 초기화 실패:', error);
       throw error;
     }
   }

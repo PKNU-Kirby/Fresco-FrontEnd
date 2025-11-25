@@ -72,7 +72,7 @@ export class UsageHistoryAPI {
       console.log(`✅ 사용 기록 조회 완료: ${response.content.length}개`);
       return response;
     } catch (error) {
-      console.error('❌ 사용 기록 조회 실패:', error);
+      // console.error('❌ 사용 기록 조회 실패:', error);
       throw error;
     }
   }
@@ -113,7 +113,7 @@ export class UsageHistoryAPI {
       console.log(`✅ 전체 사용 기록 조회 완료: ${allRecords.length}개`);
       return allRecords;
     } catch (error) {
-      console.error('❌ 전체 사용 기록 조회 실패:', error);
+      // console.error('❌ 전체 사용 기록 조회 실패:', error);
       throw error;
     }
   }

@@ -91,7 +91,7 @@ export const useAddItemSave = (
             console.log(`❌ "${item.name}" → 검색 결과 없음`);
           }
         } catch (error) {
-          console.error(`식재료 "${item.name}" 검색 실패:`, error);
+          // console.error(`식재료 "${item.name}" 검색 실패:`, error);
         }
 
         processedItems.push({
@@ -132,10 +132,12 @@ export const useAddItemSave = (
         );
 
         if (invalidItems.length > 0) {
+          /*
           console.warn(
             'ingredientId가 없는 아이템들:',
             invalidItems.map(item => item.originalName),
           );
+          */
         }
 
         if (validItems.length === 0) {
@@ -174,7 +176,7 @@ export const useAddItemSave = (
         setSavedItemsCount(response.length);
         setShowSuccessModal(true);
       } catch (error) {
-        console.error('저장 실패:', error);
+        // console.error('저장 실패:', error);
 
         // 실패 시 AsyncStorage fallback
         if (
@@ -224,7 +226,7 @@ export const useAddItemSave = (
       setSavedItemsCount(savedItems.length);
       setShowSuccessModal(true);
     } catch (fallbackError) {
-      console.error('AsyncStorage fallback 저장도 실패:', fallbackError);
+      // console.error('AsyncStorage fallback 저장도 실패:', fallbackError);
       setErrorMessage('로컬 저장도 실패했습니다. 앱을 재시작해보세요.');
       setShowErrorModal(true);
     }

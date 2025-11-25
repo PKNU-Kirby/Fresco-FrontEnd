@@ -52,7 +52,7 @@ export const apiCallWithAuth = async (
 
     return response;
   } catch (error) {
-    console.error('API 호출 실패:', error);
+    // console.error('API 호출 실패:', error);
     throw error;
   }
 };
@@ -75,7 +75,7 @@ export const apiCall = async (
 
     return response;
   } catch (error) {
-    console.error('API 호출 실패:', error);
+    // console.error('API 호출 실패:', error);
     throw error;
   }
 };
@@ -177,7 +177,7 @@ export class ApiUtils {
     try {
       return btoa(unescape(encodeURIComponent(str)));
     } catch (error) {
-      console.error('Base64 인코딩 실패:', error);
+      // console.error('Base64 인코딩 실패:', error);
       return '';
     }
   }
@@ -189,7 +189,7 @@ export class ApiUtils {
     try {
       return decodeURIComponent(escape(atob(str)));
     } catch (error) {
-      console.error('Base64 디코딩 실패:', error);
+      // console.error('Base64 디코딩 실패:', error);
       return '';
     }
   }

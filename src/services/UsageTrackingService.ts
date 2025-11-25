@@ -51,7 +51,7 @@ export class UsageTrackingService {
       );
       console.log('사용 기록 추가됨:', newRecord);
     } catch (error) {
-      console.error('사용 기록 추가 실패:', error);
+      // console.error('사용 기록 추가 실패:', error);
     }
   }
 
@@ -61,7 +61,7 @@ export class UsageTrackingService {
       const stored = await AsyncStorage.getItem(USAGE_RECORDS_KEY);
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.error('사용 기록 조회 실패:', error);
+      // console.error('사용 기록 조회 실패:', error);
       return [];
     }
   }
@@ -102,7 +102,7 @@ export class UsageTrackingService {
         };
       });
     } catch (error) {
-      console.error('❌ 서버 사용 기록 조회 실패:', error);
+      // console.error('❌ 서버 사용 기록 조회 실패:', error);
       return [];
     }
   }
@@ -151,7 +151,7 @@ export class UsageTrackingService {
         totalElements: response.pageInfo.totalElements,
       };
     } catch (error) {
-      console.error('❌ 페이지네이션 사용 기록 조회 실패:', error);
+      // console.error('❌ 페이지네이션 사용 기록 조회 실패:', error);
       return {
         records: [],
         hasMore: false,
@@ -182,7 +182,7 @@ export class UsageTrackingService {
         avatar: avatar,
       };
     } catch (error) {
-      console.error('현재 사용자 정보 조회 실패:', error);
+      // console.error('현재 사용자 정보 조회 실패:', error);
       return null;
     }
   }
@@ -199,9 +199,11 @@ export class UsageTrackingService {
   ): Promise<void> {
     const userInfo = await this.getCurrentUserInfo();
     if (!userInfo) {
+      /*
       console.error(
         '사용자 정보를 찾을 수 없어 사용 기록을 저장할 수 없습니다.',
       );
+      */
       return;
     }
 
@@ -315,7 +317,7 @@ export class UsageTrackingService {
         }개의 오래된 사용 기록이 삭제되었습니다.`,
       );
     } catch (error) {
-      console.error('사용 기록 정리 실패:', error);
+      // console.error('사용 기록 정리 실패:', error);
     }
   }
 }

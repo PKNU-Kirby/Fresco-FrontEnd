@@ -51,7 +51,7 @@ export class InviteService {
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       };
     } catch (error) {
-      console.error('초대 정보 조회 실패:', error);
+      // console.error('초대 정보 조회 실패:', error);
       return null;
     }
   }
@@ -88,7 +88,7 @@ export class InviteService {
         message: '냉장고에 성공적으로 참여했습니다.',
       };
     } catch (error) {
-      console.error('초대 수락 실패:', error);
+      // console.error('초대 수락 실패:', error);
       return {
         success: false,
         message: '초대 수락 중 오류가 발생했습니다.',
@@ -127,7 +127,7 @@ export class InviteService {
         message: '초대를 거절했습니다.',
       };
     } catch (error) {
-      console.error('초대 거절 실패:', error);
+      // console.error('초대 거절 실패:', error);
       return {
         success: false,
         message: '초대 거절 중 오류가 발생했습니다.',
@@ -143,7 +143,7 @@ export class InviteService {
       const accessToken = await AsyncStorage.getItem('accessToken');
       return accessToken || '';
     } catch (error) {
-      console.error('액세스 토큰 조회 실패:', error);
+      // console.error('액세스 토큰 조회 실패:', error);
       return '';
     }
   }
@@ -174,7 +174,7 @@ export class InviteService {
       const token = Math.random().toString(36).substring(2, 15);
       return `myapp://invite?token=${token}&fridgeId=${fridgeId}`;
     } catch (error) {
-      console.error('초대 링크 생성 실패:', error);
+      // console.error('초대 링크 생성 실패:', error);
       return null;
     }
   }

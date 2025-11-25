@@ -59,7 +59,7 @@ export const useApiUsageHistory = (fridgeId?: number, userId?: number) => {
       setHasMore(data.hasMore);
       setPage(pageNum);
     } catch (error) {
-      console.error('사용 기록 로드 실패:', error);
+      // console.error('사용 기록 로드 실패:', error);
       setErrorMessage('사용 기록을 불러올 수 없습니다.');
       setErrorModalVisible(true);
     } finally {
@@ -93,7 +93,7 @@ export const useApiUsageHistory = (fridgeId?: number, userId?: number) => {
       // 기록 추가 후 목록 새로고침
       refresh();
     } catch (error) {
-      console.error('사용 기록 추가 실패:', error);
+      // console.error('사용 기록 추가 실패:', error);
       setErrorMessage('사용 기록을 저장할 수 없습니다.');
       setErrorModalVisible(true);
     }

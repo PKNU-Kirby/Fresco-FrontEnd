@@ -38,13 +38,13 @@ export class GroceryService {
         await AsyncStorageService.addToGroceryList(serverItem);
         console.log('✅ 로컬 저장 성공');
       } catch (localError) {
-        console.warn('⚠️ 로컬 저장 실패 (무시):', localError);
+        // console.warn('⚠️ 로컬 저장 실패 (무시):', localError);
         // 서버 저장은 성공했으니 계속 진행
       }
 
       return serverItem;
     } catch (error) {
-      console.error('❌ 장바구니 추가 실패:', error);
+      // console.error('❌ 장바구니 추가 실패:', error);
 
       // 서버 실패 시 AsyncStorage에만 저장 (오프라인 모드)
       console.log('📱 오프라인 모드: 로컬에만 저장');
@@ -74,7 +74,7 @@ export class GroceryService {
 
       return response.items;
     } catch (error) {
-      console.warn('⚠️ 서버 조회 실패, 로컬 데이터 사용:', error);
+      // console.warn('⚠️ 서버 조회 실패, 로컬 데이터 사용:', error);
       return await AsyncStorageService.getGroceryList();
     }
   }
@@ -90,7 +90,7 @@ export class GroceryService {
       await GroceryListAPI.deleteSingleItem(groceryListId, itemId);
       await AsyncStorageService.removeFromGroceryList(itemId);
     } catch (error) {
-      console.error('❌ 삭제 실패:', error);
+      // console.error('❌ 삭제 실패:', error);
       // 오프라인이면 로컬만 삭제
       await AsyncStorageService.removeFromGroceryList(itemId);
     }
@@ -117,7 +117,7 @@ export class GroceryService {
         purchased: !item.purchased,
       });
     } catch (error) {
-      console.error('❌ 상태 변경 실패:', error);
+      // console.error('❌ 상태 변경 실패:', error);
       // 오프라인이면 로컬만 업데이트
       await AsyncStorageService.updateGroceryItem(item.id, {
         purchased: !item.purchased,

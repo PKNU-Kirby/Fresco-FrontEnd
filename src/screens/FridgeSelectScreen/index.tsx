@@ -126,7 +126,7 @@ const FridgeSelectScreen = () => {
       console.log('냉장고 생성 완료:', response);
       return response;
     } catch (error) {
-      console.error('냉장고 생성 실패:', error);
+      // console.error('냉장고 생성 실패:', error);
       throw error;
     }
   };
@@ -137,7 +137,7 @@ const FridgeSelectScreen = () => {
       console.log('냉장고 업데이트 완료:', response);
       return response;
     } catch (error) {
-      console.error('냉장고 업데이트 실패:', error);
+      // console.error('냉장고 업데이트 실패:', error);
       throw error;
     }
   };
@@ -147,7 +147,7 @@ const FridgeSelectScreen = () => {
       await FridgeControllerAPI.delete(id);
       console.log('냉장고 삭제 완료:', id);
     } catch (error) {
-      console.error('냉장고 삭제 실패:', error);
+      // console.error('냉장고 삭제 실패:', error);
       throw error;
     }
   };
@@ -275,7 +275,7 @@ const FridgeSelectScreen = () => {
       await loadUserFridges();
       setSaveSuccessModalVisible(true);
     } catch (error) {
-      console.error('변경사항 저장 실패:', error);
+      // console.error('변경사항 저장 실패:', error);
       if (error.message.includes('403')) {
         console.log('403 에러 발생 - 사용자 ID 불일치 또는 권한 부족');
         setPermissionErrorModalVisible(true);

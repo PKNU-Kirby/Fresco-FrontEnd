@@ -40,7 +40,7 @@ export class PermissionAPIService {
         canDelete: hasPermission,
       };
     } catch (error) {
-      console.error(`냉장고 ${fridgeId} 권한 조회 실패:`, error);
+      // console.error(`냉장고 ${fridgeId} 권한 조회 실패:`, error);
       return {
         canEdit: false,
         canDelete: false,
@@ -53,9 +53,11 @@ export class PermissionAPIService {
    * @deprecated 더 이상 사용하지 않음. getFridgePermissions 사용
    */
   static async getUserPermissions(): Promise<FridgePermission[]> {
+    /*
     console.warn(
       'getUserPermissions는 deprecated됨. getFridgePermissions 사용 권장',
     );
+    */
     return [];
   }
 
@@ -76,7 +78,7 @@ export class PermissionAPIService {
         ? permissions.canEdit
         : permissions.canDelete;
     } catch (error) {
-      console.error('냉장고 권한 확인 실패:', error);
+      // console.error('냉장고 권한 확인 실패:', error);
       return false;
     }
   }

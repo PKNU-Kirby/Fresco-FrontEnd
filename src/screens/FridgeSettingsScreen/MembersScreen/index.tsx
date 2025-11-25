@@ -83,7 +83,7 @@ const MembersScreen = ({ route }: Props) => {
       await removeMember(memberId);
       setRemoveSuccessModalVisible(true);
     } catch (error) {
-      console.error('멤버 삭제 실패:', error);
+      // console.error('멤버 삭제 실패:', error);
       setRemoveErrorModalVisible(true);
     }
   };

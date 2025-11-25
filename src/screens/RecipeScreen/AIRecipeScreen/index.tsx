@@ -108,7 +108,7 @@ const AIRecipeScreen: React.FC = () => {
 
       setGeneratedRecipe(mappedRecipe);
     } catch (error: any) {
-      console.error('❌ AI 레시피 생성 실패:', error);
+      // console.error('❌ AI 레시피 생성 실패:', error);
       setGenerateErrorMessage(
         error.message || 'AI 레시피 생성에 실패했습니다. 다시 시도해주세요.',
       );
@@ -151,7 +151,7 @@ const AIRecipeScreen: React.FC = () => {
 
       setSaveSuccessVisible(true);
     } catch (error: any) {
-      console.error('❌ AI 레시피 저장 실패:', error);
+      // console.error('❌ AI 레시피 저장 실패:', error);
       setSaveErrorMessage(error.message || '레시피 저장에 실패했습니다.');
       setSaveErrorModalVisible(true);
     } finally {

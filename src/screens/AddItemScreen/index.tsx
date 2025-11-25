@@ -265,7 +265,7 @@ const AddItemScreen: React.FC = () => {
               );
             }
           } catch (error) {
-            console.error(`유효하지 않은 식재료 : "${item.name}"`, error);
+            // console.error(`유효하지 않은 식재료 : "${item.name}"`, error);
 
             const defaultCategory = getCategoryByName(item.itemCategory);
             const userInput = {
@@ -302,7 +302,7 @@ const AddItemScreen: React.FC = () => {
       setConfirmedIngredients(confirmedList);
       setIsEditMode(false);
     } catch (error) {
-      console.error('식재료 확인 실패:', error);
+      // console.error('식재료 확인 실패:', error);
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -348,7 +348,7 @@ const AddItemScreen: React.FC = () => {
           try {
             apiResult = JSON.parse(apiResult);
           } catch (error) {
-            console.error('저장 시 apiResult 파싱 실패:', error);
+            // console.error('저장 시 apiResult 파싱 실패:', error);
             apiResult = { ingredientId: -1, categoryId: 11 };
           }
         }
@@ -412,7 +412,7 @@ const AddItemScreen: React.FC = () => {
       setShowSuccessModal(true);
     } catch (error) {
       console.log('=== API 호출 실패 ===');
-      console.error('에러 상세:', error);
+      // console.error('에러 상세:', error);
 
       // 간단한 에러 메시지로 변경
       setErrorMessage(

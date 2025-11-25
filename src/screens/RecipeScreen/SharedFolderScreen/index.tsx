@@ -265,7 +265,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
         expiryDate: ing.expiryDate || ing.expirationDate || undefined,
       }));
     } catch (error) {
-      console.error(`❌ 냉장고 ${fridgeId} 식재료 로드 실패:`, error);
+      // console.error(`❌ 냉장고 ${fridgeId} 식재료 로드 실패:`, error);
       return [];
     }
   };
@@ -345,7 +345,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
         console.log(`  - ${fridge.fridge.name}: role=${fridge.role}`);
       });
     } catch (error: any) {
-      console.error('데이터 로드 실패:', error);
+      // console.error('데이터 로드 실패:', error);
       setLoadErrorMessage(
         '냉장고 정보를 불러오는데 실패했습니다.\n\n' + (error.message || ''),
       );
@@ -361,9 +361,11 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
     }
 
     if (!currentFridgeId) {
+      /*
       console.warn(
         '⚠️ 현재 접속 중인 냉장고 ID가 없어 가용성 계산을 건너뜁니다.',
       );
+      */
       setRecipeAvailabilities(new Map());
       return;
     }
@@ -391,7 +393,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
               );
               return updatedRecipe;
             } catch (error) {
-              console.error(`❌ [${recipe.title}] 상세 로드 실패:`, error);
+              // console.error(`❌ [${recipe.title}] 상세 로드 실패:`, error);
               return recipe;
             }
           }
@@ -416,7 +418,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
         }
       });
     } catch (error) {
-      console.error('❌ 조리 가능성 계산 실패:', error);
+      // console.error('❌ 조리 가능성 계산 실패:', error);
       setRecipeAvailabilities(new Map());
     }
   };
@@ -481,7 +483,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
       setDeleteSuccessVisible(true);
       setSelectedRecipeForDelete(null);
     } catch (error) {
-      console.error('레시피 삭제 실패:', error);
+      // console.error('레시피 삭제 실패:', error);
       setDeleteConfirmVisible(false);
       setDeleteErrorVisible(true);
       setSelectedRecipeForDelete(null);

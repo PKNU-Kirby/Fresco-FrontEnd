@@ -173,7 +173,7 @@ export const calculateRecipeAvailability = async (
       availableIngredients,
     };
   } catch (error) {
-    console.error('레시피 가용성 계산 실패:', error);
+    // console.error('레시피 가용성 계산 실패:', error);
     return {
       availableIngredientsCount: 0,
       totalIngredientsCount: recipe.ingredients?.length || 0,
@@ -252,7 +252,7 @@ export const calculateMultipleRecipeAvailability = async (
         availableIngredients,
       });
     } catch (error) {
-      console.error(`레시피 ${recipe.id} 가용성 계산 실패:`, error);
+      // console.error(`레시피 ${recipe.id} 가용성 계산 실패:`, error);
       results.set(recipe.id, {
         availableIngredientsCount: 0,
         totalIngredientsCount: recipe.ingredients?.length || 0,

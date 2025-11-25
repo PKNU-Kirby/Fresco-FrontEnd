@@ -246,9 +246,9 @@ export class ApiErrorHandler {
     };
 
     console.group(`🚨 API Error [${severity.toUpperCase()}]`);
-    console.error('Error Details:', logData);
+    // console.error('Error Details:', logData);
     if (error.stack) {
-      console.error('Stack Trace:', error.stack);
+      // console.error('Stack Trace:', error.stack);
     }
     console.groupEnd();
 
@@ -339,7 +339,7 @@ export class ModalHelper {
       );
     } else {
       // 폴백: console.error
-      console.error(`${alertData.title}: ${alertData.message}`);
+      // console.error(`${alertData.title}: ${alertData.message}`);
     }
   }
 
@@ -380,9 +380,11 @@ export class AlertHelper {
    * @deprecated ModalHelper.showErrorModal 사용을 권장합니다
    */
   static showErrorAlert(error: any, context?: string, onRetry?: () => void) {
+    /*
     console.warn(
       'AlertHelper.showErrorAlert is deprecated. Use ModalHelper.showErrorModal instead.',
     );
+    */
     ModalHelper.showErrorModal(error, context, onRetry);
   }
 
@@ -390,9 +392,11 @@ export class AlertHelper {
    * @deprecated ModalHelper.showSuccessModal 사용을 권장합니다
    */
   static showSuccessAlert(title: string, message: string, onOk?: () => void) {
+    /*
     console.warn(
       'AlertHelper.showSuccessAlert is deprecated. Use ModalHelper.showSuccessModal instead.',
     );
+    */
     ModalHelper.showSuccessModal(title, message, onOk);
   }
 
@@ -405,9 +409,11 @@ export class AlertHelper {
     onConfirm: () => void,
     onCancel?: () => void,
   ) {
+    /*
     console.warn(
       'AlertHelper.showConfirmAlert is deprecated. Use ModalHelper.showConfirmModal instead.',
     );
+    */
     ModalHelper.showConfirmModal(title, message, onConfirm, onCancel);
   }
 }

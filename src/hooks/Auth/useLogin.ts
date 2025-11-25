@@ -136,7 +136,7 @@ export const useLogin = (): UseLoginReturn => {
             throw new Error('토큰 저장 검증 실패');
           }
         } catch (tokenError) {
-          console.error('토큰 저장 실패:', tokenError);
+          // console.error('토큰 저장 실패:', tokenError);
           throw new Error('토큰 저장에 실패했습니다.');
         }
 
@@ -158,7 +158,7 @@ export const useLogin = (): UseLoginReturn => {
         console.log('createUserFromLogin 반환값:', user);
 
         if (!user || typeof user !== 'object' || !user.id) {
-          console.error('사용자 생성 실패: user 객체가 없거나 id가 없음');
+          // console.error('사용자 생성 실패: user 객체가 없거나 id가 없음');
           throw new Error('사용자 정보 저장에 실패했습니다.');
         }
 
@@ -170,7 +170,7 @@ export const useLogin = (): UseLoginReturn => {
           await AsyncStorage.setItem('defaultFridgeUserId', user.id);
           console.log('기본 냉장고 설정 완료');
         } catch (fridgeError) {
-          console.warn('기본 냉장고 초기화 실패:', fridgeError);
+          // console.warn('기본 냉장고 초기화 실패:', fridgeError);
         }
 
         // ⏱️ 토큰 저장 완료 후 약간의 딜레이 추가 (AsyncStorage 동기화 대기)
@@ -202,7 +202,7 @@ export const useLogin = (): UseLoginReturn => {
             // invitationInfo가 설정되면 LoginScreen의 useEffect에서 모달 표시
             return;
           } catch (inviteError) {
-            console.error('초대 정보 조회 실패:', inviteError);
+            // console.error('초대 정보 조회 실패:', inviteError);
             await AsyncStorage.removeItem('pendingInvitationCode');
             showErrorAlert('유효하지 않은 초대코드입니다.');
             // 실패하면 그냥 FridgeSelect로
@@ -227,7 +227,7 @@ export const useLogin = (): UseLoginReturn => {
         showErrorAlert(result.message || '로그인에 실패했습니다.');
       }
     } catch (error) {
-      console.error('>> 로그인 API 호출 실패:', error);
+      // console.error('>> 로그인 API 호출 실패:', error);
       let errorMessage = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
       if (error instanceof Error) {
         errorMessage = error.message;

@@ -135,7 +135,7 @@ export const useFridgeSelect = (navigation: any) => {
 
             return result;
           } catch (permError) {
-            console.error(`냉장고 ${fridge.id} 권한 조회 실패:`, permError);
+            // console.error(`냉장고 ${fridge.id} 권한 조회 실패:`, permError);
             // 권한 조회 실패 시 기본값
             const isOwner = fridge.userRole === 'owner';
             return {
@@ -174,7 +174,7 @@ export const useFridgeSelect = (navigation: any) => {
       setFridges(fridgesWithHiddenStatus);
       syncWithLocalStorage(fridgesWithHiddenStatus, targetUser);
     } catch (error: any) {
-      console.error('냉장고 목록 로딩 실패:', error);
+      // console.error('냉장고 목록 로딩 실패:', error);
 
       // 로컬 데이터 시도
       await loadLocalFridges(targetUser);
@@ -217,7 +217,7 @@ export const useFridgeSelect = (navigation: any) => {
       setFridges(localFridges);
       console.log('로컬 데이터 로딩 완료:', localFridges);
     } catch (localError) {
-      console.error('로컬 데이터 로딩도 실패:', localError);
+      // console.error('로컬 데이터 로딩도 실패:', localError);
 
       // 심각한 에러 - 모달 표시 필요
       setError({
@@ -250,11 +250,11 @@ export const useFridgeSelect = (navigation: any) => {
 
           console.log(`냉장고 ${removedFridge.id} 로컬 제거 완료`);
         } catch (error) {
-          console.error(`냉장고 ${removedFridge.id} 로컬 제거 실패:`, error);
+          // console.error(`냉장고 ${removedFridge.id} 로컬 제거 실패:`, error);
         }
       }
     } catch (error) {
-      console.error('로컬 냉장고 제거 전체 실패:', error);
+      // console.error('로컬 냉장고 제거 전체 실패:', error);
     }
   };
 
@@ -281,7 +281,7 @@ export const useFridgeSelect = (navigation: any) => {
 
       console.log('로컬 동기화 완료');
     } catch (error) {
-      console.error('로컬 동기화 실패:', error);
+      // console.error('로컬 동기화 실패:', error);
     }
   };
 

@@ -113,7 +113,7 @@ export class FridgeSettingsAPIService {
 
       return data.result || [];
     } catch (error) {
-      console.error('냉장고 멤버 조회 실패:', error);
+      // console.error('냉장고 멤버 조회 실패:', error);
       ApiErrorHandler.logError(error, 'FridgeSettingsAPI.getFridgeMembers');
       throw error;
     }
@@ -171,7 +171,7 @@ export class FridgeSettingsAPIService {
         };
       }
     } catch (error) {
-      console.error('냉장고 멤버 추가 실패:', error);
+      // console.error('냉장고 멤버 추가 실패:', error);
       ApiErrorHandler.logError(error, 'FridgeSettingsAPI.addFridgeMember');
       throw error;
     }
@@ -227,7 +227,7 @@ export class FridgeSettingsAPIService {
         }
       }
     } catch (error) {
-      console.error('냉장고 멤버 삭제 실패:', error);
+      // console.error('냉장고 멤버 삭제 실패:', error);
       ApiErrorHandler.logError(error, 'FridgeSettingsAPI.removeFridgeMember');
       throw error;
     }
@@ -255,7 +255,7 @@ export class FridgeSettingsAPIService {
 
       // AsyncStorageService 안전성 검사
       if (!AsyncStorageService) {
-        console.error('AsyncStorageService가 undefined입니다');
+        // console.error('AsyncStorageService가 undefined입니다');
         throw {
           status: 500,
           code: 'SERVICE_UNAVAILABLE',
@@ -264,7 +264,7 @@ export class FridgeSettingsAPIService {
       }
 
       if (typeof AsyncStorageService.getCurrentUser !== 'function') {
-        console.error('AsyncStorageService.getCurrentUser가 함수가 아닙니다');
+        // console.error('AsyncStorageService.getCurrentUser가 함수가 아닙니다');
         throw {
           status: 500,
           code: 'SERVICE_UNAVAILABLE',
@@ -277,7 +277,7 @@ export class FridgeSettingsAPIService {
         currentUser = await AsyncStorageService.getCurrentUser();
         console.log('getCurrentUser 결과:', currentUser);
       } catch (userError) {
-        console.error('getCurrentUser 호출 실패:', userError);
+        // console.error('getCurrentUser 호출 실패:', userError);
         throw {
           status: 500,
           code: 'USER_SERVICE_ERROR',
@@ -287,7 +287,7 @@ export class FridgeSettingsAPIService {
 
       // 사용자 정보가 없는 경우의 처리 개선
       if (!currentUser) {
-        console.warn('getCurrentUser가 null을 반환함');
+        // console.warn('getCurrentUser가 null을 반환함');
         // 대안: getCurrentUserId로 사용자 ID만이라도 가져오기
         try {
           const userId = await AsyncStorageService.getCurrentUserId();
@@ -307,7 +307,7 @@ export class FridgeSettingsAPIService {
             };
           }
         } catch (idError) {
-          console.error('사용자 ID 조회도 실패:', idError);
+          // console.error('사용자 ID 조회도 실패:', idError);
           throw {
             status: 401,
             code: 'USER_NOT_AUTHENTICATED',
@@ -372,7 +372,7 @@ export class FridgeSettingsAPIService {
 
       return result.refrigeratorInvitationId.toString();
     } catch (error) {
-      console.error('초대 코드 생성 실패:', error);
+      // console.error('초대 코드 생성 실패:', error);
       ApiErrorHandler.logError(error, 'FridgeSettingsAPI.generateInviteCode');
       throw error;
     }
@@ -426,7 +426,7 @@ export class FridgeSettingsAPIService {
 
       return data.result;
     } catch (error) {
-      console.error('초대장 정보 조회 실패:', error);
+      // console.error('초대장 정보 조회 실패:', error);
       ApiErrorHandler.logError(error, 'FridgeSettingsAPI.getInvitationInfo');
       throw error;
     }
@@ -483,7 +483,7 @@ export class FridgeSettingsAPIService {
 
       console.log('냉장고 참여 성공:', data);
     } catch (error) {
-      console.error('냉장고 참여 실패:', error);
+      // console.error('냉장고 참여 실패:', error);
       ApiErrorHandler.logError(
         error,
         'FridgeSettingsAPI.joinRefrigeratorByInvitation',
@@ -545,7 +545,7 @@ export class FridgeSettingsAPIService {
       console.log('초대 코드 유효성 검증 완료:', data.result);
       return data.result;
     } catch (error) {
-      console.error('초대 코드 유효성 검증 실패:', error);
+      // console.error('초대 코드 유효성 검증 실패:', error);
       ApiErrorHandler.logError(
         error,
         'FridgeSettingsAPI.validateInvitationCode',
@@ -604,7 +604,7 @@ export class FridgeSettingsAPIService {
 
       return data.result;
     } catch (error) {
-      console.error('알림 전송 실패:', error);
+      // console.error('알림 전송 실패:', error);
       ApiErrorHandler.logError(error, 'FridgeSettingsAPI.sendNotification');
       throw error;
     }
@@ -669,7 +669,7 @@ export class FridgeSettingsAPIService {
 
       return data.result;
     } catch (error) {
-      console.error('사용 히스토리 조회 실패:', error);
+      // console.error('사용 히스토리 조회 실패:', error);
       ApiErrorHandler.logError(error, 'FridgeSettingsAPI.getUsageHistory');
       throw error;
     }
@@ -685,7 +685,7 @@ export class FridgeSettingsAPIService {
         !AsyncStorageService ||
         typeof AsyncStorageService.getCurrentUserId !== 'function'
       ) {
-        console.error(
+        // console.error(
           'AsyncStorageService.getCurrentUserId를 사용할 수 없습니다',
         );
         throw {
@@ -699,7 +699,7 @@ export class FridgeSettingsAPIService {
       try {
         currentUserId = await AsyncStorageService.getCurrentUserId();
       } catch (userError) {
-        console.error('getCurrentUserId 호출 실패:', userError);
+        // console.error('getCurrentUserId 호출 실패:', userError);
         throw {
           status: 500,
           code: 'USER_SERVICE_ERROR',
@@ -717,7 +717,7 @@ export class FridgeSettingsAPIService {
 
       await this.removeFridgeMember(fridgeId, currentUserId);
     } catch (error) {
-      console.error('냉장고 나가기 실패:', error);
+      // console.error('냉장고 나가기 실패:', error);
       ApiErrorHandler.logError(error, 'FridgeSettingsAPI.leaveFridge');
       throw error;
     }
@@ -735,9 +735,11 @@ export class FridgeSettingsAPIService {
         !AsyncStorageService ||
         typeof AsyncStorageService.getCurrentUserId !== 'function'
       ) {
+        /*
         console.warn(
           'AsyncStorageService.getCurrentUserId를 사용할 수 없습니다',
         );
+        */
         return null;
       }
 
@@ -745,7 +747,7 @@ export class FridgeSettingsAPIService {
       try {
         currentUserId = await AsyncStorageService.getCurrentUserId();
       } catch (userError) {
-        console.warn('getCurrentUserId 호출 실패:', userError);
+        // console.warn('getCurrentUserId 호출 실패:', userError);
         return null;
       }
 
@@ -764,7 +766,7 @@ export class FridgeSettingsAPIService {
 
       return currentUserMember.role === 'OWNER' ? 'owner' : 'member';
     } catch (error) {
-      console.error('사용자 역할 확인 실패:', error);
+      // console.error('사용자 역할 확인 실패:', error);
       ApiErrorHandler.logError(error, 'FridgeSettingsAPI.getUserRoleInFridge');
       return null;
     }
@@ -798,7 +800,7 @@ export class UsageHistoryAPI {
       console.log(`사용 기록 조회 완료: ${response.content.length}개`);
       return response;
     } catch (error) {
-      console.error('사용 기록 조회 실패:', error);
+      // console.error('사용 기록 조회 실패:', error);
       throw error;
     }
   }
@@ -829,7 +831,7 @@ export class UsageHistoryAPI {
       console.log(`전체 사용 기록 조회 완료: ${allRecords.length}개`);
       return allRecords;
     } catch (error) {
-      console.error('전체 사용 기록 조회 실패:', error);
+      // console.error('전체 사용 기록 조회 실패:', error);
       throw error;
     }
   }

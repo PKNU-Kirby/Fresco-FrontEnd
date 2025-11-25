@@ -125,7 +125,7 @@ export const useFridgeSettings = (
       setMembers(memberList);
       setCurrentUserRole(isCurrentUserOwner ? 'owner' : 'member');
     } catch (error) {
-      console.error('멤버 목록 로드 실패:', error);
+      // console.error('멤버 목록 로드 실패:', error);
       setErrorMessage('멤버 목록을 불러올 수 없습니다.');
       setErrorModalVisible(true);
     } finally {
@@ -177,7 +177,7 @@ export const useFridgeSettings = (
         }),
       );
     } catch (error) {
-      console.error('로그아웃 실패:', error);
+      // console.error('로그아웃 실패:', error);
       setLogoutConfirmVisible(false);
       setLogoutErrorVisible(true);
     }
@@ -204,7 +204,7 @@ export const useFridgeSettings = (
       setDeletingModalVisible(false);
       setDeleteSuccessVisible(true);
     } catch (error) {
-      console.error('냉장고 삭제 실패:', error);
+      // console.error('냉장고 삭제 실패:', error);
       setDeletingModalVisible(false);
       setDeleteErrorMessage(
         error.message ||
@@ -246,7 +246,7 @@ export const useFridgeSettings = (
       setLeavingModalVisible(false);
       setLeaveSuccessVisible(true);
     } catch (error) {
-      console.error('냉장고 나가기 실패:', error);
+      // console.error('냉장고 나가기 실패:', error);
       setLeavingModalVisible(false);
       setLeaveErrorMessage(
         error.message ||

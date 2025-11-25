@@ -116,7 +116,7 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
       console.log('완성된 멤버 데이터:', memberList);
       setMembers(memberList);
     } catch (error) {
-      console.error('멤버 목록 로드 실패:', error);
+      // console.error('멤버 목록 로드 실패:', error);
       setErrorMessage('멤버 목록을 불러올 수 없습니다.');
       setErrorModalVisible(true);
       setMembers([]);
@@ -150,7 +150,7 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
 
       return { success: true };
     } catch (error) {
-      console.error('멤버 삭제 실패:', error);
+      // console.error('멤버 삭제 실패:', error);
       throw error;
     } finally {
       setIsLoading(false);

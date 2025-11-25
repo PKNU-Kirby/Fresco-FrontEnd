@@ -44,7 +44,7 @@ export const FridgeStorage = {
         JSON.stringify(items),
       );
     } catch (error) {
-      console.error('냉장고 아이템 저장 실패:', error);
+      // console.error('냉장고 아이템 저장 실패:', error);
       throw error;
     }
   },
@@ -55,7 +55,7 @@ export const FridgeStorage = {
       const itemsJson = await AsyncStorage.getItem(STORAGE_KEYS.FRIDGE_ITEMS);
       return itemsJson ? JSON.parse(itemsJson) : [];
     } catch (error) {
-      console.error('냉장고 아이템 조회 실패:', error);
+      // console.error('냉장고 아이템 조회 실패:', error);
       return [];
     }
   },
@@ -66,7 +66,7 @@ export const FridgeStorage = {
       const allItems = await this.getAllFridgeItems();
       return allItems.filter(item => item.fridgeId === fridgeId);
     } catch (error) {
-      console.error('특정 냉장고 아이템 조회 실패:', error);
+      // console.error('특정 냉장고 아이템 조회 실패:', error);
       return [];
     }
   },
@@ -88,7 +88,7 @@ export const FridgeStorage = {
 
       return itemWithId;
     } catch (error) {
-      console.error('냉장고 아이템 추가 실패:', error);
+      // console.error('냉장고 아이템 추가 실패:', error);
       throw error;
     }
   },
@@ -102,7 +102,7 @@ export const FridgeStorage = {
       );
       await this.saveFridgeItems(updatedItems);
     } catch (error) {
-      console.error('냉장고 아이템 업데이트 실패:', error);
+      // console.error('냉장고 아이템 업데이트 실패:', error);
       throw error;
     }
   },
@@ -114,7 +114,7 @@ export const FridgeStorage = {
       const filteredItems = allItems.filter(item => item.id !== itemId);
       await this.saveFridgeItems(filteredItems);
     } catch (error) {
-      console.error('냉장고 아이템 삭제 실패:', error);
+      // console.error('냉장고 아이템 삭제 실패:', error);
       throw error;
     }
   },
@@ -126,7 +126,7 @@ export const FridgeStorage = {
       const filteredItems = allItems.filter(item => item.fridgeId !== fridgeId);
       await this.saveFridgeItems(filteredItems);
     } catch (error) {
-      console.error('냉장고별 아이템 삭제 실패:', error);
+      // console.error('냉장고별 아이템 삭제 실패:', error);
       throw error;
     }
   },
@@ -140,7 +140,7 @@ export const FridgeStorage = {
       );
       await this.saveFridgeItems(updatedItems);
     } catch (error) {
-      console.error('아이템 수량 업데이트 실패:', error);
+      // console.error('아이템 수량 업데이트 실패:', error);
       throw error;
     }
   },
@@ -154,7 +154,7 @@ export const FridgeStorage = {
       );
       await this.saveFridgeItems(updatedItems);
     } catch (error) {
-      console.error('아이템 단위 업데이트 실패:', error);
+      // console.error('아이템 단위 업데이트 실패:', error);
       throw error;
     }
   },
@@ -168,7 +168,7 @@ export const FridgeStorage = {
       );
       await this.saveFridgeItems(updatedItems);
     } catch (error) {
-      console.error('아이템 소비기한 업데이트 실패:', error);
+      // console.error('아이템 소비기한 업데이트 실패:', error);
       throw error;
     }
   },
@@ -184,7 +184,7 @@ export const ItemCategoryStorage = {
         JSON.stringify(categories),
       );
     } catch (error) {
-      console.error('카테고리 저장 실패:', error);
+      // console.error('카테고리 저장 실패:', error);
       throw error;
     }
   },
@@ -212,7 +212,7 @@ export const ItemCategoryStorage = {
             '기타',
           ];
     } catch (error) {
-      console.error('카테고리 조회 실패:', error);
+      // console.error('카테고리 조회 실패:', error);
       return [];
     }
   },
@@ -226,7 +226,7 @@ export const ItemCategoryStorage = {
         await this.saveItemCategories(updatedCategories);
       }
     } catch (error) {
-      console.error('카테고리 추가 실패:', error);
+      // console.error('카테고리 추가 실패:', error);
       throw error;
     }
   },
@@ -240,7 +240,7 @@ export const ItemCategoryStorage = {
       );
       await this.saveItemCategories(filteredCategories);
     } catch (error) {
-      console.error('카테고리 삭제 실패:', error);
+      // console.error('카테고리 삭제 실패:', error);
       throw error;
     }
   },
@@ -256,7 +256,7 @@ export const RecipeStorage = {
         JSON.stringify(recipes),
       );
     } catch (error) {
-      console.error('개인 레시피 저장 실패:', error);
+      // console.error('개인 레시피 저장 실패:', error);
       throw error;
     }
   },
@@ -267,7 +267,7 @@ export const RecipeStorage = {
       const stored = await AsyncStorage.getItem(STORAGE_KEYS.PERSONAL_RECIPES);
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.error('개인 레시피 불러오기 실패:', error);
+      // console.error('개인 레시피 불러오기 실패:', error);
       return [];
     }
   },
@@ -279,7 +279,7 @@ export const RecipeStorage = {
       const updatedRecipes = [recipe, ...currentRecipes];
       await this.savePersonalRecipes(updatedRecipes);
     } catch (error) {
-      console.error('개인 레시피 추가 실패:', error);
+      // console.error('개인 레시피 추가 실패:', error);
       throw error;
     }
   },
@@ -293,7 +293,7 @@ export const RecipeStorage = {
       );
       await this.savePersonalRecipes(updatedRecipes);
     } catch (error) {
-      console.error('개인 레시피 업데이트 실패:', error);
+      // console.error('개인 레시피 업데이트 실패:', error);
       throw error;
     }
   },
@@ -321,7 +321,7 @@ export const RecipeStorage = {
 
       console.log(`개인 레시피 및 관련 공유 레시피 삭제 완료: ${recipeId}`);
     } catch (error) {
-      console.error('개인 레시피 삭제 실패:', error);
+      // console.error('개인 레시피 삭제 실패:', error);
       throw error;
     }
   },
@@ -337,7 +337,7 @@ export const FavoriteStorage = {
         JSON.stringify(favoriteIds),
       );
     } catch (error) {
-      console.error('즐겨찾기 저장 실패:', error);
+      // console.error('즐겨찾기 저장 실패:', error);
       throw error;
     }
   },
@@ -350,7 +350,7 @@ export const FavoriteStorage = {
       );
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.error('즐겨찾기 불러오기 실패:', error);
+      // console.error('즐겨찾기 불러오기 실패:', error);
       return [];
     }
   },
@@ -364,7 +364,7 @@ export const FavoriteStorage = {
         await this.saveFavoriteIds(updatedFavorites);
       }
     } catch (error) {
-      console.error('즐겨찾기 추가 실패:', error);
+      // console.error('즐겨찾기 추가 실패:', error);
       throw error;
     }
   },
@@ -376,7 +376,7 @@ export const FavoriteStorage = {
       const updatedFavorites = currentFavorites.filter(id => id !== recipeId);
       await this.saveFavoriteIds(updatedFavorites);
     } catch (error) {
-      console.error('즐겨찾기 제거 실패:', error);
+      // console.error('즐겨찾기 제거 실패:', error);
       throw error;
     }
   },
@@ -394,7 +394,7 @@ export const FavoriteStorage = {
         return true;
       }
     } catch (error) {
-      console.error('즐겨찾기 토글 실패:', error);
+      // console.error('즐겨찾기 토글 실패:', error);
       throw error;
     }
   },
@@ -410,7 +410,7 @@ export const SharedRecipeStorage = {
         JSON.stringify(recipes),
       );
     } catch (error) {
-      console.error('공유 레시피 저장 실패:', error);
+      // console.error('공유 레시피 저장 실패:', error);
       throw error;
     }
   },
@@ -421,7 +421,7 @@ export const SharedRecipeStorage = {
       const stored = await AsyncStorage.getItem(STORAGE_KEYS.SHARED_RECIPES);
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.error('공유 레시피 불러오기 실패:', error);
+      // console.error('공유 레시피 불러오기 실패:', error);
       return [];
     }
   },
@@ -435,7 +435,7 @@ export const SharedRecipeStorage = {
       );
       await this.saveSharedRecipes(updatedRecipes);
     } catch (error) {
-      console.error('공유 레시피 업데이트 실패:', error);
+      // console.error('공유 레시피 업데이트 실패:', error);
       throw error;
     }
   },
@@ -453,12 +453,12 @@ export const SharedRecipeStorage = {
 
       // 권한 확인: 본인이 공유한 레시피만 삭제 가능
       if (!recipeToDelete) {
-        console.warn('삭제하려는 레시피를 찾을 수 없습니다.');
+        // console.warn('삭제하려는 레시피를 찾을 수 없습니다.');
         return false;
       }
 
       if (recipeToDelete.sharedById !== currentUserId) {
-        console.warn('본인이 공유한 레시피만 삭제할 수 있습니다.');
+        // console.warn('본인이 공유한 레시피만 삭제할 수 있습니다.');
         return false;
       }
 
@@ -470,7 +470,7 @@ export const SharedRecipeStorage = {
       console.log(`공유 레시피 삭제 완료: ${recipeId}`);
       return true;
     } catch (error) {
-      console.error('공유 레시피 삭제 실패:', error);
+      // console.error('공유 레시피 삭제 실패:', error);
       throw error;
     }
   },
@@ -495,7 +495,7 @@ export const SharedRecipeStorage = {
         `원본 레시피 ${originalRecipeId}에 연결된 공유 레시피들 삭제 완료`,
       );
     } catch (error) {
-      console.error('연관된 공유 레시피 삭제 실패:', error);
+      // console.error('연관된 공유 레시피 삭제 실패:', error);
       throw error;
     }
   },
@@ -506,7 +506,7 @@ export const SharedRecipeStorage = {
       const allSharedRecipes = await this.getSharedRecipes();
       return allSharedRecipes.filter(recipe => recipe.sharedById === userId);
     } catch (error) {
-      console.error('사용자별 공유 레시피 조회 실패:', error);
+      // console.error('사용자별 공유 레시피 조회 실패:', error);
       return [];
     }
   },
@@ -521,7 +521,7 @@ export const SharedRecipeStorage = {
       const recipe = currentRecipes.find(r => r.id === recipeId);
       return recipe?.sharedById === currentUserId;
     } catch (error) {
-      console.error('공유 레시피 삭제 권한 확인 실패:', error);
+      // console.error('공유 레시피 삭제 권한 확인 실패:', error);
       return false;
     }
   },
@@ -537,7 +537,7 @@ export const SearchHistoryStorage = {
         JSON.stringify(history),
       );
     } catch (error) {
-      console.error('검색 히스토리 저장 실패:', error);
+      // console.error('검색 히스토리 저장 실패:', error);
       throw error;
     }
   },
@@ -548,7 +548,7 @@ export const SearchHistoryStorage = {
       const stored = await AsyncStorage.getItem(STORAGE_KEYS.SEARCH_HISTORY);
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.error('검색 히스토리 불러오기 실패:', error);
+      // console.error('검색 히스토리 불러오기 실패:', error);
       return [];
     }
   },
@@ -567,7 +567,7 @@ export const SearchHistoryStorage = {
       await this.saveSearchHistory(newHistory);
       return newHistory;
     } catch (error) {
-      console.error('검색어 추가 실패:', error);
+      // console.error('검색어 추가 실패:', error);
       return [];
     }
   },
@@ -580,7 +580,7 @@ export const SearchHistoryStorage = {
       await this.saveSearchHistory(updatedHistory);
       return updatedHistory;
     } catch (error) {
-      console.error('검색 히스토리 항목 삭제 실패:', error);
+      // console.error('검색 히스토리 항목 삭제 실패:', error);
       return [];
     }
   },
@@ -590,7 +590,7 @@ export const SearchHistoryStorage = {
     try {
       await this.saveSearchHistory([]);
     } catch (error) {
-      console.error('검색 히스토리 전체 삭제 실패:', error);
+      // console.error('검색 히스토리 전체 삭제 실패:', error);
       throw error;
     }
   },
@@ -632,7 +632,7 @@ export const FridgeInitializer = {
       // 카테고리 초기화는 getItemCategories에서 기본값으로 처리됨
       console.log('냉장고 초기 데이터 설정 완료');
     } catch (error) {
-      console.error('초기 데이터 설정 실패:', error);
+      // console.error('초기 데이터 설정 실패:', error);
     }
   },
 };
@@ -650,7 +650,7 @@ export const clearAllStorage = async (): Promise<void> => {
     ]);
     console.log('모든 저장 데이터 삭제 완료');
   } catch (error) {
-    console.error('전체 데이터 삭제 실패:', error);
+    // console.error('전체 데이터 삭제 실패:', error);
     throw error;
   }
 };

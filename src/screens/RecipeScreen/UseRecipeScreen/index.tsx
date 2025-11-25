@@ -263,7 +263,7 @@ const UseRecipeScreen: React.FC = () => {
 
       setShowCompleteSuccessModal(true);
     } catch (error) {
-      console.error('재료 차감/삭제 실패:', error);
+      // console.error('재료 차감/삭제 실패:', error);
       setErrorMessage('재료 처리 중 오류가 발생했습니다.');
       setShowCompleteErrorModal(true);
     }

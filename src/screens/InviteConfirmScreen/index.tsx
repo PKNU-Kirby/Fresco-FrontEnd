@@ -48,7 +48,7 @@ const InviteConfirmScreen = (): React.JSX.Element => {
         setShowErrorModal(true);
       }
     } catch (error) {
-      console.error('초대 수락 실패:', error);
+      // console.error('초대 수락 실패:', error);
       setErrorMessage('초대 수락 중 문제가 발생했습니다.');
       setShowErrorModal(true);
     } finally {

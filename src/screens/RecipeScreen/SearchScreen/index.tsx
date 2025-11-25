@@ -39,7 +39,7 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
         const storedHistory = await SearchHistoryStorage.getSearchHistory();
         setSearchHistory(storedHistory);
       } catch (error) {
-        console.error('검색 히스토리 로드 실패:', error);
+        // console.error('검색 히스토리 로드 실패:', error);
       }
     };
 
@@ -77,7 +77,7 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
         fridgeName,
       });
     } catch (error) {
-      console.error('검색 히스토리 저장 실패:', error);
+      // console.error('검색 히스토리 저장 실패:', error);
       navigation.replace('SearchResult', {
         query: searchQuery,
         fridgeId,
@@ -101,7 +101,7 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
         fridgeName,
       });
     } catch (error) {
-      console.error('검색 히스토리 업데이트 실패:', error);
+      // console.error('검색 히스토리 업데이트 실패:', error);
       navigation.replace('SearchResult', {
         query: item,
         fridgeId,
@@ -117,7 +117,7 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
       const newHistory = await SearchHistoryStorage.removeSearchQuery(item);
       setSearchHistory(newHistory);
     } catch (error) {
-      console.error('검색 히스토리 항목 삭제 실패:', error);
+      // console.error('검색 히스토리 항목 삭제 실패:', error);
     }
   };
 
@@ -128,7 +128,7 @@ const SearchScreen: React.FC<SearchScreenProps> = () => {
       await SearchHistoryStorage.clearSearchHistory();
       setSearchHistory([]);
     } catch (error) {
-      console.error('검색 히스토리 전체 삭제 실패:', error);
+      // console.error('검색 히스토리 전체 삭제 실패:', error);
     }
   };
 

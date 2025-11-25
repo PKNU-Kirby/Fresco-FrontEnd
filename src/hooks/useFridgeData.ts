@@ -69,7 +69,7 @@ export const useFridgeData = (fridgeId: number) => {
 
         console.log(`냉장고 ${fridgeId}의 아이템 로드 완료:`, items);
       } catch (error) {
-        console.error('냉장고 데이터 로드 실패:', error);
+        // console.error('냉장고 데이터 로드 실패:', error);
         const errorMessage =
           error instanceof Error ? error.message : '알 수 없는 오류';
         setError(errorMessage);
@@ -122,7 +122,7 @@ export const useFridgeData = (fridgeId: number) => {
         // 로컬 상태에서 제거
         setFridgeItems(prev => prev.filter(item => item.id !== itemId));
       } catch (error) {
-        console.error('아이템 삭제 실패:', error);
+        // console.error('아이템 삭제 실패:', error);
         throw error;
       }
     },
@@ -144,7 +144,7 @@ export const useFridgeData = (fridgeId: number) => {
   const updateItemUnitLocal = useCallback(
     (itemId: number, newUnit: UnitType) => {
       if (!ALLOWED_UNITS.includes(newUnit)) {
-        console.warn(`허용되지 않은 단위입니다: ${newUnit}`);
+        // console.warn(`허용되지 않은 단위입니다: ${newUnit}`);
         return;
       }
 
@@ -181,7 +181,7 @@ export const useFridgeData = (fridgeId: number) => {
           ),
         );
       } catch (error) {
-        console.error('수량 업데이트 실패:', error);
+        // console.error('수량 업데이트 실패:', error);
         throw error;
       }
     },
@@ -192,7 +192,7 @@ export const useFridgeData = (fridgeId: number) => {
   const updateItemUnit = useCallback(
     async (itemId: number, newUnit: UnitType) => {
       if (!ALLOWED_UNITS.includes(newUnit)) {
-        console.warn(`허용되지 않은 단위입니다: ${newUnit}`);
+        // console.warn(`허용되지 않은 단위입니다: ${newUnit}`);
         return;
       }
 
@@ -206,7 +206,7 @@ export const useFridgeData = (fridgeId: number) => {
           ),
         );
       } catch (error) {
-        console.error('단위 업데이트 실패:', error);
+        // console.error('단위 업데이트 실패:', error);
         throw error;
       }
     },
@@ -226,7 +226,7 @@ export const useFridgeData = (fridgeId: number) => {
           ),
         );
       } catch (error) {
-        console.error('소비기한 업데이트 실패:', error);
+        // console.error('소비기한 업데이트 실패:', error);
         throw error;
       }
     },
@@ -301,7 +301,7 @@ export const useFridgeData = (fridgeId: number) => {
 
         return changedItems.length;
       } catch (error) {
-        console.error('편집 변경사항 적용 실패:', error);
+        // console.error('편집 변경사항 적용 실패:', error);
         throw error;
       }
     },
@@ -314,7 +314,7 @@ export const useFridgeData = (fridgeId: number) => {
       await ItemCategoryStorage.saveItemCategories(newCategories);
       setItemCategories(newCategories);
     } catch (error) {
-      console.error('카테고리 업데이트 실패:', error);
+      // console.error('카테고리 업데이트 실패:', error);
       throw error;
     }
   }, []);

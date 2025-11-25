@@ -141,14 +141,14 @@ export class RecipeAPI {
       const apiRecipes = await ApiService.apiCall<ApiRecipe[]>('/recipe/list');
       return apiRecipes.map(RecipeTypeConverter.apiToFrontend);
     } catch (error: any) {
-      console.error('레시피 목록 조회 실패:', error);
+      // console.error('레시피 목록 조회 실패:', error);
 
       // 권한 에러 -> 빈 배열 반환
       if (
         error.message?.includes('권한') ||
         error.message?.includes('Permission')
       ) {
-        console.warn('⚠️ 레시피 목록 접근 권한 없음 - 빈 배열 반환');
+        // console.warn('⚠️ 레시피 목록 접근 권한 없음 - 빈 배열 반환');
         return [];
       }
 
@@ -164,13 +164,13 @@ export class RecipeAPI {
       );
       return apiRecipes.map(RecipeTypeConverter.apiToFrontend);
     } catch (error: any) {
-      console.error('즐겨찾기 레시피 조회 실패:', error);
+      // console.error('즐겨찾기 레시피 조회 실패:', error);
 
       if (
         error.message?.includes('권한') ||
         error.message?.includes('Permission')
       ) {
-        console.warn('⚠️ 즐겨찾기 접근 권한 없음 - 빈 배열 반환');
+        // console.warn('⚠️ 즐겨찾기 접근 권한 없음 - 빈 배열 반환');
         return [];
       }
 
@@ -195,16 +195,18 @@ export class RecipeAPI {
       console.log('O 공유 레시피 조회 성공:', apiRecipes.length);
       return apiRecipes.map(RecipeTypeConverter.apiToFrontend);
     } catch (error: any) {
+      /*
       console.error('X 공유 레시피 조회 실패:', {
         error: error.message,
         refrigeratorId,
       });
+      */
 
       if (
         error.message?.includes('권한') ||
         error.message?.includes('Permission')
       ) {
-        console.warn('!! 공유 레시피 접근 권한 없음 - 빈 배열 반환');
+        // console.warn('!! 공유 레시피 접근 권한 없음 - 빈 배열 반환');
         return [];
       }
 
@@ -236,7 +238,7 @@ export class RecipeAPI {
         })),
       };
     } catch (error) {
-      console.error('레시피 상세 조회 실패:', error);
+      // console.error('레시피 상세 조회 실패:', error);
       throw error;
     }
   }
@@ -271,7 +273,7 @@ export class RecipeAPI {
 
       return RecipeTypeConverter.apiToFrontend(apiRecipe);
     } catch (error) {
-      console.error('레시피 생성 실패:', error);
+      // console.error('레시피 생성 실패:', error);
       throw error;
     }
   }
@@ -312,7 +314,7 @@ export class RecipeAPI {
 
       return convertedRecipe;
     } catch (error) {
-      console.error('레시피 수정 실패:', error);
+      // console.error('레시피 수정 실패:', error);
       throw error;
     }
   }
@@ -323,7 +325,7 @@ export class RecipeAPI {
         method: 'DELETE',
       });
     } catch (error) {
-      console.error('레시피 삭제 실패:', error);
+      // console.error('레시피 삭제 실패:', error);
       throw error;
     }
   }
@@ -342,7 +344,7 @@ export class RecipeAPI {
 
       return result;
     } catch (error) {
-      console.error('즐겨찾기 토글 실패:', error);
+      // console.error('즐겨찾기 토글 실패:', error);
       throw error;
     }
   }
@@ -366,7 +368,7 @@ export class RecipeAPI {
         },
       );
     } catch (error) {
-      console.error('레시피 공유 실패:', error);
+      // console.error('레시피 공유 실패:', error);
       throw error;
     }
   }
@@ -383,7 +385,7 @@ export class RecipeAPI {
 
       return apiRecipes.map(RecipeTypeConverter.apiToFrontend);
     } catch (error) {
-      console.error('레시피 검색 실패:', error);
+      // console.error('레시피 검색 실패:', error);
       throw error;
     }
   }
@@ -398,7 +400,7 @@ export class RecipeAPI {
     try {
       return await ApiService.apiCall(`/recipe/expiry/${refrigeratorId}`);
     } catch (error) {
-      console.error('소비기한 레시피 조회 실패:', error);
+      // console.error('소비기한 레시피 조회 실패:', error);
       throw error;
     }
   }
@@ -415,7 +417,7 @@ export class RecipeAPI {
         body: JSON.stringify(requestData),
       });
     } catch (error) {
-      console.error('재료 사용 처리 실패:', error);
+      // console.error('재료 사용 처리 실패:', error);
       throw error;
     }
   }
@@ -425,7 +427,7 @@ export class RecipeAPI {
     try {
       return await ApiService.apiCall(`/recipe/cook/stocks/${refrigeratorId}`);
     } catch (error) {
-      console.error('조리 재고 조회 실패:', error);
+      // console.error('조리 재고 조회 실패:', error);
       throw error;
     }
   }
@@ -443,7 +445,7 @@ export class RecipeAPI {
       console.log('✅ AI 레시피 추천 성공:', result);
       return result;
     } catch (error: any) {
-      console.error('❌ AI 레시피 추천 실패:', error);
+      // console.error('❌ AI 레시피 추천 실패:', error);
       throw new Error(error.message || 'AI 레시피 생성에 실패했습니다.');
     }
   }
@@ -463,7 +465,7 @@ export class RecipeAPI {
       console.log('✅ AI 레시피 저장 성공:', result);
       return result;
     } catch (error: any) {
-      console.error('❌ AI 레시피 저장 실패:', error);
+      // console.error('❌ AI 레시피 저장 실패:', error);
       throw new Error(error.message || 'AI 레시피 저장에 실패했습니다.');
     }
   }

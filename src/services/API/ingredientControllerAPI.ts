@@ -230,7 +230,7 @@ export class IngredientControllerAPI {
 
       return this.convertScanToConfirmed(scanResults, scanMode);
     } catch (error) {
-      console.error('안전 스캔 처리 실패:', error);
+      // console.error('안전 스캔 처리 실패:', error);
       throw error;
     }
   }
@@ -380,11 +380,11 @@ export class IngredientControllerAPI {
         });
 
         if (fileBlob.size === 0) {
-          console.error('❌ 파일 크기가 0바이트입니다!');
+          // console.error('❌ 파일 크기가 0바이트입니다!');
           return;
         }
       } catch (fileError) {
-        console.error('❌ 파일 읽기 실패:', fileError);
+        // console.error('❌ 파일 읽기 실패:', fileError);
         return;
       }
 
@@ -421,7 +421,7 @@ export class IngredientControllerAPI {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     } catch (error) {
-      console.error('FormData 검증 중 오류:', error);
+      // console.error('FormData 검증 중 오류:', error);
     }
   }
 
@@ -456,7 +456,7 @@ export class IngredientControllerAPI {
         response: responseText,
       });
     } catch (error) {
-      console.error('refrigeratorId 테스트 실패:', error);
+      // console.error('refrigeratorId 테스트 실패:', error);
     }
 
     // 2. 완전한 요청 (더미 이미지 + refrigeratorId)
@@ -487,7 +487,7 @@ export class IngredientControllerAPI {
         response: responseText,
       });
     } catch (error) {
-      console.error('완전한 요청 테스트 실패:', error);
+      // console.error('완전한 요청 테스트 실패:', error);
     }
   }
   /**
@@ -508,7 +508,7 @@ export class IngredientControllerAPI {
       !file.uri.startsWith('content://') &&
       !file.uri.startsWith('data:')
     ) {
-      console.warn('비표준 이미지 URI 형식:', file.uri);
+      // console.warn('비표준 이미지 URI 형식:', file.uri);
     }
 
     // 파일 크기 체크 (10MB)
@@ -543,7 +543,7 @@ export class IngredientControllerAPI {
 
       return headers;
     } catch (error) {
-      console.error('인증 헤더 생성 실패:', error);
+      // console.error('인증 헤더 생성 실패:', error);
       return {};
     }
   }
@@ -588,7 +588,7 @@ export class IngredientControllerAPI {
       // 실제 이미지인 경우 실제 API 호출 (refrigeratorId 제거)
       return await this.scanPhoto(imageUri);
     } catch (error) {
-      console.error('시뮬레이터 사진 스캔 실패:', error);
+      // console.error('시뮬레이터 사진 스캔 실패:', error);
       throw error;
     }
   }
@@ -631,7 +631,7 @@ export class IngredientControllerAPI {
       // 실제 이미지인 경우 실제 API 호출
       return await this.scanReceipt(imageUri);
     } catch (error) {
-      console.error('시뮬레이터 영수증 스캔 실패:', error);
+      // console.error('시뮬레이터 영수증 스캔 실패:', error);
       throw error;
     }
   }
@@ -683,7 +683,7 @@ export class IngredientControllerAPI {
 
       return this.convertScanToConfirmed(scanResults, scanMode);
     } catch (error) {
-      console.error('안전 스캔 처리 실패:', error);
+      // console.error('안전 스캔 처리 실패:', error);
       throw error;
     }
   }
@@ -778,7 +778,7 @@ export class IngredientControllerAPI {
       console.log(`검색 결과: ${response.length}개`);
       return response;
     } catch (error) {
-      console.error('식재료 검색 실패:', error);
+      // console.error('식재료 검색 실패:', error);
       throw new Error(`식재료 검색에 실패했습니다: ${error.message}`);
     }
   }
@@ -819,7 +819,7 @@ export class IngredientControllerAPI {
       console.log(`조회 결과: ${response.content?.length || 0}개 아이템`);
       return response;
     } catch (error) {
-      console.error('냉장고 식재료 조회 실패:', error);
+      // console.error('냉장고 식재료 조회 실패:', error);
       throw new Error(
         `냉장고 식재료를 불러오는데 실패했습니다: ${error.message}`,
       );
@@ -845,7 +845,7 @@ export class IngredientControllerAPI {
       console.log(`조회된 식재료: ${result.content.length}개`);
       return result.content;
     } catch (error) {
-      console.error('식재료 조회 실패:', error);
+      // console.error('식재료 조회 실패:', error);
       throw error;
     }
   }
@@ -883,7 +883,7 @@ export class IngredientControllerAPI {
       return response;
     } catch (error) {
       console.log('=== API 응답 실패 ===');
-      console.error('API 에러:', error);
+      // console.error('API 에러:', error);
       throw new Error(`식재료 추가에 실패했습니다: ${error.message}`);
     }
   }
@@ -925,7 +925,7 @@ export class IngredientControllerAPI {
       console.log('식재료 수정 성공:', response);
       return response;
     } catch (error) {
-      console.error('식재료 수정 실패:', error);
+      // console.error('식재료 수정 실패:', error);
       throw new Error(`식재료 수정에 실패했습니다: ${error.message}`);
     }
   }
@@ -947,7 +947,7 @@ export class IngredientControllerAPI {
 
       return null;
     } catch (error) {
-      console.error('식재료 검색 실패:', error);
+      // console.error('식재료 검색 실패:', error);
       throw new Error(`"${ingredientName}" 식재료를 찾을 수 없습니다.`);
     }
   }
@@ -1004,8 +1004,8 @@ export class IngredientControllerAPI {
         return; // 예외를 던지지 않고 정상 종료
       }
 
-      console.error('❌ 배치 삭제 실패');
-      console.error('에러:', error.message);
+      // console.error('❌ 배치 삭제 실패');
+      // console.error('에러:', error.message);
       throw error;
     }
   }
@@ -1034,7 +1034,7 @@ export class IngredientControllerAPI {
       }
       return date.toISOString().split('T')[0];
     } catch (error) {
-      console.warn('날짜 형식 변환 실패, 기본값 사용:', dateString);
+      // console.warn('날짜 형식 변환 실패, 기본값 사용:', dateString);
       const defaultDate = new Date();
       defaultDate.setMonth(defaultDate.getMonth() + 1);
       return defaultDate.toISOString().split('T')[0];
@@ -1126,7 +1126,7 @@ export class IngredientControllerAPI {
         }
       }
     } catch (error) {
-      console.error('모든 스캔 시도 실패:', error);
+      // console.error('모든 스캔 시도 실패:', error);
       throw new Error(
         `이미지 스캔에 실패했습니다. 서버 문제일 수 있습니다: ${error.message}`,
       );
@@ -1176,7 +1176,7 @@ export class IngredientControllerAPI {
         }
       }
     } catch (error) {
-      console.error('모든 영수증 스캔 시도 실패:', error);
+      // console.error('모든 영수증 스캔 시도 실패:', error);
       throw new Error(
         `영수증 스캔에 실패했습니다. 서버 문제일 수 있습니다: ${error.message}`,
       );
@@ -1242,7 +1242,7 @@ export class IngredientControllerAPI {
 
       return this.convertScanToConfirmed(scanResults, scanMode);
     } catch (error) {
-      console.error('안전 스캔 처리 실패:', error);
+      // console.error('안전 스캔 처리 실패:', error);
 
       // 최종 폴백: 에러가 발생해도 기본 결과 제공
       console.log('최종 폴백: 기본 결과 제공');
@@ -1257,7 +1257,7 @@ export class IngredientControllerAPI {
 
         return this.convertScanToConfirmed(fallbackResults, scanMode);
       } catch (fallbackError) {
-        console.error('최종 폴백도 실패:', fallbackError);
+        // console.error('최종 폴백도 실패:', fallbackError);
         throw new Error(
           `이미지 스캔에 완전히 실패했습니다. 네트워크 또는 서버 문제가 있을 수 있습니다.`,
         );
@@ -1345,11 +1345,11 @@ export class IngredientControllerAPI {
         });
 
         if (fileBlob.size === 0) {
-          console.error('❌ 파일 크기가 0바이트입니다!');
+          // console.error('❌ 파일 크기가 0바이트입니다!');
           return;
         }
       } catch (fileError) {
-        console.error('❌ 파일 읽기 실패:', fileError);
+        // console.error('❌ 파일 읽기 실패:', fileError);
         return;
       }
 
@@ -1405,14 +1405,16 @@ export class IngredientControllerAPI {
 
       // Content-Type이 명시적으로 설정되지 않았는지 확인
       if (headers['Content-Type']) {
+        /*
         console.warn(
           '⚠️ Content-Type이 수동으로 설정됨. FormData 사용 시 제거해야 함',
         );
+        */
       } else {
         console.log('✅ Content-Type 미설정 (FormData가 자동 설정)');
       }
     } catch (error) {
-      console.error('FormData 검증 중 오류:', error);
+      // console.error('FormData 검증 중 오류:', error);
     }
   }
 
@@ -1435,7 +1437,7 @@ export class IngredientControllerAPI {
       // 임시로 원본 이미지 그대로 반환 (실제로는 압축 처리)
       return imageUri;
     } catch (error) {
-      console.error('이미지 전처리 실패:', error);
+      // console.error('이미지 전처리 실패:', error);
       return imageUri; // 실패하면 원본 사용
     }
   }
@@ -1483,7 +1485,7 @@ export class IngredientControllerAPI {
         }
       }
     } catch (error) {
-      console.error('모든 스캔 시도 실패:', error);
+      // console.error('모든 스캔 시도 실패:', error);
       throw error;
     }
   }
@@ -1606,7 +1608,7 @@ export class IngredientControllerAPI {
 
       return this.convertScanToConfirmed(scanResults, scanMode);
     } catch (error) {
-      console.error('강화된 스캔 실패:', error);
+      // console.error('강화된 스캔 실패:', error);
       throw error;
     }
   }

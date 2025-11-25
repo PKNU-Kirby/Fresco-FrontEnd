@@ -111,7 +111,7 @@ export class AsyncStorageService {
     try {
       return await AsyncStorage.getItem('accessToken');
     } catch (error) {
-      console.error('getAuthToken error:', error);
+      // console.error('getAuthToken error:', error);
       return null;
     }
   }
@@ -120,7 +120,7 @@ export class AsyncStorageService {
     try {
       await AsyncStorage.setItem('accessToken', token);
     } catch (error) {
-      console.error('setAuthToken error:', error);
+      // console.error('setAuthToken error:', error);
       throw error;
     }
   }
@@ -129,7 +129,7 @@ export class AsyncStorageService {
     try {
       await AsyncStorage.removeItem('accessToken');
     } catch (error) {
-      console.error('clearAuthToken error:', error);
+      // console.error('clearAuthToken error:', error);
       throw error;
     }
   }
@@ -139,7 +139,7 @@ export class AsyncStorageService {
       await AsyncStorage.setItem('refreshToken', token);
       console.log('리프레시 토큰 저장됨');
     } catch (error) {
-      console.error('리프레시 토큰 저장 실패:', error);
+      // console.error('리프레시 토큰 저장 실패:', error);
       throw error;
     }
   }
@@ -148,7 +148,7 @@ export class AsyncStorageService {
     try {
       return await AsyncStorage.getItem('refreshToken');
     } catch (error) {
-      console.error('리프레시 토큰 조회 실패:', error);
+      // console.error('리프레시 토큰 조회 실패:', error);
       return null;
     }
   }
@@ -158,7 +158,7 @@ export class AsyncStorageService {
       await AsyncStorage.removeItem('refreshToken');
       console.log('리프레시 토큰 삭제됨');
     } catch (error) {
-      console.error('리프레시 토큰 삭제 실패:', error);
+      // console.error('리프레시 토큰 삭제 실패:', error);
       throw error;
     }
   }
@@ -184,7 +184,7 @@ export class AsyncStorageService {
       ]);
       console.log('모든 인증 데이터 삭제됨');
     } catch (error) {
-      console.error('인증 데이터 삭제 실패:', error);
+      // console.error('인증 데이터 삭제 실패:', error);
       throw error;
     }
   }
@@ -197,7 +197,7 @@ export class AsyncStorageService {
     try {
       await AsyncStorage.setItem('currentUser', JSON.stringify(user));
     } catch (error) {
-      console.error('setCurrentUser error:', error);
+      // console.error('setCurrentUser error:', error);
       throw error;
     }
   }
@@ -207,7 +207,7 @@ export class AsyncStorageService {
       const userJson = await AsyncStorage.getItem('currentUser');
       return userJson ? JSON.parse(userJson) : null;
     } catch (error) {
-      console.error('getCurrentUser error:', error);
+      // console.error('getCurrentUser error:', error);
       return null;
     }
   }
@@ -216,7 +216,7 @@ export class AsyncStorageService {
     try {
       await AsyncStorage.removeItem('currentUser');
     } catch (error) {
-      console.error('clearCurrentUser error:', error);
+      // console.error('clearCurrentUser error:', error);
       throw error;
     }
   }
@@ -225,7 +225,7 @@ export class AsyncStorageService {
     try {
       await AsyncStorage.setItem('currentUserId', userId);
     } catch (error) {
-      console.error('setCurrentUserId error:', error);
+      // console.error('setCurrentUserId error:', error);
       throw error;
     }
   }
@@ -262,10 +262,10 @@ export class AsyncStorageService {
         return storedUserId;
       }
 
-      console.error('X 모든 방법으로 userId 조회 실패');
+      // console.error('X 모든 방법으로 userId 조회 실패');
       return null;
     } catch (error) {
-      console.error('X 사용자 ID 조회 중 오류:', error);
+      // console.error('X 사용자 ID 조회 중 오류:', error);
       return null;
     }
   }
@@ -294,7 +294,7 @@ export class AsyncStorageService {
 
       return currentId;
     } catch (error) {
-      console.error('Auto increment error:', error);
+      // console.error('Auto increment error:', error);
       return Date.now();
     }
   }
@@ -337,7 +337,7 @@ export class AsyncStorageService {
 
       return newUser;
     } catch (error) {
-      console.error('사용자 생성 실패:', error);
+      // console.error('사용자 생성 실패:', error);
       throw error;
     }
   }
@@ -351,7 +351,7 @@ export class AsyncStorageService {
       const usersData = await AsyncStorage.getItem(this.KEYS.USERS);
       return usersData ? JSON.parse(usersData) : [];
     } catch (error) {
-      console.error('Get users error:', error);
+      // console.error('Get users error:', error);
       return [];
     }
   }
@@ -382,7 +382,7 @@ export class AsyncStorageService {
       const users: User[] = JSON.parse(usersJson);
       return users.find(user => user.id === id.toString()) || null;
     } catch (error) {
-      console.error('X Get user by ID error:', error);
+      // console.error('X Get user by ID error:', error);
       return null;
     }
   }
@@ -396,7 +396,7 @@ export class AsyncStorageService {
       const fridgesData = await AsyncStorage.getItem(this.KEYS.REFRIGERATORS);
       return fridgesData ? JSON.parse(fridgesData) : [];
     } catch (error) {
-      console.error('Get refrigerators error:', error);
+      // console.error('Get refrigerators error:', error);
       return [];
     }
   }
@@ -450,7 +450,7 @@ export class AsyncStorageService {
         refrigeratorUser: newRefrigeratorUser,
       };
     } catch (error) {
-      console.error('Create refrigerator error:', error);
+      // console.error('Create refrigerator error:', error);
       throw error;
     }
   }
@@ -462,7 +462,7 @@ export class AsyncStorageService {
       );
       return refrigeratorUsersData ? JSON.parse(refrigeratorUsersData) : [];
     } catch (error) {
-      console.error('Get refrigerator users error:', error);
+      // console.error('Get refrigerator users error:', error);
       return [];
     }
   }
@@ -491,7 +491,7 @@ export class AsyncStorageService {
 
       return newRefrigeratorUser;
     } catch (error) {
-      console.error('Add user to refrigerator error:', error);
+      // console.error('Add user to refrigerator error:', error);
       throw error;
     }
   }
@@ -534,7 +534,7 @@ export class AsyncStorageService {
 
       return fridgesWithRole;
     } catch (error) {
-      console.error('Get user refrigerators error:', error);
+      // console.error('Get user refrigerators error:', error);
       return [];
     }
   }
@@ -547,7 +547,7 @@ export class AsyncStorageService {
       );
       return hiddenFridgesData ? JSON.parse(hiddenFridgesData) : [];
     } catch (error) {
-      console.error('Get hidden fridges error:', error);
+      // console.error('Get hidden fridges error:', error);
       return [];
     }
   }
@@ -560,7 +560,7 @@ export class AsyncStorageService {
       const hiddenFridges = await this.getHiddenFridges(userId);
       return hiddenFridges.includes(fridgeId);
     } catch (error) {
-      console.error('getFridgeHidden 실패:', error);
+      // console.error('getFridgeHidden 실패:', error);
       return false;
     }
   }
@@ -589,7 +589,7 @@ export class AsyncStorageService {
         JSON.stringify(hiddenFridges),
       );
     } catch (error) {
-      console.error('Set fridge hidden error:', error);
+      // console.error('Set fridge hidden error:', error);
     }
   }
 
@@ -612,7 +612,7 @@ export class AsyncStorageService {
 
       await AsyncStorage.setItem(initKey, 'true');
     } catch (error) {
-      console.error('Initialize default fridge error:', error);
+      // console.error('Initialize default fridge error:', error);
     }
   }
 
@@ -621,7 +621,7 @@ export class AsyncStorageService {
       const fridgeId = await AsyncStorage.getItem('selectedFridgeId');
       return fridgeId ? parseInt(fridgeId, 10) : null;
     } catch (error) {
-      console.error('선택된 냉장고 ID 조회 실패:', error);
+      // console.error('선택된 냉장고 ID 조회 실패:', error);
       return null;
     }
   }
@@ -630,7 +630,7 @@ export class AsyncStorageService {
     try {
       await AsyncStorage.setItem('selectedFridgeId', fridgeId.toString());
     } catch (error) {
-      console.error('선택된 냉장고 ID 저장 실패:', error);
+      // console.error('선택된 냉장고 ID 저장 실패:', error);
       throw error;
     }
   }
@@ -647,7 +647,7 @@ export class AsyncStorageService {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.GROCERY_LIST);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('장바구니 조회 실패:', error);
+      // console.error('장바구니 조회 실패:', error);
       return [];
     }
   }
@@ -662,7 +662,7 @@ export class AsyncStorageService {
         JSON.stringify(items),
       );
     } catch (error) {
-      console.error('장바구니 저장 실패:', error);
+      // console.error('장바구니 저장 실패:', error);
       throw error;
     }
   }
@@ -676,7 +676,7 @@ export class AsyncStorageService {
       items.push(item);
       await this.saveGroceryList(items);
     } catch (error) {
-      console.error('장바구니 아이템 추가 실패:', error);
+      // console.error('장바구니 아이템 추가 실패:', error);
       throw error;
     }
   }
@@ -697,7 +697,7 @@ export class AsyncStorageService {
         await this.saveGroceryList(items);
       }
     } catch (error) {
-      console.error('장바구니 아이템 업데이트 실패:', error);
+      // console.error('장바구니 아이템 업데이트 실패:', error);
       throw error;
     }
   }
@@ -711,7 +711,7 @@ export class AsyncStorageService {
       const filtered = items.filter(item => item.id !== itemId);
       await this.saveGroceryList(filtered);
     } catch (error) {
-      console.error('장바구니 아이템 삭제 실패:', error);
+      // console.error('장바구니 아이템 삭제 실패:', error);
       throw error;
     }
   }
@@ -723,7 +723,7 @@ export class AsyncStorageService {
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.GROCERY_LIST);
     } catch (error) {
-      console.error('장바구니 비우기 실패:', error);
+      // console.error('장바구니 비우기 실패:', error);
       throw error;
     }
   }
@@ -801,7 +801,7 @@ export const isTokenExpired = async (): Promise<boolean> => {
 
     return payload.exp <= currentTime + 30;
   } catch (error) {
-    console.error('토큰 만료 확인 중 오류:', error);
+    // console.error('토큰 만료 확인 중 오류:', error);
     return true;
   }
 };
@@ -859,7 +859,7 @@ export const refreshAccessToken = async (): Promise<boolean> => {
         return false;
       }
     } catch (error) {
-      console.error('X 토큰 갱신 중 오류 :', error);
+      // console.error('X 토큰 갱신 중 오류 :', error);
       return false;
     } finally {
       isRefreshing = false;
@@ -878,7 +878,7 @@ export const getUserInfo = async (): Promise<StoredUserInfo | null> => {
     const userProfileString = await AsyncStorage.getItem('userProfile');
     return userProfileString ? JSON.parse(userProfileString) : null;
   } catch (error) {
-    console.error('사용자 정보 읽기 실패:', error);
+    // console.error('사용자 정보 읽기 실패:', error);
     return null;
   }
 };
@@ -914,7 +914,7 @@ export const logout = async (): Promise<boolean> => {
     refreshPromise = null;
     return true;
   } catch (error) {
-    console.error('로그아웃 실패:', error);
+    // console.error('로그아웃 실패:', error);
     return false;
   }
 };

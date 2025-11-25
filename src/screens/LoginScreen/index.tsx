@@ -42,7 +42,7 @@ const LoginScreen: React.FC = () => {
       setShowInvitationModal(false);
       navigation.replace('FridgeSelect');
     } catch (error) {
-      console.error('냉장고 참여 실패:', error);
+      // console.error('냉장고 참여 실패:', error);
       await AsyncStorage.removeItem('pendingInvitationCode');
       clearInvitationInfo();
       setShowInvitationModal(false);

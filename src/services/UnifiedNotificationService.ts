@@ -33,7 +33,7 @@ class UnifiedNotificationService {
 
       return granted;
     } catch (error) {
-      console.error('❌ 알림 권한 요청 실패:', error);
+      // console.error('❌ 알림 권한 요청 실패:', error);
       return false;
     }
   }
@@ -45,7 +45,7 @@ class UnifiedNotificationService {
     try {
       await NotificationService.printFCMToken();
     } catch (error) {
-      console.error('❌ FCM 토큰 출력 실패:', error);
+      // console.error('❌ FCM 토큰 출력 실패:', error);
       throw error;
     }
   }
@@ -67,7 +67,7 @@ class UnifiedNotificationService {
 
       console.log('✅ 통합 알림 설정 저장 완료');
     } catch (error) {
-      console.error('❌ 통합 알림 설정 저장 실패:', error);
+      // console.error('❌ 통합 알림 설정 저장 실패:', error);
       throw error;
     }
   }
@@ -80,7 +80,7 @@ class UnifiedNotificationService {
       // LocalNotificationService에서 설정 불러오기
       return await LocalNotificationService.getNotificationSettings();
     } catch (error) {
-      console.error('❌ 알림 설정 불러오기 실패:', error);
+      // console.error('❌ 알림 설정 불러오기 실패:', error);
       // 기본값 반환
       return {
         enabled: true,
@@ -122,7 +122,7 @@ class UnifiedNotificationService {
         isEnabled,
       };
     } catch (error) {
-      console.error('❌ 알림 상태 확인 실패:', error);
+      // console.error('❌ 알림 상태 확인 실패:', error);
       return {
         hasPermission: false,
         isEnabled: false,
@@ -147,7 +147,7 @@ class UnifiedNotificationService {
 
       console.log('✅ 테스트 알림 전송 완료');
     } catch (error) {
-      console.error('❌ 테스트 알림 전송 실패:', error);
+      // console.error('❌ 테스트 알림 전송 실패:', error);
       throw error;
     }
   }
@@ -163,10 +163,10 @@ class UnifiedNotificationService {
         await LocalNotificationService.createDemoNotifications();
         console.log('✅ 데모 알림 생성 완료');
       } else {
-        console.warn('⚠️ createDemoNotifications 메서드가 없습니다');
+        // console.warn('⚠️ createDemoNotifications 메서드가 없습니다');
       }
     } catch (error) {
-      console.error('❌ 데모 알림 생성 실패:', error);
+      // console.error('❌ 데모 알림 생성 실패:', error);
       throw error;
     }
   }
@@ -181,7 +181,7 @@ class UnifiedNotificationService {
       }
       return [];
     } catch (error) {
-      console.error('❌ 예약된 알림 조회 실패:', error);
+      // console.error('❌ 예약된 알림 조회 실패:', error);
       return [];
     }
   }
@@ -200,10 +200,10 @@ class UnifiedNotificationService {
         );
         console.log('✅ 식재료 알림 스케줄링 완료');
       } else {
-        console.warn('⚠️ scheduleIngredientsNotifications 메서드가 없습니다');
+        // console.warn('⚠️ scheduleIngredientsNotifications 메서드가 없습니다');
       }
     } catch (error) {
-      console.error('❌ 식재료 알림 스케줄링 실패:', error);
+      // console.error('❌ 식재료 알림 스케줄링 실패:', error);
       throw error;
     }
   }
@@ -220,7 +220,7 @@ class UnifiedNotificationService {
         console.log('✅ 모든 알림 취소 완료');
       }
     } catch (error) {
-      console.error('❌ 알림 취소 실패:', error);
+      // console.error('❌ 알림 취소 실패:', error);
       throw error;
     }
   }

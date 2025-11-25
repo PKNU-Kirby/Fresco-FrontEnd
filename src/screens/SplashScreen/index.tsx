@@ -42,7 +42,7 @@ const SplashScreen = (): React.JSX.Element => {
         navigation.replace('Login');
       }
     } catch (error) {
-      console.error('인증 상태 확인 실패:', error);
+      // console.error('인증 상태 확인 실패:', error);
       navigation.replace('Login');
     }
   };

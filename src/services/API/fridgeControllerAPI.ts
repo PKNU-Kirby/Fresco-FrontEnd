@@ -88,7 +88,7 @@ export class FridgeControllerAPI {
         return text as unknown as T;
       }
     } catch (error) {
-      console.error(`API 요청 실패 ${endpoint}:`, error);
+      // console.error(`API 요청 실패 ${endpoint}:`, error);
       throw error;
     }
   }

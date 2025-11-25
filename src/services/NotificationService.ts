@@ -53,7 +53,7 @@ class NotificationService {
           await this.getFCMToken();
           this.setupMessageHandlers();
         } catch (tokenError) {
-          console.error('❌ FCM 토큰 가져오기 실패:', tokenError);
+          // console.error('❌ FCM 토큰 가져오기 실패:', tokenError);
         }
       } else {
         console.log('❌ 푸시 알림 권한 거부됨');
@@ -61,7 +61,7 @@ class NotificationService {
 
       return enabled;
     } catch (error) {
-      console.error('푸시 알림 권한 요청 실패:', error);
+      // console.error('푸시 알림 권한 요청 실패:', error);
       return false;
     }
   }
@@ -90,7 +90,7 @@ class NotificationService {
 
       return this.fcmToken;
     } catch (error) {
-      console.error('❌ FCM 토큰 가져오기 실패:', error);
+      // console.error('❌ FCM 토큰 가져오기 실패:', error);
       throw error;
     }
   }
@@ -100,7 +100,7 @@ class NotificationService {
     try {
       await this.printTokenForTesting();
     } catch (error) {
-      console.error('FCM 토큰 출력 실패:', error);
+      // console.error('FCM 토큰 출력 실패:', error);
       throw error;
     }
   }
@@ -117,10 +117,10 @@ class NotificationService {
       if (success) {
         console.log('✅ FCM 토큰 서버 저장 완료');
       } else {
-        console.warn('⚠️ FCM 토큰 서버 저장 실패 (재시도 가능)');
+        // console.warn('⚠️ FCM 토큰 서버 저장 실패 (재시도 가능)');
       }
     } catch (error) {
-      console.error('❌ 서버에 토큰 저장 중 오류:', error);
+      // console.error('❌ 서버에 토큰 저장 중 오류:', error);
     }
   }
 
@@ -191,11 +191,11 @@ class NotificationService {
         if (success) {
           console.log('✅ 알림 설정 서버 전송 완료');
         } else {
-          console.warn('⚠️ 알림 설정 서버 전송 실패');
+          // console.warn('⚠️ 알림 설정 서버 전송 실패');
         }
       }
     } catch (error) {
-      console.error('❌ 알림 설정 저장 실패:', error);
+      // console.error('❌ 알림 설정 저장 실패:', error);
       throw error;
     }
   }
@@ -208,7 +208,7 @@ class NotificationService {
         return JSON.parse(settingsStr);
       }
     } catch (error) {
-      console.error('알림 설정 불러오기 실패:', error);
+      // console.error('알림 설정 불러오기 실패:', error);
     }
 
     return {
@@ -247,7 +247,7 @@ class NotificationService {
         }
       }
     } catch (error) {
-      console.error('❌ printTokenForTesting 실패:', error);
+      // console.error('❌ printTokenForTesting 실패:', error);
       // ✅ 콜백을 통해 UI에서 에러 모달 표시
       if (this.modalCallbacks.showTokenError) {
         this.modalCallbacks.showTokenError();
@@ -272,7 +272,7 @@ class NotificationService {
         isEnabled: settings.enabled,
       };
     } catch (error) {
-      console.error('알림 상태 확인 실패:', error);
+      // console.error('알림 상태 확인 실패:', error);
       return { hasPermission: false, isEnabled: false };
     }
   }

@@ -61,7 +61,7 @@ export class ApiService {
         });
         console.log('O 서버 로그아웃 성공');
       } catch (logoutError) {
-        console.warn('!! 서버 로그아웃 실패 (무시):', logoutError);
+        // console.warn('!! 서버 로그아웃 실패 (무시):', logoutError);
         // 서버 로그아웃 실패해도 로컬 클리어 진행
       }
     } finally {
@@ -155,7 +155,7 @@ export class ApiService {
         console.log('O 토큰 갱신 성공');
         return true;
       } catch (error) {
-        console.error('X 토큰 갱신 중 오류:', error);
+        // console.error('X 토큰 갱신 중 오류:', error);
         return false;
       } finally {
         isRefreshing = false;
@@ -232,14 +232,14 @@ export class ApiService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('X API 에러 응답:', errorText);
+        // console.error('X API 에러 응답:', errorText);
 
         try {
           const errorData = JSON.parse(errorText);
 
           // NP (No Permission) 코드 특별 처리
           if (errorData.code === 'NP') {
-            console.warn('!! 권한 에러 감지:', errorData.message);
+            // console.warn('!! 권한 에러 감지:', errorData.message);
             throw new Error('이 기능에 접근할 권한이 없습니다.');
           }
 
@@ -297,7 +297,7 @@ export class ApiService {
       }
       return responseData as T;
     } catch (error) {
-      console.error('X API 호출 실패:', error);
+      // console.error('X API 호출 실패:', error);
 
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error(
@@ -325,7 +325,7 @@ export class ApiService {
 
       return userInfo;
     } catch (error) {
-      console.error('getCurrentUser error:', error);
+      // console.error('getCurrentUser error:', error);
       await this.logout();
       throw error;
     }
@@ -430,7 +430,7 @@ export class ApiService {
       console.log('O FCM 토큰 등록 성공');
       return true;
     } catch (error) {
-      console.error('X FCM 토큰 등록 실패:', error);
+      // console.error('X FCM 토큰 등록 실패:', error);
       return false;
     }
   }
@@ -460,7 +460,7 @@ export class ApiService {
       console.log('O 알림 설정 업데이트 성공');
       return true;
     } catch (error) {
-      console.error('X 알림 설정 업데이트 실패:', error);
+      // console.error('X 알림 설정 업데이트 실패:', error);
       return false;
     }
   }
@@ -484,7 +484,7 @@ export class ApiService {
       console.log('O 테스트 알림 전송 성공');
       return true;
     } catch (error) {
-      console.error('X 테스트 알림 전송 실패:', error);
+      // console.error('X 테스트 알림 전송 실패:', error);
       return false;
     }
   }
@@ -567,7 +567,7 @@ export class ApiService {
       console.log('O 멤버 삭제 성공:', result);
       return result;
     } catch (error) {
-      console.error('X 멤버 삭제 API 실패:', error);
+      // console.error('X 멤버 삭제 API 실패:', error);
       throw error;
     }
   }

@@ -35,7 +35,7 @@ export class RecipeFridgeUtils {
         };
       });
     } catch (error) {
-      console.error('레시피-냉장고 매칭 실패:', error);
+      // console.error('레시피-냉장고 매칭 실패:', error);
       return [];
     }
   }
@@ -170,7 +170,7 @@ export class RecipeFridgeUtils {
         message: `${deductAmount}만큼 차감되었습니다.`,
       };
     } catch (error) {
-      console.error('재료 차감 실패:', error);
+      // console.error('재료 차감 실패:', error);
       return {
         success: false,
         newQuantity: 0,
@@ -202,7 +202,7 @@ export class RecipeFridgeUtils {
 
       return similarItems;
     } catch (error) {
-      console.error('유사 재료 검색 실패:', error);
+      // console.error('유사 재료 검색 실패:', error);
       return [];
     }
   }
@@ -237,7 +237,7 @@ export class RecipeFridgeUtils {
 
       return true;
     } catch (error) {
-      console.error('조리 기록 저장 실패:', error);
+      // console.error('조리 기록 저장 실패:', error);
       return false;
     }
   }

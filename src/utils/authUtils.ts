@@ -12,7 +12,7 @@ export const getAccessToken = async (): Promise<string | null> => {
     const token = await AsyncStorage.getItem('accessToken');
     return token;
   } catch (error) {
-    console.error('액세스 토큰 조회 실패:', error);
+    // console.error('액세스 토큰 조회 실패:', error);
     return null;
   }
 };
@@ -22,7 +22,7 @@ export const getRefreshToken = async (): Promise<string | null> => {
     const token = await AsyncStorage.getItem('refreshToken');
     return token;
   } catch (error) {
-    console.error('리프레시 토큰 조회 실패:', error);
+    // console.error('리프레시 토큰 조회 실패:', error);
     return null;
   }
 };
@@ -37,7 +37,7 @@ export const saveTokens = async (
       ['refreshToken', refreshToken],
     ]);
   } catch (error) {
-    console.error('토큰 저장 실패:', error);
+    // console.error('토큰 저장 실패:', error);
     throw error;
   }
 };
@@ -53,7 +53,7 @@ export const clearTokens = async (): Promise<void> => {
     ]);
     await AsyncStorageService.clearAllAuthData();
   } catch (error) {
-    console.error('토큰 삭제 실패:', error);
+    // console.error('토큰 삭제 실패:', error);
     throw error;
   }
 };
@@ -83,7 +83,7 @@ export const isTokenExpired = (token: string): boolean => {
 
     return isExpired;
   } catch (error) {
-    console.error('❌ 토큰 파싱 실패:', error);
+    // console.error('❌ 토큰 파싱 실패:', error);
     return true;
   }
 };
@@ -96,7 +96,7 @@ export const isRefreshTokenExpired = async (): Promise<boolean> => {
 
     return isTokenExpired(refreshToken);
   } catch (error) {
-    console.error('❌ Refresh Token 확인 실패:', error);
+    // console.error('❌ Refresh Token 확인 실패:', error);
     return true;
   }
 };
@@ -110,7 +110,7 @@ export const isAuthenticated = async (): Promise<boolean> => {
 
     return !!(accessToken && isLoggedIn === 'true');
   } catch (error) {
-    console.error('인증 상태 확인 실패:', error);
+    // console.error('인증 상태 확인 실패:', error);
     return false;
   }
 };
@@ -171,7 +171,7 @@ export const getValidAccessToken = async (): Promise<string | null> => {
 
     return accessToken;
   } catch (error) {
-    console.error('유효한 토큰 조회 실패:', error);
+    // console.error('유효한 토큰 조회 실패:', error);
     return null;
   }
 };
@@ -205,12 +205,12 @@ export const debugTokenInfo = async (): Promise<void> => {
           });
         }
       } catch (parseError) {
-        console.error('토큰 파싱 실패:', parseError);
+        // console.error('토큰 파싱 실패:', parseError);
       }
     }
     console.log('=====================');
   } catch (error) {
-    console.error('토큰 디버깅 실패:', error);
+    // console.error('토큰 디버깅 실패:', error);
   }
 };
 
@@ -228,7 +228,7 @@ export const getTokenUserId = async (): Promise<string | null> => {
     const payload = JSON.parse(atob(parts[1]));
     return payload.userId ? String(payload.userId) : null;
   } catch (error) {
-    console.error('토큰에서 사용자 ID 추출 실패:', error);
+    // console.error('토큰에서 사용자 ID 추출 실패:', error);
     return null;
   }
 };
@@ -267,7 +267,7 @@ export const validateUserTokenMatch = async (
       needsReauth: !isValid,
     };
   } catch (error) {
-    console.error('사용자-토큰 매칭 검증 실패:', error);
+    // console.error('사용자-토큰 매칭 검증 실패:', error);
     return {
       isValid: false,
       needsReauth: true,
@@ -337,7 +337,7 @@ export const getValidAccessTokenWithUserCheck = async (
       needsReauth: false,
     };
   } catch (error) {
-    console.error('개선된 토큰 조회 실패:', error);
+    // console.error('개선된 토큰 조회 실패:', error);
     return {
       token: null,
       needsReauth: true,
@@ -376,7 +376,7 @@ export const getTokenStatus = async (): Promise<{
           accessTokenExpiresIn = payload.exp - currentTime;
         }
       } catch (parseError) {
-        console.error('토큰 파싱 실패:', parseError);
+        // console.error('토큰 파싱 실패:', parseError);
       }
     }
 
@@ -387,7 +387,7 @@ export const getTokenStatus = async (): Promise<{
       accessTokenExpiresIn,
     };
   } catch (error) {
-    console.error('토큰 상태 확인 실패:', error);
+    // console.error('토큰 상태 확인 실패:', error);
     return {
       hasAccessToken: false,
       hasRefreshToken: false,
@@ -472,7 +472,7 @@ export const validateLoginTokens = async (): Promise<{
       issues,
     };
   } catch (error) {
-    console.error('토큰 검증 실패:', error);
+    // console.error('토큰 검증 실패:', error);
     return {
       isValid: false,
       issues: ['토큰 검증 중 오류 발생'],

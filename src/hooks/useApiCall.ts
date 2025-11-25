@@ -32,7 +32,7 @@ export const useApiCall = <T>(options: UseApiCallOptions<T> = {}) => {
         options.onSuccess?.(result);
         return result;
       } catch (err) {
-        console.error('API 호출 실패:', err);
+        // console.error('API 호출 실패:', err);
         ApiErrorHandler.logError(err, 'useApiCall');
         setError(err);
         options.onError?.(err);

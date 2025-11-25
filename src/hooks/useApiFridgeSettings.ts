@@ -138,13 +138,13 @@ export const useApiFridgeSettings = (
 
           console.log('판단된 역할:', isOwner ? 'owner' : 'member');
         } catch (permissionError) {
-          console.error('권한 확인 중 오류:', permissionError);
+          // console.error('권한 확인 중 오류:', permissionError);
           // 권한 확인 실패 시 route에서 전달받은 userRole 사용
           setCurrentUserRole(userRole || null);
         }
       }
     } catch (error) {
-      console.error('권한 정보 로드 실패:', error);
+      // console.error('권한 정보 로드 실패:', error);
       setErrorMessage('권한 정보를 불러올 수 없습니다.');
       setErrorModalVisible(true);
     } finally {
@@ -160,7 +160,7 @@ export const useApiFridgeSettings = (
       );
       setMembers(Array.isArray(membersResponse) ? membersResponse : []);
     } catch (error) {
-      console.error('멤버 목록 로드 실패:', error);
+      // console.error('멤버 목록 로드 실패:', error);
       setErrorMessage('멤버 목록을 불러올 수 없습니다.');
       setErrorModalVisible(true);
       setMembers([]); // 실패 시 빈 배열로 설정
@@ -201,7 +201,7 @@ export const useApiFridgeSettings = (
       setCanInvite(canEdit);
       setCanView(canViewHistory);
     } catch (error) {
-      console.error('권한 확인 실패:', error);
+      // console.error('권한 확인 실패:', error);
       // 기본값으로 설정
       setCanInvite(currentUserRole === 'owner');
       setCanView(true); // 기본적으로 조회는 허용
@@ -285,7 +285,7 @@ export const useApiFridgeSettings = (
         }),
       );
     } catch (error) {
-      console.error('로그아웃 실패:', error);
+      // console.error('로그아웃 실패:', error);
       setErrorMessage('로그아웃 중 문제가 발생했습니다.');
       setErrorModalVisible(true);
     }
@@ -311,7 +311,7 @@ export const useApiFridgeSettings = (
       setDeleteFinalConfirmVisible(false);
       setDeleteSuccessVisible(true);
     } catch (error) {
-      console.error('냉장고 삭제 실패:', error);
+      // console.error('냉장고 삭제 실패:', error);
       setDeleteFinalConfirmVisible(false);
       setDeleteErrorVisible(true);
     }

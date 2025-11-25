@@ -176,7 +176,7 @@ export const useOptimisticEdit = () => {
 
         return true;
       } catch (error) {
-        console.error('변경사항 전송 실패:', error);
+        // console.error('변경사항 전송 실패:', error);
         throw error;
       }
     },

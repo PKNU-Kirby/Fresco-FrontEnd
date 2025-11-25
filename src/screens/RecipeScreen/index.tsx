@@ -98,7 +98,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                 );
                 return updatedRecipe;
               } catch (error) {
-                console.error(`❌ [${recipe.title}] 상세 로드 실패:`, error);
+                // console.error(`❌ [${recipe.title}] 상세 로드 실패:`, error);
                 return recipe;
               }
             }
@@ -122,7 +122,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
         });
       }
     } catch (error) {
-      console.error('❌ 레시피 가용성 계산 실패:', error);
+      // console.error('❌ 레시피 가용성 계산 실패:', error);
       setRecipeAvailabilities(new Map());
     }
   };
@@ -239,7 +239,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
         setFavoriteRecipeIds(prev => prev.filter(id => id !== recipeId));
       }
     } catch (error) {
-      console.error('즐겨찾기 토글 실패', error);
+      // console.error('즐겨찾기 토글 실패', error);
       setFavoriteErrorModalVisible(true);
     }
   };
@@ -263,7 +263,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
       setDeleteSuccessVisible(true);
       setSelectedRecipeId(null);
     } catch (error) {
-      console.error('레시피 삭제 실패', error);
+      // console.error('레시피 삭제 실패', error);
       setDeleteConfirmVisible(false);
       setDeleteErrorVisible(true);
       setSelectedRecipeId(null);

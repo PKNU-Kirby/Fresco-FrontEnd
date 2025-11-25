@@ -236,7 +236,7 @@ export const useIngredientMatching = (
 
       setMatchedIngredients(matched);
     } catch (error) {
-      console.error('냉장고 재료 로드 실패:', error);
+      // console.error('냉장고 재료 로드 실패:', error);
       setErrorMessage('냉장고 정보를 불러올 수 없습니다.');
       setErrorModalVisible(true);
     } finally {
@@ -295,7 +295,7 @@ export const useIngredientMatching = (
       setEnhancedIngredients(enhanced);
       onEnhancedIngredientsChange?.(enhanced);
     } catch (error) {
-      console.error('에러 발생:', error);
+      // console.error('에러 발생:', error);
       const errorIngredients = (ingredients || []).map(ing => ({
         ...ing,
         isAvailable: false,
@@ -386,7 +386,7 @@ export const useIngredientMatching = (
 
         setMatchedIngredients(matched);
       } catch (error) {
-        console.error('향상된 재료 데이터 로드 실패:', error);
+        // console.error('향상된 재료 데이터 로드 실패:', error);
         setErrorMessage('재료 정보를 불러올 수 없습니다.');
         setErrorModalVisible(true);
       } finally {

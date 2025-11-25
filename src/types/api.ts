@@ -204,7 +204,7 @@ const apiCall = async (
 
     return response;
   } catch (error) {
-    console.error('API 호출 실패:', error);
+    // console.error('API 호출 실패:', error);
     throw error;
   }
 };

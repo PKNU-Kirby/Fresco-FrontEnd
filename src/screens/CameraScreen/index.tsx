@@ -76,7 +76,7 @@ const CameraScreen: React.FC = () => {
     }
 
     if (response.errorMessage) {
-      console.error('Camera Error:', response.errorMessage);
+      // console.error('Camera Error:', response.errorMessage);
       setCameraErrorModalVisible(true);
       return;
     }
@@ -132,7 +132,7 @@ const CameraScreen: React.FC = () => {
           return;
         }
       } catch (err) {
-        console.warn('권한 요청 오류:', err);
+        // console.warn('권한 요청 오류:', err);
         return;
       }
     }
@@ -162,10 +162,11 @@ const CameraScreen: React.FC = () => {
 
   const navigateToPreview = useCallback(() => {
     if (!capturedPhoto || !scanMode) {
+      /*
       console.error('촬영된 사진 또는 스캔 모드가 없습니다', {
         capturedPhoto,
         scanMode,
-      });
+      });*/
       return;
     }
 

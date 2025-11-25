@@ -53,11 +53,11 @@ const UsageHistoryScreen = ({ route }: Props) => {
       console.log('✅ 로컬 사용자 ID:', localUserId);
 
       if (!tokenUserId) {
-        console.error('❌ 토큰 사용자 ID 없음');
+        // console.error('❌ 토큰 사용자 ID 없음');
         return;
       }
     } catch (error) {
-      console.error('❌ 사용자 정보 로드 실패:', error);
+      // console.error('❌ 사용자 정보 로드 실패:', error);
     }
   };
 
@@ -90,7 +90,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
 
       setUsageRecords(recordsWithUserName);
     } catch (error) {
-      console.error('❌ 사용 기록 로드 실패:', error);
+      // console.error('❌ 사용 기록 로드 실패:', error);
       setUsageRecords([]);
     } finally {
       setIsLoading(false);
@@ -166,7 +166,7 @@ const UsageHistoryScreen = ({ route }: Props) => {
           return recordDate >= startDate && recordDate <= endDate;
         });
       } catch (error) {
-        console.error('날짜 범위 필터링 오류:', error);
+        // console.error('날짜 범위 필터링 오류:', error);
         filteredData = usageRecords;
       }
     }

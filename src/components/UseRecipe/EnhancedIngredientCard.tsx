@@ -190,7 +190,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
             unit: unit || '개',
           });
         } catch (localError) {
-          console.warn('⚠️ 로컬 저장 실패 (무시):', localError);
+          // console.warn('⚠️ 로컬 저장 실패 (무시):', localError);
         }
 
         // 성공 알림

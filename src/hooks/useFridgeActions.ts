@@ -243,7 +243,7 @@ export const useFridgeActions = ({
         showErrorModal('오류', '냉장고 나가기에 실패했습니다.');
       }
     } catch (error) {
-      console.error('냉장고 나가기 실패:', error);
+      // console.error('냉장고 나가기 실패:', error);
       showErrorModal('오류', '냉장고 나가기에 실패했습니다.');
     }
     setSelectedFridge(null);

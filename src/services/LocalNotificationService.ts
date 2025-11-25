@@ -33,7 +33,7 @@ class LocalNotificationService {
 
       return granted;
     } catch (error) {
-      console.error('❌ 로컬 알림 권한 요청 실패:', error);
+      // console.error('❌ 로컬 알림 권한 요청 실패:', error);
       return false;
     }
   }
@@ -51,7 +51,7 @@ class LocalNotificationService {
       });
       console.log('✅ 알림 채널 생성 완료');
     } catch (error) {
-      console.error('❌ 알림 채널 생성 실패:', error);
+      // console.error('❌ 알림 채널 생성 실패:', error);
     }
   }
 
@@ -68,7 +68,7 @@ class LocalNotificationService {
       );
       console.log('💾 로컬 알림 설정 저장 완료');
     } catch (error) {
-      console.error('❌ 로컬 알림 설정 저장 실패:', error);
+      // console.error('❌ 로컬 알림 설정 저장 실패:', error);
       throw error;
     }
   }
@@ -85,7 +85,7 @@ class LocalNotificationService {
         return JSON.parse(settingsStr);
       }
     } catch (error) {
-      console.error('❌ 로컬 알림 설정 불러오기 실패:', error);
+      // console.error('❌ 로컬 알림 설정 불러오기 실패:', error);
     }
 
     // 기본값
@@ -114,7 +114,7 @@ class LocalNotificationService {
         isEnabled: settings.enabled,
       };
     } catch (error) {
-      console.error('❌ 로컬 알림 상태 확인 실패:', error);
+      // console.error('❌ 로컬 알림 상태 확인 실패:', error);
       return { hasPermission: false, isEnabled: false };
     }
   }
@@ -143,7 +143,7 @@ class LocalNotificationService {
 
       console.log('✅ 로컬 테스트 알림 전송 완료');
     } catch (error) {
-      console.error('❌ 로컬 테스트 알림 전송 실패:', error);
+      // console.error('❌ 로컬 테스트 알림 전송 실패:', error);
       throw error;
     }
   }
@@ -190,7 +190,7 @@ class LocalNotificationService {
 
       console.log('✅ 데모 알림 생성 완료');
     } catch (error) {
-      console.error('❌ 데모 알림 생성 실패:', error);
+      // console.error('❌ 데모 알림 생성 실패:', error);
       throw error;
     }
   }
@@ -204,7 +204,7 @@ class LocalNotificationService {
       console.log('📋 예약된 알림 개수:', notifications.length);
       return notifications;
     } catch (error) {
-      console.error('❌ 예약된 알림 조회 실패:', error);
+      // console.error('❌ 예약된 알림 조회 실패:', error);
       return [];
     }
   }
@@ -276,7 +276,7 @@ class LocalNotificationService {
         );
       }
     } catch (error) {
-      console.error('❌ 식재료 알림 스케줄링 실패:', error);
+      // console.error('❌ 식재료 알림 스케줄링 실패:', error);
       throw error;
     }
   }
@@ -289,7 +289,7 @@ class LocalNotificationService {
       await notifee.cancelAllNotifications();
       console.log('✅ 모든 알림 취소 완료');
     } catch (error) {
-      console.error('❌ 알림 취소 실패:', error);
+      // console.error('❌ 알림 취소 실패:', error);
       throw error;
     }
   }
