@@ -73,7 +73,7 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
       console.log('🔍 추출된 냉장고 데이터:', fridgeData);
 
       if (!Array.isArray(fridgeData)) {
-        console.error('❌ fridgeData가 배열이 아닙니다:', typeof fridgeData);
+        // console.error('❌ fridgeData가 배열이 아닙니다:', typeof fridgeData);
         fridgeData = [];
       }
 
@@ -104,7 +104,7 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
       console.log('✅ 공유 가능한 냉장고:', shareableFridges.length);
       console.log('🔍 공유 가능한 냉장고 목록:', shareableFridges);
     } catch (error) {
-      console.error('❌ 냉장고 목록 로드 실패:', error);
+      // console.error('❌ 냉장고 목록 로드 실패:', error);
       setErrorMessage('냉장고 목록을 불러오는데 실패했습니다.');
       setErrorModalVisible(true);
       setFridges([]); // 에러 시 빈 배열로 설정
@@ -168,7 +168,7 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
       // 선택 상태 초기화
       setFridges(prev => prev.map(fridge => ({ ...fridge, isChecked: false })));
     } catch (error) {
-      console.error('❌ 레시피 공유 실패:', error);
+      // console.error('❌ 레시피 공유 실패:', error);
       setErrorMessage('레시피 공유에 실패했습니다.');
       setErrorModalVisible(true);
     } finally {

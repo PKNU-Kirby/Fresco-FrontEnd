@@ -133,7 +133,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
 
       console.log('✅ 로컬 저장 성공');
     } catch (error) {
-      console.error('❌ 로컬 저장 실패:', error);
+      // console.error('❌ 로컬 저장 실패:', error);
       throw error;
     }
   };
@@ -167,7 +167,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
         groceryListId = await GroceryListAPI.getGroceryListIdByFridge(fridgeId);
         console.log('✅ 장바구니 ID 조회 성공:', groceryListId);
       } catch (error) {
-        console.error('❌ 장바구니 ID 조회 실패:', error);
+        // console.error('❌ 장바구니 ID 조회 실패:', error);
         throw new Error('장바구니 정보를 가져올 수 없습니다.');
       }
 
@@ -199,7 +199,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
         );
         setSuccessModalVisible(true);
       } catch (serverError) {
-        console.error('❌ 서버 추가 실패:', serverError);
+        // console.error('❌ 서버 추가 실패:', serverError);
 
         // 서버 실패 시 로컬만 저장 (오프라인 모드)
         console.log('📱 오프라인 모드: 로컬에만 저장');
@@ -215,7 +215,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
         setOfflineSuccessModalVisible(true);
       }
     } catch (error) {
-      console.error('❌ 장바구니 추가 실패:', error);
+      // console.error('❌ 장바구니 추가 실패:', error);
       setErrorMessage(
         error instanceof Error
           ? error.message

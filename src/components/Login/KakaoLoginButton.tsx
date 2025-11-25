@@ -61,7 +61,7 @@ const KakaoLoginButton: React.FC<KakaoLoginButtonProps> = ({
         profileImage: profileImageUrl,
       });
     } catch (error) {
-      console.error('카카오 로그인 실패:', error);
+      // console.error('카카오 로그인 실패:', error);
       const message =
         error instanceof Error ? error.message : '카카오 로그인에 실패했습니다';
       showErrorAlert(message);

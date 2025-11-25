@@ -45,7 +45,7 @@ export const InviteCodeModal: React.FC<InviteCodeModalProps> = ({
       setInviteCode('');
       onClose();
     } catch (error) {
-      console.error('초대코드 참여 실패:', error);
+      // console.error('초대코드 참여 실패:', error);
     } finally {
       setIsLoading(false);
     }

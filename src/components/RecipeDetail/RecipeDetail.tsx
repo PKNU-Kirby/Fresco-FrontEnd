@@ -81,7 +81,7 @@ export const useRecipeDetail = (
           const favoriteIds = await FavoriteStorage.getFavoriteIds();
           setIsFavorite(favoriteIds.includes(currentRecipe.id));
         } catch (error) {
-          console.error('즐겨찾기 상태 로드 실패:', error);
+          // console.error('즐겨찾기 상태 로드 실패:', error);
         }
       }
     };
@@ -128,7 +128,7 @@ export const useRecipeDetail = (
       }
       setIsEditMode(false);
     } catch (error) {
-      console.error('레시피 저장 실패:', error);
+      // console.error('레시피 저장 실패:', error);
       setErrorMessage('레시피 저장에 실패했습니다.');
       setErrorModalVisible(true);
     } finally {
@@ -144,7 +144,7 @@ export const useRecipeDetail = (
       );
       setIsFavorite(newFavoriteState);
     } catch (error) {
-      console.error('즐겨찾기 토글 실패:', error);
+      // console.error('즐겨찾기 토글 실패:', error);
       setErrorMessage('즐겨찾기 설정에 실패했습니다.');
       setErrorModalVisible(true);
     }

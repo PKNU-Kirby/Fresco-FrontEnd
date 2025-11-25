@@ -62,7 +62,7 @@ const verifyNaverToken = async (accessToken: string) => {
       return { valid: false, error: result.message };
     }
   } catch (error) {
-    console.error('>> 네이버 토큰 검증 실패:', error);
+    // console.error('>> 네이버 토큰 검증 실패:', error);
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error occurred';
     return { valid: false, error: errorMessage };
