@@ -198,7 +198,7 @@ export class UserFridgeManager {
         JSON.stringify(relations),
       );
 
-      console.log('refrigeratorUsers 관계 추가 완료:', newRelation);
+      // console.log('refrigeratorUsers 관계 추가 완료:', newRelation);
 
       // 냉장고 멤버 수 업데이트
       await this.updateFridgeMemberCount(fridgeId);

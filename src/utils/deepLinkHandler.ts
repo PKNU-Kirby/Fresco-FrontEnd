@@ -40,17 +40,17 @@ export class DeepLinkHandler {
     try {
       const urlObj = new URL(url);
 
-      // 초대 링크 처리
+      // 초대 코드 처리
       if (urlObj.pathname === '/invite' || url.includes('/invite')) {
         DeepLinkHandler.handleInviteLink(urlObj);
       }
-      // 다른 딥링크 타입들 추가 가능
+      // 다른 링크 타입들 추가 가능
     } catch (error) {
-      // console.error('딥링크 URL 파싱 실패:', error);
+      // console.error('링크 URL 파싱 실패:', error);
     }
   }
 
-  // 초대 링크 처리
+  // 초대 코드 처리
   private static async handleInviteLink(urlObj: URL) {
     const token = urlObj.searchParams.get('token');
     const fridgeId = urlObj.searchParams.get('fridgeId');

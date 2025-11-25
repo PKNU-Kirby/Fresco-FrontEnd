@@ -47,7 +47,7 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
   const [kakaoNotInstalledVisible, setKakaoNotInstalledVisible] =
     useState(false);
 
-  // 초대 링크 로드
+  // 초대 코드 로드
   const loadInviteCode = React.useCallback(async () => {
     try {
       setIsLoading(true);
@@ -57,21 +57,21 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
       );
       setInviteCode(link);
     } catch (error) {
-      setErrorMessage('초대 링크를 생성할 수 없습니다.');
+      setErrorMessage('초대 코드 생성할 수 없습니다.');
       setErrorModalVisible(true);
     } finally {
       setIsLoading(false);
     }
   }, [fridgeId, fridgeName]);
 
-  // 컴포넌트가 보여질 때 초대 링크 로드
+  // 컴포넌트가 보여질 때 초대 코드 로드
   useEffect(() => {
     if (visible) {
       loadInviteCode();
     }
   }, [visible, loadInviteCode]);
 
-  // 초대 링크 재생성 실행
+  // 초대 코드 재생성 실행
   const handleRegenerateConfirm = async () => {
     try {
       setIsLoading(true);
@@ -80,10 +80,10 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
         fridgeName,
       );
       setInviteCode(newCode);
-      setSuccessMessage('새로운 초대 링크가 생성되었습니다.');
+      setSuccessMessage('새로운 초대 코드 생성되었습니다.');
       setSuccessModalVisible(true);
     } catch (error) {
-      setErrorMessage('초대 링크 재생성에 실패했습니다.');
+      setErrorMessage('초대 코드 재생성에 실패했습니다.');
       setErrorModalVisible(true);
     } finally {
       setIsLoading(false);
@@ -96,14 +96,14 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
     const codeString = String(inviteCode || '');
 
     if (!codeString || codeString === 'undefined' || codeString === 'null') {
-      setErrorMessage('유효한 초대 링크가 없습니다.');
+      setErrorMessage('유효한 초대 코드가 없습니다.');
       setErrorModalVisible(true);
       return;
     }
 
     try {
       Clipboard.setString(codeString);
-      setSuccessMessage('초대 링크가 클립보드에 복사되었습니다.');
+      setSuccessMessage('초대 코드가 클립보드에 복사되었습니다.');
       setSuccessModalVisible(true);
     } catch (error) {
       setErrorMessage('클립보드 복사에 실패했습니다.');
@@ -113,7 +113,7 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
 
   // 문자 메시지로 공유
   const shareToSMS = () => {
-    const message = `[Fresco] ${fridgeName} 냉장고 모임에 초대되었습니다.\n\n초대 링크: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 냉장고 모임에 참여해 보세요!`;
+    const message = `[Fresco] ${fridgeName} 냉장고 모임에 초대되었습니다.\n\n초대 코드: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 냉장고 모임에 참여해 보세요!`;
     const smsUrl = `sms:?body=${encodeURIComponent(message)}`;
 
     Linking.canOpenURL(smsUrl)
@@ -131,7 +131,7 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
 
   // 카카오톡으로 공유
   const shareToKakaoTalk = async () => {
-    const message = `[Fresco] ${fridgeName} 냉장고 모임에 초대되었습니다.\n\n초대 링크: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 냉장고 모임에 참여해 보세요!`;
+    const message = `[Fresco] ${fridgeName} 냉장고 모임에 초대되었습니다.\n\n초대 코드: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 냉장고 모임에 참여해 보세요!`;
     const encodedMessage = encodeURIComponent(message);
     const kakaoUrl = `kakaotalk://send?text=${encodedMessage}`;
 
@@ -151,7 +151,7 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
 
   // 일반 공유
   const shareGeneral = async () => {
-    const message = `[Fresco] ${fridgeName} 냉장고 모임에 초대되었습니다.\n\n초대 링크: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 냉장고 모임에 참여해 보세요!`;
+    const message = `[Fresco] ${fridgeName} 냉장고 모임에 초대되었습니다.\n\n초대 코드: ${inviteCode}\n\n앱에서 '냉장고 참여하기'를 눌러 냉장고 모임에 참여해 보세요!`;
 
     try {
       const result = await Share.share({
@@ -188,11 +188,11 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
               <View style={styles.inviteSection}>
                 <Text style={styles.fridgeNameText}>{fridgeName}</Text>
                 <Text style={styles.fridgeSubText}>
-                  초대 링크를 공유해서 멤버를 초대하세요
+                  초대 코드를 공유해서 멤버를 초대하세요
                 </Text>
               </View>
 
-              {/* 초대 링크 */}
+              {/* 초대 코드 */}
               <View style={styles.settingsGroup}>
                 <View style={styles.linkContainer}>
                   <View style={styles.linkTextContainer}>
