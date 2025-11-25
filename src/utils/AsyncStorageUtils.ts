@@ -319,7 +319,7 @@ export const RecipeStorage = {
         );
       }
 
-      console.log(`개인 레시피 및 관련 공유 레시피 삭제 완료: ${recipeId}`);
+      // console.log(`개인 레시피 및 관련 공유 레시피 삭제 완료: ${recipeId}`);
     } catch (error) {
       // console.error('개인 레시피 삭제 실패:', error);
       throw error;
@@ -467,7 +467,7 @@ export const SharedRecipeStorage = {
       );
       await this.saveSharedRecipes(updatedRecipes);
 
-      console.log(`공유 레시피 삭제 완료: ${recipeId}`);
+      // console.log(`공유 레시피 삭제 완료: ${recipeId}`);
       return true;
     } catch (error) {
       // console.error('공유 레시피 삭제 실패:', error);
@@ -491,9 +491,11 @@ export const SharedRecipeStorage = {
       });
 
       await this.saveSharedRecipes(updatedRecipes);
+      /*
       console.log(
         `원본 레시피 ${originalRecipeId}에 연결된 공유 레시피들 삭제 완료`,
       );
+      */
     } catch (error) {
       // console.error('연관된 공유 레시피 삭제 실패:', error);
       throw error;
@@ -630,7 +632,7 @@ export const FridgeInitializer = {
       }
 
       // 카테고리 초기화는 getItemCategories에서 기본값으로 처리됨
-      console.log('냉장고 초기 데이터 설정 완료');
+      // console.log('냉장고 초기 데이터 설정 완료');
     } catch (error) {
       // console.error('초기 데이터 설정 실패:', error);
     }
@@ -648,7 +650,7 @@ export const clearAllStorage = async (): Promise<void> => {
       STORAGE_KEYS.SEARCH_HISTORY,
       STORAGE_KEYS.SHARED_RECIPES,
     ]);
-    console.log('모든 저장 데이터 삭제 완료');
+    // console.log('모든 저장 데이터 삭제 완료');
   } catch (error) {
     // console.error('전체 데이터 삭제 실패:', error);
     throw error;

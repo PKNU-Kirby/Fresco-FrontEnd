@@ -116,7 +116,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
   // newItems와 refreshKey 처리
   useEffect(() => {
     if (newItems && newItems.length > 0) {
-      console.log('새로 추가된 아이템들 감지:', newItems);
+      // console.log('새로 추가된 아이템들 감지:', newItems);
       refreshWithCategory(activeItemCategory);
     }
   }, [newItems, refreshKey, refreshWithCategory, activeItemCategory]);
@@ -167,22 +167,22 @@ const FridgeHomeScreen = ({ route }: Props) => {
 
   const handleEditModeToggle = useCallback(async () => {
     if (!isEditMode) {
-      console.log('편집 모드 진입');
+      // console.log('편집 모드 진입');
       setEditModeStartState(JSON.parse(JSON.stringify(fridgeItems)));
       setIsEditMode(true);
     } else {
-      console.log('편집 모드 종료 - 변경사항 적용 중...');
+      // console.log('편집 모드 종료 - 변경사항 적용 중...');
 
       try {
         const changedCount = await applyEditChanges(editModeStartState);
 
         if (changedCount > 0) {
-          console.log(`${changedCount}개 아이템 변경사항 저장 완료`);
+          // console.log(`${changedCount}개 아이템 변경사항 저장 완료`);
           // 🔥 Alert 대신 모달 표시
           setSaveSuccessCount(changedCount);
           setSaveSuccessModalVisible(true);
         } else {
-          console.log('변경사항 없음');
+          // console.log('변경사항 없음');
         }
 
         // 최신 데이터 다시 로드
@@ -219,7 +219,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
     async (itemId: number, newQuantity: number) => {
       if (isEditMode) {
         // 편집 모드에서는 로컬 상태만 변경
-        console.log(`로컬 수량 변경: ${itemId} -> ${newQuantity}`);
+        // console.log(`로컬 수량 변경: ${itemId} -> ${newQuantity}`);
         updateItemQuantityLocal(itemId, newQuantity);
       } else {
         // 일반 모드에서는 즉시 API 호출
@@ -233,7 +233,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
     async (itemId: number, newUnit: string) => {
       if (isEditMode) {
         // 편집 모드에서는 로컬 상태만 변경
-        console.log(`로컬 단위 변경: ${itemId} -> ${newUnit}`);
+        // console.log(`로컬 단위 변경: ${itemId} -> ${newUnit}`);
         updateItemUnitLocal(itemId, newUnit as any);
       } else {
         // 일반 모드에서는 즉시 API 호출
@@ -247,7 +247,7 @@ const FridgeHomeScreen = ({ route }: Props) => {
     async (itemId: number, newDate: string) => {
       if (isEditMode) {
         // 편집 모드에서는 로컬 상태만 변경
-        console.log(`로컬 날짜 변경: ${itemId} -> ${newDate}`);
+        // console.log(`로컬 날짜 변경: ${itemId} -> ${newDate}`);
         updateItemExpiryDateLocal(itemId, newDate);
       } else {
         // 일반 모드에서는 즉시 API 호출

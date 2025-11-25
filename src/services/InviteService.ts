@@ -41,7 +41,7 @@ export class InviteService {
       */
 
       // 임시로 AsyncStorage 사용
-      console.log('초대 토큰 정보 조회:', token);
+      // console.log('초대 토큰 정보 조회:', token);
       return {
         fridgeId: '1',
         fridgeName: '우리 가족 냉장고',
@@ -82,7 +82,7 @@ export class InviteService {
       */
 
       // 임시로 성공 응답 반환
-      console.log('초대 수락:', token);
+      // console.log('초대 수락:', token);
       return {
         success: true,
         message: '냉장고에 성공적으로 참여했습니다.',
@@ -121,7 +121,7 @@ export class InviteService {
       */
 
       // 임시로 성공 응답 반환
-      console.log('초대 거절:', token);
+      // console.log('초대 거절:', token);
       return {
         success: true,
         message: '초대를 거절했습니다.',

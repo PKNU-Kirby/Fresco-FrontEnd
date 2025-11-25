@@ -49,8 +49,8 @@ const UsageHistoryScreen = ({ route }: Props) => {
       const tokenUserId = Number(await getTokenUserId());
       const localUserId = Number(await AsyncStorageService.getCurrentUserId());
 
-      console.log('✅ 토큰 사용자 ID:', tokenUserId);
-      console.log('✅ 로컬 사용자 ID:', localUserId);
+      // console.log('✅ 토큰 사용자 ID:', tokenUserId);
+      // console.log('✅ 로컬 사용자 ID:', localUserId);
 
       if (!tokenUserId) {
         // console.error('❌ 토큰 사용자 ID 없음');
@@ -65,11 +65,11 @@ const UsageHistoryScreen = ({ route }: Props) => {
   const loadUsageRecords = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log(`📡 냉장고 ${fridgeId}의 사용 기록 로드 시작...`);
+      // console.log(`📡 냉장고 ${fridgeId}의 사용 기록 로드 시작...`);
       const records = await UsageTrackingService.getFridgeUsageRecords(
         fridgeId,
       );
-      console.log(`✅ ${records.length}개의 사용 기록 로드 완료`);
+      // console.log(`✅ ${records.length}개의 사용 기록 로드 완료`);
 
       // usedQuantity가 0인 기록 필터링 & 사용자 이름 매핑
       const recordsWithUserName = records
@@ -78,10 +78,11 @@ const UsageHistoryScreen = ({ route }: Props) => {
           // 🟢 백엔드에서 제공하는 consumerName 사용
           const displayName = record.consumerName || '알 수 없음';
 
+          /*
           console.log(
             `👤 기록 ${record.id}: consumerName=${record.consumerName}, displayName=${displayName}, usedQuantity=${record.usedQuantity}`,
           );
-
+*/
           return {
             ...record,
             userName: displayName,

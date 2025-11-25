@@ -41,7 +41,7 @@ export const useIngredientSearch = ({
         setShowSearchResults(results.length > 0);
 
         if (results.length === 0) {
-          console.log('!! 검색 결과 없음 -> 사용자 입력 그대로 사용');
+          // console.log('!! 검색 결과 없음 -> 사용자 입력 그대로 사용');
         }
       } catch (error: unknown) {
         let errorMessage = '검색 중 오류 발생';
@@ -59,7 +59,7 @@ export const useIngredientSearch = ({
         setShowSearchResults(false);
         setSearchError(errorMessage);
 
-        console.log('X 검색 실패로 사용자 입력 그대로 사용');
+        // console.log('X 검색 실패로 사용자 입력 그대로 사용');
       } finally {
         setIsSearching(false);
       }
@@ -72,7 +72,7 @@ export const useIngredientSearch = ({
     onSelect(ingredient);
     setShowSearchResults(false);
     setSearchError(null);
-    console.log('O 식재료 선택 완료 - API 재검색 없이 사용');
+    // console.log('O 식재료 선택 완료 - API 재검색 없이 사용');
   };
 
   const handleFocus = () => {

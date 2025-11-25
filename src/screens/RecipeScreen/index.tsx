@@ -77,15 +77,15 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
   const calculateRecipeAvailabilities = async () => {
     try {
       if (personalRecipes.length > 0 && fridgeId) {
-        console.log('🔍 조리 가능성 계산 시작...');
-        console.log(`📊 전체 레시피: ${personalRecipes.length}개`);
+        // console.log('🔍 조리 가능성 계산 시작...');
+        // console.log(`📊 전체 레시피: ${personalRecipes.length}개`);
 
         // ✅ 1단계: 재료 정보 확인 및 상세 정보 로드
         const recipesWithIngredients = await Promise.all(
           personalRecipes.map(async recipe => {
             if (!recipe.ingredients || recipe.ingredients.length === 0) {
               try {
-                console.log(`📋 [${recipe.title}] 상세 정보 로드 중...`);
+                // console.log(`📋 [${recipe.title}] 상세 정보 로드 중...`);
                 const detailResponse = await RecipeAPI.getRecipeDetail(
                   recipe.id,
                 );
@@ -93,9 +93,10 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
                   ...recipe,
                   ingredients: detailResponse.ingredients || [],
                 };
+                /*
                 console.log(
                   `✅ [${recipe.title}] 재료 ${updatedRecipe.ingredients.length}개 로드됨`,
-                );
+                );*/
                 return updatedRecipe;
               } catch (error) {
                 // console.error(`❌ [${recipe.title}] 상세 로드 실패:`, error);
@@ -114,11 +115,13 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route }) => {
 
         setRecipeAvailabilities(availabilities);
 
-        console.log('✅ 조리 가능성 계산 완료');
+        // console.log('✅ 조리 가능성 계산 완료');
         availabilities.forEach((value, key) => {
+          /*
           console.log(
             `  - ${key}: ${value.availableIngredientsCount}/${value.totalIngredientsCount}`,
           );
+          */
         });
       }
     } catch (error) {

@@ -60,7 +60,7 @@ export const useEditMode = (initialItems: FridgeItem[]) => {
       // 1. 배치 삭제 실행
       if (itemsToDelete.length > 0) {
         await batchDeleteItems(itemsToDelete);
-        console.log(`${itemsToDelete.length}개 아이템 삭제 완료`);
+        // console.log(`${itemsToDelete.length}개 아이템 삭제 완료`);
       }
 
       // 2. 개별 업데이트 실행
@@ -70,7 +70,7 @@ export const useEditMode = (initialItems: FridgeItem[]) => {
 
       if (updatePromises.length > 0) {
         await Promise.all(updatePromises);
-        console.log(`${updatePromises.length}개 아이템 업데이트 완료`);
+        // console.log(`${updatePromises.length}개 아이템 업데이트 완료`);
       }
 
       // 3. 전체 목록 새로 불러오기

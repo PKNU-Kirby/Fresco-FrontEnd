@@ -57,7 +57,7 @@ export class GroceryListAPI {
    * 장바구니 아이템 추가 - POST /grocery/item
    */
   static async createItem(itemData: CreateItemRequest): Promise<GroceryItem> {
-    console.log('[GroceryListAPI] 아이템 추가 요청:', itemData);
+    // console.log('[GroceryListAPI] 아이템 추가 요청:', itemData);
 
     // ✅ apiCall이 이미 result를 반환
     const response = await ApiService.apiCall<GroceryItem>('/grocery/item', {
@@ -65,7 +65,7 @@ export class GroceryListAPI {
       body: JSON.stringify(itemData),
     });
 
-    console.log('[GroceryListAPI] 아이템 추가 응답:', response);
+    // console.log('[GroceryListAPI] 아이템 추가 응답:', response);
     return response;
   }
 
@@ -76,7 +76,7 @@ export class GroceryListAPI {
     groceryListId: number,
     items: UpdateItemRequest[],
   ): Promise<any> {
-    console.log('[GroceryListAPI] 아이템 일괄 수정:', items);
+    // console.log('[GroceryListAPI] 아이템 일괄 수정:', items);
 
     return await ApiService.apiCall<any>(`/grocery/${groceryListId}/update`, {
       method: 'PATCH',
@@ -91,7 +91,7 @@ export class GroceryListAPI {
     groceryListId: number,
     itemIds: number[],
   ): Promise<void> {
-    console.log('[GroceryListAPI] 아이템 삭제:', itemIds);
+    // console.log('[GroceryListAPI] 아이템 삭제:', itemIds);
 
     // ✅ 문법 오류 수정
     await ApiService.apiCall<void>(`/grocery/${groceryListId}/delete`, {
@@ -127,7 +127,7 @@ export class GroceryListAPI {
     groceryListId: number,
     items: UpdateItemRequest[],
   ): Promise<any> {
-    console.log('[GroceryListAPI] 체크된 아이템 일괄 업데이트:', items.length);
+    // console.log('[GroceryListAPI] 체크된 아이템 일괄 업데이트:', items.length);
     return await this.updateItems(groceryListId, items);
   }
 
@@ -143,7 +143,7 @@ export class GroceryListAPI {
    */
   static async getGroceryListIdByFridge(fridgeId: number): Promise<number> {
     try {
-      console.log('[GroceryListAPI] 장바구니 ID 조회 - fridgeId:', fridgeId);
+      // console.log('[GroceryListAPI] 장바구니 ID 조회 - fridgeId:', fridgeId);
 
       const fridges = await this.getRefrigerators();
       const targetFridge = fridges.find(f => f.id === fridgeId);
@@ -156,10 +156,11 @@ export class GroceryListAPI {
         throw new Error(`냉장고에 장바구니가 연결되지 않았습니다.`);
       }
 
-      console.log(
+      /* console.log(
         '[GroceryListAPI] ✅ groceryListId:',
         targetFridge.groceryListId,
       );
+      */
       return targetFridge.groceryListId;
     } catch (error) {
       // console.error('[GroceryListAPI] ❌ 조회 실패:', error);

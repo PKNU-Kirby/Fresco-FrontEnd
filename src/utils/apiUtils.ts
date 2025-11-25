@@ -108,11 +108,13 @@ export class ApiUtils {
         }
 
         // 재시도 전 딜레이
+        /*
         console.log(
           `API 호출 실패 (${attempt + 1}/${
             maxRetries + 1
           }). ${retryDelay}ms 후 재시도...`,
         );
+        */
         await new Promise(resolve => setTimeout(resolve, retryDelay));
         retryDelay *= 2; // 지수 백오프
       }

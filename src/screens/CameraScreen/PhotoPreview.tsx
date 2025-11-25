@@ -89,7 +89,7 @@ const PhotoPreviewScreen: React.FC = () => {
           },
         );
 
-      console.log('강화된 스캔 완료');
+      // console.log('강화된 스캔 완료');
 
       // 결과 처리
       if (confirmedIngredients && confirmedIngredients.length > 0) {

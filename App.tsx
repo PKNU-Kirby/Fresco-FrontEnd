@@ -232,8 +232,8 @@ function App(): React.JSX.Element {
     DeepLinkHandler.setNavigationRef(navigationRef.current);
     const subscription = DeepLinkHandler.initialize();
 
-    console.log('🔥 Firebase App Name:', firebase.app().name);
-    console.log('🔥 Firebase initialized:', firebase.apps.length > 0);
+    // console.log('🔥 Firebase App Name:', firebase.app().name);
+    // console.log('🔥 Firebase initialized:', firebase.apps.length > 0);
     return () => {
       subscription?.remove();
     };

@@ -63,7 +63,7 @@ export const useAddItemSave = (
         let isModified = false;
 
         try {
-          console.log(`식재료 "${item.name}" 자동완성 검색 중...`);
+          // console.log(`식재료 "${item.name}" 자동완성 검색 중...`);
 
           const response = await ApiService.apiCall<
             Array<{
@@ -84,11 +84,13 @@ export const useAddItemSave = (
             ingredientId = firstResult.ingredientId;
             isModified = item.name !== correctedName;
 
+            /*
             console.log(
               `✅ "${item.name}" → "${correctedName}" (ID: ${ingredientId})`,
             );
+            */
           } else {
-            console.log(`❌ "${item.name}" → 검색 결과 없음`);
+            // console.log(`❌ "${item.name}" → 검색 결과 없음`);
           }
         } catch (error) {
           // console.error(`식재료 "${item.name}" 검색 실패:`, error);
@@ -122,8 +124,8 @@ export const useAddItemSave = (
       setErrorMessage('');
 
       try {
-        console.log('확인된 아이템들 저장 시작...');
-        console.log('저장할 아이템들:', itemsToSave);
+        // console.log('확인된 아이템들 저장 시작...');
+        // console.log('저장할 아이템들:', itemsToSave);
 
         // ingredientId가 있는 아이템들만 필터링
         const validItems = itemsToSave.filter(item => item.ingredientId > 0);
@@ -155,7 +157,7 @@ export const useAddItemSave = (
           ingredientsInfo: ingredientsInfo,
         };
 
-        console.log('백엔드 저장 요청:', saveRequest);
+        // console.log('백엔드 저장 요청:', saveRequest);
 
         const response = await ApiService.apiCall<
           Array<{
@@ -170,7 +172,7 @@ export const useAddItemSave = (
           body: JSON.stringify(saveRequest),
         });
 
-        console.log('저장 완료:', response);
+        // console.log('저장 완료:', response);
 
         // 성공 처리
         setSavedItemsCount(response.length);
@@ -183,7 +185,7 @@ export const useAddItemSave = (
           error.message.includes('500') ||
           error.message.includes('네트워크')
         ) {
-          console.log('API 실패로 인한 AsyncStorage 자동 저장 시작...');
+          // console.log('API 실패로 인한 AsyncStorage 자동 저장 시작...');
           await handleSaveItemsFallback();
           return;
         }
@@ -205,7 +207,7 @@ export const useAddItemSave = (
   // AsyncStorage fallback 저장
   const handleSaveItemsFallback = useCallback(async () => {
     try {
-      console.log('AsyncStorage fallback 저장 시도...');
+      // console.log('AsyncStorage fallback 저장 시도...');
 
       const { addItemsToFridge } = await import('../../utils/fridgeStorage');
 
@@ -222,7 +224,7 @@ export const useAddItemSave = (
 
       const savedItems = await addItemsToFridge(fridgeId, itemsToSave);
 
-      console.log('AsyncStorage로 저장된 아이템들:', savedItems);
+      // console.log('AsyncStorage로 저장된 아이템들:', savedItems);
       setSavedItemsCount(savedItems.length);
       setShowSuccessModal(true);
     } catch (fallbackError) {

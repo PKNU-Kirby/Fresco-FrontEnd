@@ -40,7 +40,7 @@ export class ApiService {
   // 공통 헤더 생성
   private static async getHeaders(): Promise<HeadersInit_> {
     const token = await AsyncStorageService.getAuthToken();
-    console.log('현재 토큰:', token ? `${token}` : 'null');
+    // console.log('현재 토큰:', token ? `${token}` : 'null');
 
     return {
       'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ export class ApiService {
 
   // 로그아웃
   static async logout(navigation?: any): Promise<void> {
-    console.log('🚪 로그아웃 시작');
+    // console.log('🚪 로그아웃 시작');
 
     try {
       // 로그아웃 API 호출 시도 (실패해도 계속 진행)
@@ -59,14 +59,14 @@ export class ApiService {
         await this.apiCall<void>('/api/v1/auth/logout', {
           method: 'POST',
         });
-        console.log('O 서버 로그아웃 성공');
+        // console.log('O 서버 로그아웃 성공');
       } catch (logoutError) {
         // console.warn('!! 서버 로그아웃 실패 (무시):', logoutError);
         // 서버 로그아웃 실패해도 로컬 클리어 진행
       }
     } finally {
       // 무조건 실행 // 정리 작업
-      console.log('🧹 로컬 데이터 클리어');
+      // console.log('🧹 로컬 데이터 클리어');
 
       // 토큰 갱신 상태 초기화
       isRefreshing = false;
@@ -77,7 +77,7 @@ export class ApiService {
 
       // 네비게이션 리셋
       if (navigation) {
-        console.log('-> 로그인 화면으로 이동');
+        // console.log('-> 로그인 화면으로 이동');
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
@@ -86,27 +86,29 @@ export class ApiService {
         );
       }
 
-      console.log('O 로그아웃 완료');
+      // console.log('O 로그아웃 완료');
     }
   }
 
   // 토큰 갱신 메서드
   static async refreshAccessToken(): Promise<boolean> {
     if (isRefreshing && refreshPromise) {
+      /*
       console.log(
         '⏳ 토큰 갱신이 이미 진행 중입니다. 기존 프로미스를 반환합니다.',
       );
+      */
       return await refreshPromise;
     }
 
     isRefreshing = true;
     refreshPromise = (async () => {
       try {
-        console.log('-> 토큰 갱신 시작...');
+        // console.log('-> 토큰 갱신 시작...');
         const refreshToken = await AsyncStorageService.getRefreshToken();
 
         if (!refreshToken) {
-          console.log('X 리프레시 토큰이 없습니다');
+          // console.log('X 리프레시 토큰이 없습니다');
           return false;
         }
 
@@ -123,11 +125,11 @@ export class ApiService {
         );
 
         if (!response.ok) {
-          console.log('X 토큰 갱신 HTTP 실패:', response.status);
+          // console.log('X 토큰 갱신 HTTP 실패:', response.status);
 
           // 401/403 -> 토큰 만료로 간주
           if (response.status === 401 || response.status === 403) {
-            console.log('🚪 토큰 만료 - 재로그인 필요');
+            // console.log('🚪 토큰 만료 - 재로그인 필요');
             await ApiService.logout();
           }
 
@@ -140,7 +142,7 @@ export class ApiService {
         }> = await response.json();
 
         if (!responseData.code.includes('OK') || !responseData.result) {
-          console.log('X 토큰 갱신 응답 실패:', responseData.message);
+          // console.log('X 토큰 갱신 응답 실패:', responseData.message);
           return false;
         }
 
@@ -152,7 +154,7 @@ export class ApiService {
           );
         }
 
-        console.log('O 토큰 갱신 성공');
+        // console.log('O 토큰 갱신 성공');
         return true;
       } catch (error) {
         // console.error('X 토큰 갱신 중 오류:', error);
@@ -186,9 +188,9 @@ export class ApiService {
       const url = `${Config.API_BASE_URL}${normalizedEndpoint}`;
       const headers = await this.getHeaders();
 
-      console.log(`=> API 호출: ${options.method || 'GET'} ${url}`);
+      // console.log(`=> API 호출: ${options.method || 'GET'} ${url}`);
       if (options.body) {
-        console.log('-- 요청 데이터:', options.body);
+        // console.log('-- 요청 데이터:', options.body);
       }
 
       const response = await fetch(url, {
@@ -203,7 +205,7 @@ export class ApiService {
       if (response.status === 401 && retryCount === 0) {
         // 로그아웃, 로그인, 리프레시는 재시도 안 함
         if (this.isAuthEndpoint(endpoint)) {
-          console.log('X 인증 엔드포인트는 401 재시도 안 함:', endpoint);
+          // console.log('X 인증 엔드포인트는 401 재시도 안 함:', endpoint);
 
           // 로그아웃 실패는 무시 -> 로컬 클리어
           if (endpoint.includes('/auth/logout')) {
@@ -217,14 +219,14 @@ export class ApiService {
         }
 
         // 일반 API만 토큰 갱신 시도
-        console.log('!! 401 에러 감지, 토큰 갱신 시도...');
+        // console.log('!! 401 에러 감지, 토큰 갱신 시도...');
         const refreshSuccess = await this.refreshAccessToken();
 
         if (refreshSuccess) {
-          console.log('O 토큰 갱신 성공, API 재시도...');
+          // console.log('O 토큰 갱신 성공, API 재시도...');
           return this.apiCall<T>(endpoint, options, retryCount + 1);
         } else {
-          console.log('X 토큰 갱신 실패, 로그아웃 처리');
+          // console.log('X 토큰 갱신 실패, 로그아웃 처리');
           await this.logout();
           throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
         }
@@ -232,14 +234,14 @@ export class ApiService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        // console.error('X API 에러 응답:', errorText);
+        // // console.error('X API 에러 응답:', errorText);
 
         try {
           const errorData = JSON.parse(errorText);
 
           // NP (No Permission) 코드 특별 처리
           if (errorData.code === 'NP') {
-            // console.warn('!! 권한 에러 감지:', errorData.message);
+            // // console.warn('!! 권한 에러 감지:', errorData.message);
             throw new Error('이 기능에 접근할 권한이 없습니다.');
           }
 
@@ -267,10 +269,12 @@ export class ApiService {
 
       // API 응답 구조 확인
       const responseText = await response.text();
+      /*
       console.log(
         `O API 응답 (${response.status}):`,
         responseText.substring(0, 200),
       );
+      */
 
       if (!responseText.trim()) {
         return {} as T;
@@ -414,7 +418,7 @@ export class ApiService {
   // FCM 토큰 등록/업데이트
   static async registerFCMToken(fcmToken: string): Promise<boolean> {
     try {
-      console.log('=> FCM 토큰 등록 시작:', fcmToken.substring(0, 30) + '...');
+      // console.log('=> FCM 토큰 등록 시작:', fcmToken.substring(0, 30) + '...');
 
       await this.apiCall<void>('/notification', {
         method: 'POST',
@@ -427,7 +431,7 @@ export class ApiService {
         }),
       });
 
-      console.log('O FCM 토큰 등록 성공');
+      // console.log('O FCM 토큰 등록 성공');
       return true;
     } catch (error) {
       // console.error('X FCM 토큰 등록 실패:', error);
@@ -444,7 +448,7 @@ export class ApiService {
     },
   ): Promise<boolean> {
     try {
-      console.log('=> 알림 설정 업데이트:', settings);
+      // console.log('=> 알림 설정 업데이트:', settings);
 
       await this.apiCall<void>('/notification', {
         method: 'POST',
@@ -457,7 +461,7 @@ export class ApiService {
         }),
       });
 
-      console.log('O 알림 설정 업데이트 성공');
+      // console.log('O 알림 설정 업데이트 성공');
       return true;
     } catch (error) {
       // console.error('X 알림 설정 업데이트 실패:', error);
@@ -468,7 +472,7 @@ export class ApiService {
   // 테스트 푸시 알림 전송
   static async sendTestNotification(fcmToken: string): Promise<boolean> {
     try {
-      console.log('=> 테스트 알림 전송');
+      // console.log('=> 테스트 알림 전송');
 
       await this.apiCall<void>('/notification', {
         method: 'POST',
@@ -481,7 +485,7 @@ export class ApiService {
         }),
       });
 
-      console.log('O 테스트 알림 전송 성공');
+      // console.log('O 테스트 알림 전송 성공');
       return true;
     } catch (error) {
       // console.error('X 테스트 알림 전송 실패:', error);
@@ -553,9 +557,9 @@ export class ApiService {
     fridgeId: number,
     deleteUserId: number,
   ): Promise<void> {
-    console.log('=== 멤버 삭제 API 호출 ===');
-    console.log('fridgeId:', fridgeId);
-    console.log('deleteUserId:', deleteUserId);
+    // console.log('=== 멤버 삭제 API 호출 ===');
+    // console.log('fridgeId:', fridgeId);
+    // console.log('deleteUserId:', deleteUserId);
 
     try {
       const result = await this.apiCall<void>(
@@ -564,7 +568,7 @@ export class ApiService {
           method: 'DELETE',
         },
       );
-      console.log('O 멤버 삭제 성공:', result);
+      // console.log('O 멤버 삭제 성공:', result);
       return result;
     } catch (error) {
       // console.error('X 멤버 삭제 API 실패:', error);

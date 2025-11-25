@@ -22,7 +22,7 @@ export class AuthAPIService {
     accessToken: string,
   ): Promise<LoginResponse> {
     try {
-      console.log('🔐 로그인 요청:', { provider });
+      // console.log('🔐 로그인 요청:', { provider });
 
       const response = await fetch(`${Config.API_BASE_URL}/api/v1/auth/login`, {
         method: 'POST',
@@ -38,12 +38,14 @@ export class AuthAPIService {
 
       // 🔍 토큰 정보 로깅 (디버깅용)
       if (result.result?.accessToken && result.result?.refreshToken) {
-        console.log('📝 로그인 응답 토큰 정보:', {
+        /*
+         console.log('📝 로그인 응답 토큰 정보:', {
           accessToken: result.result.accessToken.substring(0, 50) + '...',
           refreshToken: result.result.refreshToken.substring(0, 50) + '...',
           tokensAreSame:
             result.result.accessToken === result.result.refreshToken,
         });
+        */
 
         // 토큰 페이로드 분석
         try {
@@ -54,11 +56,12 @@ export class AuthAPIService {
             atob(result.result.refreshToken.split('.')[1]),
           );
 
-          console.log('📊 토큰 만료시간 분석:', {
+          /* console.log('📊 토큰 만료시간 분석:', {
             accessExp: new Date(accessPayload.exp * 1000).toLocaleString(),
             refreshExp: new Date(refreshPayload.exp * 1000).toLocaleString(),
             sameExpiry: accessPayload.exp === refreshPayload.exp,
           });
+          */
         } catch (e) {
           // console.warn('토큰 페이로드 파싱 실패:', e);
         }
@@ -93,7 +96,7 @@ export class AuthAPIService {
   // token Refresh API - 개선된 버전
   static async refreshToken(): Promise<boolean> {
     if (isRefreshing && refreshPromise) {
-      console.log('⏳ 이미 토큰 갱신 중 - 기존 Promise 대기');
+      // console.log('⏳ 이미 토큰 갱신 중 - 기존 Promise 대기');
       return await refreshPromise;
     }
 
@@ -103,9 +106,11 @@ export class AuthAPIService {
         const refreshToken = await getRefreshToken();
         const currentAccessToken = await getAccessToken();
 
+        /*
         console.log('🔄 토큰 갱신 시도:', {
           hasRefreshToken: !!refreshToken,
         });
+        */
 
         if (!refreshToken) {
           // console.error('❌ Refresh Token이 없습니다');
@@ -118,9 +123,9 @@ export class AuthAPIService {
         // Access Token이 있으면 헤더에 추가
         if (currentAccessToken) {
           headers.Authorization = `Bearer ${currentAccessToken}`;
-          console.log('✅ Authorization 헤더에 Access Token 포함');
+          // console.log('✅ Authorization 헤더에 Access Token 포함');
         } else {
-          console.log('⚠️ Access Token 없음 - Authorization 헤더 제외');
+          // console.log('⚠️ Access Token 없음 - Authorization 헤더 제외');
         }
 
         const response = await fetch(
@@ -132,7 +137,7 @@ export class AuthAPIService {
           },
         );
 
-        console.log('📡 Refresh 응답 상태:', response.status);
+        // console.log('📡 Refresh 응답 상태:', response.status);
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -144,7 +149,7 @@ export class AuthAPIService {
           */
 
           if (response.status === 401 || response.status === 403) {
-            console.log('🚪 인증 만료 - 토큰 클리어 및 재로그인 필요');
+            // console.log('🚪 인증 만료 - 토큰 클리어 및 재로그인 필요');
             await clearTokens();
           }
           return false;
@@ -152,18 +157,20 @@ export class AuthAPIService {
 
         const result: RefreshTokenResponse = await response.json();
 
-        console.log('📥 Refresh 응답:', {
+        /*
+         console.log('📥 Refresh 응답:', {
           code: result.code,
           hasAccessToken: !!result.result?.accessToken,
           hasRefreshToken: !!result.result?.refreshToken,
         });
+        */
 
         if (result.code === 'AUTH_OK_002' && result.result?.accessToken) {
           const newAccessToken = result.result.accessToken;
           const newRefreshToken = result.result.refreshToken || refreshToken;
 
           await saveTokens(newAccessToken, newRefreshToken);
-          console.log('✅ 토큰 갱신 성공');
+          // console.log('✅ 토큰 갱신 성공');
 
           return true;
         }

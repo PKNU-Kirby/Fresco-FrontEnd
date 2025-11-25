@@ -60,7 +60,7 @@ export class FridgeUtils {
           parseInt(currentUser.id, 10),
           serverFridge.id,
         );
-        console.log('냉장고 로컬 생성 동기화 완료');
+        // console.log('냉장고 로컬 생성 동기화 완료');
         return true;
       } else {
         // console.warn('AsyncStorageService.createRefrigerator 메서드가 없음');
@@ -88,7 +88,7 @@ export class FridgeUtils {
           typeof fridgeId === 'string' ? parseInt(fridgeId, 10) : fridgeId, // ✅ 안전한 변환
           updateData,
         );
-        console.log('냉장고 로컬 수정 동기화 완료');
+        // console.log('냉장고 로컬 수정 동기화 완료');
         return true;
       } else {
         // console.warn('AsyncStorageService.updateRefrigerator 메서드가 없음');
@@ -111,7 +111,7 @@ export class FridgeUtils {
       // 1차: AsyncStorageService.deleteRefrigerator 시도
       if (AsyncStorageService.deleteRefrigerator) {
         await AsyncStorageService.deleteRefrigerator(parseInt(fridgeId, 10));
-        console.log('냉장고 로컬 삭제 동기화 완료 (deleteRefrigerator)');
+        // console.log('냉장고 로컬 삭제 동기화 완료 (deleteRefrigerator)');
         return true;
       }
 
@@ -121,9 +121,10 @@ export class FridgeUtils {
           parseInt(fridgeId, 10),
           parseInt(currentUserId, 10),
         );
-        console.log(
+        /* console.log(
           '냉장고 로컬 삭제 동기화 완료 (removeUserFromRefrigerator)',
         );
+        */
         return true;
       }
 
@@ -139,7 +140,7 @@ export class FridgeUtils {
           (fridge: any) => fridge.id !== fridgeId,
         );
         await AsyncStorage.setItem(userKey, JSON.stringify(updatedFridges));
-        console.log('냉장고 로컬 삭제 동기화 완료 (직접 조작)');
+        // console.log('냉장고 로컬 삭제 동기화 완료 (직접 조작)');
         return true;
       }
 
@@ -265,7 +266,7 @@ export class FridgeUtils {
     if (__DEV__) {
       // data 객체를 안전하게 변환
       const safeData = data ? JSON.parse(JSON.stringify(data)) : data;
-      console.log(`[FridgeUtils] ${operation}:`, safeData);
+      // console.log(`[FridgeUtils] ${operation}:`, safeData);
     }
   }
 }

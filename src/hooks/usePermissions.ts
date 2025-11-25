@@ -46,14 +46,16 @@ export const usePermissions = (currentUser: User | null) => {
       const permission = permissions.find(p => p.fridgeId === fridgeId);
 
       if (permission) {
+        /*
         console.log(`>> 권한 조회 - 냉장고 ${fridgeId}:`, {
           role: permission.role,
           canDelete: permission.canDelete,
           canEdit: permission.canEdit,
           fridgeId: permission.fridgeId,
         });
+        */
       } else {
-        console.log(`>> 권한 없음 - 냉장고 ${fridgeId}`);
+        // console.log(`>> 권한 없음 - 냉장고 ${fridgeId}`);
       }
 
       return permission;

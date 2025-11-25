@@ -70,7 +70,7 @@ const CameraScreen: React.FC = () => {
     setIsLoading(false);
 
     if (response.didCancel) {
-      console.log('User canceled camera');
+      // console.log('User canceled camera');
       setScanMode(null);
       return;
     }
@@ -99,6 +99,7 @@ const CameraScreen: React.FC = () => {
         fileName: asset.fileName,
       };
 
+      /*
       console.log('촬영 완료:', {
         uri: photo.uri,
         size: photo.fileSize
@@ -106,6 +107,7 @@ const CameraScreen: React.FC = () => {
           : 'Unknown',
         dimensions: `${photo.width}x${photo.height}`,
       });
+      */
 
       setCapturedPhoto(photo);
     }
@@ -144,7 +146,7 @@ const CameraScreen: React.FC = () => {
       maxWidth: scanMode === 'receipt' ? 3000 : 2000,
     };
 
-    console.log(`${scanMode} 모드로 카메라 실행:`, modeSpecificOptions);
+    // console.log(`${scanMode} 모드로 카메라 실행:`, modeSpecificOptions);
 
     setIsLoading(true);
     launchCamera(modeSpecificOptions, handleCameraResponse);
@@ -179,7 +181,7 @@ const CameraScreen: React.FC = () => {
 
   const handleModeSelect = useCallback(
     (mode: 'ingredient' | 'receipt') => {
-      console.log(`촬영 모드 선택: ${mode}`);
+      // console.log(`촬영 모드 선택: ${mode}`);
       setScanMode(mode);
 
       setTimeout(() => {

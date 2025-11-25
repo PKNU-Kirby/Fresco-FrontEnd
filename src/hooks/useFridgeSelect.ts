@@ -29,8 +29,8 @@ export const useFridgeSelect = (navigation: any) => {
       const tokenUserId = await getTokenUserId();
       const localUserId = await AsyncStorageService.getCurrentUserId();
 
-      console.log('토큰 사용자 ID:', tokenUserId);
-      console.log('로컬 사용자 ID:', localUserId);
+      // console.log('토큰 사용자 ID:', tokenUserId);
+      // console.log('로컬 사용자 ID:', localUserId);
 
       if (!tokenUserId) {
         navigation.replace('Login');
@@ -40,7 +40,7 @@ export const useFridgeSelect = (navigation: any) => {
       let user: User | null = null;
 
       if (tokenUserId !== localUserId) {
-        console.log('사용자 ID 불일치 - 토큰 기준으로 동기화');
+        // console.log('사용자 ID 불일치 - 토큰 기준으로 동기화');
         user = await AsyncStorageService.getUserById(tokenUserId);
 
         if (!user) {
@@ -52,7 +52,7 @@ export const useFridgeSelect = (navigation: any) => {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
-          console.log('토큰 사용자 정보를 기본값으로 생성:', user);
+          // console.log('토큰 사용자 정보를 기본값으로 생성:', user);
         }
       } else {
         user = await AsyncStorageService.getUserById(localUserId);
@@ -63,7 +63,7 @@ export const useFridgeSelect = (navigation: any) => {
         return;
       }
 
-      console.log('최종 설정된 사용자:', user);
+      // console.log('최종 설정된 사용자:', user);
       setCurrentUser(user);
       await loadUserFridges(user);
     } finally {
@@ -80,12 +80,14 @@ export const useFridgeSelect = (navigation: any) => {
       const fridgeData = await ApiService.apiCall<any[]>(
         '/api/v1/refrigerator',
       );
-      console.log('🔍 API URL:', `${Config.API_BASE_URL}/api/v1/refrigerator`);
+      // console.log('🔍 API URL:', `${Config.API_BASE_URL}/api/v1/refrigerator`);
 
+      /*
       console.log(
         '🔍 [loadUserFridges] 서버에서 받은 냉장고 목록:',
         fridgeData,
       );
+      */
 
       // 2. 각 냉장고의 권한 정보 가져오기
       const fridgesWithPermissions = await Promise.all(
@@ -96,10 +98,12 @@ export const useFridgeSelect = (navigation: any) => {
               Number(fridge.id),
             );
 
+            /*
             console.log(
               `🔍 [loadUserFridges] 냉장고 ${fridge.id} 권한:`,
               permissions,
             );
+            */
 
             // 권한 기반으로 방장 여부 판단
             // canEdit과 canDelete 둘 다 true면 방장
@@ -123,15 +127,19 @@ export const useFridgeSelect = (navigation: any) => {
               canDelete: permissions.canDelete,
             } as FridgeWithRole;
 
+            /*
             console.log(
               `🔍 [권한 판단] 냉장고 ${fridge.id}:`,
               `userRole=${fridge.userRole}, canEdit=${permissions.canEdit}, canDelete=${permissions.canDelete}, 최종isOwner=${isOwner}`,
             );
+            */
 
+            /*
             console.log(
               `🔍 [loadUserFridges] 냉장고 ${fridge.id} 최종 객체:`,
               result,
             );
+            */
 
             return result;
           } catch (permError) {
@@ -155,10 +163,12 @@ export const useFridgeSelect = (navigation: any) => {
         }),
       );
 
+      /*
       console.log(
         '🔍 [loadUserFridges] 권한 병합 완료:',
         fridgesWithPermissions,
       );
+      */
 
       // 3. 숨김 설정 적용
       const fridgesWithHiddenStatus = await applyLocalHiddenSettings(
@@ -166,10 +176,12 @@ export const useFridgeSelect = (navigation: any) => {
         targetUser,
       );
 
+      /*
       console.log(
         '🔍 [loadUserFridges] 숨김 설정 적용 완료:',
         fridgesWithHiddenStatus,
       );
+      */
 
       setFridges(fridgesWithHiddenStatus);
       syncWithLocalStorage(fridgesWithHiddenStatus, targetUser);
@@ -215,7 +227,7 @@ export const useFridgeSelect = (navigation: any) => {
         parseInt(targetUser.id, 10),
       );
       setFridges(localFridges);
-      console.log('로컬 데이터 로딩 완료:', localFridges);
+      // console.log('로컬 데이터 로딩 완료:', localFridges);
     } catch (localError) {
       // console.error('로컬 데이터 로딩도 실패:', localError);
 
@@ -233,7 +245,7 @@ export const useFridgeSelect = (navigation: any) => {
     targetUser: any,
   ) => {
     try {
-      console.log('❌ 서버에서 삭제된 냉장고 정리:', removedFridges);
+      // console.log('❌ 서버에서 삭제된 냉장고 정리:', removedFridges);
 
       for (const removedFridge of removedFridges) {
         try {
@@ -248,7 +260,7 @@ export const useFridgeSelect = (navigation: any) => {
             await AsyncStorage.setItem(userKey, JSON.stringify(updatedFridges));
           }
 
-          console.log(`냉장고 ${removedFridge.id} 로컬 제거 완료`);
+          // console.log(`냉장고 ${removedFridge.id} 로컬 제거 완료`);
         } catch (error) {
           // console.error(`냉장고 ${removedFridge.id} 로컬 제거 실패:`, error);
         }
@@ -263,7 +275,7 @@ export const useFridgeSelect = (navigation: any) => {
     user: User,
   ) => {
     try {
-      console.log('서버 데이터와 로컬 동기화 시작...');
+      // console.log('서버 데이터와 로컬 동기화 시작...');
 
       const localFridges = await AsyncStorageService.getUserRefrigerators(
         parseInt(user.id, 10),
@@ -275,11 +287,11 @@ export const useFridgeSelect = (navigation: any) => {
       );
 
       if (removedFridges.length > 0) {
-        console.log('서버에서 삭제된 냉장고들:', removedFridges);
+        // console.log('서버에서 삭제된 냉장고들:', removedFridges);
         await removeDeletedFridgesFromLocal(removedFridges, user);
       }
 
-      console.log('로컬 동기화 완료');
+      // console.log('로컬 동기화 완료');
     } catch (error) {
       // console.error('로컬 동기화 실패:', error);
     }

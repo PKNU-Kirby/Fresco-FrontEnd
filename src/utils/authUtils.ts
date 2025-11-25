@@ -74,11 +74,13 @@ export const isTokenExpired = (token: string): boolean => {
     const isExpired = payload.exp <= currentTime + 30;
 
     if (isExpired) {
+      /*
       console.log('⏰ 토큰 만료 감지:', {
         expiryTime: new Date(payload.exp * 1000).toLocaleString(),
         currentTime: new Date().toLocaleString(),
         remainingSeconds: payload.exp - currentTime,
       });
+      */
     }
 
     return isExpired;
@@ -120,7 +122,7 @@ export const isAuthenticated = async (): Promise<boolean> => {
  */
 const performTokenRefresh = async (): Promise<boolean> => {
   if (isRefreshing && refreshPromise) {
-    console.log('이미 토큰 갱신 중입니다. 기존 Promise를 기다립니다.');
+    // console.log('이미 토큰 갱신 중입니다. 기존 Promise를 기다립니다.');
     return await refreshPromise;
   }
 
@@ -129,7 +131,7 @@ const performTokenRefresh = async (): Promise<boolean> => {
 
   try {
     const result = await refreshPromise;
-    console.log('토큰 갱신 결과:', result);
+    // console.log('토큰 갱신 결과:', result);
     return result;
   } finally {
     isRefreshing = false;
@@ -145,26 +147,26 @@ export const getValidAccessToken = async (): Promise<string | null> => {
     let accessToken = await getAccessToken();
 
     if (!accessToken) {
-      console.log('액세스 토큰이 없습니다');
+      // console.log('액세스 토큰이 없습니다');
       return null;
     }
 
     // 토큰 만료 확인 (30초 여유를 두고 갱신)
     if (isTokenExpired(accessToken)) {
-      console.log('토큰이 만료되었습니다. 갱신을 시도합니다...');
+      // console.log('토큰이 만료되었습니다. 갱신을 시도합니다...');
 
       const refreshSuccess = await performTokenRefresh();
       if (refreshSuccess) {
         accessToken = await getAccessToken();
         if (accessToken) {
-          console.log('토큰 갱신 성공');
+          // console.log('토큰 갱신 성공');
           return accessToken;
         } else {
-          console.log('갱신 후 토큰을 찾을 수 없음');
+          // console.log('갱신 후 토큰을 찾을 수 없음');
           return null;
         }
       } else {
-        console.log('토큰 갱신 실패');
+        // console.log('토큰 갱신 실패');
         return null;
       }
     }
@@ -184,9 +186,9 @@ export const debugTokenInfo = async (): Promise<void> => {
     const accessToken = await getAccessToken();
     const refreshToken = await getRefreshToken();
 
-    console.log('=== 토큰 디버깅 정보 ===');
-    console.log('액세스 토큰 존재:', !!accessToken);
-    console.log('리프레시 토큰 존재:', !!refreshToken);
+    // console.log('=== 토큰 디버깅 정보 ===');
+    // console.log('액세스 토큰 존재:', !!accessToken);
+    // console.log('리프레시 토큰 존재:', !!refreshToken);
 
     if (accessToken) {
       try {
@@ -195,6 +197,7 @@ export const debugTokenInfo = async (): Promise<void> => {
           const payload = JSON.parse(atob(parts[1]));
           const currentTime = Math.floor(Date.now() / 1000);
 
+          /*
           console.log('토큰 페이로드:', {
             userId: payload.userId,
             발급시간: new Date(payload.iat * 1000),
@@ -203,12 +206,13 @@ export const debugTokenInfo = async (): Promise<void> => {
             남은시간_초: payload.exp - currentTime,
             만료여부: payload.exp <= currentTime,
           });
+          */
         }
       } catch (parseError) {
         // console.error('토큰 파싱 실패:', parseError);
       }
     }
-    console.log('=====================');
+    // console.log('=====================');
   } catch (error) {
     // console.error('토큰 디버깅 실패:', error);
   }
@@ -246,11 +250,13 @@ export const validateUserTokenMatch = async (
   try {
     const tokenUserId = await getTokenUserId();
 
+    /*
     console.log('사용자 ID 검증:', {
       현재사용자ID: currentUserId,
       토큰사용자ID: tokenUserId,
       일치여부: currentUserId === tokenUserId,
     });
+    */
 
     if (!tokenUserId) {
       return {
@@ -289,7 +295,7 @@ export const getValidAccessTokenWithUserCheck = async (
     let accessToken = await getAccessToken();
 
     if (!accessToken) {
-      console.log('액세스 토큰이 없습니다');
+      // console.log('액세스 토큰이 없습니다');
       return {
         token: null,
         needsReauth: true,
@@ -299,7 +305,7 @@ export const getValidAccessTokenWithUserCheck = async (
 
     // 토큰 만료 확인
     if (isTokenExpired(accessToken)) {
-      console.log('토큰이 만료되었습니다. 갱신을 시도합니다...');
+      // console.log('토큰이 만료되었습니다. 갱신을 시도합니다...');
 
       const refreshSuccess = await performTokenRefresh();
       if (refreshSuccess) {
@@ -436,12 +442,14 @@ export const validateLoginTokens = async (): Promise<{
       const accessExpInHours = (accessPayload.exp - currentTime) / 3600;
       const refreshExpInHours = (refreshPayload.exp - currentTime) / 3600;
 
+      /*
       console.log('📊 토큰 만료시간 분석:', {
         accessTokenExpiry: `${accessExpInHours.toFixed(2)} 시간`,
         refreshTokenExpiry: `${refreshExpInHours.toFixed(2)} 시간`,
         recommendedAccess: '1 hour',
         recommendedRefresh: '7~30 days',
       });
+      */
 
       if (accessExpInHours < 0.5) {
         issues.push(
@@ -462,10 +470,12 @@ export const validateLoginTokens = async (): Promise<{
       issues.push('토큰 페이로드 파싱 실패');
     }
 
+    /*
     console.log('🔍 토큰 검증 결과:', {
       isValid: issues.length === 0,
       issues,
     });
+    */
 
     return {
       isValid: issues.length === 0,

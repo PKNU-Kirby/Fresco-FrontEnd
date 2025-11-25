@@ -78,12 +78,14 @@ export const useApiFridgeSettings = (
         FridgeSettingsAPIService.getFridgeMembers(fridgeId),
       ]);
 
-      console.log('=== 디버깅 정보 ===');
-      console.log('membersResponse:', JSON.stringify(membersResponse, null, 2));
+      // console.log('=== 디버깅 정보 ===');
+      // console.log('membersResponse:', JSON.stringify(membersResponse, null, 2));
+      /*
       console.log(
         'permissionsResponse:',
         JSON.stringify(permissionsResponse, null, 2),
       );
+      */
 
       // 권한 데이터를 UserPermissions 형태로 변환
       const userPermissions: UserPermissions = {
@@ -97,20 +99,22 @@ export const useApiFridgeSettings = (
         perm => perm.fridgeId === fridgeId,
       );
 
-      console.log('현재 냉장고 권한 정보:', currentFridgePermission);
+      // console.log('현재 냉장고 권한 정보:', currentFridgePermission);
 
       // 현재 사용자 ID 가져오기
       const currentUserId = await AsyncStorageService.getCurrentUserId();
-      console.log('현재 사용자 ID:', currentUserId);
+      // console.log('현재 사용자 ID:', currentUserId);
 
       // 멤버 데이터에 역할 정보 추가
       const enrichedMembers: FridgeMember[] = membersResponse.map(member => {
         const isOwner = currentFridgePermission?.role === 'OWNER';
         const role = isOwner ? 'OWNER' : 'MEMBER';
 
+        /*
         console.log(
           `멤버 ${member.userName}(${member.userId}): 권한기반역할=${role}`,
         );
+        */
 
         return {
           ...member,
@@ -118,7 +122,7 @@ export const useApiFridgeSettings = (
         };
       });
 
-      console.log('완성된 멤버 데이터:', enrichedMembers);
+      // console.log('완성된 멤버 데이터:', enrichedMembers);
       setMembers(enrichedMembers);
 
       // 현재 사용자의 역할을 권한으로 판단
@@ -130,13 +134,13 @@ export const useApiFridgeSettings = (
             PermissionAPIService.checkFridgePermission(fridgeId, 'view'),
           ]);
 
-          console.log(`사용자 ${currentUserId} 권한:`, { canEdit, canDelete });
+          // console.log(`사용자 ${currentUserId} 권한:`, { canEdit, canDelete });
 
           // canEdit과 canDelete 둘 다 true면 방장, 아니면 멤버
           const isOwner = canEdit && canDelete;
           setCurrentUserRole(isOwner ? 'owner' : 'member');
 
-          console.log('판단된 역할:', isOwner ? 'owner' : 'member');
+          // console.log('판단된 역할:', isOwner ? 'owner' : 'member');
         } catch (permissionError) {
           // console.error('권한 확인 중 오류:', permissionError);
           // 권한 확인 실패 시 route에서 전달받은 userRole 사용
@@ -303,7 +307,7 @@ export const useApiFridgeSettings = (
 
   const handleDeleteFinalConfirm = async () => {
     try {
-      console.log('냉장고 삭제 시작:', fridgeId);
+      // console.log('냉장고 삭제 시작:', fridgeId);
 
       // FridgeControllerAPI로 냉장고 삭제
       await FridgeControllerAPI.delete(fridgeId);

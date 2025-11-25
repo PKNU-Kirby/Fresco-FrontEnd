@@ -50,7 +50,7 @@ export class UsageHistoryAPI {
       const size = options?.size ?? 10;
       const sort = options?.sort ?? 'createdAt,desc';
 
-      console.log(`📡 냉장고 ${refrigeratorId} 사용 기록 조회 중...`);
+      // console.log(`📡 냉장고 ${refrigeratorId} 사용 기록 조회 중...`);
 
       // 쿼리 파라미터 생성 - refrigeratorId도 포함
       const queryParams = new URLSearchParams({
@@ -60,7 +60,7 @@ export class UsageHistoryAPI {
         sort: sort,
       });
 
-      console.log(`🔍 요청 URL: /api/v1/history?${queryParams.toString()}`);
+      // console.log(`🔍 요청 URL: /api/v1/history?${queryParams.toString()}`);
 
       const response = await ApiService.apiCall<HistoryResponse>(
         `/api/v1/history/${refrigeratorId}`,
@@ -69,7 +69,7 @@ export class UsageHistoryAPI {
         },
       );
 
-      console.log(`✅ 사용 기록 조회 완료: ${response.content.length}개`);
+      // console.log(`✅ 사용 기록 조회 완료: ${response.content.length}개`);
       return response;
     } catch (error) {
       // console.error('❌ 사용 기록 조회 실패:', error);
@@ -89,10 +89,10 @@ export class UsageHistoryAPI {
     let hasMore = true;
 
     try {
-      console.log(`📡 냉장고 ${refrigeratorId}의 전체 사용 기록 조회 시작...`);
+      // console.log(`📡 냉장고 ${refrigeratorId}의 전체 사용 기록 조회 시작...`);
 
       while (hasMore && currentPage < maxPages) {
-        console.log(`  - 페이지 ${currentPage + 1} 조회 중...`);
+        // console.log(`  - 페이지 ${currentPage + 1} 조회 중...`);
 
         const response = await this.getUsageHistory(refrigeratorId, {
           page: currentPage,
@@ -103,14 +103,15 @@ export class UsageHistoryAPI {
         hasMore = response.pageInfo.hasNext;
         currentPage++;
 
-        console.log(
+        /* console.log(
           `  - 현재까지 ${allRecords.length}개 수집, 다음 페이지 ${
             hasMore ? '있음' : '없음'
           }`,
         );
+        */
       }
 
-      console.log(`✅ 전체 사용 기록 조회 완료: ${allRecords.length}개`);
+      // console.log(`✅ 전체 사용 기록 조회 완료: ${allRecords.length}개`);
       return allRecords;
     } catch (error) {
       // console.error('❌ 전체 사용 기록 조회 실패:', error);

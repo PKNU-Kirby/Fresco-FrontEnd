@@ -148,7 +148,7 @@ export const useOptimisticEdit = () => {
       onDeleteFridge: (id: string) => Promise<any>,
     ) => {
       try {
-        console.log('변경사항 서버 전송 시작:', pendingChanges);
+        // console.log('변경사항 서버 전송 시작:', pendingChanges);
 
         // 순서: 1. 삭제 -> 2. 업데이트 -> 3. 생성
         const deleteChanges = pendingChanges.filter(c => c.type === 'delete');

@@ -237,7 +237,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
     fridgeId: number,
   ): Promise<FridgeIngredient[]> => {
     try {
-      console.log(`🔍 냉장고 ${fridgeId} 식재료 API 로드 시도`);
+      // console.log(`🔍 냉장고 ${fridgeId} 식재료 API 로드 시도`);
 
       const response = await IngredientControllerAPI.getRefrigeratorIngredients(
         fridgeId,
@@ -274,7 +274,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   const loadUserFridgesWithRecipes = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      console.log('=== 냉장고 데이터 로드 시작 (API) ===');
+      // console.log('=== 냉장고 데이터 로드 시작 (API) ===');
 
       const currentUserId = await AsyncStorageService.getCurrentUserId();
       if (!currentUserId) {
@@ -289,7 +289,7 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
       }
 
       const userFridgesResponse = await ApiService.getUserFridges();
-      console.log('🔍 API 응답 - 사용자 냉장고 목록:', userFridgesResponse);
+      // console.log('🔍 API 응답 - 사용자 냉장고 목록:', userFridgesResponse);
       const fridgesWithRecipes: UserFridge[] = await Promise.all(
         userFridgesResponse.map(async fridge => {
           // 👇 PermissionAPI로 권한 확인
@@ -301,12 +301,14 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
           const role: 'owner' | 'member' =
             permissions.canEdit || permissions.canDelete ? 'owner' : 'member';
 
+          /*
           console.log('🔍 냉장고 role 확인:', {
             fridgeId: fridge.id,
             fridgeName: fridge.name,
             permissions,
             determinedRole: role,
           });
+          */
 
           const sharedRecipes = await RecipeAPI.getSharedRecipes(
             Number(fridge.id),
@@ -330,19 +332,21 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
             ingredients: fridgeIngredients,
           };
 
+          /*
           console.log('🔍 생성된 fridgeData:', {
             fridgeId: fridgeData.fridge.id,
             fridgeName: fridgeData.fridge.name,
             role: fridgeData.role,
           });
+          */
 
           return fridgeData;
         }),
       );
       setFridgeList(fridgesWithRecipes);
-      console.log('=== 최종 냉장고 + 레시피 + 식재료 ===');
+      // console.log('=== 최종 냉장고 + 레시피 + 식재료 ===');
       fridgesWithRecipes.forEach(fridge => {
-        console.log(`  - ${fridge.fridge.name}: role=${fridge.role}`);
+        // console.log(`  - ${fridge.fridge.name}: role=${fridge.role}`);
       });
     } catch (error: any) {
       // console.error('데이터 로드 실패:', error);
@@ -371,16 +375,16 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
     }
 
     try {
-      console.log('🔍 레시피 조리 가능성 계산 시작...');
-      console.log(`📍 현재 접속 냉장고: ${currentFridgeId}`);
-      console.log(`📂 선택된 냉장고: ${selectedFridge.fridge.id}`);
-      console.log(`📋 레시피 개수: ${selectedFridge.recipes.length}개`);
+      // console.log('🔍 레시피 조리 가능성 계산 시작...');
+      // console.log(`📍 현재 접속 냉장고: ${currentFridgeId}`);
+      // console.log(`📂 선택된 냉장고: ${selectedFridge.fridge.id}`);
+      // console.log(`📋 레시피 개수: ${selectedFridge.recipes.length}개`);
 
       const recipesWithIngredients = await Promise.all(
         selectedFridge.recipes.map(async recipe => {
           if (!recipe.ingredients || recipe.ingredients.length === 0) {
             try {
-              console.log(`📋 [${recipe.title}] 상세 정보 로드 중...`);
+              // console.log(`📋 [${recipe.title}] 상세 정보 로드 중...`);
               const detailResponse = await RecipeAPI.getRecipeDetail(recipe.id);
 
               const updatedRecipe = {
@@ -388,9 +392,10 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
                 ingredients: detailResponse.ingredients || [],
               };
 
+              /*
               console.log(
                 `✅ [${recipe.title}] 재료 ${updatedRecipe.ingredients.length}개 로드됨`,
-              );
+              );*/
               return updatedRecipe;
             } catch (error) {
               // console.error(`❌ [${recipe.title}] 상세 로드 실패:`, error);
@@ -412,9 +417,10 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
       availabilities.forEach((value, key) => {
         const recipe = recipesWithIngredients.find(r => r.id === key);
         if (recipe && value.totalIngredientsCount > 0) {
+          /*
           console.log(
             `  - ${recipe.title}: ${value.availableIngredientsCount}/${value.totalIngredientsCount}`,
-          );
+          );*/
         }
       });
     } catch (error) {
@@ -434,11 +440,12 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
     if (!selectedFridge) return;
 
     // 👇 navigate 하기 전에 로그 확인!
-    console.log('🔍 ===== 레시피 클릭 (navigate 직전) =====');
-    console.log('🔍 레시피:', recipe.title);
-    console.log('🔍 selectedFridge:', selectedFridge);
-    console.log('🔍 selectedFridge.role:', selectedFridge.role);
-    console.log('🔍 selectedFridge.role type:', typeof selectedFridge.role);
+    // console.log('🔍 ===== 레시피 클릭 (navigate 직전) =====');
+    // console.log('🔍 레시피:', recipe.title);
+    // console.log('🔍 selectedFridge:', selectedFridge);
+    // console.log('🔍 selectedFridge.role:', selectedFridge.role);
+    // console.log('🔍 selectedFridge.role type:', typeof selectedFridge.role);
+    /*
     console.log('🔍 전달할 params:', {
       recipe: recipe.title,
       fridgeId: selectedFridge.fridge.id,
@@ -446,8 +453,8 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
       currentFridgeId: currentFridgeId,
       isSharedRecipe: true,
       userRole: selectedFridge.role,
-    });
-    console.log('🔍 =========================================');
+    });*/
+    // console.log('🔍 =========================================');
 
     navigation.navigate('RecipeDetail', {
       recipe,
@@ -515,11 +522,11 @@ const SharedFolderScreen: React.FC<SharedFolderScreenProps> = ({ route }) => {
   );
 
   const handleFridgePress = (userFridge: UserFridge) => {
-    console.log('🔍 냉장고 선택:', {
+    /*console.log('🔍 냉장고 선택:', {
       name: userFridge.fridge.name,
       role: userFridge.role,
       roleType: typeof userFridge.role,
-    });
+    });*/
     setSelectedFridge(userFridge);
   };
 

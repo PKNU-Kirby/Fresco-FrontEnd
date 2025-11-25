@@ -275,7 +275,7 @@ export class FridgeSettingsAPIService {
       let currentUser;
       try {
         currentUser = await AsyncStorageService.getCurrentUser();
-        console.log('getCurrentUser 결과:', currentUser);
+        // console.log('getCurrentUser 결과:', currentUser);
       } catch (userError) {
         // console.error('getCurrentUser 호출 실패:', userError);
         throw {
@@ -291,14 +291,14 @@ export class FridgeSettingsAPIService {
         // 대안: getCurrentUserId로 사용자 ID만이라도 가져오기
         try {
           const userId = await AsyncStorageService.getCurrentUserId();
-          console.log('대안으로 사용자 ID 조회:', userId);
+          // console.log('대안으로 사용자 ID 조회:', userId);
           if (userId) {
             // 사용자 ID로 임시 사용자 객체 생성
             currentUser = {
               id: userId,
               name: `User${userId}`, // 사용자 ID 기반 기본 이름
             };
-            console.log('임시 사용자 객체 생성:', currentUser);
+            // console.log('임시 사용자 객체 생성:', currentUser);
           } else {
             throw {
               status: 401,
@@ -332,7 +332,7 @@ export class FridgeSettingsAPIService {
         inviterName: currentUser.name,
       });
 
-      console.log('초대 API 호출 - 쿼리 파라미터:', queryParams.toString());
+      // console.log('초대 API 호출 - 쿼리 파라미터:', queryParams.toString());
 
       const response = await fetch(
         `${
@@ -358,7 +358,7 @@ export class FridgeSettingsAPIService {
       }
 
       const data = await response.json();
-      console.log('초대 API 응답:', data);
+      // console.log('초대 API 응답:', data);
 
       if (!data.code || !data.code.includes('OK')) {
         throw {
@@ -449,7 +449,7 @@ export class FridgeSettingsAPIService {
         };
       }
 
-      console.log('냉장고 참여 시도 - refrigeratorId:', fridgeId);
+      // console.log('냉장고 참여 시도 - refrigeratorId:', fridgeId);
 
       const response = await fetch(
         `${Config.API_BASE_URL}/api/v1/refrigerator/users/${fridgeId}`,
@@ -481,7 +481,7 @@ export class FridgeSettingsAPIService {
         };
       }
 
-      console.log('냉장고 참여 성공:', data);
+      // console.log('냉장고 참여 성공:', data);
     } catch (error) {
       // console.error('냉장고 참여 실패:', error);
       ApiErrorHandler.logError(
@@ -509,8 +509,8 @@ export class FridgeSettingsAPIService {
         };
       }
 
-      console.log('초대 코드 유효성 검증:', refrigeratorInvitationId);
-      console.log('사용할 토큰:', token.substring(0, 30) + '...');
+      // console.log('초대 코드 유효성 검증:', refrigeratorInvitationId);
+      // console.log('사용할 토큰:', token.substring(0, 30) + '...');
 
       const response = await fetch(
         `${Config.API_BASE_URL}/api/v1/refrigerator/invitation/${refrigeratorInvitationId}`,
@@ -542,7 +542,7 @@ export class FridgeSettingsAPIService {
         };
       }
 
-      console.log('초대 코드 유효성 검증 완료:', data.result);
+      // console.log('초대 코드 유효성 검증 완료:', data.result);
       return data.result;
     } catch (error) {
       // console.error('초대 코드 유효성 검증 실패:', error);
@@ -685,9 +685,10 @@ export class FridgeSettingsAPIService {
         !AsyncStorageService ||
         typeof AsyncStorageService.getCurrentUserId !== 'function'
       ) {
-        // console.error(
+        /* console.error(
           'AsyncStorageService.getCurrentUserId를 사용할 수 없습니다',
         );
+        */
         throw {
           status: 500,
           code: 'SERVICE_UNAVAILABLE',
@@ -788,7 +789,7 @@ export class UsageHistoryAPI {
    */
   static async getUsageHistory(fridgeId: number): Promise<HistoryResponse> {
     try {
-      console.log(`냉장고 ${fridgeId} 사용 기록 조회 중...`);
+      // console.log(`냉장고 ${fridgeId} 사용 기록 조회 중...`);
 
       const response = await ApiService.apiCall<HistoryResponse>(
         `/api/v1/history/${fridgeId}`,
@@ -797,7 +798,7 @@ export class UsageHistoryAPI {
         },
       );
 
-      console.log(`사용 기록 조회 완료: ${response.content.length}개`);
+      // console.log(`사용 기록 조회 완료: ${response.content.length}개`);
       return response;
     } catch (error) {
       // console.error('사용 기록 조회 실패:', error);
@@ -828,7 +829,7 @@ export class UsageHistoryAPI {
         currentPage++;
       }
 
-      console.log(`전체 사용 기록 조회 완료: ${allRecords.length}개`);
+      // console.log(`전체 사용 기록 조회 완료: ${allRecords.length}개`);
       return allRecords;
     } catch (error) {
       // console.error('전체 사용 기록 조회 실패:', error);

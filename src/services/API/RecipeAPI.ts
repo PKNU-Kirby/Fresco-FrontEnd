@@ -103,7 +103,7 @@ interface SaveAIRecipeResponse {
 
 class RecipeTypeConverter {
   static apiToFrontend(apiRecipe: any): Recipe {
-    console.log('🔥 API 원본 데이터:', apiRecipe);
+    // console.log('🔥 API 원본 데이터:', apiRecipe);
 
     const converted = {
       id: apiRecipe.recipeId,
@@ -182,17 +182,18 @@ export class RecipeAPI {
   static async getSharedRecipes(refrigeratorId: number): Promise<Recipe[]> {
     try {
       const token = await AsyncStorageService.getAuthToken();
-      console.log('-> 공유 레시피 조회 시작:', {
+      /* console.log('-> 공유 레시피 조회 시작:', {
         refrigeratorId,
         hasToken: !!token,
         tokenPreview: token ? token.substring(0, 20) + '...' : 'null',
       });
+      */
 
       const apiRecipes = await ApiService.apiCall<ApiRecipe[]>(
         `/recipe/share/${refrigeratorId}`,
       );
 
-      console.log('O 공유 레시피 조회 성공:', apiRecipes.length);
+      // console.log('O 공유 레시피 조회 성공:', apiRecipes.length);
       return apiRecipes.map(RecipeTypeConverter.apiToFrontend);
     } catch (error: any) {
       /*
@@ -221,7 +222,7 @@ export class RecipeAPI {
     }
   > {
     try {
-      console.log('🔍 레시피 상세 조회:', recipeId);
+      // console.log('🔍 레시피 상세 조회:', recipeId);
       const apiRecipe = await ApiService.apiCall<ApiRecipe>(
         `/recipe/detail/${recipeId}`,
       );
@@ -261,10 +262,12 @@ export class RecipeAPI {
         url: recipe.url || recipe.referenceUrl || '',
       };
 
+      /*
       console.log(
         '🔥 RecipeAPI - 보낼 데이터:',
         JSON.stringify(requestData, null, 2),
       );
+      */
 
       const apiRecipe = await ApiService.apiCall<ApiRecipe>('/recipe/create', {
         method: 'POST',
@@ -283,7 +286,7 @@ export class RecipeAPI {
     updates: Partial<Recipe>,
   ): Promise<Recipe> {
     try {
-      console.log('🔥 RecipeAPI.updateRecipe 시작:', { recipeId, updates });
+      // console.log('🔥 RecipeAPI.updateRecipe 시작:', { recipeId, updates });
 
       const requestData: UpdateRecipeRequest = {
         title: updates.title,
@@ -298,7 +301,7 @@ export class RecipeAPI {
         url: updates.referenceUrl,
       };
 
-      console.log('🔥 요청 데이터:', requestData);
+      // console.log('🔥 요청 데이터:', requestData);
 
       const apiRecipe = await ApiService.apiCall<ApiRecipe>(
         `/recipe/replace/${recipeId}`,
@@ -308,9 +311,9 @@ export class RecipeAPI {
         },
       );
 
-      console.log('🔥 API 응답:', apiRecipe);
+      // console.log('🔥 API 응답:', apiRecipe);
       const convertedRecipe = RecipeTypeConverter.apiToFrontend(apiRecipe);
-      console.log('🔥 변환된 레시피:', convertedRecipe);
+      // console.log('🔥 변환된 레시피:', convertedRecipe);
 
       return convertedRecipe;
     } catch (error) {
@@ -437,12 +440,12 @@ export class RecipeAPI {
    */
   static async getAIRecipe(prompt: string): Promise<AIRecipeResponse> {
     try {
-      console.log('📤 AI 레시피 요청:', prompt);
+      // console.log('📤 AI 레시피 요청:', prompt);
       const result = await ApiService.apiCall<AIRecipeResponse>(
         `/recipe/ai?prompt=${encodeURIComponent(prompt)}`,
         { method: 'GET' },
       );
-      console.log('✅ AI 레시피 추천 성공:', result);
+      // console.log('✅ AI 레시피 추천 성공:', result);
       return result;
     } catch (error: any) {
       // console.error('❌ AI 레시피 추천 실패:', error);
@@ -455,14 +458,14 @@ export class RecipeAPI {
    */
   static async saveAIRecipe(recipeData: any) {
     try {
-      console.log('📤 AI 레시피 저장 요청:', recipeData);
+      // console.log('📤 AI 레시피 저장 요청:', recipeData);
 
       const result = await ApiService.apiCall('/recipe/ai/save', {
         method: 'POST',
         body: JSON.stringify(recipeData),
       });
 
-      console.log('✅ AI 레시피 저장 성공:', result);
+      // console.log('✅ AI 레시피 저장 성공:', result);
       return result;
     } catch (error: any) {
       // console.error('❌ AI 레시피 저장 실패:', error);

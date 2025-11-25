@@ -77,10 +77,12 @@ export const useLogin = (): UseLoginReturn => {
   ): Promise<void> => {
     setIsLoading(true);
     try {
+      /*
       console.log('[Login request] : ', {
         provider,
         accessToken: socialAccessToken.substring(0, 10) + '...',
       });
+      */
 
       const result = await loginAPI(provider, socialAccessToken);
 
@@ -89,10 +91,12 @@ export const useLogin = (): UseLoginReturn => {
           throw new Error('서버에서 토큰을 받지 못했습니다.');
         }
 
+        /*
         console.log('서버에서 받은 토큰들:', {
           accessToken: result.result.accessToken.substring(0, 20) + '...',
           refreshToken: result.result.refreshToken.substring(0, 20) + '...',
         });
+        */
 
         // 🔥 토큰 저장 순서 및 방식 개선
         try {
@@ -109,20 +113,21 @@ export const useLogin = (): UseLoginReturn => {
           await AsyncStorageService.setAuthToken(result.result.accessToken);
           await AsyncStorageService.setRefreshToken(result.result.refreshToken);
 
-          console.log('토큰 저장 완료');
+          // console.log('토큰 저장 완료');
 
           // ✅ 여기에 추가: 토큰에서 userId 추출하여 저장
           const { getTokenUserId } = require('../../utils/authUtils');
           const tokenUserId = await getTokenUserId();
           if (tokenUserId) {
             await AsyncStorageService.setCurrentUserId(tokenUserId);
-            console.log('토큰에서 추출한 userId 저장:', tokenUserId);
+            // console.log('토큰에서 추출한 userId 저장:', tokenUserId);
           }
 
           // 3. 저장 확인
           const savedAccessToken = await AsyncStorage.getItem('accessToken');
           const savedRefreshToken = await AsyncStorage.getItem('refreshToken');
 
+          /*
           console.log('저장 확인:', {
             accessToken: savedAccessToken
               ? savedAccessToken.substring(0, 20) + '...'
@@ -131,6 +136,7 @@ export const useLogin = (): UseLoginReturn => {
               ? savedRefreshToken.substring(0, 20) + '...'
               : 'null',
           });
+          */
 
           if (!savedAccessToken || !savedRefreshToken) {
             throw new Error('토큰 저장 검증 실패');
@@ -141,7 +147,7 @@ export const useLogin = (): UseLoginReturn => {
         }
 
         // 사용자 정보 저장
-        console.log('사용자 정보 저장 시작:', userProfile);
+        // console.log('사용자 정보 저장 시작:', userProfile);
 
         if (!userProfile || typeof userProfile !== 'object') {
           throw new Error('사용자 프로필 정보가 없습니다.');
@@ -155,20 +161,20 @@ export const useLogin = (): UseLoginReturn => {
           userProfile.profileImage,
         );
 
-        console.log('createUserFromLogin 반환값:', user);
+        // console.log('createUserFromLogin 반환값:', user);
 
         if (!user || typeof user !== 'object' || !user.id) {
           // console.error('사용자 생성 실패: user 객체가 없거나 id가 없음');
           throw new Error('사용자 정보 저장에 실패했습니다.');
         }
 
-        console.log('토큰 userId가 currentUserId로 설정됨');
+        // console.log('토큰 userId가 currentUserId로 설정됨');
 
         // 기본 냉장고 설정
         try {
           await AsyncStorage.setItem('hasDefaultFridge', 'true');
           await AsyncStorage.setItem('defaultFridgeUserId', user.id);
-          console.log('기본 냉장고 설정 완료');
+          // console.log('기본 냉장고 설정 완료');
         } catch (fridgeError) {
           // console.warn('기본 냉장고 초기화 실패:', fridgeError);
         }
@@ -182,22 +188,25 @@ export const useLogin = (): UseLoginReturn => {
         );
         if (pendingInvitationCode) {
           try {
+            /*
             console.log(
               '초대코드 발견, 초대 정보 조회 시작:',
               pendingInvitationCode,
             );
+            */
 
             // 토큰 재확인
             const verifyToken = await AsyncStorage.getItem('accessToken');
+            /*
             console.log(
               '초대 정보 조회 전 토큰 확인:',
               verifyToken ? verifyToken.substring(0, 20) + '...' : 'null',
-            );
+            );*/
 
             const info = await FridgeSettingsAPIService.validateInvitationCode(
               Number(pendingInvitationCode),
             );
-            console.log('초대 정보 조회 성공:', info);
+            // console.log('초대 정보 조회 성공:', info);
             setInvitationInfo(info);
             // invitationInfo가 설정되면 LoginScreen의 useEffect에서 모달 표시
             return;

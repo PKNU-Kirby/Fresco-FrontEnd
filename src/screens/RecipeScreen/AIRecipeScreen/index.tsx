@@ -64,12 +64,14 @@ const AIRecipeScreen: React.FC = () => {
   const [saveErrorModalVisible, setSaveErrorModalVisible] = useState(false);
   const [saveErrorMessage, setSaveErrorMessage] = useState('');
 
+  /*
   console.log('🔍 렌더링 상태:', {
     isLoading,
     hasGeneratedRecipe: !!generatedRecipe,
     generatedRecipe,
     prompt,
   });
+  */
 
   // AI 레시피 생성
   const generateRecipe = async () => {
@@ -88,7 +90,7 @@ const AIRecipeScreen: React.FC = () => {
     setPromptHistory(newHistory);
 
     try {
-      console.log('📤 AI 레시피 요청:', prompt);
+      // console.log('📤 AI 레시피 요청:', prompt);
 
       const aiRecipeData = await RecipeAPI.getAIRecipe(prompt);
 
@@ -142,12 +144,12 @@ const AIRecipeScreen: React.FC = () => {
         substitutions: generatedRecipe.substitutions || [],
       };
 
-      console.log('📤 AI 레시피 저장 요청:', saveData);
+      // console.log('📤 AI 레시피 저장 요청:', saveData);
       const savedRecipe = await RecipeAPI.saveAIRecipe(saveData);
-      console.log('✅ AI 레시피 저장 성공:', savedRecipe);
+      // console.log('✅ AI 레시피 저장 성공:', savedRecipe);
 
       const currentFridgeId = await AsyncStorageService.getSelectedFridgeId();
-      console.log('📦 현재 냉장고 ID:', currentFridgeId);
+      // console.log('📦 현재 냉장고 ID:', currentFridgeId);
 
       setSaveSuccessVisible(true);
     } catch (error: any) {

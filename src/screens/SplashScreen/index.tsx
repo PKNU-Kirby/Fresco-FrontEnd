@@ -25,7 +25,7 @@ const SplashScreen = (): React.JSX.Element => {
         const user = await AsyncStorageService.getUserById(currentUserId);
 
         if (user) {
-          console.log(`기존 사용자 로그인: ${user.name} (ID: ${user.id})`);
+          // console.log(`기존 사용자 로그인: ${user.name} (ID: ${user.id})`);
 
           await AsyncStorageService.initializeDefaultFridgeForUser(
             currentUserId,
@@ -33,12 +33,12 @@ const SplashScreen = (): React.JSX.Element => {
 
           navigation.replace('FridgeSelect');
         } else {
-          console.log('사용자 정보가 없습니다. 로그인 화면으로 이동');
+          // console.log('사용자 정보가 없습니다. 로그인 화면으로 이동');
           await AsyncStorageService.clearCurrentUser();
           navigation.replace('Login');
         }
       } else {
-        console.log('로그인된 사용자가 없습니다. 로그인 화면으로 이동');
+        // console.log('로그인된 사용자가 없습니다. 로그인 화면으로 이동');
         navigation.replace('Login');
       }
     } catch (error) {

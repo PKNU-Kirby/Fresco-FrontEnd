@@ -56,11 +56,11 @@ const RecipeDetailScreen: React.FC = () => {
     isSharedRecipe = false,
   } = route.params;
 
-  console.log('🔍 ===== RecipeDetailScreen 진입 =====');
-  console.log('🔍 route.params:', route.params);
-  console.log('🔍 isSharedRecipe:', isSharedRecipe);
-  console.log('🔍 fridgeId:', fridgeId);
-  console.log('🔍 =====================================');
+  // console.log('🔍 ===== RecipeDetailScreen 진입 =====');
+  // console.log('🔍 route.params:', route.params);
+  // console.log('🔍 isSharedRecipe:', isSharedRecipe);
+  // console.log('🔍 fridgeId:', fridgeId);
+  // console.log('🔍 =====================================');
 
   const getInitialRecipe = () => {
     if (aiGeneratedData) {
@@ -188,14 +188,14 @@ const RecipeDetailScreen: React.FC = () => {
       if (!isNewRecipe && currentRecipe.id) {
         try {
           setIsLoading(true);
-          console.log('상세 레시피 로드:', currentRecipe.id);
+          // console.log('상세 레시피 로드:', currentRecipe.id);
 
           const detailRecipe = await RecipeAPI.getRecipeDetail(
             currentRecipe.id,
           );
           setCurrentRecipe(detailRecipe);
 
-          console.log('로드된 상세 레시피:', detailRecipe);
+          // console.log('로드된 상세 레시피:', detailRecipe);
         } catch (error) {
           // console.error('레시피 상세 로드 실패:', error);
         } finally {
@@ -213,7 +213,7 @@ const RecipeDetailScreen: React.FC = () => {
     const checkPermissions = async () => {
       // 개인 레시피 - 모든 권한
       if (!isSharedRecipe) {
-        console.log('✅ 개인 레시피 - 전체 권한');
+        // console.log('✅ 개인 레시피 - 전체 권한');
         setCanEdit(true);
         setCanDelete(true);
         return;
@@ -221,7 +221,7 @@ const RecipeDetailScreen: React.FC = () => {
 
       // 공유 레시피인데 fridgeId가 없으면 권한 없음
       if (!fridgeId) {
-        console.log('⚠️ 공유 레시피인데 fridgeId 없음');
+        // console.log('⚠️ 공유 레시피인데 fridgeId 없음');
         setCanEdit(false);
         setCanDelete(false);
         return;
@@ -229,12 +229,12 @@ const RecipeDetailScreen: React.FC = () => {
 
       // PermissionAPI로 권한 확인
       try {
-        console.log(`🔍 냉장고 ${fridgeId} 권한 조회 시작...`);
+        // console.log(`🔍 냉장고 ${fridgeId} 권한 조회 시작...`);
         const permissions = await PermissionAPIService.getFridgePermissions(
           Number(fridgeId),
         );
 
-        console.log('✅ 권한 조회 결과:', permissions);
+        // console.log('✅ 권한 조회 결과:', permissions);
 
         // 👇 공유 레시피 정책:
         // - 수정: 항상 불가
@@ -244,11 +244,13 @@ const RecipeDetailScreen: React.FC = () => {
         setCanEdit(false); // 공유 레시피는 무조건 수정 불가
         setCanDelete(isOwner); // 방장만 삭제 가능
 
+        /*
         console.log('✅ 최종 권한 설정:', {
           isOwner,
           canEdit: false,
           canDelete: isOwner,
         });
+        */
       } catch (error) {
         // console.error('❌ 권한 확인 실패:', error);
         setCanEdit(false);
@@ -259,12 +261,14 @@ const RecipeDetailScreen: React.FC = () => {
     checkPermissions();
   }, [isSharedRecipe, fridgeId]);
   // 👇 디버깅 로그
+  /*
   console.log('🔍 권한 정보:', {
     isSharedRecipe,
     fridgeId,
     canEdit,
     canDelete,
   });
+  */
 
   const getStepsArray = (steps: any): string[] => {
     if (!steps) return [];
@@ -311,11 +315,11 @@ const RecipeDetailScreen: React.FC = () => {
           referenceUrl: currentRecipe.referenceUrl || '',
         };
 
-        console.log('🔥 새 레시피 생성 데이터:', createData);
+        // console.log('🔥 새 레시피 생성 데이터:', createData);
 
         const savedRecipe = await RecipeAPI.createRecipe(createData);
 
-        console.log('✅ 저장된 레시피:', savedRecipe);
+        // console.log('✅ 저장된 레시피:', savedRecipe);
 
         setCurrentRecipe({
           id: savedRecipe.id,
@@ -379,10 +383,10 @@ const RecipeDetailScreen: React.FC = () => {
     }
 
     try {
-      console.log('⭐ 즐겨찾기 토글:', currentRecipe.id);
+      // console.log('⭐ 즐겨찾기 토글:', currentRecipe.id);
       const result = await RecipeAPI.toggleFavorite(currentRecipe.id);
       setIsFavorite(result.favorite);
-      console.log('✅ 즐겨찾기 상태:', result.favorite);
+      // console.log('✅ 즐겨찾기 상태:', result.favorite);
     } catch (error: any) {
       // console.error('❌ 즐겨찾기 토글 실패:', error);
       modalHandlers.setFavoriteErrorVisible(true);
@@ -404,11 +408,13 @@ const RecipeDetailScreen: React.FC = () => {
       return;
     }
 
+    /*
     console.log('🔍 RecipeDetail 냉장고 정보:', {
       fridgeId,
       currentFridgeId,
       targetFridgeId,
     });
+    */
 
     navigation.navigate('UseRecipe', {
       recipe: currentRecipe,
@@ -452,7 +458,7 @@ const RecipeDetailScreen: React.FC = () => {
   };
 
   const addStep = () => {
-    console.log('🔥 addStep 호출됨!');
+    // console.log('🔥 addStep 호출됨!');
 
     setCurrentRecipe(prev => {
       const currentSteps = Array.isArray(prev.steps) ? prev.steps : [];
@@ -505,7 +511,7 @@ const RecipeDetailScreen: React.FC = () => {
 
     try {
       const currentUserId = await AsyncStorageService.getCurrentUserId();
-      console.log('🔍 Current User ID:', currentUserId);
+      // console.log('🔍 Current User ID:', currentUserId);
 
       if (!currentUserId) {
         modalHandlers.setUserNotFoundVisible(true);
@@ -513,7 +519,7 @@ const RecipeDetailScreen: React.FC = () => {
       }
 
       const currentUser = await AsyncStorageService.getUserById(currentUserId);
-      console.log('🔍 Current User:', currentUser);
+      // console.log('🔍 Current User:', currentUser);
 
       if (!currentUser) {
         modalHandlers.setUserNotFoundVisible(true);
@@ -524,7 +530,7 @@ const RecipeDetailScreen: React.FC = () => {
         currentUser.id,
       );
 
-      console.log('🔍 User Fridge List:', userFridgeList);
+      // console.log('🔍 User Fridge List:', userFridgeList);
 
       const fridges: CheckableFridge[] = userFridgeList.map(
         (fridge: FridgeWithRole) => ({
@@ -570,10 +576,10 @@ const RecipeDetailScreen: React.FC = () => {
         try {
           await RecipeAPI.shareRecipe(fridge.id, currentRecipe.id);
           successCount++;
-          console.log(`✅ 냉장고 ${fridge.id}에 공유 성공`);
+          // console.log(`✅ 냉장고 ${fridge.id}에 공유 성공`);
         } catch (error: any) {
           if (error.message?.includes('이미')) {
-            console.log(`⚠️ 냉장고 ${fridge.id}에 이미 공유됨`);
+            // console.log(`⚠️ 냉장고 ${fridge.id}에 이미 공유됨`);
           } else {
             // console.error(`❌ 냉장고 ${fridge.id} 공유 실패:`, error);
           }

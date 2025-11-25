@@ -49,7 +49,7 @@ export class UsageTrackingService {
         USAGE_RECORDS_KEY,
         JSON.stringify(existingRecords),
       );
-      console.log('사용 기록 추가됨:', newRecord);
+      // console.log('사용 기록 추가됨:', newRecord);
     } catch (error) {
       // console.error('사용 기록 추가 실패:', error);
     }
@@ -75,7 +75,7 @@ export class UsageTrackingService {
     },
   ): Promise<UsageRecord[]> {
     try {
-      console.log(`📡 냉장고 ${fridgeId}의 사용 기록 서버 조회 시작...`);
+      // console.log(`📡 냉장고 ${fridgeId}의 사용 기록 서버 조회 시작...`);
 
       // 옵션이 있으면 페이지네이션, 없으면 전체 조회
       const records = options
@@ -84,7 +84,7 @@ export class UsageTrackingService {
           )
         : await UsageHistoryAPI.getAllUsageHistory(fridgeId);
 
-      console.log(`✅ 서버에서 ${records.length}개의 기록 조회 완료`);
+      // console.log(`✅ 서버에서 ${records.length}개의 기록 조회 완료`);
 
       return records.map((item: HistoryRecord, index: number) => {
         return {
@@ -119,9 +119,11 @@ export class UsageTrackingService {
     totalElements: number;
   }> {
     try {
+      /*
       console.log(
         `📡 냉장고 ${fridgeId}의 사용 기록 조회 (page: ${page}, size: ${size})`,
       );
+      */
 
       const response = await UsageHistoryAPI.getUsageHistory(fridgeId, {
         page,
@@ -311,11 +313,13 @@ export class UsageTrackingService {
         JSON.stringify(filteredRecords),
       );
 
+      /*
       console.log(
         `${
           allRecords.length - filteredRecords.length
         }개의 오래된 사용 기록이 삭제되었습니다.`,
       );
+      */
     } catch (error) {
       // console.error('사용 기록 정리 실패:', error);
     }

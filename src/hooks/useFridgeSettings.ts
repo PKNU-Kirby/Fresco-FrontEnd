@@ -99,16 +99,16 @@ export const useFridgeSettings = (
   const loadMembers = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log('=== 냉장고 멤버 목록 로드 ===');
-      console.log('냉장고 ID:', fridgeId);
+      // console.log('=== 냉장고 멤버 목록 로드 ===');
+      // console.log('냉장고 ID:', fridgeId);
 
       const [fridgeMembers, userPermissions] = await Promise.all([
         ApiService.getFridgeMembers(fridgeId),
         PermissionAPIService.getUserPermissions(),
       ]);
 
-      console.log('서버에서 가져온 멤버 목록:', fridgeMembers);
-      console.log('권한 응답 전체:', JSON.stringify(userPermissions, null, 2));
+      // console.log('서버에서 가져온 멤버 목록:', fridgeMembers);
+      // console.log('권한 응답 전체:', JSON.stringify(userPermissions, null, 2));
 
       // 현재 사용자가 이 냉장고의 owner인지 확인
       const isCurrentUserOwner = userPermissions[fridgeId] === true;
@@ -119,8 +119,8 @@ export const useFridgeSettings = (
         role: 'member' as const,
       }));
 
-      console.log('변환된 멤버 목록:', memberList);
-      console.log('현재 사용자가 owner인가:', isCurrentUserOwner);
+      // console.log('변환된 멤버 목록:', memberList);
+      // console.log('현재 사용자가 owner인가:', isCurrentUserOwner);
 
       setMembers(memberList);
       setCurrentUserRole(isCurrentUserOwner ? 'owner' : 'member');

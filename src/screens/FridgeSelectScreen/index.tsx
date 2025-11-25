@@ -123,7 +123,7 @@ const FridgeSelectScreen = () => {
   const handleCreateFridge = async (name: string) => {
     try {
       const response = await FridgeControllerAPI.create({ name });
-      console.log('냉장고 생성 완료:', response);
+      // console.log('냉장고 생성 완료:', response);
       return response;
     } catch (error) {
       // console.error('냉장고 생성 실패:', error);
@@ -134,7 +134,7 @@ const FridgeSelectScreen = () => {
   const handleUpdateFridge = async (id: number, name: string) => {
     try {
       const response = await FridgeControllerAPI.update(Number(id), { name });
-      console.log('냉장고 업데이트 완료:', response);
+      // console.log('냉장고 업데이트 완료:', response);
       return response;
     } catch (error) {
       // console.error('냉장고 업데이트 실패:', error);
@@ -145,7 +145,7 @@ const FridgeSelectScreen = () => {
   const handleDeleteFridge = async (id: number) => {
     try {
       await FridgeControllerAPI.delete(id);
-      console.log('냉장고 삭제 완료:', id);
+      // console.log('냉장고 삭제 완료:', id);
     } catch (error) {
       // console.error('냉장고 삭제 실패:', error);
       throw error;
@@ -259,9 +259,11 @@ const FridgeSelectScreen = () => {
           await validateUserTokenMatch(currentUser.id);
 
         if (!isValid) {
+          /*
           console.log(
             `사용자 ID 불일치! 현재: ${currentUser.id}, 토큰: ${tokenUserId}`,
           );
+          */
           setAuthErrorModalVisible(true);
           return;
         }
@@ -277,7 +279,7 @@ const FridgeSelectScreen = () => {
     } catch (error) {
       // console.error('변경사항 저장 실패:', error);
       if (error.message.includes('403')) {
-        console.log('403 에러 발생 - 사용자 ID 불일치 또는 권한 부족');
+        // console.log('403 에러 발생 - 사용자 ID 불일치 또는 권한 부족');
         setPermissionErrorModalVisible(true);
       } else {
         setSaveErrorMessage(`변경사항 저장에 실패했습니다: ${error.message}`);

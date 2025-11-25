@@ -104,11 +104,13 @@ export class UserFridgeManager {
         throw new Error('현재 사용자를 찾을 수 없습니다.');
       }
 
+      /*
       console.log('냉장고 생성 시작:', {
         name,
         description,
         userId: currentUser.id,
       });
+      */
 
       // 기존 냉장고 목록 조회
       const stored = await AsyncStorage.getItem(REFRIGERATORS_KEY);
@@ -143,9 +145,11 @@ export class UserFridgeManager {
       // 소유자 관계 생성
       await this.addRefrigeratorUser(currentUser.id, newId, currentUser.id);
 
+      /*
       console.log(
         `새 냉장고 생성 완료: ${name} (ID: ${newId}, 코드: ${inviteCode})`,
       );
+      */
       return newFridge;
     } catch (error) {
       // console.error('냉장고 생성 실패:', error);
@@ -160,11 +164,13 @@ export class UserFridgeManager {
     inviterUserId: number,
   ): Promise<void> {
     try {
+      /*
       console.log('refrigeratorUsers 관계 추가:', {
         invitedUserId,
         fridgeId,
         inviterUserId,
       });
+      */
 
       const stored = await AsyncStorage.getItem(REFRIGERATOR_USERS_KEY);
       const relations: RefrigeratorUser[] = stored ? JSON.parse(stored) : [];
@@ -256,7 +262,7 @@ export class UserFridgeManager {
       // 새로운 관계 생성
       await this.addRefrigeratorUser(currentUser.id, fridge.id, fridge.ownerId);
 
-      console.log(`냉장고 참여: ${fridge.name} (사용자: ${currentUser.name})`);
+      // console.log(`냉장고 참여: ${fridge.name} (사용자: ${currentUser.name})`);
       return {
         success: true,
         message: `'${fridge.name}' 냉장고에 참여했습니다.`,
@@ -375,21 +381,21 @@ export class UserFridgeManager {
     Array<{ fridge: Refrigerator; role: 'owner' | 'member'; joinedAt: string }>
   > {
     try {
-      console.log(`getUserFridges 호출: userId = ${userId}`);
+      // console.log(`getUserFridges 호출: userId = ${userId}`);
 
       // 1. 냉장고-사용자 관계 조회
       const stored = await AsyncStorage.getItem(REFRIGERATOR_USERS_KEY);
       const relations: RefrigeratorUser[] = stored ? JSON.parse(stored) : [];
-      console.log('모든 refrigeratorUsers 관계:', relations);
+      // console.log('모든 refrigeratorUsers 관계:', relations);
 
       // 활성 상태이고 초대받은_사람_id가 현재 사용자인 관계들 찾기
       const userRelations = relations.filter(
         r => r.초대받은_사람_id === userId && (r.상태 === 'active' || !r.상태), // 상태가 없으면 기본값 active
       );
-      console.log(`사용자 ${userId}의 활성 관계:`, userRelations);
+      // console.log(`사용자 ${userId}의 활성 관계:`, userRelations);
 
       if (userRelations.length === 0) {
-        console.log('사용자의 활성 관계가 없습니다.');
+        // console.log('사용자의 활성 관계가 없습니다.');
         return [];
       }
 
@@ -398,14 +404,14 @@ export class UserFridgeManager {
       const fridges: Refrigerator[] = fridgeStored
         ? JSON.parse(fridgeStored)
         : [];
-      console.log('모든 냉장고:', fridges);
+      // console.log('모든 냉장고:', fridges);
 
       // 3. 사용자 냉장고 목록 구성
       const userFridges = userRelations
         .map(relation => {
           const fridge = fridges.find(f => f.id === relation.냉장고Id);
           if (!fridge) {
-            console.log(`냉장고 ${relation.냉장고Id}를 찾을 수 없습니다.`);
+            // console.log(`냉장고 ${relation.냉장고Id}를 찾을 수 없습니다.`);
             return null;
           }
 
@@ -429,10 +435,11 @@ export class UserFridgeManager {
           );
         });
 
-      console.log(
+      /* console.log(
         `사용자 ${userId}의 최종 냉장고 ${userFridges.length}개:`,
         userFridges,
       );
+      */
       return userFridges;
     } catch (error) {
       // console.error('사용자 냉장고 목록 조회 실패:', error);
@@ -476,7 +483,7 @@ export class UserFridgeManager {
         REFRIGERATOR_USERS_KEY,
         USER_PROFILES_KEY,
       ]);
-      console.log('모든 냉장고 데이터가 초기화되었습니다.');
+      // console.log('모든 냉장고 데이터가 초기화되었습니다.');
     } catch (error) {
       // console.error('데이터 초기화 실패:', error);
       throw error;

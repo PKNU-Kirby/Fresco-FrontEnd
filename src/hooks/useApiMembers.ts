@@ -49,21 +49,21 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
   const loadMembers = async () => {
     try {
       setIsLoading(true);
-      console.log('=== 냉장고 멤버 목록 로드 ===');
-      console.log('냉장고 ID:', fridgeId);
+      // console.log('=== 냉장고 멤버 목록 로드 ===');
+      // console.log('냉장고 ID:', fridgeId);
 
       const [fridgeMembers, fridgePermissions] = await Promise.all([
         ApiService.getFridgeMembers(fridgeId),
         PermissionAPIService.getFridgePermissions(fridgeId),
       ]);
 
-      console.log('=== 디버깅 정보 ===');
-      console.log('membersResponse:', fridgeMembers);
-      console.log('permissionsResponse:', fridgePermissions);
+      // console.log('=== 디버깅 정보 ===');
+      // console.log('membersResponse:', fridgeMembers);
+      // console.log('permissionsResponse:', fridgePermissions);
 
       // 현재 사용자 정보 가져오기
       const userId = await AsyncStorageService.getCurrentUserId();
-      console.log('현재 사용자 ID:', userId);
+      // console.log('현재 사용자 ID:', userId);
 
       if (!userId) {
         setErrorMessage('사용자 정보를 찾을 수 없습니다.');
@@ -71,15 +71,15 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
         return;
       }
 
-      console.log('🔍 fridgePermissions:', fridgePermissions);
+      // console.log('🔍 fridgePermissions:', fridgePermissions);
 
       // 권한 기반으로 역할 결정
       const isOwner = fridgePermissions.canEdit && fridgePermissions.canDelete;
       const userRole = isOwner ? 'owner' : 'member';
 
-      console.log('🔍 결정된 userRole:', userRole);
-      console.log('🔍 canEdit:', fridgePermissions.canEdit);
-      console.log('🔍 canDelete:', fridgePermissions.canDelete);
+      // console.log('🔍 결정된 userRole:', userRole);
+      // console.log('🔍 canEdit:', fridgePermissions.canEdit);
+      // console.log('🔍 canDelete:', fridgePermissions.canDelete);
 
       // currentUser 설정 - 권한 정보 포함
       const user = {
@@ -91,18 +91,20 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
         canDelete: fridgePermissions.canDelete,
       };
 
-      console.log('최종 설정된 currentUser:', user);
+      // console.log('최종 설정된 currentUser:', user);
       setCurrentUser(user);
 
       // 각 멤버의 역할 결정
       const memberList: Member[] = fridgeMembers.map((member: any) => {
-        console.log(`userRole=${userRole} userId:${userId} `);
+        // console.log(`userRole=${userRole} userId:${userId} `);
         const isSelf = String(member.userId) === String(userId);
         const memberRole = isSelf ? userRole : 'member';
 
+        /*
         console.log(
           `멤버 ${member.userName}(${member.userId}): isSelf=${isSelf}, role=${memberRole}`,
         );
+        */
 
         return {
           id: member.userId,
@@ -113,7 +115,7 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
         };
       });
 
-      console.log('완성된 멤버 데이터:', memberList);
+      // console.log('완성된 멤버 데이터:', memberList);
       setMembers(memberList);
     } catch (error) {
       // console.error('멤버 목록 로드 실패:', error);
@@ -159,36 +161,36 @@ export const useApiMembers = (fridgeId: number, _fridgeName: string) => {
 
   // 현재 사용자 권한 확인 함수
   const canRemoveMember = (targetMember: Member) => {
-    console.log('=== 삭제 권한 확인 ===');
-    console.log('currentUser:', currentUser);
-    console.log('targetMember:', targetMember);
+    // console.log('=== 삭제 권한 확인 ===');
+    // console.log('currentUser:', currentUser);
+    // console.log('targetMember:', targetMember);
 
     if (!currentUser) {
-      console.log('currentUser 없음');
+      // console.log('currentUser 없음');
       return false;
     }
 
     // 현재 사용자가 방장이어야 함
-    console.log('currentUser.role:', currentUser.role);
+    // console.log('currentUser.role:', currentUser.role);
 
     if (currentUser.role !== 'owner') {
-      console.log('현재 사용자가 방장이 아님');
+      // console.log('현재 사용자가 방장이 아님');
       return false;
     }
 
     // 자기 자신은 삭제할 수 없음
     if (targetMember.id === currentUser.id) {
-      console.log('자기 자신은 삭제 불가');
+      // console.log('자기 자신은 삭제 불가');
       return false;
     }
 
     // 다른 방장은 삭제할 수 없음
     if (targetMember.role === 'owner') {
-      console.log('다른 방장은 삭제 불가');
+      // console.log('다른 방장은 삭제 불가');
       return false;
     }
 
-    console.log('삭제 권한 있음');
+    // console.log('삭제 권한 있음');
     return true;
   };
 

@@ -43,17 +43,17 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
   const loadFridges = async () => {
     try {
       setIsLoading(true);
-      console.log('🔄 냉장고 목록 로드 시작...');
-      console.log('🔍 현재 냉장고 ID:', currentFridgeId);
+      // console.log('🔄 냉장고 목록 로드 시작...');
+      // console.log('🔍 현재 냉장고 ID:', currentFridgeId);
 
       const response = await FridgeAPIService.getFridgeList();
-      console.log('🔍 API 응답 상태:', response.status);
+      // console.log('🔍 API 응답 상태:', response.status);
 
       // API 응답 구조 확인
       let fridgeData;
       if (response.ok) {
         const responseData = await response.json();
-        console.log('🔍 전체 응답 데이터:', responseData);
+        // console.log('🔍 전체 응답 데이터:', responseData);
 
         // API 응답 구조에 따라 데이터 추출
         if (responseData.result && Array.isArray(responseData.result)) {
@@ -63,14 +63,14 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
         } else if (responseData.data && Array.isArray(responseData.data)) {
           fridgeData = responseData.data;
         } else {
-          // console.warn('⚠️ 예상하지 못한 응답 구조:', responseData);
+          // // console.warn('⚠️ 예상하지 못한 응답 구조:', responseData);
           fridgeData = [];
         }
       } else {
         throw new Error(`API 호출 실패: ${response.status}`);
       }
 
-      console.log('🔍 추출된 냉장고 데이터:', fridgeData);
+      // console.log('🔍 추출된 냉장고 데이터:', fridgeData);
 
       if (!Array.isArray(fridgeData)) {
         // console.error('❌ fridgeData가 배열이 아닙니다:', typeof fridgeData);
@@ -101,8 +101,8 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
         });
 
       setFridges(shareableFridges);
-      console.log('✅ 공유 가능한 냉장고:', shareableFridges.length);
-      console.log('🔍 공유 가능한 냉장고 목록:', shareableFridges);
+      // console.log('✅ 공유 가능한 냉장고:', shareableFridges.length);
+      // console.log('🔍 공유 가능한 냉장고 목록:', shareableFridges);
     } catch (error) {
       // console.error('❌ 냉장고 목록 로드 실패:', error);
       setErrorMessage('냉장고 목록을 불러오는데 실패했습니다.');
@@ -141,25 +141,29 @@ export const RecipeActionButtons: React.FC<RecipeActionButtonsProps> = ({
 
     try {
       setIsLoading(true);
+      /*
       console.log('🔄 레시피 공유 시작...', {
         recipeId,
         recipeIdType: typeof recipeId,
         targetFridges: selectedFridges.map(f => f.id),
       });
+      */
 
       // 각 냉장고에 레시피 공유
       const sharePromises = selectedFridges.map(fridge => {
+        /*
         console.log('🔄 공유 시도:', {
           recipeId,
           fridgeId: fridge.id,
           fridgeIdType: typeof fridge.id,
         });
+        */
         return RecipeAPI.shareRecipe(recipeId, fridge.id);
       });
 
       await Promise.all(sharePromises);
 
-      console.log('✅ 레시피 공유 완료');
+      // console.log('✅ 레시피 공유 완료');
       setSuccessMessage(
         `${selectedFridges.length}개의 냉장고에 레시피가 공유되었습니다.`,
       );

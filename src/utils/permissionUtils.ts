@@ -63,7 +63,7 @@ export class PermissionUtils {
    * 권한 API 응답을 FridgePermission 배열로 변환
    */
   static parsePermissionResponse(response: any): FridgePermission[] {
-    console.log('권한 응답 파싱 시작:', response);
+    // console.log('권한 응답 파싱 시작:', response);
 
     let permissionData: { [key: string]: boolean } = {};
 
@@ -92,7 +92,7 @@ export class PermissionUtils {
         });
       }
     } else {
-      console.warn('예상치 못한 권한 응답 구조:', response);
+      // console.warn('예상치 못한 권한 응답 구조:', response);
       return [];
     }
 
@@ -114,7 +114,7 @@ export class PermissionUtils {
           ...rolePermissions,
         });
 
-        console.log(`냉장고 ${fridgeId} 권한: ${role}`, rolePermissions);
+        // console.log(`냉장고 ${fridgeId} 권한: ${role}`, rolePermissions);
       }
     }
 
@@ -133,7 +133,7 @@ export class PermissionUtils {
     const validFridges: FridgeWithRole[] = [];
 
     for (const fridge of fridges) {
-      console.log(`\n냉장고 ${fridge.name} (ID: ${fridge.id}) 처리 중...`);
+      // console.log(`\n냉장고 ${fridge.name} (ID: ${fridge.id}) 처리 중...`);
 
       const permission = permissions.find(p => {
         // console.log(`권한 비교: ${p.fridgeId} === ${fridge.id.toString()}`);
@@ -141,7 +141,7 @@ export class PermissionUtils {
       });
 
       if (!permission) {
-        console.log(`냉장고 ${fridge.id}에 대한 권한을 찾을 수 없음`);
+        // console.log(`냉장고 ${fridge.id}에 대한 권한을 찾을 수 없음`);
         continue;
       }
 
@@ -163,11 +163,11 @@ export class PermissionUtils {
         canDelete: rolePermissions.canDelete,
       };
 
-      console.log(`최종 냉장고 객체:`, fridgeWithRole);
+      // console.log(`최종 냉장고 객체:`, fridgeWithRole);
       validFridges.push(fridgeWithRole);
     }
 
-    console.log('User Fridge Info :', validFridges);
+    // console.log('User Fridge Info :', validFridges);
     return validFridges;
   }
 

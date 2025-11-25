@@ -143,7 +143,7 @@ const AddItemScreen: React.FC = () => {
   const confirmIngredients = useCallback(async () => {
     // 스캔 결과가 있으면 그대로 사용
     if (scanResults && scanResults.length > 0) {
-      console.log('scanResults 사용 (스캔 결과) - items 반영 필요');
+      // console.log('scanResults 사용 (스캔 결과) - items 반영 필요');
 
       // scanResults를 사용하되 items의 수정사항을 반영
       const updatedConfirmed = scanResults.map(scanResult => {
@@ -166,7 +166,7 @@ const AddItemScreen: React.FC = () => {
         return scanResult;
       });
 
-      console.log('수정사항 반영된 confirmedIngredients:', updatedConfirmed);
+      // console.log('수정사항 반영된 confirmedIngredients:', updatedConfirmed);
       setConfirmedIngredients(updatedConfirmed);
       setIsEditMode(false);
       return;
@@ -174,20 +174,20 @@ const AddItemScreen: React.FC = () => {
 
     try {
       setIsLoading(true);
-      console.log('\n ===== 식재료 확인 시작 =====');
-      console.log('현재 items 배열 전체:', JSON.stringify(items, null, 2));
+      // console.log('\n ===== 식재료 확인 시작 =====');
+      // console.log('현재 items 배열 전체:', JSON.stringify(items, null, 2));
 
       const confirmedList: ConfirmedIngredient[] = [];
 
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
 
-        console.log(`\n🔍 [${i}] 아이템 처리 시작 --------`);
-        console.log('  name:', item.name);
-        console.log('  quantity:', item.quantity, typeof item.quantity);
-        console.log('  unit:', item.unit);
-        console.log('  expirationDate:', item.expirationDate);
-        console.log('  selectedIngredient:', !!item.selectedIngredient);
+        // console.log(`\n🔍 [${i}] 아이템 처리 시작 --------`);
+        // console.log('  name:', item.name);
+        // console.log('  quantity:', item.quantity, typeof item.quantity);
+        // console.log('  unit:', item.unit);
+        // console.log('  expirationDate:', item.expirationDate);
+        // console.log('  selectedIngredient:', !!item.selectedIngredient);
 
         // 사용자가 이미 식재료를 선택한 경우
         if (item.selectedIngredient) {
@@ -219,28 +219,30 @@ const AddItemScreen: React.FC = () => {
               photo: item.photo,
             };
 
+            /*
             console.log('userInput 생성:', {
               quantity: userInput.quantity,
               unit: userInput.unit,
             });
+            */
 
             confirmedList.push({
               userInput,
               apiResult: selectedIngredient,
             });
 
-            console.log(`[${i}] confirmedList에 추가 완료`);
+            // console.log(`[${i}] confirmedList에 추가 완료`);
           }
         } else {
           // console.log('selectedIngredient 없음 - API 호출 필요');
 
           try {
-            console.log(`"${item.name}" 검색 중...`);
+            // console.log(`"${item.name}" 검색 중...`);
             const foundIngredient =
               await IngredientControllerAPI.findIngredientByName(item.name);
 
             if (foundIngredient) {
-              console.log(`"${item.name}" 검색 성공`);
+              // console.log(`"${item.name}" 검색 성공`);
 
               const userInput = {
                 id: item.id,
@@ -257,7 +259,7 @@ const AddItemScreen: React.FC = () => {
                 apiResult: foundIngredient,
               });
 
-              console.log(`[${i}] confirmedList에 추가 완료 (API 결과)`);
+              // console.log(`[${i}] confirmedList에 추가 완료 (API 결과)`);
             } else {
               throw new Error(
                 `유효하지 않은 식재료 : "${item.name}"
@@ -287,16 +289,16 @@ const AddItemScreen: React.FC = () => {
                 categoryName: defaultCategory.name,
               },
             });
-            console.log(`[${i}] 기본값으로 추가 (API 실패)`);
+            // console.log(`[${i}] 기본값으로 추가 (API 실패)`);
           }
         }
       }
 
-      console.log('\n===== 최종 confirmedList =====');
+      // console.log('\n===== 최종 confirmedList =====');
       confirmedList.forEach((confirmed, index) => {
-        console.log(`[${index}] ${confirmed.userInput.name}:`);
-        console.log(`  quantity: ${confirmed.userInput.quantity}`);
-        console.log(`  unit: ${confirmed.userInput.unit}`);
+        // console.log(`[${index}] ${confirmed.userInput.name}:`);
+        // console.log(`  quantity: ${confirmed.userInput.quantity}`);
+        // console.log(`  unit: ${confirmed.userInput.unit}`);
       });
 
       setConfirmedIngredients(confirmedList);
@@ -318,26 +320,30 @@ const AddItemScreen: React.FC = () => {
   const handleSaveItems = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log('=== API 호출 디버깅 시작 ===');
+      // console.log('=== API 호출 디버깅 시작 ===');
 
       // 1. 환경 정보 확인
-      console.log('Config.API_BASE_URL:', Config.API_BASE_URL);
+      // console.log('Config.API_BASE_URL:', Config.API_BASE_URL);
 
       // 2. 토큰 확인
       const token = await AsyncStorageService.getAuthToken();
-      console.log(
+      /*
+       console.log(
         '현재 토큰:',
         token ? `${token.substring(0, 20)}...` : 'null',
       );
+      */
 
       // 3. fridgeId 확인
-      console.log('fridgeId:', fridgeId, typeof fridgeId);
+      // console.log('fridgeId:', fridgeId, typeof fridgeId);
 
       // 4. confirmedIngredients 확인
+      /*
       console.log(
         'confirmedIngredients:',
         JSON.stringify(confirmedIngredients, null, 2),
       );
+      */
 
       // 5. 요청 데이터 생성 확인
       const ingredientIds: number[] = [];
@@ -371,16 +377,16 @@ const AddItemScreen: React.FC = () => {
         ingredientsInfo,
         ingredientIds,
       };
-      console.log('최종 요청 데이터:', JSON.stringify(saveRequest, null, 2));
+      // console.log('최종 요청 데이터:', JSON.stringify(saveRequest, null, 2));
 
-      console.log('API 호출 시작...');
+      // console.log('API 호출 시작...');
       const response = await IngredientControllerAPI.addConfirmedIngredients(
         fridgeId,
         confirmedIngredients,
       );
 
-      console.log('=== API 호출 성공 ===');
-      console.log('응답:', JSON.stringify(response, null, 2));
+      // console.log('=== API 호출 성공 ===');
+      // console.log('응답:', JSON.stringify(response, null, 2));
 
       // 저장 응답과 개수 저장
       setSavedItemsResponse(response.result || []);
@@ -411,7 +417,7 @@ const AddItemScreen: React.FC = () => {
       // 성공 메시지 표시 후 편집 모드로 돌아가기
       setShowSuccessModal(true);
     } catch (error) {
-      console.log('=== API 호출 실패 ===');
+      // console.log('=== API 호출 실패 ===');
       // console.error('에러 상세:', error);
 
       // 간단한 에러 메시지로 변경
@@ -504,7 +510,7 @@ const AddItemScreen: React.FC = () => {
 
     // 저장된 아이템이 있으면 홈으로 전달
     if (allSavedItems.length > 0) {
-      console.log('홈으로 전달하는 allSavedItems:', allSavedItems);
+      // console.log('홈으로 전달하는 allSavedItems:', allSavedItems);
 
       // 🔥 네비게이션 스택 초기화
       navigation.reset({
@@ -539,7 +545,7 @@ const AddItemScreen: React.FC = () => {
   const handleSuccessConfirm = useCallback(() => {
     setShowSuccessModal(false);
 
-    console.log('홈으로 전달하는 allSavedItems:', allSavedItems);
+    // console.log('홈으로 전달하는 allSavedItems:', allSavedItems);
 
     // 🔥 네비게이션 스택 초기화 후 홈으로 이동
     navigation.reset({
@@ -570,7 +576,7 @@ const AddItemScreen: React.FC = () => {
       return;
     }
 
-    console.log('홈으로 전달하는 allSavedItems:', allSavedItems);
+    // console.log('홈으로 전달하는 allSavedItems:', allSavedItems);
 
     // 네비게이션 스택 초기화
     navigation.reset({

@@ -18,18 +18,20 @@ export const useAuth = () => {
   const checkAuthStatus = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log('=== 인증 상태 확인 시작 ===');
+      // console.log('=== 인증 상태 확인 시작 ===');
 
       // 토큰 상태 확인
       const status = await getTokenStatus();
-      console.log('토큰 상태:', status);
+      // console.log('토큰 상태:', status);
       setTokenStatus(status);
 
       if (!status.hasAccessToken || !status.hasRefreshToken) {
+        /*
         console.log('❌ 토큰 없음:', {
           hasAccessToken: status.hasAccessToken,
           hasRefreshToken: status.hasRefreshToken,
         });
+        */
         setIsAuthenticated(false);
         setUser(null);
         return false;
@@ -37,22 +39,22 @@ export const useAuth = () => {
 
       // 사용자 정보 조회
       const userId = await AsyncStorageService.getCurrentUserId();
-      console.log('현재 userId:', userId);
+      // console.log('현재 userId:', userId);
 
       if (userId) {
         const userData = await AsyncStorageService.getUserById(userId);
-        console.log('사용자 데이터:', userData);
+        // console.log('사용자 데이터:', userData);
 
         if (userData) {
           setUser(userData);
           setIsAuthenticated(true);
-          console.log('✅ 인증 성공');
+          // console.log('✅ 인증 성공');
           return true;
         } else {
-          console.log('❌ 사용자 데이터 없음');
+          // console.log('❌ 사용자 데이터 없음');
         }
       } else {
-        console.log('❌ userId 없음');
+        // console.log('❌ userId 없음');
       }
 
       setIsAuthenticated(false);
@@ -82,7 +84,7 @@ export const useAuth = () => {
         const status = await getTokenStatus();
         setTokenStatus(status);
 
-        console.log('로그인 완료:', userData);
+        // console.log('로그인 완료:', userData);
       } catch (error) {
         // console.error('로그인 처리 실패:', error);
         throw error;
@@ -97,7 +99,7 @@ export const useAuth = () => {
       setUser(null);
       setIsAuthenticated(false);
       setTokenStatus(null);
-      console.log('로그아웃 완료');
+      // console.log('로그아웃 완료');
     } catch (error) {
       // console.error('로그아웃 처리 실패:', error);
       throw error;

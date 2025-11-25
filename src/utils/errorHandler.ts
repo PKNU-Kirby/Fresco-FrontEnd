@@ -245,12 +245,12 @@ export class ApiErrorHandler {
       originalError: error,
     };
 
-    console.group(`🚨 API Error [${severity.toUpperCase()}]`);
+    // console.group(`🚨 API Error [${severity.toUpperCase()}]`);
     // console.error('Error Details:', logData);
     if (error.stack) {
       // console.error('Stack Trace:', error.stack);
     }
-    console.groupEnd();
+    // console.groupEnd();
 
     // 프로덕션에서는 에러 리포팅 서비스로 전송
     if (__DEV__ === false && severity === 'critical') {
@@ -351,7 +351,7 @@ export class ModalHelper {
     if (callbacks.showSuccessModal) {
       callbacks.showSuccessModal(title, message, onOk);
     } else {
-      console.log(`${title}: ${message}`);
+      // console.log(`${title}: ${message}`);
     }
   }
 
@@ -368,7 +368,7 @@ export class ModalHelper {
     if (callbacks.showConfirmModal) {
       callbacks.showConfirmModal(title, message, onConfirm, onCancel);
     } else {
-      console.log(`${title}: ${message}`);
+      // console.log(`${title}: ${message}`);
     }
   }
 }

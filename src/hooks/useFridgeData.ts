@@ -67,7 +67,7 @@ export const useFridgeData = (fridgeId: number) => {
         const items = await getFridgeItemsByFridgeId(fridgeId, categoryIds);
         setFridgeItems(items);
 
-        console.log(`냉장고 ${fridgeId}의 아이템 로드 완료:`, items);
+        // console.log(`냉장고 ${fridgeId}의 아이템 로드 완료:`, items);
       } catch (error) {
         // console.error('냉장고 데이터 로드 실패:', error);
         const errorMessage =
@@ -251,7 +251,7 @@ export const useFridgeData = (fridgeId: number) => {
           );
         });
 
-        console.log('변경된 아이템들:', changedItems);
+        // console.log('변경된 아이템들:', changedItems);
 
         // 변경사항 일괄 적용
         for (const changedItem of changedItems) {

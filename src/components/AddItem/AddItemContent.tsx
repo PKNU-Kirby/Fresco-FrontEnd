@@ -90,12 +90,14 @@ export const AddItemContent: React.FC<AddItemContentProps> = ({
                 }
               }
 
+              /*
               console.log(`확인 모드 렌더링 ${index}:`, {
                 userInputName: confirmed.userInput?.name,
                 apiResultName: apiResult?.ingredientName,
                 parsedApiResult: apiResult,
                 fullUserInput: confirmed.userInput,
               });
+              */
 
               return (
                 <View key={index} style={styles.confirmationCard}>

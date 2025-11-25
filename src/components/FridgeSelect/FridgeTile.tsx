@@ -66,6 +66,7 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
     }
   };
   // 🔍 디버깅 로그 추가
+  /*
   console.log('🔍 [FridgeTile] 냉장고 정보:', {
     id: fridge.id,
     name: fridge.name,
@@ -74,15 +75,17 @@ export const FridgeTile: React.FC<FridgeTileProps> = ({
     canDelete: fridge.canDelete,
     role: fridge.role,
   });
-
+*/
   const canEditFridge = fridge.canEdit ?? fridge.isOwner;
   const canDeleteFridge = fridge.canDelete ?? fridge.isOwner;
 
+  /*
   console.log('🔍 [FridgeTile] 계산된 권한:', {
     canEditFridge,
     canDeleteFridge,
     onEdit존재: !!onEdit,
   });
+  */
   const containerStyle = [
     styles.tileContainer,
     isEditMode && styles.editModeContainer,

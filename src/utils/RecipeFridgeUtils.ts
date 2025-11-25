@@ -232,7 +232,7 @@ export class RecipeFridgeUtils {
         cookedAt: new Date().toISOString(),
       };
 
-      console.log('조리 기록 저장:', cookingRecord);
+      // console.log('조리 기록 저장:', cookingRecord);
       // await AsyncStorage.setItem(`cooking_history_${cookingRecord.id}`, JSON.stringify(cookingRecord));
 
       return true;

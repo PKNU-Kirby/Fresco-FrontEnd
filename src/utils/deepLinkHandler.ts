@@ -35,7 +35,7 @@ export class DeepLinkHandler {
 
   // URL 파싱 및 처리
   static handleURL(url: string) {
-    console.log('딥링크 URL 수신:', url);
+    // console.log('딥링크 URL 수신:', url);
 
     try {
       const urlObj = new URL(url);

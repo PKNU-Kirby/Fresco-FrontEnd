@@ -131,7 +131,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(finalItems));
       }
 
-      console.log('✅ 로컬 저장 성공');
+      // console.log('✅ 로컬 저장 성공');
     } catch (error) {
       // console.error('❌ 로컬 저장 실패:', error);
       throw error;
@@ -155,17 +155,18 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
         .replace(/[\d.\s]+/g, '')
         .trim();
 
+      /*
       console.log('🛒 장바구니 추가 시작:', {
         itemName,
         quantity,
         unit,
         fridgeId,
-      });
+      });*/
 
       let groceryListId: number;
       try {
         groceryListId = await GroceryListAPI.getGroceryListIdByFridge(fridgeId);
-        console.log('✅ 장바구니 ID 조회 성공:', groceryListId);
+        // console.log('✅ 장바구니 ID 조회 성공:', groceryListId);
       } catch (error) {
         // console.error('❌ 장바구니 ID 조회 실패:', error);
         throw new Error('장바구니 정보를 가져올 수 없습니다.');
@@ -180,7 +181,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
           purchased: false,
           groceryListId: groceryListId,
         });
-        console.log('✅ 서버 추가 성공');
+        // console.log('✅ 서버 추가 성공');
 
         // 3️⃣ 로컬에도 백업 저장
         try {
@@ -202,7 +203,7 @@ const EnhancedIngredientCard: React.FC<IngredientCardProps> = ({
         // console.error('❌ 서버 추가 실패:', serverError);
 
         // 서버 실패 시 로컬만 저장 (오프라인 모드)
-        console.log('📱 오프라인 모드: 로컬에만 저장');
+        // console.log('📱 오프라인 모드: 로컬에만 저장');
         await addToLocalCart({
           name: itemName,
           quantity: quantity,

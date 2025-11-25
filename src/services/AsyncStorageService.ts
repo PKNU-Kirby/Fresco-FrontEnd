@@ -137,7 +137,7 @@ export class AsyncStorageService {
   static async setRefreshToken(token: string): Promise<void> {
     try {
       await AsyncStorage.setItem('refreshToken', token);
-      console.log('리프레시 토큰 저장됨');
+      // console.log('리프레시 토큰 저장됨');
     } catch (error) {
       // console.error('리프레시 토큰 저장 실패:', error);
       throw error;
@@ -156,7 +156,7 @@ export class AsyncStorageService {
   static async clearRefreshToken(): Promise<void> {
     try {
       await AsyncStorage.removeItem('refreshToken');
-      console.log('리프레시 토큰 삭제됨');
+      // console.log('리프레시 토큰 삭제됨');
     } catch (error) {
       // console.error('리프레시 토큰 삭제 실패:', error);
       throw error;
@@ -182,7 +182,7 @@ export class AsyncStorageService {
         this.clearCurrentUser(),
         AsyncStorage.removeItem(this.KEYS.CURRENT_USER_ID),
       ]);
-      console.log('모든 인증 데이터 삭제됨');
+      // console.log('모든 인증 데이터 삭제됨');
     } catch (error) {
       // console.error('인증 데이터 삭제 실패:', error);
       throw error;
@@ -333,7 +333,7 @@ export class AsyncStorageService {
       }
 
       await AsyncStorage.setItem('users', JSON.stringify(users));
-      console.log('사용자 저장 완료:', newUser);
+      // console.log('사용자 저장 완료:', newUser);
 
       return newUser;
     } catch (error) {
@@ -599,7 +599,7 @@ export class AsyncStorageService {
       const isInitialized = await AsyncStorage.getItem(initKey);
 
       if (isInitialized) {
-        console.log('사용자 이미 초기화됨');
+        // console.log('사용자 이미 초기화됨');
         return;
       }
 
@@ -607,7 +607,7 @@ export class AsyncStorageService {
 
       if (userFridges.length === 0) {
         await this.createRefrigerator('내 냉장고', userId);
-        console.log('기본 냉장고 생성 완료');
+        // console.log('기본 냉장고 생성 완료');
       }
 
       await AsyncStorage.setItem(initKey, 'true');
@@ -808,7 +808,7 @@ export const isTokenExpired = async (): Promise<boolean> => {
 
 export const refreshAccessToken = async (): Promise<boolean> => {
   if (isRefreshing && refreshPromise) {
-    console.log('토큰 갱신이 이미 진행 중, 기존 프로미스를 반환');
+    // console.log('토큰 갱신이 이미 진행 중, 기존 프로미스를 반환');
     return await refreshPromise;
   }
 
@@ -852,7 +852,7 @@ export const refreshAccessToken = async (): Promise<boolean> => {
 
         // 401/403 -> 재로그인 필요
         if (response.status === 401 || response.status === 403) {
-          console.log('>> 토큰 만료 : 재로그인 필요');
+          // console.log('>> 토큰 만료 : 재로그인 필요');
           await logout();
         }
 

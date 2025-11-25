@@ -52,13 +52,13 @@ const verifyNaverToken = async (accessToken: string) => {
     });
 
     const result = await response.json();
-    console.log('🔍 네이버 토큰 검증 응답:', result);
+    // console.log('🔍 네이버 토큰 검증 응답:', result);
 
     if (result.resultcode === '00') {
-      console.log('>> 네이버 토큰 유효함');
+      // console.log('>> 네이버 토큰 유효함');
       return { valid: true, data: result };
     } else {
-      console.log('>> 네이버 토큰 무효:', result.message);
+      // console.log('>> 네이버 토큰 무효:', result.message);
       return { valid: false, error: result.message };
     }
   } catch (error) {

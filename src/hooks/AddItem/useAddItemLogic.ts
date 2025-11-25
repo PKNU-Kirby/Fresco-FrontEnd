@@ -82,14 +82,16 @@ export const useAddItemLogic = (initialItems: ItemFormData[]) => {
 
   // 디버깅용 함수 추가
   const logItemsState = useCallback(() => {
-    console.log('=== 현재 items 상태 ===');
+    // console.log('=== 현재 items 상태 ===');
     items.forEach((item, index) => {
+      /*
       console.log(`Item ${index + 1}:`, {
         id: item.id,
         name: item.name,
         hasSelectedIngredient: !!item.selectedIngredient,
         selectedIngredient: item.selectedIngredient,
       });
+      */
     });
   }, [items]);
 

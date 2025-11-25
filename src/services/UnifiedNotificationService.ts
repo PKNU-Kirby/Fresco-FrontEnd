@@ -13,7 +13,7 @@ class UnifiedNotificationService {
    */
   async requestPermission(): Promise<boolean> {
     try {
-      console.log('📱 알림 권한 요청 시작...');
+      // console.log('📱 알림 권한 요청 시작...');
 
       // 1. FCM 권한 요청
       const fcmGranted = await NotificationService.requestPermission();
@@ -24,11 +24,11 @@ class UnifiedNotificationService {
       const granted = fcmGranted && localGranted;
 
       if (granted) {
-        console.log('✅ 모든 알림 권한 허용됨');
+        // console.log('✅ 모든 알림 권한 허용됨');
       } else {
-        console.log('❌ 일부 알림 권한이 거부됨');
-        console.log('- FCM 권한:', fcmGranted);
-        console.log('- 로컬 알림 권한:', localGranted);
+        // console.log('❌ 일부 알림 권한이 거부됨');
+        // console.log('- FCM 권한:', fcmGranted);
+        // console.log('- 로컬 알림 권한:', localGranted);
       }
 
       return granted;
@@ -57,7 +57,7 @@ class UnifiedNotificationService {
     settings: NotificationSettings,
   ): Promise<void> {
     try {
-      console.log('💾 통합 알림 설정 저장 시작:', settings);
+      // console.log('💾 통합 알림 설정 저장 시작:', settings);
 
       // 1. FCM 설정 저장 (서버 + AsyncStorage)
       await NotificationService.saveNotificationSettings(settings);
@@ -65,7 +65,7 @@ class UnifiedNotificationService {
       // 2. 로컬 알림 설정 저장
       await LocalNotificationService.saveNotificationSettings(settings);
 
-      console.log('✅ 통합 알림 설정 저장 완료');
+      // console.log('✅ 통합 알림 설정 저장 완료');
     } catch (error) {
       // console.error('❌ 통합 알림 설정 저장 실패:', error);
       throw error;
@@ -110,12 +110,14 @@ class UnifiedNotificationService {
         fcmStatus.hasPermission && localStatus.hasPermission;
       const isEnabled = fcmStatus.isEnabled && localStatus.isEnabled;
 
+      /*
       console.log('📊 통합 알림 상태:', {
         FCM: fcmStatus,
         로컬: localStatus,
         통합_권한: hasPermission,
         통합_활성화: isEnabled,
       });
+      */
 
       return {
         hasPermission,
@@ -135,7 +137,7 @@ class UnifiedNotificationService {
    */
   async sendTestNotifications(): Promise<void> {
     try {
-      console.log('🧪 테스트 알림 전송 시작...');
+      // console.log('🧪 테스트 알림 전송 시작...');
 
       // 1. FCM 토큰 출력 및 테스트
       await NotificationService.printFCMToken();
@@ -145,7 +147,7 @@ class UnifiedNotificationService {
         await LocalNotificationService.sendTestNotification();
       }
 
-      console.log('✅ 테스트 알림 전송 완료');
+      // console.log('✅ 테스트 알림 전송 완료');
     } catch (error) {
       // console.error('❌ 테스트 알림 전송 실패:', error);
       throw error;
@@ -157,11 +159,11 @@ class UnifiedNotificationService {
    */
   async createDemoNotifications(): Promise<void> {
     try {
-      console.log('🎬 데모 알림 생성 시작...');
+      // console.log('🎬 데모 알림 생성 시작...');
 
       if (LocalNotificationService.createDemoNotifications) {
         await LocalNotificationService.createDemoNotifications();
-        console.log('✅ 데모 알림 생성 완료');
+        // console.log('✅ 데모 알림 생성 완료');
       } else {
         // console.warn('⚠️ createDemoNotifications 메서드가 없습니다');
       }
@@ -192,13 +194,13 @@ class UnifiedNotificationService {
    */
   async scheduleIngredientsNotifications(ingredients: any[]): Promise<void> {
     try {
-      console.log('📅 식재료 알림 스케줄링 시작...');
+      // console.log('📅 식재료 알림 스케줄링 시작...');
 
       if (LocalNotificationService.scheduleIngredientsNotifications) {
         await LocalNotificationService.scheduleIngredientsNotifications(
           ingredients,
         );
-        console.log('✅ 식재료 알림 스케줄링 완료');
+        // console.log('✅ 식재료 알림 스케줄링 완료');
       } else {
         // console.warn('⚠️ scheduleIngredientsNotifications 메서드가 없습니다');
       }
@@ -213,11 +215,11 @@ class UnifiedNotificationService {
    */
   async cancelAllNotifications(): Promise<void> {
     try {
-      console.log('🗑️ 모든 알림 취소 시작...');
+      // console.log('🗑️ 모든 알림 취소 시작...');
 
       if (LocalNotificationService.cancelAllNotifications) {
         await LocalNotificationService.cancelAllNotifications();
-        console.log('✅ 모든 알림 취소 완료');
+        // console.log('✅ 모든 알림 취소 완료');
       }
     } catch (error) {
       // console.error('❌ 알림 취소 실패:', error);

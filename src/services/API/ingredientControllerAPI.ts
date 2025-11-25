@@ -108,7 +108,7 @@ export class IngredientControllerAPI {
    * 식재료 사진 스캔
    */ static async scanPhoto(imageUri: string): Promise<PhotoScanResult[]> {
     try {
-      console.log('서버 상태 체크 후 스캔 시작');
+      // console.log('서버 상태 체크 후 스캔 시작');
 
       // 서버 다운 감지를 위한 빠른 테스트
       const testResponse = await fetch(
@@ -147,7 +147,7 @@ export class IngredientControllerAPI {
       const responseData = JSON.parse(await response.text());
       return responseData.result || [];
     } catch (error) {
-      console.log('스캔 실패, 시뮬레이터 모드로 폴백:', error.message);
+      // console.log('스캔 실패, 시뮬레이터 모드로 폴백:', error.message);
 
       // 서버 문제시 시뮬레이터 모드로 폴백
       return await this.scanPhotoForSimulator(imageUri);
@@ -189,7 +189,7 @@ export class IngredientControllerAPI {
 
       return data;
     } catch (error) {
-      console.log('영수증 스캔 실패, 시뮬레이터 모드로 폴백:', error.message);
+      // console.log('영수증 스캔 실패, 시뮬레이터 모드로 폴백:', error.message);
       return await this.scanReceiptForSimulator(imageUri);
     }
   }
@@ -204,10 +204,12 @@ export class IngredientControllerAPI {
     try {
       let scanResults: (PhotoScanResult | ScanResultItem)[];
 
+      /*
       console.log(
         `안전 스캔 시작 (${scanMode} 모드):`,
         imageUri.substring(0, 50) + '...',
       );
+      */
 
       if (scanMode === 'ingredient') {
         scanResults = await this.scanPhoto(imageUri);
@@ -215,15 +217,19 @@ export class IngredientControllerAPI {
         scanResults = await this.scanReceipt(imageUri);
       }
 
+      /*
       console.log(
         `${scanMode} 스캔 API 성공, 결과 개수:`,
         scanResults?.length || 0,
       );
+      */
 
       if (!scanResults || scanResults.length === 0) {
+        /*
         console.log(
           `${scanMode} 스캔 결과 없음 - 서버는 정상이지만 인식된 항목이 없음`,
         );
+        */
 
         return [];
       }
@@ -299,31 +305,31 @@ export class IngredientControllerAPI {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`시도 ${attempt}/${maxRetries}`);
+        // console.log(`시도 ${attempt}/${maxRetries}`);
 
         // 첫 번째 시도가 아니면 서버 상태 먼저 확인
         if (attempt > 1) {
-          console.log('서버 상태 확인 중...');
+          // console.log('서버 상태 확인 중...');
           const healthCheck = await this.checkServerHealth();
 
           if (!healthCheck) {
-            console.log('서버 상태 불량, 대기 후 재시도...');
+            // console.log('서버 상태 불량, 대기 후 재시도...');
             await new Promise(resolve => setTimeout(resolve, 2000));
           }
         }
 
         // 실제 작업 수행
         const result = await operation();
-        console.log(`시도 ${attempt} 성공!`);
+        // console.log(`시도 ${attempt} 성공!`);
         return result;
       } catch (error) {
-        console.log(`시도 ${attempt} 실패:`, error.message);
+        // console.log(`시도 ${attempt} 실패:`, error.message);
         lastError = error;
 
         // 마지막 시도가 아니면 잠시 대기
         if (attempt < maxRetries) {
           const waitTime = attempt * 1000; // 1초, 2초, 3초씩 증가
-          console.log(`${waitTime}ms 대기 후 재시도...`);
+          // console.log(`${waitTime}ms 대기 후 재시도...`);
           await new Promise(resolve => setTimeout(resolve, waitTime));
         }
       }
@@ -361,23 +367,23 @@ export class IngredientControllerAPI {
     fridgeId: number,
   ): Promise<void> {
     try {
-      console.log('=== FormData 전송 검증 시작 (fridgeId 포함) ===');
+      // console.log('=== FormData 전송 검증 시작 (fridgeId 포함) ===');
 
       // 이미지 파일 기본 정보 확인
-      console.log('>> 이미지 파일 기본 정보');
-      console.log('URI:', imageUri);
-      console.log('fridgeId:', fridgeId);
+      // console.log('>> 이미지 파일 기본 정보');
+      // console.log('URI:', imageUri);
+      // console.log('fridgeId:', fridgeId);
 
       // 파일 읽기 테스트
-      console.log('>> 파일 읽기 테스트');
+      // console.log('>> 파일 읽기 테스트');
       try {
         const fileResponse = await fetch(imageUri);
         const fileBlob = await fileResponse.blob();
-        console.log('파일 읽기 성공:', {
+        /* console.log('파일 읽기 성공:', {
           size: fileBlob.size,
           type: fileBlob.type,
           readable: fileResponse.ok,
-        });
+        }); */
 
         if (fileBlob.size === 0) {
           // console.error('❌ 파일 크기가 0바이트입니다!');
@@ -389,7 +395,7 @@ export class IngredientControllerAPI {
       }
 
       // 3. FormData 구성 테스트 (refrigeratorId 포함)
-      console.log('3️⃣ FormData 구성 테스트 (refrigeratorId 포함)');
+      // console.log('3️⃣ FormData 구성 테스트 (refrigeratorId 포함)');
 
       const formData1 = new FormData();
       formData1.append('ingredientImage', {
@@ -398,7 +404,7 @@ export class IngredientControllerAPI {
         name: 'ingredient.jpg',
       } as any);
       formData1.append('refrigeratorId', fridgeId);
-      console.log('방식 1 (refrigeratorId 포함): FormData 구성 완료');
+      // console.log('방식 1 (refrigeratorId 포함): FormData 구성 완료');
 
       const formData2 = new FormData();
       formData2.append('ingredientImage', {
@@ -407,7 +413,7 @@ export class IngredientControllerAPI {
         name: 'ingredient.jpg',
       } as any);
       formData2.append('refrigeratorId', fridgeId);
-      console.log('방식 2 (jpg 타입 + refrigeratorId): FormData 구성 완료');
+      // console.log('방식 2 (jpg 타입 + refrigeratorId): FormData 구성 완료');
 
       // 4. 서버 요청 테스트
       const testMethods = [
@@ -431,11 +437,11 @@ export class IngredientControllerAPI {
   static async validateServerParametersWithFridgeId(
     fridgeId: number,
   ): Promise<void> {
-    console.log('=== 서버 파라미터 요구사항 검증 (fridgeId 포함) ===');
+    // console.log('=== 서버 파라미터 요구사항 검증 (fridgeId 포함) ===');
 
     // 1. refrigeratorId만 있는 요청
     try {
-      console.log('1️⃣ refrigeratorId만 있는 FormData 테스트');
+      // console.log('1️⃣ refrigeratorId만 있는 FormData 테스트');
 
       const onlyFridgeIdData = new FormData();
       onlyFridgeIdData.append('refrigeratorId', fridgeId);
@@ -451,17 +457,17 @@ export class IngredientControllerAPI {
       );
 
       const responseText = await response.text();
-      console.log('refrigeratorId만 있는 요청 응답:', {
+      /* console.log('refrigeratorId만 있는 요청 응답:', {
         status: response.status,
         response: responseText,
-      });
+      });*/
     } catch (error) {
       // console.error('refrigeratorId 테스트 실패:', error);
     }
 
     // 2. 완전한 요청 (더미 이미지 + refrigeratorId)
     try {
-      console.log('2️⃣ 더미 이미지 + refrigeratorId 테스트');
+      // console.log('2️⃣ 더미 이미지 + refrigeratorId 테스트');
 
       const completeData = new FormData();
       completeData.append('ingredientImage', {
@@ -482,10 +488,12 @@ export class IngredientControllerAPI {
       );
 
       const responseText = await response.text();
+      /*
       console.log('완전한 요청 응답:', {
         status: response.status,
         response: responseText,
       });
+      */
     } catch (error) {
       // console.error('완전한 요청 테스트 실패:', error);
     }
@@ -534,7 +542,7 @@ export class IngredientControllerAPI {
         require('@react-native-async-storage/async-storage').default;
       const token = await AsyncStorage.getItem('accessToken');
 
-      console.log('인증 토큰 확인:', token ? '토큰 있음' : '토큰 없음');
+      // console.log('인증 토큰 확인:', token ? '토큰 있음' : '토큰 없음');
 
       const headers: HeadersInit_ = {
         // FormData 사용 시 Content-Type은 자동 설정되므로 제거
@@ -557,11 +565,11 @@ export class IngredientControllerAPI {
     imageUri: string,
   ): Promise<PhotoScanResult[]> {
     try {
-      console.log('시뮬레이터용 식재료 사진 스캔 시작:', imageUri);
+      // console.log('시뮬레이터용 식재료 사진 스캔 시작:', imageUri);
 
       // Base64나 목업 이미지인 경우 목업 데이터 반환
       if (imageUri.startsWith('data:image') || imageUri.includes('grocery')) {
-        console.log('목업 이미지 감지됨, 목업 데이터 반환');
+        // console.log('목업 이미지 감지됨, 목업 데이터 반환');
 
         const mockResponse: PhotoScanResult[] = [
           {
@@ -600,10 +608,10 @@ export class IngredientControllerAPI {
     imageUri: string,
   ): Promise<ScanResultItem[]> {
     try {
-      console.log('시뮬레이터용 영수증 스캔 시작:', imageUri);
+      // console.log('시뮬레이터용 영수증 스캔 시작:', imageUri);
 
       if (imageUri.startsWith('data:image') || imageUri.includes('receipt')) {
-        console.log('목업 이미지 감지됨, 목업 데이터 반환');
+        // console.log('목업 이미지 감지됨, 목업 데이터 반환');
 
         const mockResponse: ScanResultItem[] = [
           {
@@ -651,15 +659,17 @@ export class IngredientControllerAPI {
       const isMockImage =
         imageUri.includes('grocery') || imageUri.includes('receipt');
 
+      /*
       console.log('스캔 환경 체크:', {
         isSimulator,
         isBase64,
         isMockImage,
         imageUri: imageUri.substring(0, 50) + '...',
       });
+      */
 
       if (isSimulator || isBase64 || isMockImage) {
-        console.log('시뮬레이터/목업 모드로 스캔 실행');
+        // console.log('시뮬레이터/목업 모드로 스캔 실행');
 
         if (scanMode === 'ingredient') {
           scanResults = await this.scanPhotoForSimulator(imageUri);
@@ -667,7 +677,7 @@ export class IngredientControllerAPI {
           scanResults = await this.scanReceiptForSimulator(imageUri);
         }
       } else {
-        console.log('실제 디바이스 모드로 스캔 실행');
+        // console.log('실제 디바이스 모드로 스캔 실행');
 
         if (scanMode === 'ingredient') {
           scanResults = await this.scanPhoto(imageUri);
@@ -677,7 +687,7 @@ export class IngredientControllerAPI {
       }
 
       if (!scanResults || scanResults.length === 0) {
-        console.log(`${scanMode} 스캔 결과 없음`);
+        // console.log(`${scanMode} 스캔 결과 없음`);
         return [];
       }
 
@@ -771,11 +781,11 @@ export class IngredientControllerAPI {
     const endpoint = `/api/v1/ingredient/auto-complete?keyword=${encodedKeyword}`;
 
     try {
-      console.log(`식재료 검색: "${keyword}"`);
+      // console.log(`식재료 검색: "${keyword}"`);
       const response = await ApiService.apiCall<AutoCompleteSearchResponse[]>(
         endpoint,
       );
-      console.log(`검색 결과: ${response.length}개`);
+      // console.log(`검색 결과: ${response.length}개`);
       return response;
     } catch (error) {
       // console.error('식재료 검색 실패:', error);
@@ -810,13 +820,13 @@ export class IngredientControllerAPI {
     const endpoint = `/api/v1/ingredient/${refrigeratorId}?${params.toString()}`;
 
     try {
-      console.log(`냉장고 ${refrigeratorId} 식재료 목록 조회`, {
+      /* console.log(`냉장고 ${refrigeratorId} 식재료 목록 조회`, {
         filter: defaultFilter,
-      });
+      });*/
       const response = await ApiService.apiCall<
         PageResponse<RefrigeratorIngredientResponse>
       >(endpoint);
-      console.log(`조회 결과: ${response.content?.length || 0}개 아이템`);
+      // // console.log(`조회 결과: ${response.content?.length || 0}개 아이템`);
       return response;
     } catch (error) {
       // console.error('냉장고 식재료 조회 실패:', error);
@@ -833,7 +843,7 @@ export class IngredientControllerAPI {
     refrigeratorId: number,
   ): Promise<RefrigeratorIngredientResponse[]> {
     try {
-      console.log(`냉장고 ${refrigeratorId}의 식재료 조회 (레시피용)`);
+      // console.log(`냉장고 ${refrigeratorId}의 식재료 조회 (레시피용)`);
 
       const result = await this.getRefrigeratorIngredients(refrigeratorId, {
         size: 1000, // 충분히 큰 사이즈로 모든 식재료 가져오기
@@ -842,7 +852,7 @@ export class IngredientControllerAPI {
         categoryIds: [],
       });
 
-      console.log(`조회된 식재료: ${result.content.length}개`);
+      // console.log(`조회된 식재료: ${result.content.length}개`);
       return result.content;
     } catch (error) {
       // console.error('식재료 조회 실패:', error);
@@ -853,9 +863,9 @@ export class IngredientControllerAPI {
     refrigeratorId: number,
     saveRequest: SaveIngredientsRequest,
   ): Promise<any> {
-    console.log('=== addIngredientsToRefrigerator 디버깅 ===');
-    console.log('refrigeratorId:', refrigeratorId);
-    console.log('saveRequest:', JSON.stringify(saveRequest, null, 2));
+    // console.log('=== addIngredientsToRefrigerator 디버깅 ===');
+    // console.log('refrigeratorId:', refrigeratorId);
+    // console.log('saveRequest:', JSON.stringify(saveRequest, null, 2));
 
     const processedRequest = {
       ingredientsInfo: saveRequest.ingredientsInfo.map(item => ({
@@ -868,21 +878,21 @@ export class IngredientControllerAPI {
       ingredientIds: saveRequest.ingredientIds,
     };
 
-    console.log('processedRequest:', JSON.stringify(processedRequest, null, 2));
+    // console.log('processedRequest:', JSON.stringify(processedRequest, null, 2));
 
     const endpoint = `/api/v1/ingredient/${refrigeratorId}`;
     try {
-      console.log('API 호출 시작...');
+      // console.log('API 호출 시작...');
       const response = await ApiService.apiCall(endpoint, {
         method: 'POST',
         body: JSON.stringify(processedRequest),
       });
 
-      console.log('=== API 응답 성공 ===');
-      console.log('응답 데이터:', JSON.stringify(response, null, 2));
+      // console.log('=== API 응답 성공 ===');
+      // console.log('응답 데이터:', JSON.stringify(response, null, 2));
       return response;
     } catch (error) {
-      console.log('=== API 응답 실패 ===');
+      // console.log('=== API 응답 실패 ===');
       // console.error('API 에러:', error);
       throw new Error(`식재료 추가에 실패했습니다: ${error.message}`);
     }
@@ -909,10 +919,12 @@ export class IngredientControllerAPI {
     const endpoint = `/api/v1/ingredient/${refrigeratorIngredientId}`;
 
     try {
+      /*
       console.log(
         `냉장고 식재료 ${refrigeratorIngredientId} 수정:`,
         processedData,
       );
+      */
 
       const response = await ApiService.apiCall<RefrigeratorIngredientResponse>(
         endpoint,
@@ -922,7 +934,7 @@ export class IngredientControllerAPI {
         },
       );
 
-      console.log('식재료 수정 성공:', response);
+      // console.log('식재료 수정 성공:', response);
       return response;
     } catch (error) {
       // console.error('식재료 수정 실패:', error);
@@ -974,23 +986,23 @@ export class IngredientControllerAPI {
 
   static async batchDeleteIngredients(ingredientIds: number[]): Promise<void> {
     try {
-      console.log('=== 배치 삭제 디버깅 ===');
-      console.log('입력 ID들:', ingredientIds);
+      // console.log('=== 배치 삭제 디버깅 ===');
+      // console.log('입력 ID들:', ingredientIds);
 
       const numericIds = ingredientIds.map(id => id);
-      console.log('숫자 ID들:', numericIds);
+      // console.log('숫자 ID들:', numericIds);
 
       // API 문서대로: ids=1&ids=2 형식
       const queryString = numericIds.map(id => `ids=${id}`).join('&');
       const url = `/api/v1/ingredient?${queryString}`;
 
-      console.log('최종 URL:', url);
+      // console.log('최종 URL:', url);
 
       const response = await ApiService.apiCall<void>(url, {
         method: 'DELETE',
       });
 
-      console.log('✅ 삭제 성공!');
+      // console.log('✅ 삭제 성공!');
       return response;
     } catch (error) {
       // 권한 오류(아이템이 이미 없음)는 성공으로 처리
@@ -998,9 +1010,11 @@ export class IngredientControllerAPI {
         error.message?.includes('권한') ||
         error.message?.includes('Permission')
       ) {
+        /*
         console.log(
           '⚠️ 아이템이 이미 삭제되었거나 권한이 없음 - 성공으로 처리',
         );
+        */
         return; // 예외를 던지지 않고 정상 종료
       }
 
@@ -1090,38 +1104,38 @@ export class IngredientControllerAPI {
     imageUri: string,
   ): Promise<PhotoScanResult[]> {
     try {
-      console.log('향상된 식재료 사진 스캔 시작:', imageUri);
+      // console.log('향상된 식재료 사진 스캔 시작:', imageUri);
 
       // 1차 시도: 원본 API
       try {
         const result = await this.scanPhoto(imageUri);
-        console.log('1차 API 호출 성공:', result);
+        // console.log('1차 API 호출 성공:', result);
         return result;
       } catch (error) {
-        console.log('1차 API 호출 실패:', error.message);
+        // console.log('1차 API 호출 실패:', error.message);
 
         // 500 오류인 경우 서버 문제이므로 추가 시도
         if (error.message.includes('500')) {
-          console.log('서버 500 오류 감지, 대안 처리 시작...');
+          // console.log('서버 500 오류 감지, 대안 처리 시작...');
 
           // 2차 시도: 다른 형식으로 재시도
           try {
             await new Promise(resolve => setTimeout(resolve, 2000)); // 2초 대기
-            console.log('2차 시도: 서버 복구 후 재시도...');
+            // console.log('2차 시도: 서버 복구 후 재시도...');
 
             const retryResult = await this.scanPhoto(imageUri);
-            console.log('2차 API 호출 성공:', retryResult);
+            // console.log('2차 API 호출 성공:', retryResult);
             return retryResult;
           } catch (retryError) {
-            console.log('2차 API 호출도 실패:', retryError.message);
+            // console.log('2차 API 호출도 실패:', retryError.message);
 
             // 3차 시도: 폴백 - 시뮬레이터 모드로 전환
-            console.log('폴백 모드로 전환: 시뮬레이터 스캔 사용');
+            // console.log('폴백 모드로 전환: 시뮬레이터 스캔 사용');
             return await this.scanPhotoForSimulator(imageUri);
           }
         } else {
           // 500이 아닌 다른 오류는 바로 폴백
-          console.log('비-500 오류, 즉시 폴백 모드로 전환');
+          // console.log('비-500 오류, 즉시 폴백 모드로 전환');
           return await this.scanPhotoForSimulator(imageUri);
         }
       }
@@ -1140,38 +1154,38 @@ export class IngredientControllerAPI {
     imageUri: string,
   ): Promise<ScanResultItem[]> {
     try {
-      console.log('향상된 영수증 스캔 시작:', imageUri);
+      // console.log('향상된 영수증 스캔 시작:', imageUri);
 
       // 1차 시도: 원본 API
       try {
         const result = await this.scanReceipt(imageUri);
-        console.log('1차 영수증 API 호출 성공:', result);
+        // console.log('1차 영수증 API 호출 성공:', result);
         return result;
       } catch (error) {
-        console.log('1차 영수증 API 호출 실패:', error.message);
+        // console.log('1차 영수증 API 호출 실패:', error.message);
 
         // 500 오류인 경우 서버 문제이므로 추가 시도
         if (error.message.includes('500')) {
-          console.log('영수증 서버 500 오류 감지, 대안 처리 시작...');
+          // console.log('영수증 서버 500 오류 감지, 대안 처리 시작...');
 
           // 2차 시도: 다른 형식으로 재시도
           try {
             await new Promise(resolve => setTimeout(resolve, 2000)); // 2초 대기
-            console.log('2차 시도: 영수증 서버 복구 후 재시도...');
+            // console.log('2차 시도: 영수증 서버 복구 후 재시도...');
 
             const retryResult = await this.scanReceipt(imageUri);
-            console.log('2차 영수증 API 호출 성공:', retryResult);
+            // console.log('2차 영수증 API 호출 성공:', retryResult);
             return retryResult;
           } catch (retryError) {
-            console.log('2차 영수증 API 호출도 실패:', retryError.message);
+            // console.log('2차 영수증 API 호출도 실패:', retryError.message);
 
             // 3차 시도: 폴백 - 시뮬레이터 모드로 전환
-            console.log('폴백 모드로 전환: 영수증 시뮬레이터 스캔 사용');
+            // console.log('폴백 모드로 전환: 영수증 시뮬레이터 스캔 사용');
             return await this.scanReceiptForSimulator(imageUri);
           }
         } else {
           // 500이 아닌 다른 오류는 바로 폴백
-          console.log('비-500 오류, 즉시 영수증 폴백 모드로 전환');
+          // console.log('비-500 오류, 즉시 영수증 폴백 모드로 전환');
           return await this.scanReceiptForSimulator(imageUri);
         }
       }
@@ -1188,14 +1202,14 @@ export class IngredientControllerAPI {
    */
   static async checkServerHealth(): Promise<boolean> {
     try {
-      console.log('서버 상태 점검 시작...');
+      // console.log('서버 상태 점검 시작...');
 
       // 간단한 API 호출로 서버 상태 확인
       const response = await this.searchIngredients('test');
-      console.log('서버 상태 정상:', response.length >= 0);
+      // console.log('서버 상태 정상:', response.length >= 0);
       return true;
     } catch (error) {
-      console.log('서버 상태 불량:', error.message);
+      // console.log('서버 상태 불량:', error.message);
       return false;
     }
   }
@@ -1210,17 +1224,18 @@ export class IngredientControllerAPI {
     try {
       let scanResults: (PhotoScanResult | ScanResultItem)[];
 
-      console.log(
+      /* console.log(
         `안전 스캔 시작 (${scanMode} 모드):`,
         imageUri.substring(0, 50) + '...',
       );
+      */
 
       // 서버 상태 먼저 확인
       const isServerHealthy = await this.checkServerHealth();
       console.log('서버 상태:', isServerHealthy ? '정상' : '불량');
 
       if (!isServerHealthy) {
-        console.log('서버 상태 불량으로 인해 즉시 폴백 모드 사용');
+        // console.log('서버 상태 불량으로 인해 즉시 폴백 모드 사용');
         if (scanMode === 'ingredient') {
           scanResults = await this.scanPhotoForSimulator(imageUri);
         } else {
@@ -1236,7 +1251,7 @@ export class IngredientControllerAPI {
       }
 
       if (!scanResults || scanResults.length === 0) {
-        console.log(`${scanMode} 스캔 결과 없음`);
+        // console.log(`${scanMode} 스캔 결과 없음`);
         return [];
       }
 
@@ -1245,7 +1260,7 @@ export class IngredientControllerAPI {
       // console.error('안전 스캔 처리 실패:', error);
 
       // 최종 폴백: 에러가 발생해도 기본 결과 제공
-      console.log('최종 폴백: 기본 결과 제공');
+      // console.log('최종 폴백: 기본 결과 제공');
       try {
         let fallbackResults: (PhotoScanResult | ScanResultItem)[];
 
@@ -1323,26 +1338,28 @@ export class IngredientControllerAPI {
    */
   static async validateFormDataTransmission(imageUri: string): Promise<void> {
     try {
-      console.log('=== FormData 전송 검증 시작 ===');
+      // console.log('=== FormData 전송 검증 시작 ===');
 
       // 1. 이미지 파일 기본 정보 확인
-      console.log('1️⃣ 이미지 파일 기본 정보');
-      console.log('URI:', imageUri);
-      console.log(
+      // console.log('1️⃣ 이미지 파일 기본 정보');
+      // console.log('URI:', imageUri);
+      /* console.log(
         'URI 타입:',
         imageUri.startsWith('file://') ? 'Local File' : 'Other',
       );
+      */
 
       // 2. 파일 읽기 테스트
-      console.log('2️⃣ 파일 읽기 테스트');
+      // console.log('2️⃣ 파일 읽기 테스트');
       try {
         const fileResponse = await fetch(imageUri);
         const fileBlob = await fileResponse.blob();
-        console.log('파일 읽기 성공:', {
+        /* console.log('파일 읽기 성공:', {
           size: fileBlob.size,
           type: fileBlob.type,
           readable: fileResponse.ok,
         });
+        */
 
         if (fileBlob.size === 0) {
           // console.error('❌ 파일 크기가 0바이트입니다!');
@@ -1354,7 +1371,7 @@ export class IngredientControllerAPI {
       }
 
       // 3. FormData 구성 테스트 (여러 방식으로)
-      console.log('3️⃣ FormData 구성 테스트');
+      // console.log('3️⃣ FormData 구성 테스트');
 
       // 방식 1: 현재 방식
       const formData1 = new FormData();
@@ -1363,7 +1380,7 @@ export class IngredientControllerAPI {
         type: 'image/jpeg',
         name: 'ingredient.jpg',
       } as any);
-      console.log('방식 1 (현재): FormData 구성 완료');
+      // console.log('방식 1 (현재): FormData 구성 완료');
 
       // 방식 2: 명시적 타입 지정
       const formData2 = new FormData();
@@ -1372,7 +1389,7 @@ export class IngredientControllerAPI {
         type: 'image/jpg', // jpg vs jpeg
         name: 'ingredient.jpg',
       } as any);
-      console.log('방식 2 (jpg 타입): FormData 구성 완료');
+      // console.log('방식 2 (jpg 타입): FormData 구성 완료');
 
       // 방식 3: 파일명 변경
       const formData3 = new FormData();
@@ -1381,7 +1398,7 @@ export class IngredientControllerAPI {
         type: 'image/jpeg',
         name: 'test.jpeg',
       } as any);
-      console.log('방식 3 (다른 파일명): FormData 구성 완료');
+      // console.log('방식 3 (다른 파일명): FormData 구성 완료');
 
       // 4. 서버 요청 테스트 (각 방식별로)
       const testMethods = [
@@ -1391,7 +1408,7 @@ export class IngredientControllerAPI {
       ];
 
       for (const method of testMethods) {
-        console.log(`4️⃣ ${method.name} 테스트 중...`);
+        // console.log(`4️⃣ ${method.name} 테스트 중...`);
         await this.testFormDataMethod(method.formData, method.name);
 
         // 각 테스트 사이에 1초 대기
@@ -1399,9 +1416,9 @@ export class IngredientControllerAPI {
       }
 
       // 5. 헤더 검증
-      console.log('5️⃣ 헤더 검증');
+      // console.log('5️⃣ 헤더 검증');
       const headers = await this.getAuthHeaders();
-      console.log('인증 헤더:', headers);
+      // console.log('인증 헤더:', headers);
 
       // Content-Type이 명시적으로 설정되지 않았는지 확인
       if (headers['Content-Type']) {
@@ -1411,7 +1428,7 @@ export class IngredientControllerAPI {
         );
         */
       } else {
-        console.log('✅ Content-Type 미설정 (FormData가 자동 설정)');
+        // console.log('✅ Content-Type 미설정 (FormData가 자동 설정)');
       }
     } catch (error) {
       // console.error('FormData 검증 중 오류:', error);
@@ -1429,7 +1446,7 @@ export class IngredientControllerAPI {
    */
   static async preprocessImageForScan(imageUri: string): Promise<string> {
     try {
-      console.log('이미지 전처리 시작:', imageUri);
+      // console.log('이미지 전처리 시작:', imageUri);
 
       // React Native에서 이미지 리사이징/압축 라이브러리 사용
       // 예: react-native-image-resizer
@@ -1449,25 +1466,25 @@ export class IngredientControllerAPI {
     imageUri: string,
   ): Promise<PhotoScanResult[]> {
     try {
-      console.log('AI 폴백 스캔 시작:', imageUri);
+      // console.log('AI 폴백 스캔 시작:', imageUri);
 
       // 1단계: 원본 이미지로 시도
       try {
         return await this.attemptScanWithImage(imageUri, 'original');
       } catch (originalError) {
-        console.log('원본 이미지 스캔 실패:', originalError.message);
+        // console.log('원본 이미지 스캔 실패:', originalError.message);
 
         // 2단계: 이미지 전처리 후 재시도
         try {
-          console.log('이미지 전처리 후 재시도...');
+          // console.log('이미지 전처리 후 재시도...');
           const processedUri = await this.preprocessImageForScan(imageUri);
           return await this.attemptScanWithImage(processedUri, 'processed');
         } catch (processedError) {
-          console.log('전처리 이미지 스캔도 실패:', processedError.message);
+          // console.log('전처리 이미지 스캔도 실패:', processedError.message);
 
           // 3단계: 더미 이미지로 API 정상 작동 확인
           try {
-            console.log('더미 이미지로 API 상태 확인...');
+            // console.log('더미 이미지로 API 상태 확인...');
             const dummyResult = await this.attemptScanWithDummyImage();
 
             if (dummyResult.length >= 0) {
@@ -1480,7 +1497,7 @@ export class IngredientControllerAPI {
           }
 
           // 4단계: 최종 폴백 - 시뮬레이터 모드
-          console.log('최종 폴백: 시뮬레이터 모드');
+          // console.log('최종 폴백: 시뮬레이터 모드');
           return await this.scanPhotoForSimulator(imageUri);
         }
       }
@@ -1504,7 +1521,7 @@ export class IngredientControllerAPI {
       name: `image_${imageType}.jpg`,
     } as any);
 
-    console.log(`${imageType} 이미지로 스캔 시도...`);
+    // console.log(`${imageType} 이미지로 스캔 시도...`);
 
     const headers = await this.getAuthHeaders();
 
@@ -1519,11 +1536,13 @@ export class IngredientControllerAPI {
     );
 
     const responseText = await response.text();
+    /*
     console.log(
       `${imageType} 이미지 응답:`,
       response.status,
       responseText.substring(0, 100),
     );
+    */
 
     if (!response.ok) {
       throw new Error(`${imageType}_SCAN_FAILED: ${response.status}`);
@@ -1602,7 +1621,7 @@ export class IngredientControllerAPI {
       progressCallback?.('결과 처리 중...');
 
       if (!scanResults || scanResults.length === 0) {
-        console.log('스캔 성공했지만 인식된 항목 없음');
+        // console.log('스캔 성공했지만 인식된 항목 없음');
         return [];
       }
 
@@ -1623,7 +1642,7 @@ export class IngredientControllerAPI {
     try {
       return await this.attemptReceiptScanWithImage(imageUri, 'original');
     } catch (error) {
-      console.log('영수증 원본 스캔 실패, 폴백 시도...');
+      // console.log('영수증 원본 스캔 실패, 폴백 시도...');
       return await this.scanReceiptForSimulator(imageUri);
     }
   }

@@ -19,7 +19,7 @@ export class GroceryService {
     },
   ): Promise<GroceryItem> {
     try {
-      console.log('🛒 장바구니 추가 시작:', item);
+      // console.log('🛒 장바구니 추가 시작:', item);
 
       // 1. 서버에 먼저 추가
       const requestData: CreateItemRequest = {
@@ -31,12 +31,12 @@ export class GroceryService {
       };
 
       const serverItem = await GroceryListAPI.createItem(requestData);
-      console.log('✅ 서버 추가 성공:', serverItem);
+      // console.log('✅ 서버 추가 성공:', serverItem);
 
       // 2. AsyncStorage에도 저장 (오프라인 대비)
       try {
         await AsyncStorageService.addToGroceryList(serverItem);
-        console.log('✅ 로컬 저장 성공');
+        // console.log('✅ 로컬 저장 성공');
       } catch (localError) {
         // console.warn('⚠️ 로컬 저장 실패 (무시):', localError);
         // 서버 저장은 성공했으니 계속 진행
@@ -47,7 +47,7 @@ export class GroceryService {
       // console.error('❌ 장바구니 추가 실패:', error);
 
       // 서버 실패 시 AsyncStorage에만 저장 (오프라인 모드)
-      console.log('📱 오프라인 모드: 로컬에만 저장');
+      // console.log('📱 오프라인 모드: 로컬에만 저장');
       const localItem: GroceryItem = {
         id: Date.now(), // 임시 ID
         name: item.name,

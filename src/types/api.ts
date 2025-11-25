@@ -172,31 +172,33 @@ const apiCall = async (
       ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
     };
 
-    console.log(`API 호출: ${options.method || 'GET'} ${endpoint}`);
+    // console.log(`API 호출: ${options.method || 'GET'} ${endpoint}`);
+    /*
     console.log(
       '토큰 사용:',
       accessToken ? `${accessToken.substring(0, 20)}...` : 'none',
     );
+    */
 
     let response = await fetch(`${Config.API_BASE_URL}${endpoint}`, {
       ...options,
       headers,
     });
 
-    console.log(`API 응답: ${response.status} ${response.statusText}`);
+    // console.log(`API 응답: ${response.status} ${response.statusText}`);
 
     // 401 에러이고 재시도가 1회 미만인 경우
     if (response.status === 401 && retryCount < 1) {
-      console.log('401 에러 감지, 토큰 갱신 후 재시도...');
+      // console.log('401 에러 감지, 토큰 갱신 후 재시도...');
 
       const refreshSuccess = await refreshAccessToken();
 
       if (refreshSuccess) {
-        console.log('토큰 갱신 성공, API 재시도...');
+        // console.log('토큰 갱신 성공, API 재시도...');
         // 재귀 호출로 재시도 (retryCount 증가로 무한 루프 방지)
         return apiCall(endpoint, options, retryCount + 1);
       } else {
-        console.log('토큰 갱신 실패, 인증 데이터 삭제 후 로그아웃');
+        // console.log('토큰 갱신 실패, 인증 데이터 삭제 후 로그아웃');
         await clearTokens();
         throw new Error('AUTHENTICATION_FAILED');
       }
@@ -217,11 +219,13 @@ export const loginAPI = async (
   provider: SocialProvider,
   accessToken: string,
 ): Promise<LoginResponse> => {
-  console.log('🔍 Config.API_BASE_URL:', Config.API_BASE_URL);
+  // console.log('🔍 Config.API_BASE_URL:', Config.API_BASE_URL);
+  /*
   console.log(
     '🔍 전체 URL:',
     `${Config.API_BASE_URL}${API_ENDPOINTS.AUTH.LOGIN}`,
   );
+  */
   const response = await fetch(
     `${Config.API_BASE_URL}${API_ENDPOINTS.AUTH.LOGIN}`,
     {

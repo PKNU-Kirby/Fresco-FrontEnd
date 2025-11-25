@@ -169,7 +169,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     }
 
     try {
-      console.log('🔍 검색 결과 가용성 계산 시작...');
+      // console.log('🔍 검색 결과 가용성 계산 시작...');
 
       // 재료 정보가 없는 레시피는 상세 정보 먼저 로드
       const recipesWithIngredients = await Promise.all(
@@ -196,7 +196,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
       );
 
       setRecipeAvailabilities(availabilities);
-      console.log('✅ 검색 결과 가용성 계산 완료');
+      // console.log('✅ 검색 결과 가용성 계산 완료');
     } catch (error) {
       // console.error('❌ 가용성 계산 실패:', error);
       setRecipeAvailabilities(new Map());
@@ -213,7 +213,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
     setIsLoading(true);
 
     try {
-      console.log('🔍 검색 시작:', searchQuery);
+      // console.log('🔍 검색 시작:', searchQuery);
 
       // Update search history
       const newHistory = await SearchHistoryStorage.addSearchQuery(searchQuery);
@@ -259,7 +259,7 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
   // 즐겨찾기 토글 API
   const toggleFavorite = async (recipeId: number) => {
     try {
-      console.log('>> 즐겨찾기 토글:', recipeId);
+      // console.log('>> 즐겨찾기 토글:', recipeId);
 
       // API 호출
       const result = await RecipeAPI.toggleFavorite(recipeId);
@@ -267,10 +267,10 @@ const SearchResultScreen: React.FC<SearchResultScreenProps> = () => {
       // 로컬 상태 업데이트
       if (result.favorite) {
         setFavoriteRecipeIds(prev => [...prev, recipeId]);
-        console.log('>> 즐겨찾기 추가');
+        // console.log('>> 즐겨찾기 추가');
       } else {
         setFavoriteRecipeIds(prev => prev.filter(id => id !== recipeId));
-        console.log('>> 즐겨찾기 제거');
+        // console.log('>> 즐겨찾기 제거');
       }
     } catch (error) {
       // console.error('X 즐겨찾기 토글 실패:', error);

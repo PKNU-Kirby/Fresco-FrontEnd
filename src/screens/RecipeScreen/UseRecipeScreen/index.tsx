@@ -83,11 +83,11 @@ const UseRecipeScreen: React.FC = () => {
   useEffect(() => {
     if (enhancedIngredients && enhancedIngredients.length > 0) {
       // 향상된 재료 데이터가 있으면 그것을 사용
-      console.log('향상된 재료 데이터 사용:', enhancedIngredients);
+      // console.log('향상된 재료 데이터 사용:', enhancedIngredients);
       loadFromEnhancedIngredients(enhancedIngredients);
     } else {
       // 없으면 기존 방식 사용
-      console.log('기존 재료 매칭 방식 사용');
+      // console.log('기존 재료 매칭 방식 사용');
       loadIngredients();
     }
   }, [enhancedIngredients, loadIngredients, loadFromEnhancedIngredients]);
@@ -149,6 +149,7 @@ const UseRecipeScreen: React.FC = () => {
       return remainingQuantity <= 0; // 수량이 0 이하가 되는 경우
     });
 
+    /*
     console.log(
       `🗑️ 완전 소진될 재료 ${ingredientsToDelete.length}개:`,
       ingredientsToDelete.map(item => {
@@ -163,7 +164,7 @@ const UseRecipeScreen: React.FC = () => {
           item.fridgeIngredient!.quantity
         } -> 0, 차감: ${inputQuantity})`;
       }),
-    );
+    );*/
 
     setCompleteInfo({
       completed: completedStepsCount,
@@ -180,9 +181,11 @@ const UseRecipeScreen: React.FC = () => {
   const handleCompleteConfirm = async () => {
     setShowCompleteConfirmModal(false);
     try {
+      /*
       console.log(
         `🔄 ${completeInfo.ingredientsToDeduct.length}개 재료 처리 시작`,
       );
+      */
 
       // 모든 재료를 순차적으로 처리
       for (const ingredient of completeInfo.ingredientsToDeduct) {
@@ -196,20 +199,24 @@ const UseRecipeScreen: React.FC = () => {
         if (isMaxQuantity) {
           // 최대값으로 설정된 경우 정확한 냉장고 수량을 사용
           inputQuantity = currentQuantity;
+          /*
           console.log(
             `🎯 최대값 사용: ${ingredient.fridgeIngredient!.name} - ${
               ingredient.userInputQuantity
             } -> ${inputQuantity} (정확한 총량)`,
           );
+          */
         }
 
         const newQuantity = currentQuantity - inputQuantity;
 
+        /*
         console.log(
           `📦 ${
             ingredient.fridgeIngredient!.name
           }: ${currentQuantity} -> ${newQuantity} (차감: ${inputQuantity})`,
         );
+        */
 
         // 레시피 사용 기록 추가 (삭제 전에 먼저 기록)
         const isCompletelyConsumed = newQuantity <= 0;

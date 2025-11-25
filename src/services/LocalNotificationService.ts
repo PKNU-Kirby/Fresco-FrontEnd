@@ -19,16 +19,16 @@ class LocalNotificationService {
    */
   async requestPermission(): Promise<boolean> {
     try {
-      console.log('📱 로컬 알림 권한 요청...');
+      // console.log('📱 로컬 알림 권한 요청...');
       const settings = await notifee.requestPermission();
 
       const granted = settings.authorizationStatus >= 1; // AUTHORIZED or PROVISIONAL
 
       if (granted) {
-        console.log('✅ 로컬 알림 권한 허용됨');
+        // console.log('✅ 로컬 알림 권한 허용됨');
         await this.createNotificationChannel();
       } else {
-        console.log('❌ 로컬 알림 권한 거부됨');
+        // console.log('❌ 로컬 알림 권한 거부됨');
       }
 
       return granted;
@@ -49,7 +49,7 @@ class LocalNotificationService {
         importance: AndroidImportance.HIGH,
         sound: 'default',
       });
-      console.log('✅ 알림 채널 생성 완료');
+      // console.log('✅ 알림 채널 생성 완료');
     } catch (error) {
       // console.error('❌ 알림 채널 생성 실패:', error);
     }
@@ -66,7 +66,7 @@ class LocalNotificationService {
         'local_notification_settings',
         JSON.stringify(settings),
       );
-      console.log('💾 로컬 알림 설정 저장 완료');
+      // console.log('💾 로컬 알림 설정 저장 완료');
     } catch (error) {
       // console.error('❌ 로컬 알림 설정 저장 실패:', error);
       throw error;
@@ -124,7 +124,7 @@ class LocalNotificationService {
    */
   async sendTestNotification(): Promise<void> {
     try {
-      console.log('🧪 로컬 테스트 알림 전송...');
+      // console.log('🧪 로컬 테스트 알림 전송...');
 
       await notifee.displayNotification({
         title: '🧪 테스트 알림',
@@ -141,7 +141,7 @@ class LocalNotificationService {
         },
       });
 
-      console.log('✅ 로컬 테스트 알림 전송 완료');
+      // console.log('✅ 로컬 테스트 알림 전송 완료');
     } catch (error) {
       // console.error('❌ 로컬 테스트 알림 전송 실패:', error);
       throw error;
@@ -153,7 +153,7 @@ class LocalNotificationService {
    */
   async createDemoNotifications(): Promise<void> {
     try {
-      console.log('🎬 데모 알림 생성 시작...');
+      // console.log('🎬 데모 알림 생성 시작...');
 
       const demoIngredients = [
         {
@@ -188,7 +188,7 @@ class LocalNotificationService {
         );
       }
 
-      console.log('✅ 데모 알림 생성 완료');
+      // console.log('✅ 데모 알림 생성 완료');
     } catch (error) {
       // console.error('❌ 데모 알림 생성 실패:', error);
       throw error;
@@ -201,7 +201,7 @@ class LocalNotificationService {
   async getScheduledNotifications(): Promise<any[]> {
     try {
       const notifications = await notifee.getTriggerNotifications();
-      console.log('📋 예약된 알림 개수:', notifications.length);
+      // console.log('📋 예약된 알림 개수:', notifications.length);
       return notifications;
     } catch (error) {
       // console.error('❌ 예약된 알림 조회 실패:', error);
@@ -214,12 +214,12 @@ class LocalNotificationService {
    */
   async scheduleIngredientsNotifications(ingredients: any[]): Promise<void> {
     try {
-      console.log('📅 식재료 알림 스케줄링:', ingredients.length + '개');
+      // console.log('📅 식재료 알림 스케줄링:', ingredients.length + '개');
 
       const settings = await this.getNotificationSettings();
 
       if (!settings.enabled) {
-        console.log('⚠️ 알림이 비활성화되어 있습니다');
+        // console.log('⚠️ 알림이 비활성화되어 있습니다');
         return;
       }
 
@@ -244,7 +244,7 @@ class LocalNotificationService {
 
         // 과거 시간이면 스킵
         if (notificationDate.getTime() <= Date.now()) {
-          console.log('⏭️ 과거 알림 스킵:', ingredient.name);
+          // console.log('⏭️ 과거 알림 스킵:', ingredient.name);
           continue;
         }
 
@@ -269,11 +269,13 @@ class LocalNotificationService {
           trigger,
         );
 
+        /*
         console.log(
           `✅ 알림 예약: ${
             ingredient.name
           } - ${notificationDate.toLocaleString()}`,
         );
+        */
       }
     } catch (error) {
       // console.error('❌ 식재료 알림 스케줄링 실패:', error);
@@ -287,7 +289,7 @@ class LocalNotificationService {
   async cancelAllNotifications(): Promise<void> {
     try {
       await notifee.cancelAllNotifications();
-      console.log('✅ 모든 알림 취소 완료');
+      // console.log('✅ 모든 알림 취소 완료');
     } catch (error) {
       // console.error('❌ 알림 취소 실패:', error);
       throw error;
