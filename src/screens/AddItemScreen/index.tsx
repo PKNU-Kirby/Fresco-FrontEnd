@@ -143,8 +143,6 @@ const AddItemScreen: React.FC = () => {
   const confirmIngredients = useCallback(async () => {
     // 스캔 결과가 있으면 그대로 사용
     if (scanResults && scanResults.length > 0) {
-      // console.log('scanResults 사용 (스캔 결과) - items 반영 필요');
-
       // scanResults를 사용하되 items의 수정사항을 반영
       const updatedConfirmed = scanResults.map(scanResult => {
         const correspondingItem = items.find(
@@ -156,17 +154,21 @@ const AddItemScreen: React.FC = () => {
             ...scanResult,
             userInput: {
               ...scanResult.userInput,
-              quantity: Number(correspondingItem.quantity), // 수정된 값 반영
-              unit: correspondingItem.unit, // 수정된 값 반영
+              quantity: Number(correspondingItem.quantity),
+              unit: correspondingItem.unit,
               expirationDate: correspondingItem.expirationDate,
               name: correspondingItem.name,
+              maxQuantity: Math.max(
+                // 🔥 maxQuantity 업데이트
+                scanResult.userInput.maxQuantity || 10,
+                Number(correspondingItem.quantity),
+              ),
             },
           };
         }
         return scanResult;
       });
 
-      // console.log('수정사항 반영된 confirmedIngredients:', updatedConfirmed);
       setConfirmedIngredients(updatedConfirmed);
       setIsEditMode(false);
       return;
@@ -174,30 +176,24 @@ const AddItemScreen: React.FC = () => {
 
     try {
       setIsLoading(true);
-      // console.log('\n ===== 식재료 확인 시작 =====');
-      // console.log('현재 items 배열 전체:', JSON.stringify(items, null, 2));
 
       const confirmedList: ConfirmedIngredient[] = [];
 
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
 
-        // console.log(`\n🔍 [${i}] 아이템 처리 시작 --------`);
-        // console.log('  name:', item.name);
-        // console.log('  quantity:', item.quantity, typeof item.quantity);
-        // console.log('  unit:', item.unit);
-        // console.log('  expirationDate:', item.expirationDate);
-        // console.log('  selectedIngredient:', !!item.selectedIngredient);
+        // 🔥 maxQuantity 계산: 현재 quantity와 기존 maxQuantity 중 큰 값
+        const newMaxQuantity = Math.max(
+          item.maxQuantity || 10,
+          Number(item.quantity),
+        );
 
-        // 사용자가 이미 식재료를 선택한 경우
         if (item.selectedIngredient) {
           let selectedIngredient = item.selectedIngredient;
           if (typeof selectedIngredient === 'string') {
             try {
               selectedIngredient = JSON.parse(selectedIngredient);
-              // console.log('selectedIngredient 파싱 완료');
             } catch (error) {
-              // console.error('selectedIngredient 파싱 실패:', error);
               selectedIngredient = {
                 ingredientId: -1,
                 ingredientName: item.name,
@@ -208,42 +204,28 @@ const AddItemScreen: React.FC = () => {
           }
 
           if (selectedIngredient) {
-            // 현재 items[i]의 값을 직접 사용
             const userInput = {
               id: item.id,
               name: item.name,
               quantity: item.quantity,
-              unit: item.unit, // items[i]의 unit 사용
+              unit: item.unit,
               expirationDate: item.expirationDate,
               itemCategory: item.itemCategory,
               photo: item.photo,
+              maxQuantity: newMaxQuantity, // 🔥 업데이트된 maxQuantity
             };
-
-            /*
-            console.log('userInput 생성:', {
-              quantity: userInput.quantity,
-              unit: userInput.unit,
-            });
-            */
 
             confirmedList.push({
               userInput,
               apiResult: selectedIngredient,
             });
-
-            // console.log(`[${i}] confirmedList에 추가 완료`);
           }
         } else {
-          // console.log('selectedIngredient 없음 - API 호출 필요');
-
           try {
-            // console.log(`"${item.name}" 검색 중...`);
             const foundIngredient =
               await IngredientControllerAPI.findIngredientByName(item.name);
 
             if (foundIngredient) {
-              // console.log(`"${item.name}" 검색 성공`);
-
               const userInput = {
                 id: item.id,
                 name: item.name,
@@ -252,23 +234,20 @@ const AddItemScreen: React.FC = () => {
                 expirationDate: item.expirationDate,
                 itemCategory: item.itemCategory,
                 photo: item.photo,
+                maxQuantity: newMaxQuantity, // 🔥 업데이트된 maxQuantity
               };
 
               confirmedList.push({
                 userInput,
                 apiResult: foundIngredient,
               });
-
-              // console.log(`[${i}] confirmedList에 추가 완료 (API 결과)`);
             } else {
               throw new Error(
                 `유효하지 않은 식재료 : "${item.name}"
-                식재료 명을 다시 확인해 주세요.`,
+식재료 명을 다시 확인해 주세요.`,
               );
             }
           } catch (error) {
-            // console.error(`유효하지 않은 식재료 : "${item.name}"`, error);
-
             const defaultCategory = getCategoryByName(item.itemCategory);
             const userInput = {
               id: item.id,
@@ -278,6 +257,7 @@ const AddItemScreen: React.FC = () => {
               expirationDate: item.expirationDate,
               itemCategory: item.itemCategory,
               photo: item.photo,
+              maxQuantity: newMaxQuantity, // 🔥 업데이트된 maxQuantity
             };
 
             confirmedList.push({
@@ -289,22 +269,13 @@ const AddItemScreen: React.FC = () => {
                 categoryName: defaultCategory.name,
               },
             });
-            // console.log(`[${i}] 기본값으로 추가 (API 실패)`);
           }
         }
       }
 
-      // console.log('\n===== 최종 confirmedList =====');
-      confirmedList.forEach((confirmed, index) => {
-        // console.log(`[${index}] ${confirmed.userInput.name}:`);
-        // console.log(`  quantity: ${confirmed.userInput.quantity}`);
-        // console.log(`  unit: ${confirmed.userInput.unit}`);
-      });
-
       setConfirmedIngredients(confirmedList);
       setIsEditMode(false);
     } catch (error) {
-      // console.error('식재료 확인 실패:', error);
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -315,7 +286,6 @@ const AddItemScreen: React.FC = () => {
       setIsLoading(false);
     }
   }, [items, scanResults, setIsEditMode, setIsLoading]);
-
   // ========== 저장 로직 (수정됨) ==========
   const handleSaveItems = useCallback(async () => {
     try {

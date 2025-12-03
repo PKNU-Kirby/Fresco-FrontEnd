@@ -29,6 +29,7 @@ type FridgeItemListProps = {
   onUnitChange?: (itemId: number, newUnit: string) => void;
   onExpiryDateChange?: (itemId: number, newDate: string) => void;
   onDeleteItem?: (itemId: number) => void;
+  // onMaxQuantityChange?: (itemId: number, newMaxQuantity: number) => void; // 🔥 제거
   // FilterBar props
   activeItemCategory: string;
   onItemCategoryPress: () => void;
@@ -44,6 +45,7 @@ const FridgeItemList: React.FC<FridgeItemListProps> = ({
   onUnitChange,
   onExpiryDateChange,
   onDeleteItem,
+  // onMaxQuantityChange, // 🔥 제거
   // FilterBar props
   activeItemCategory,
   onItemCategoryPress,
@@ -58,6 +60,7 @@ const FridgeItemList: React.FC<FridgeItemListProps> = ({
       onUnitChange={onUnitChange}
       onExpiryDateChange={onExpiryDateChange}
       onDeleteItem={onDeleteItem}
+      // onMaxQuantityChange={onMaxQuantityChange} // 🔥 제거
     />
   );
 
@@ -100,7 +103,6 @@ const FridgeItemList: React.FC<FridgeItemListProps> = ({
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
         />
-
         <ItemAddButton onPress={onAddItem} visible={!isEditMode} />
       </KeyboardAvoidingView>
     </View>

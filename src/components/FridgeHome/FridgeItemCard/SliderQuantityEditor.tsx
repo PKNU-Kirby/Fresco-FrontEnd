@@ -10,7 +10,6 @@ interface SliderQuantityEditorProps {
   maxQuantity: number;
   isEditMode: boolean;
   onQuantityChange: (quantity: number) => void;
-  onMaxQuantityChange?: (maxQuantity: number) => void;
   onTextBlur: () => void;
   onUnitPress: () => void;
   onDeleteRequest?: () => void;
@@ -22,7 +21,6 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
   maxQuantity,
   isEditMode,
   onQuantityChange,
-  onMaxQuantityChange,
   onTextBlur,
   onUnitPress,
   onDeleteRequest,
@@ -35,22 +33,18 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     switch (unit.toLowerCase()) {
       case 'g':
       case 'ml':
-        return 1; // 정수 단위
-
+        return 1;
       case 'kg':
       case 'l':
-        return 0.01; // 0.01 단위
-
+        return 0.01;
       case '개':
       default:
-        return maxValue <= 10 ? 0.01 : 1; // 10개 이하면 0.01, 이상이면 정수
+        return maxValue <= 10 ? 0.01 : 1;
     }
   };
 
-  // Stepper step unit : 1.0
   const getStepperStep = () => 1;
 
-  // Slider step unit
   const sliderStep = getStepSize(maxQuantity);
   const stepperStep = getStepperStep();
 
@@ -58,16 +52,13 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     setLocalQuantity(quantity);
   }, [quantity]);
 
-  // step unit으로 반올림
   const roundToStep = (value: number, step: number) => {
     return Math.round(value / step) * step;
   };
 
-  // Quantity 포맷 -> 정수면 소수점 없이, 소수면 둘째자리까지
   const formatQuantity = (value: number | string): number => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(numValue)) return 0;
-
     if (numValue % 1 === 0) {
       return Math.round(numValue);
     } else {
@@ -75,7 +66,6 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     }
   };
 
-  // 0이 되면 삭제 모달 트리거
   const checkAndTriggerDelete = (newValue: number) => {
     if (newValue <= 0 && onDeleteRequest) {
       onDeleteRequest();
@@ -84,14 +74,14 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     return false;
   };
 
-  // Stepper increment, decrement
+  // 🔥 스테퍼: 자유롭게 증가/감소 (maxQuantity 제한 없음)
   const handleStepperChange = (increment: boolean) => {
     const currentValue = localQuantity || 0;
     const step = stepperStep;
-
     let newValue;
+
     if (increment) {
-      newValue = Math.min(currentValue + step, maxQuantity);
+      newValue = currentValue + step; // 🔥 maxQuantity 제한 제거
     } else {
       newValue = Math.max(currentValue - step, 0);
       if (checkAndTriggerDelete(newValue)) {
@@ -99,19 +89,16 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
       }
     }
 
-    // to Integer
     newValue = Math.round(newValue);
-
     setLocalQuantity(newValue);
     onQuantityChange(newValue);
   };
 
-  // Slider change
+  // 🔥 슬라이더: 0 ~ maxQuantity 범위로 제한
   const handleSliderChange = (value: number) => {
     const roundedValue = roundToStep(value, sliderStep);
-    const clampedValue = Math.max(0, Math.min(roundedValue, maxQuantity));
+    const clampedValue = Math.max(0, Math.min(roundedValue, maxQuantity)); // 🔥 maxQuantity로 clamp
 
-    // 소수점 처리
     const finalValue =
       sliderStep < 1
         ? parseFloat(clampedValue.toFixed(2))
@@ -121,36 +108,32 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
     onQuantityChange(finalValue);
   };
 
-  // text Input
+  // 🔥 텍스트 입력: 자유롭게 입력 가능
   const handleTextChange = (text: string) => {
-    // 숫자, 소수점만 허용
     const cleanText = text.replace(/[^0-9.]/g, '');
-
     const parts = cleanText.split('.');
     if (parts.length > 2) {
-      return; // 소수점이 2개 이상이면 무시
+      return;
     }
 
     const numValue = parseFloat(cleanText) || 0;
-    setLocalQuantity(numValue);
+    setLocalQuantity(numValue); // 🔥 제한 없이 저장
   };
 
+  // 🔥 텍스트 입력 완료: 자유롭게 입력 가능 (maxQuantity 초과 허용)
   const handleTextBlur = () => {
     const numValue = localQuantity || 0;
 
-    // 0 이하면 삭제 모달
     if (numValue <= 0) {
       if (checkAndTriggerDelete(0)) {
         return;
       }
     }
 
-    const clampedValue = Math.max(0, Math.min(numValue, maxQuantity));
-
-    // 슬라이더 모드일 때는 스텝 단위로 반올림
+    // 🔥 maxQuantity 제한 제거 (자유롭게 입력 가능)
     const finalValue = isSliderMode
-      ? roundToStep(clampedValue, sliderStep)
-      : clampedValue;
+      ? roundToStep(numValue, sliderStep)
+      : numValue;
 
     const formattedValue = formatQuantity(finalValue);
     setLocalQuantity(formattedValue);
@@ -166,9 +149,7 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
 
   return (
     <View style={styles.sliderQuantityContainer}>
-      {/* 수량 입력 섹션 */}
       <View style={styles.quantityEditContainer}>
-        {/* 스테퍼 (정수 단위) */}
         <View style={styles.stepper}>
           <TouchableOpacity
             style={[
@@ -199,20 +180,15 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.quantityButton,
-              currentQuantityNum >= maxQuantity &&
-                styles.quantityButtonDisabled,
-            ]}
+            style={styles.quantityButton} // 🔥 disabled 스타일 제거
             activeOpacity={0.7}
             onPress={() => handleStepperChange(true)}
-            disabled={!isEditMode || currentQuantityNum >= maxQuantity}
+            disabled={!isEditMode} // 🔥 maxQuantity 제한 제거
           >
             <FontAwesome6 name="circle-plus" size={20} color="#999" />
           </TouchableOpacity>
         </View>
 
-        {/* 슬라이더/스테퍼 토글 버튼 */}
         <TouchableOpacity
           style={
             isSliderMode ? styles.isSlidderButton : styles.isNotSlidderButton
@@ -229,15 +205,14 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* 슬라이더 섹션 (단위별 스텝 적용) */}
       {isSliderMode && (
         <View style={styles.sliderSection}>
           <View style={styles.sliderContainer}>
             <Slider
               style={styles.slider}
               minimumValue={0}
-              maximumValue={maxQuantity}
-              value={currentQuantityNum}
+              maximumValue={maxQuantity} // 🔥 maxQuantity 고정
+              value={Math.min(currentQuantityNum, maxQuantity)} // 🔥 maxQuantity 초과 시 clamp
               onValueChange={handleSliderChange}
               step={sliderStep}
               minimumTrackTintColor="rgba(47, 72, 88, 0.5)"
@@ -246,7 +221,6 @@ const SliderQuantityEditor: React.FC<SliderQuantityEditorProps> = ({
               disabled={!isEditMode}
             />
           </View>
-
           <View style={styles.sliderLabels}>
             <Text style={styles.sliderLabel}>0</Text>
             <Text style={styles.sliderLabel}>

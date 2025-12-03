@@ -68,7 +68,6 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
 }) => {
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [isSliderActive, _setIsSliderActive] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [localUnit, setLocalUnit] = useState(item.unit || '개');
   const [localQuantity, setLocalQuantity] = useState(item.quantity);
@@ -132,8 +131,7 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     }
   };
 
-  // (!EditMode -> EditMode)
-  // init maxQuantity
+  // 🔥 편집 모드 진입 시 maxQuantity 초기화 (한 번만!)
   useEffect(() => {
     if (isEditMode) {
       const currentQuantity = item.quantity || 10;
@@ -141,21 +139,24 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
         item.maxQuantity || currentQuantity,
         currentQuantity,
       );
+      console.log(
+        '🔵 [편집 모드 진입] maxQuantity 초기화:',
+        initialMaxQuantity,
+      );
       setMaxQuantity(initialMaxQuantity);
     }
-  }, [isEditMode, item.quantity, item.maxQuantity]);
+  }, [isEditMode]); // 🔥 item.quantity, item.maxQuantity 제거!
 
   // item.quantity prop 변경 -> localQuantity 동기화
   useEffect(() => {
     setLocalQuantity(item.quantity);
   }, [item.quantity]);
 
-  // item.maxQuantity prop 변경 -> maxQuantity 동기화
+  // 🔥 maxQuantity 변경 감지 (디버깅용)
   useEffect(() => {
-    if (item.maxQuantity !== undefined && item.maxQuantity !== maxQuantity) {
-      setMaxQuantity(item.maxQuantity);
-    }
-  }, [item.maxQuantity, maxQuantity]);
+    console.log('🔴 [maxQuantity 변경됨]:', maxQuantity);
+    console.trace(); // 호출 스택 추적
+  }, [maxQuantity]);
 
   const handleUnitSelect = (unit: string) => {
     setLocalUnit(unit);
@@ -172,8 +173,15 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
     onExpiryDateChange?.(item.id, formattedDate);
   };
 
-  // Handle : Quantity 변경
+  // 🔥 Handle : Quantity 변경 (maxQuantity 업데이트 제거)
   const handleQuantityChange = (newQuantity: number) => {
+    console.log(
+      '🟢 [Quantity 변경]:',
+      newQuantity,
+      'maxQuantity:',
+      maxQuantity,
+    );
+
     if (newQuantity === 0) {
       setLocalQuantity(newQuantity);
       return;
@@ -181,18 +189,6 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
 
     setLocalQuantity(newQuantity);
     onQuantityChange?.(item.id, newQuantity);
-
-    if (newQuantity > maxQuantity && !isSliderActive) {
-      setMaxQuantity(newQuantity);
-    }
-  };
-
-  // 총량 변화시 적용
-  const handleMaxQuantityChange = (newMaxQuantity: number) => {
-    if (newMaxQuantity > maxQuantity) {
-      setMaxQuantity(newMaxQuantity);
-      onMaxQuantityChange?.(item.id, newMaxQuantity);
-    }
   };
 
   // Handle : 식재료 삭제
@@ -293,7 +289,6 @@ const FridgeItemCard: React.FC<FridgeItemCardProps> = ({
                 maxQuantity={maxQuantity}
                 isEditMode={isEditMode}
                 onQuantityChange={handleQuantityChange}
-                onMaxQuantityChange={handleMaxQuantityChange}
                 onTextBlur={handleTextInputBlur}
                 onUnitPress={() => setShowUnitModal(true)}
                 onDeleteRequest={handleDeleteRequest}
