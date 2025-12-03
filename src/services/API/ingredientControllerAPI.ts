@@ -697,7 +697,6 @@ export class IngredientControllerAPI {
       throw error;
     }
   }
-
   /**
    * ✅ 수정된 스캔 결과 변환
    */
@@ -723,8 +722,8 @@ export class IngredientControllerAPI {
             userInput: {
               id: `scan_${index + 1}`,
               name: photoResult.ingredientName,
-              quantity: 1, // quantity가 null이면 기본값 '1'
-              unit: '개', // 기본값 '개'
+              quantity: 1,
+              unit: '개',
               expirationDate:
                 photoResult.expirationDate || this.getDefaultExpiryDate(),
               itemCategory:
@@ -742,12 +741,13 @@ export class IngredientControllerAPI {
           };
         } else {
           const receiptResult = item as ScanResultItem;
+
           return {
             userInput: {
               id: `scan_${index + 1}`,
-              name: receiptResult.inputName || receiptResult.ingredientName,
-              quantity: 1, // quantity가 null이면 기본값 '1'
-              unit: '개', // 기본값 '개'
+              name: receiptResult.ingredientName, // 🔥 ingredientName 사용 (정확한 이름)
+              quantity: 1,
+              unit: '개',
               expirationDate:
                 receiptResult.expirationDate || this.getDefaultExpiryDate(),
               itemCategory:
@@ -1232,7 +1232,7 @@ export class IngredientControllerAPI {
 
       // 서버 상태 먼저 확인
       const isServerHealthy = await this.checkServerHealth();
-      console.log('서버 상태:', isServerHealthy ? '정상' : '불량');
+      // console.log('서버 상태:', isServerHealthy ? '정상' : '불량');
 
       if (!isServerHealthy) {
         // console.log('서버 상태 불량으로 인해 즉시 폴백 모드 사용');

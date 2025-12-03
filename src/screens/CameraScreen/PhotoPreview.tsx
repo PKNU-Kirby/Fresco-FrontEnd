@@ -91,14 +91,32 @@ const PhotoPreviewScreen: React.FC = () => {
 
       // console.log('강화된 스캔 완료');
 
+      // 🔥 디버깅: 스캔 결과 확인
+      console.log('스캔 결과:', JSON.stringify(confirmedIngredients, null, 2));
+
       // 결과 처리
       if (confirmedIngredients && confirmedIngredients.length > 0) {
+        // 🔥 userInput.name이 제대로 설정되었는지 확인
+        const validResults = confirmedIngredients.map(item => {
+          if (!item.userInput.name && item.apiResult?.ingredientName) {
+            // userInput.name이 없으면 ingredientName으로 설정
+            return {
+              ...item,
+              userInput: {
+                ...item.userInput,
+                name: item.apiResult.ingredientName,
+              },
+            };
+          }
+          return item;
+        });
+
         setScanProgress('인식 완료!');
 
         setTimeout(() => {
           navigation.navigate('AddItemScreen', {
             fridgeId,
-            scanResults: confirmedIngredients,
+            scanResults: validResults, // 수정된 결과 전달
             scanMode,
           });
         }, 500);

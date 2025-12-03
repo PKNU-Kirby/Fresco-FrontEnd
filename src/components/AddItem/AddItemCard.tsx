@@ -178,7 +178,7 @@ const AddItemCard: React.FC<AddItemCardProps> = ({
         resetSearch();
       }
 
-      console.log('사용자 직접 입력:', text, '- selectedIngredient 초기화됨');
+      // console.log('사용자 직접 입력:', text, '- selectedIngredient 초기화됨');
     },
     [item.id, onUpdateItem, resetSearch],
   );

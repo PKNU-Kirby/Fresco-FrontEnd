@@ -98,7 +98,7 @@ const AIRecipeScreen: React.FC = () => {
         title: aiRecipeData.title,
         description: `AI가 추천하는 "${prompt}" 레시피입니다.`,
         ingredients: aiRecipeData.ingredients.map((ing, index) => ({
-          id: `${Date.now()}_${Math.random()}_${index}`,
+          id: Number(`${Date.now()}_${Math.random()}_${index}`),
           name: ing.ingredientName,
           quantity: ing.quantity,
           unit: ing.unit,
@@ -447,7 +447,7 @@ const AIRecipeScreen: React.FC = () => {
         isAlert={false}
         visible={saveSuccessVisible}
         title="성공"
-        message="레시피가 저장되었습니다.\n레시피 탭에서 확인하세요!"
+        message="레시피가 저장되었습니다. 레시피 탭에서 확인하세요!"
         iconContainer={{ backgroundColor: '#d3f0d3' }}
         icon={{ name: 'check', color: 'limegreen', size: 48 }}
         confirmText="확인"
